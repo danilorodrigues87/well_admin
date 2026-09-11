@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MTR {{numero_mtr}} — Well S.A.</title>
+    <link rel="icon" href="{{URL}}/resources/assets/imgs/favicon.png" type="image/png" />
+    <link href="{{URL}}/resources/css/mtr-print.css" rel="stylesheet" />
+</head>
+<body class="mtr-print-page">
+    <div class="mtr-toolbar no-print">
+        <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir / Salvar PDF</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="window.close()">Fechar</button>
+    </div>
+
+    <table class="mtr-table">
+        <tr class="mtr-header">
+            <td colspan="11">RELATÓRIO DE COLETA</td>
+            <td colspan="4">VIA DO CLIENTE</td>
+        </tr>
+
+        <tr><td colspan="15" style="border:none;height:6px;"></td></tr>
+        <tr class="mtr-section"><td colspan="10">COLETOR</td><td colspan="1" style="border:none;"></td><td colspan="4">MTRº</td></tr>
+        <tr>
+            <td colspan="2" style="text-align:center;border-bottom:none;"><img src="{{URL}}/resources/assets/imgs/logo.png" alt="Well" class="mtr-logo" /></td>
+            <td colspan="8" class="mtr-title" style="border-bottom:none;">{{transportador_nome}}</td>
+            <td colspan="1" style="border:none;"></td>
+            <td colspan="4" class="mtr-title" style="text-align:center;">{{numero_mtr}}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">CNPJ</td>
+            <td colspan="3">{{transportador_cnpj}}</td>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">TELEFONE</td>
+            <td colspan="8">(66) 99680-0006</td>
+        </tr>
+
+        <tr><td colspan="15" style="border:none;height:6px;"></td></tr>
+        <tr class="mtr-section"><td colspan="15">GERADOR</td></tr>
+        <tr><td colspan="15" class="mtr-title">{{gerador_nome}}</td></tr>
+        <tr>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">CNPJ</td>
+            <td colspan="3">{{gerador_cnpj}}</td>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">PLANO</td>
+            <td colspan="8">{{gerador_plano}}</td>
+        </tr>
+        <tr><td colspan="15" style="text-align:center;font-weight:bold;border:none;">{{gerador_endereco}}</td></tr>
+        <tr>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">RESPONSÁVEL</td>
+            <td colspan="3">{{gerador_responsavel}}</td>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">DOC REF.</td>
+            <td colspan="3">{{doc_referencia}}</td>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">DATA COLETA</td>
+            <td colspan="3">{{data_coleta}} {{hora}}</td>
+        </tr>
+
+        <tr><td colspan="15" style="border:none;height:6px;"></td></tr>
+        <tr>
+            <td colspan="7" style="font-weight:bold;">PESAGENS</td>
+            <td colspan="1" style="border:none;"></td>
+            <td colspan="7" style="font-weight:bold;">OBSERVAÇÕES</td>
+        </tr>
+        <tr>
+            <td colspan="7">
+                <table class="mtr-nested">
+                    <tr><td style="font-weight:bold;">TIPO DE MATERIAL</td><td style="font-weight:bold;text-align:right;">PESO</td></tr>
+                    {{itens_html}}
+                    <tr><td colspan="2" style="height:16px;"></td></tr>
+                    <tr><td style="font-weight:bold;text-align:right;">TOTAL COLETADO:</td><td style="font-weight:bold;text-align:right;">{{total_peso}}</td></tr>
+                </table>
+            </td>
+            <td colspan="1" style="border:none;"></td>
+            <td colspan="7">{{relatorio}}</td>
+        </tr>
+
+        <tr><td colspan="15" style="border:none;height:6px;"></td></tr>
+        <tr class="mtr-section"><td colspan="15">TRANSPORTADOR</td></tr>
+        <tr><td colspan="15" class="mtr-title">{{transportador_nome}}</td></tr>
+        <tr>
+            <td colspan="3" style="font-weight:bold;text-align:center;border:none;">CNPJ</td>
+            <td colspan="4">{{transportador_cnpj}}</td>
+            <td colspan="1" style="border:none;"></td>
+            <td colspan="3" style="font-weight:bold;text-align:center;border:none;">MOTORISTA</td>
+            <td colspan="4">{{motorista_nome}}</td>
+        </tr>
+        <tr>
+            <td colspan="3" style="font-weight:bold;text-align:center;border:none;">VEÍCULO</td>
+            <td colspan="4">{{veiculo_descricao}}</td>
+            <td colspan="1" style="border:none;"></td>
+            <td colspan="3" style="font-weight:bold;text-align:center;border:none;">PLACA</td>
+            <td colspan="4">{{veiculo_placa}}</td>
+        </tr>
+
+        <tr><td colspan="15" style="border:none;height:6px;"></td></tr>
+        <tr class="mtr-section"><td colspan="15">DESTINO FINAL</td></tr>
+        <tr><td colspan="15" class="mtr-title">{{destinador_nome}}</td></tr>
+        <tr>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">CNPJ</td>
+            <td colspan="3">{{destinador_cnpj}}</td>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">TELEFONE</td>
+            <td colspan="3">{{destinador_telefone}}</td>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">RECEBIMENTO</td>
+            <td colspan="3">{{data_recebimento}}</td>
+        </tr>
+        <tr><td colspan="15" style="text-align:center;font-weight:bold;border:none;">{{destinador_endereco}}</td></tr>
+        <tr>
+            <td colspan="3" style="font-weight:bold;text-align:center;border:none;">RESPONSÁVEL</td>
+            <td colspan="4">{{destinador_responsavel}}</td>
+            <td colspan="1" style="border:none;"></td>
+            <td colspan="3" style="font-weight:bold;text-align:center;border:none;">SITUAÇÃO</td>
+            <td colspan="4">{{situacao_recebimento}}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="font-weight:bold;text-align:center;border:none;">TRATAMENTO</td>
+            <td colspan="13">{{tratamento}}</td>
+        </tr>
+        <tr>
+            <td colspan="15" style="border:none;font-size:9px;padding-top:12px;">
+                “Tão importante quanto semear flores, é semear ideias. Fale com outras pessoas sobre a importância de cuidar do planeta.”
+            </td>
+        </tr>
+    </table>
+
+    {{auto_print_script}}
+</body>
+</html>

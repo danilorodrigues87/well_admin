@@ -1,0 +1,20 @@
+Linguagem: PHP 8+
+Ambiente: XAMPP local · produção Linux
+Projeto: Well Eco Admin (single-tenant, sem multi-escola)
+
+Antes de alterar código, leia:
+- README.md
+- ARCHITECTURE.md (obrigatório)
+- .cursor/rules/well-eco.mdc
+
+Regras rápidas:
+- Nunca duplicar lógica entre controllers — usar Service layer
+- SQL novo: prepared statements sempre
+- POST no admin: CSRF via CsrfHelper
+- Rotas admin: middleware required-admin-login + required-module:{slug}
+- Migrations: arquivos numerados em database/migrations/
+- Não commitar .env nem storage/*
+- Não criar commits Git sem pedido explícito do usuário
+- Scripts temporários (_test_*.php): apagar ao terminar
+- Após feature relevante: atualizar ARCHITECTURE.md
+- Comunicação em português

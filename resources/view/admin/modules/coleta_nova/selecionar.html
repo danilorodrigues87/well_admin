@@ -1,0 +1,22 @@
+<h1 class="mt-2">Lançar Coleta</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Escolher cliente</li>
+</ol>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-route me-1"></i> Clientes para coleta</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">Listagem filtrada pela sua rota (ou todos, se admin). Por padrão exibe urgentes ou com data ≤ hoje.</p>
+        <form id="crud-form" class="d-none">{{csrf_field}}</form>
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
+            <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar cliente, cidade, CNPJ..." /></div>
+            <div class="col-md-3"><select name="prioridade" class="form-select crud-filter"><option value="">Prioridade: todas</option><option value="urgente">Urgente</option><option value="normal">Normal</option></select></div>
+            <div class="col-md-3"><select name="escopo" class="form-select crud-filter"><option value="pendentes">Pendentes (hoje/urgente)</option><option value="todos">Todos os ativos</option></select></div>
+        </div>
+        <table class="table table-hover">
+            <thead><tr><th>Cliente</th><th>Cidade</th><th>Próxima coleta</th><th>Plano</th><th></th></tr></thead>
+            <tbody id="crud-tbody"></tbody>
+        </table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>

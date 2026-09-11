@@ -1,0 +1,25 @@
+<h1 class="mt-2">Veículos</h1>
+<ol class="breadcrumb mb-4"><li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li><li class="breadcrumb-item active">Veículos</li></ol>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between"><span><i class="fas fa-car me-1"></i> Frota</span><button class="btn btn-primary btn-sm" onclick="novoRegistro()"><i class="fas fa-plus"></i> Novo</button></div>
+    <div class="card-body">
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
+            <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar placa, marca..." /></div>
+            <div class="col-md-2"><select name="ativo" class="form-select crud-filter"><option value="">Ativos</option><option value="1">Somente ativos</option><option value="0">Somente inativos</option></select></div>
+        </div>
+        <table class="table table-striped"><thead><tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Ano</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+<div class="modal fade" id="crudModal"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Veículo</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><form id="crud-form">{{csrf_field}}<input type="hidden" name="id" id="crud-id" value="0"/>
+        <div class="mb-2"><label>Placa</label><input class="form-control" name="placa" id="crud-placa" required/></div>
+        <div class="mb-2"><label>Marca</label><input class="form-control" name="marca" id="crud-marca" required/></div>
+        <div class="mb-2"><label>Modelo</label><input class="form-control" name="modelo" id="crud-modelo" required/></div>
+        <div class="mb-2"><label>Ano</label><input class="form-control" name="ano" id="crud-ano"/></div>
+        <div class="mb-2"><label>Cor</label><input class="form-control" name="cor" id="crud-cor"/></div>
+        <div class="mb-2"><label>Status</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+    </form></div>
+    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
+</div></div></div>

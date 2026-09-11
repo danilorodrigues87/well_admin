@@ -1,0 +1,69 @@
+<h1 class="mt-2">Coleta — {{cliente_nome}}</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel/coleta/nova">Clientes</a></li>
+    <li class="breadcrumb-item active">Wizard MTR</li>
+</ol>
+
+<ul class="nav nav-tabs mb-3" id="coletaTabs">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-transporte">1. Transporte</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-residuos">2. Resíduos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-finalizar">3. Finalizar</button></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="tab-transporte">
+        <div class="card mb-3"><div class="card-body">
+            <p class="small text-muted mb-3"><strong>Gerador:</strong> {{cliente_nome}} — {{gerador_endereco}}</p>
+            <form id="form-transporte">
+                <div class="row">
+                    <div class="col-md-4 mb-2"><label>Veículo</label><select class="form-select" name="veiculo_id" id="veiculo_id">{{veiculos_options}}</select></div>
+                    <div class="col-md-4 mb-2"><label>Motorista</label><input class="form-control" name="motorista_nome" id="motorista_nome" value="{{motorista_nome}}"/></div>
+                    <div class="col-md-4 mb-2"><label>Tratamento</label><select class="form-select" name="tratamento" id="tratamento"><option value="">—</option>{{tratamentos_options}}</select></div>
+                    <div class="col-md-6 mb-2"><label>Transportador</label><input class="form-control" name="transportador_nome" value="{{transportador_nome}}"/></div>
+                    <div class="col-md-6 mb-2"><label>CNPJ transportador</label><input class="form-control" name="transportador_cnpj" value="{{transportador_cnpj}}"/></div>
+                    <div class="col-12"><hr><strong>Destinador final</strong></div>
+                    <div class="col-md-6 mb-2"><label>Nome</label><input class="form-control" name="destinador_nome" value="{{destinador_nome}}"/></div>
+                    <div class="col-md-6 mb-2"><label>CNPJ</label><input class="form-control" name="destinador_cnpj" value="{{destinador_cnpj}}"/></div>
+                    <div class="col-md-8 mb-2"><label>Endereço</label><input class="form-control" name="destinador_endereco" value="{{destinador_endereco}}"/></div>
+                    <div class="col-md-4 mb-2"><label>Telefone</label><input class="form-control" name="destinador_telefone" value="{{destinador_telefone}}"/></div>
+                    <div class="col-md-6 mb-2"><label>Responsável</label><input class="form-control" name="destinador_responsavel" value="{{destinador_responsavel}}"/></div>
+                    <div class="col-md-6 mb-2"><label>Obs. destinador</label><input class="form-control" name="observacao_destinador" value="{{observacao_destinador}}"/></div>
+                    <div class="col-md-4 mb-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="situacao_recebimento" value="recebido" id="situacao_recebimento" {{situacao_recebido}}/><label class="form-check-label" for="situacao_recebimento">Recebido no destinador</label></div></div>
+                    <div class="col-md-4 mb-2"><label>Data recebimento</label><input type="date" class="form-control" name="data_recebimento" value="{{data_recebimento}}"/></div>
+                </div>
+                <button type="button" class="btn btn-primary mt-2" onclick="salvarTransporte()">Salvar e continuar</button>
+            </form>
+        </div></div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-residuos">
+        <div class="card mb-3"><div class="card-body">
+            <form id="crud-form" class="row g-2 align-items-end mb-3">{{csrf_field}}
+                <input type="hidden" id="crud-id" value="{{coleta_id}}"/>
+                <div class="col-md-5"><label>Tipo de resíduo</label><select class="form-select" id="tipo_residuo_id">{{tipos_options}}</select></div>
+                <div class="col-md-3"><label>Quantidade</label><input type="number" step="0.001" min="0.001" class="form-control" id="quantidade" value="1"/></div>
+                <div class="col-md-2"><label>Unidade</label><select class="form-select" id="unidade"><option value="kg">Kg</option><option value="l">Litros</option><option value="un">Unid.</option></select></div>
+                <div class="col-md-2"><button type="button" class="btn btn-success w-100" onclick="adicionarItem()"><i class="fas fa-plus"></i> Add</button></div>
+            </form>
+            <table class="table table-sm"><thead><tr><th>Resíduo</th><th>Classe</th><th>Grupo</th><th>Qtd</th><th></th></tr></thead>
+            <tbody id="itens-tbody">{{itens_html}}</tbody></table>
+        </div></div>
+    </div>
+
+    <div class="tab-pane fade" id="tab-finalizar">
+        <div class="card mb-3"><div class="card-body">
+            <form id="form-finalizar" enctype="multipart/form-data">
+                <div class="mb-3"><label>Relatório / observações</label><textarea class="form-control" name="relatorio" rows="3">{{relatorio}}</textarea></div>
+                <div class="mb-3"><label>Evidências (até 3 fotos JPG/PNG)</label>
+                    <div class="row g-2">
+                        <div class="col-md-4"><input type="file" class="form-control" name="evidencia_1" accept="image/jpeg,image/png,image/webp"/></div>
+                        <div class="col-md-4"><input type="file" class="form-control" name="evidencia_2" accept="image/jpeg,image/png,image/webp"/></div>
+                        <div class="col-md-4"><input type="file" class="form-control" name="evidencia_3" accept="image/jpeg,image/png,image/webp"/></div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success btn-lg" onclick="finalizarColeta()"><i class="fas fa-check"></i> Finalizar MTR</button>
+                <button type="button" class="btn btn-outline-danger ms-2" onclick="cancelarColeta()">Cancelar rascunho</button>
+            </form>
+        </div></div>
+    </div>
+</div>

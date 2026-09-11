@@ -1,0 +1,22 @@
+<h1 class="mt-2">Rotas</h1>
+<ol class="breadcrumb mb-4"><li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li><li class="breadcrumb-item active">Rotas</li></ol>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between"><span><i class="fas fa-route me-1"></i> Rotas de coleta</span><button class="btn btn-primary btn-sm" onclick="novoRegistro()"><i class="fas fa-plus"></i> Nova rota</button></div>
+    <div class="card-body">
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
+            <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar nome ou descrição..." /></div>
+            <div class="col-md-2"><select name="ativo" class="form-select crud-filter"><option value="">Ativos</option><option value="1">Somente ativos</option><option value="0">Somente inativos</option></select></div>
+        </div>
+        <table class="table table-striped"><thead><tr><th>Nome</th><th>Descrição</th><th class="text-center">Clientes</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+<div class="modal fade" id="crudModal"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Rota</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><form id="crud-form">{{csrf_field}}<input type="hidden" name="id" id="crud-id" value="0"/>
+        <div class="mb-2"><label>Nome</label><input class="form-control" name="nome" id="crud-nome" required/></div>
+        <div class="mb-2"><label>Descrição</label><textarea class="form-control" name="descricao" id="crud-descricao" rows="2"></textarea></div>
+        <div class="mb-2"><label>Status</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativa</option><option value="0">Inativa</option></select></div>
+    </form></div>
+    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
+</div></div></div>

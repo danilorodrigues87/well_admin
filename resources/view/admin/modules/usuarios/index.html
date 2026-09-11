@@ -1,0 +1,73 @@
+<h1 class="mt-2">{{titulo_pagina}}</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">{{titulo_pagina}}</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-users me-1"></i> {{titulo_pagina}}</span>
+        <button type="button" class="btn btn-primary btn-sm" onclick="novoRegistro()"><i class="fas fa-plus"></i> Novo</button>
+    </div>
+    <div class="card-body">
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
+            <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar nome ou e-mail..." /></div>
+            <div class="col-md-3"><select name="funcao_id" class="form-select crud-filter"><option value="">Função: todas</option>{{funcoes_options}}</select></div>
+            <div class="col-md-2"><select name="ativo" class="form-select crud-filter"><option value="">Status: todos</option><option value="s">Ativo</option><option value="n">Inativo</option></select></div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr><th>Nome</th><th>E-mail</th><th>Função</th><th>Status</th><th width="120">Ações</th></tr>
+                </thead>
+                <tbody id="crud-tbody"></tbody>
+            </table>
+        </div>
+        <div id="crud-pagination" class="mt-2"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="crudModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Usuário</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="crud-form">
+                    {{csrf_field}}
+                    <input type="hidden" name="id" id="crud-id" value="0" />
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="nome" id="crud-nome" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">E-mail</label>
+                        <input type="email" class="form-control" name="email" id="crud-email" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Função</label>
+                        <select class="form-select" name="funcao_id" id="crud-funcao_id" required>{{funcoes_options}}</select>
+                    </div>
+                    <div class="mb-3" id="crud-senha-wrap">
+                        <label class="form-label">Senha</label>
+                        <input type="password" class="form-control" name="senha" id="crud-senha" minlength="8" />
+                        <small class="text-muted">Mínimo 8 caracteres. Deixe vazio na edição para manter.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="ativo" id="crud-ativo">
+                            <option value="s">Ativo</option>
+                            <option value="n">Inativo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarRegistro()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>

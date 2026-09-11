@@ -1,0 +1,35 @@
+<h1 class="mt-2">Tipos de Resíduos</h1>
+<ol class="breadcrumb mb-4"><li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li><li class="breadcrumb-item active">Tipos de Resíduos</li></ol>
+<div class="alert alert-info py-2"><small><i class="fas fa-info-circle me-1"></i> Classes e grupos são cadastrados separadamente — cada tipo usa <strong>IDs</strong>, evitando inconsistência de nomes.</small></div>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between"><span><i class="fas fa-recycle me-1"></i> Catálogo</span><button class="btn btn-primary btn-sm" onclick="novoRegistro()"><i class="fas fa-plus"></i> Novo</button></div>
+    <div class="card-body">
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
+            <div class="col-md-3"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar..." /></div>
+            <div class="col-md-3"><select name="classe_id" id="filter-classe_id" class="form-select">{{classes_filter_options}}</select></div>
+            <div class="col-md-3"><select name="grupo_id" id="filter-grupo_id" class="form-select crud-filter"><option value="">Grupo: todos</option></select></div>
+        </div>
+        <table class="table table-striped"><thead><tr><th>Nome</th><th>Classe</th><th>Grupo</th><th>Cód. IBAMA</th><th>SINIR</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+<div class="modal fade" id="crudModal"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Tipo de resíduo</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><form id="crud-form">{{csrf_field}}<input type="hidden" name="id" id="crud-id" value="0"/>
+        <div class="mb-2"><label>Nome *</label><input class="form-control" name="nome" id="crud-nome" required/></div>
+        <div class="mb-2"><label>Classe *</label><select class="form-select" name="classe_id" id="crud-classe_id" required>{{classes_options}}</select></div>
+        <div class="mb-2"><label>Grupo *</label><select class="form-select" name="grupo_id" id="crud-grupo_id" required><option value="">— Selecione a classe primeiro —</option></select></div>
+        <div class="mb-2"><label>Código IBAMA</label><input class="form-control" name="cod_ibama" id="crud-cod_ibama"/></div>
+        <div class="mb-2"><label class="form-label mb-1">Códigos SINIR <small class="text-muted">(opcional — Fase B)</small></label>
+            <div class="row g-2">
+                <div class="col-6 col-md-4"><input class="form-control form-control-sm" name="tra_codigo" id="crud-tra_codigo" placeholder="traCodigo" inputmode="numeric"/></div>
+                <div class="col-6 col-md-4"><input class="form-control form-control-sm" name="tie_codigo" id="crud-tie_codigo" placeholder="tieCodigo" inputmode="numeric"/></div>
+                <div class="col-6 col-md-4"><input class="form-control form-control-sm" name="tia_codigo" id="crud-tia_codigo" placeholder="tiaCodigo" inputmode="numeric"/></div>
+                <div class="col-6 col-md-4"><input class="form-control form-control-sm" name="cla_codigo" id="crud-cla_codigo" placeholder="claCodigo" inputmode="numeric"/></div>
+                <div class="col-6 col-md-4"><input class="form-control form-control-sm" name="uni_codigo" id="crud-uni_codigo" placeholder="uniCodigo" inputmode="numeric"/></div>
+            </div>
+        </div>
+        <div class="mb-2"><label>Status</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+    </form></div>
+    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
+</div></div></div>

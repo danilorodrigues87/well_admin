@@ -1,0 +1,69 @@
+<h1 class="mt-2">Relatórios</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Relatórios</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-chart-bar me-1"></i> Coletas por período</span>
+        <button type="button" class="btn btn-outline-success btn-sm" onclick="exportarCsv()"><i class="fas fa-file-csv me-1"></i> Exportar CSV</button>
+    </div>
+    <div class="card-body">
+        <form id="relatorio-export-form" method="post" action="{{URL}}/painel/relatorios/export" class="d-none">
+            {{csrf_field}}
+            <input type="hidden" name="data_inicio" id="export-data_inicio"/>
+            <input type="hidden" name="data_fim" id="export-data_fim"/>
+            <input type="hidden" name="cliente_id" id="export-cliente_id"/>
+            <input type="hidden" name="status" id="export-status"/>
+        </form>
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label small mb-0">De</label>
+                <input type="date" name="data_inicio" class="form-control" value="{{data_inicio_default}}"/>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-0">Até</label>
+                <input type="date" name="data_fim" class="form-control" value="{{data_fim_default}}"/>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small mb-0">Cliente</label>
+                <select name="cliente_id" class="form-select">{{clientes_options}}</select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-0">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="finalizada">Finalizadas</option>
+                    <option value="rascunho">Rascunhos</option>
+                </select>
+            </div>
+        </div>
+        <p class="text-muted small mb-2" id="relatorio-total"></p>
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>MTR</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Coletor</th>
+                    <th>Peso (kg)</th>
+                    <th>Status</th>
+                    <th>Recebimento</th>
+                </tr>
+            </thead>
+            <tbody id="crud-tbody"></tbody>
+        </table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+<script>
+function exportarCsv() {
+    var bar = document.getElementById('barra-filtros-lista');
+    document.getElementById('export-data_inicio').value = bar.querySelector('[name="data_inicio"]').value;
+    document.getElementById('export-data_fim').value = bar.querySelector('[name="data_fim"]').value;
+    document.getElementById('export-cliente_id').value = bar.querySelector('[name="cliente_id"]').value;
+    document.getElementById('export-status').value = bar.querySelector('[name="status"]').value;
+    document.getElementById('relatorio-export-form').submit();
+}
+</script>

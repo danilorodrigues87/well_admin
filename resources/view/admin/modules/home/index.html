@@ -1,0 +1,76 @@
+<h1 class="mt-2">Dashboard</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Início</li>
+</ol>
+
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-primary border-4 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Coletas finalizadas (mês)</div>
+                <div class="fs-3 fw-bold">{{coletas_mes}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-warning border-4 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Rascunhos abertos</div>
+                <div class="fs-3 fw-bold">{{rascunhos}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-danger border-4 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Clientes urgentes</div>
+                <div class="fs-3 fw-bold">{{urgentes}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start border-info border-4 h-100">
+            <div class="card-body">
+                <div class="text-muted small">Coleta atrasada / hoje</div>
+                <div class="fs-3 fw-bold">{{atrasados}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-muted small">Clientes ativos</div>
+                <div class="fs-4 fw-bold">{{clientes_ativos}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-muted small">Atribuições sem coletor</div>
+                <div class="fs-4 fw-bold">{{sem_coletor}}</div>
+                <a href="{{URL}}/painel/rotas" class="small">Ver rotas</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-muted small">MTR pendente recebimento</div>
+                <div class="fs-4 fw-bold">{{pend_recebimento}}</div>
+                <a href="{{URL}}/painel/coletas" class="small">Ver coletas</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-leaf me-1"></i> Bem-vindo ao {{site}}</div>
+    <div class="card-body">
+        <p class="mb-2">Painel administrativo Well Eco — coleta, MTR e gestão operacional.</p>
+        <p class="text-muted small mb-0">Use o menu lateral para acessar os módulos liberados para sua função.</p>
+    </div>
+</div>

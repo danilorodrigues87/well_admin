@@ -1,0 +1,90 @@
+<?php
+
+use App\Controller\Admin\Agendamentos;
+use App\Controller\Admin\ColetaNova;
+use App\Controller\Admin\Coletas;
+use App\Http\Response;
+
+// ── Lançar coleta (wizard) ──
+$obRouter->get('/painel/coleta/nova', [
+    'middlewares' => ['required-admin-login', 'required-module:coleta_nova'],
+    function ($request) {
+        return new Response(200, ColetaNova::selecionarCliente($request));
+    },
+]);
+
+$obRouter->post('/painel/coleta/nova', [
+    'middlewares' => ['required-admin-login', 'required-module:coleta_nova'],
+    function ($request) {
+        return new Response(200, ColetaNova::post($request), 'application/json');
+    },
+]);
+
+$obRouter->get('/painel/coleta/nova/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:coleta_nova'],
+    function ($request, int $id) {
+        return new Response(200, ColetaNova::wizard($request, $id));
+    },
+]);
+
+$obRouter->post('/painel/coleta/nova/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:coleta_nova'],
+    function ($request, int $id) {
+        return new Response(200, ColetaNova::post($request, $id), 'application/json');
+    },
+]);
+
+// ── Impressão MTR ──
+$obRouter->get('/painel/coletas/mtr/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request, int $id) {
+        return new Response(200, Coletas::mtrPrint($request, $id));
+    },
+]);
+
+// ── Listagem coletas ──
+$coletaCrud = [
+    ['path' => '/painel/coletas', 'ctrl' => Coletas::class, 'module' => 'coletas'],
+    ['path' => '/painel/agendamentos', 'ctrl' => Agendamentos::class, 'module' => 'agendamentos'],
+];
+
+foreach ($coletaCrud as $route) {
+    $ctrl = $route['ctrl'];
+    $module = $route['module'];
+    $path = $route['path'];
+
+    $obRouter->get($path, [
+        'middlewares' => ['required-admin-login', 'required-module:'.$module],
+        function ($request) use ($ctrl) {
+            return new Response(200, $ctrl::index($request));
+        },
+    ]);
+
+    $obRouter->post($path, [
+        'middlewares' => ['required-admin-login', 'required-module:'.$module],
+        function ($request) use ($ctrl) {
+            $acao = $request->getPostVars()['acao'] ?? 'listar';
+            $content = match ($acao) {
+                'listar' => $ctrl::list($request),
+                'get' => $ctrl::get($request),
+                'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                default => json_encode(['success' => false, 'message' => 'Ação inválida']),
+            };
+            return new Response(200, $content, 'application/json');
+        },
+    ]);
+}
+
+// ── Servir evidências (storage) ──
+$obRouter->get('/storage/coletas/{coletaId}/{arquivo}', [
+    'middlewares' => ['required-admin-login'],
+    function ($request, int $coletaId, string $arquivo) {
+        $arquivo = basename($arquivo);
+        $path = dirname(__DIR__, 2).'/storage/coletas/'.$coletaId.'/'.$arquivo;
+        if (!is_file($path)) {
+            return new Response(404, 'Arquivo não encontrado');
+        }
+        $mime = mime_content_type($path) ?: 'application/octet-stream';
+        return new Response(200, file_get_contents($path), $mime);
+    },
+]);

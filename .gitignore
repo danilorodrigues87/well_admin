@@ -1,0 +1,16 @@
+/vendor/
+.env
+/app/sessions/*
+!/app/sessions/.gitkeep
+/storage/evidencias/*
+!/storage/evidencias/.gitkeep
+/storage/coletas/*
+!/storage/coletas/.gitkeep
+/storage/boletos/*
+!/storage/boletos/.gitkeep
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+_test_*.php

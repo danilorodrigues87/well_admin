@@ -1,0 +1,40 @@
+<h1 class="mt-2">Funções e Módulos</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Funções</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-shield-halved me-1"></i> Funções do sistema</div>
+    <div class="card-body">
+        <p class="text-muted small">Defina quais módulos cada função pode acessar. Administrador tem acesso total.</p>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead><tr><th>Função</th><th>Slug</th><th>Módulos</th><th width="140">Ações</th></tr></thead>
+                <tbody id="crud-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="crudModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Módulos da função: <span id="crud-nome-label"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="crud-form">
+                    {{csrf_field}}
+                    <input type="hidden" name="id" id="crud-id" value="0" />
+                    <div class="row g-2" id="crud-modulos"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarRegistro()">Salvar módulos</button>
+            </div>
+        </div>
+    </div>
+</div>

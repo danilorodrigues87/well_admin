@@ -1,0 +1,26 @@
+<div class="d-flex justify-content-end mb-2">
+    {{mtr_print_btn}}
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <p><strong>MTR:</strong> {{numero_mtr}}</p>
+        <p><strong>Cliente:</strong> {{cliente}}</p>
+        <p><strong>Coletor:</strong> {{coletor}}</p>
+        <p><strong>Data:</strong> {{data_coleta}}</p>
+        <p><strong>Status:</strong> {{status}}</p>
+        <p><strong>Tratamento:</strong> {{tratamento}}</p>
+    </div>
+    <div class="col-md-6">
+        <p><strong>Gerador:</strong> {{gerador}}</p>
+        <p><strong>Endereço:</strong> {{endereco}}</p>
+        <p><strong>Transportador:</strong> {{transportador}}</p>
+        <p><strong>Motorista:</strong> {{motorista}} · {{veiculo}}</p>
+        <p><strong>Destinador:</strong> {{destinador}}</p>
+    </div>
+</div>
+<hr/>
+<p><strong>Relatório:</strong><br/>{{relatorio}}</p>
+<h6>Resíduos coletados</h6>
+<table class="table table-sm"><thead><tr><th>Resíduo</th><th>Classe</th><th>Qtd</th></tr></thead><tbody>{{itens_html}}</tbody></table>
+<h6 class="mt-3">Evidências</h6>
+<div class="row g-2">{{evidencias_html}}</div>

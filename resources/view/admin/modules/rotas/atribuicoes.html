@@ -1,0 +1,65 @@
+<h1 class="mt-2">Atribuições — {{rota_nome}}</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{URL}}/painel/rotas">Rotas</a></li>
+    <li class="breadcrumb-item active">Atribuições</li>
+</ol>
+
+<div class="row mb-3 g-2">
+    <div class="col-md-4">
+        <div class="card border-0 bg-light">
+            <div class="card-body py-2">
+                <small class="text-muted">Clientes na rota</small>
+                <div class="fs-4 fw-bold" id="stat-total">{{stats_total}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 bg-warning-subtle">
+            <div class="card-body py-2">
+                <small class="text-muted">Sem coletor</small>
+                <div class="fs-4 fw-bold text-warning-emphasis" id="stat-sem-coletor">{{stats_sem_coletor}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between flex-wrap gap-2">
+        <span><i class="fas fa-users me-1"></i> Clientes × coletores</span>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addClienteModal"><i class="fas fa-plus"></i> Adicionar cliente</button>
+    </div>
+    <div class="card-body">
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
+            <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar cliente, cidade ou coletor..." /></div>
+            <div class="col-md-3"><select name="sem_coletor" class="form-select crud-filter"><option value="">Coletor: todos</option><option value="1">Somente sem coletor</option></select></div>
+            <div class="col-md-5">
+                <div class="input-group input-group-sm">
+                    <select id="bulk-coletor" class="form-select"><option value="">Coletor...</option>{{coletores_options}}</select>
+                    <button class="btn btn-outline-secondary" type="button" onclick="aplicarColetorLote()">Atribuir aos sem coletor</button>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped table-sm">
+            <thead><tr><th>Cliente</th><th>Cidade</th><th>Coletor</th><th width="60"></th></tr></thead>
+            <tbody id="crud-tbody"></tbody>
+        </table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="addClienteModal">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Adicionar cliente à rota</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <form id="add-cliente-form">{{csrf_field}}
+                <div class="mb-2"><label>Buscar cliente</label><input type="text" id="add-busca" class="form-control" placeholder="Digite e pressione Enter"/></div>
+                <div class="mb-2"><label>Cliente *</label><select name="cliente_id" id="add-cliente_id" class="form-select" required><option value="">— Selecione —</option></select></div>
+                <div class="mb-2"><label>Coletor (opcional)</label><select name="coletor_id" id="add-coletor_id" class="form-select"><option value="">— Sem coletor —</option>{{coletores_options}}</select></div>
+            </form>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="adicionarCliente()">Adicionar</button></div>
+    </div></div>
+</div>
+
+<input type="hidden" id="csrf-atrib" value="" />
