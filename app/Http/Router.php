@@ -80,6 +80,26 @@ class Router
         $this->addRoute('POST', $route, $params);
     }
 
+    public function put(string $route, array $params = []): void
+    {
+        $this->addRoute('PUT', $route, $params);
+    }
+
+    public function patch(string $route, array $params = []): void
+    {
+        $this->addRoute('PATCH', $route, $params);
+    }
+
+    public function delete(string $route, array $params = []): void
+    {
+        $this->addRoute('DELETE', $route, $params);
+    }
+
+    public function options(string $route, array $params = []): void
+    {
+        $this->addRoute('OPTIONS', $route, $params);
+    }
+
     public function getUri(): string
     {
         $uri = $this->request->getUri();
@@ -143,17 +163,30 @@ class Router
             if ($code < 400 || $code > 599) {
                 $code = 500;
             }
-            return new Response($code, $this->getErrorMessage($e->getMessage()), $this->contentType);
+            return new Response($code, $this->getErrorMessage($e->getMessage(), $code), $this->contentType);
         }
     }
 
-    private function getErrorMessage(string $message): string|array
+    private function getErrorMessage(string $message, int $httpCode = 404): string|array
     {
         if ($this->contentType === 'application/json') {
             if (str_contains($message, '<!doctype') || str_contains($message, '<html')) {
                 $message = 'Recurso não encontrado.';
             }
-            return ['success' => false, 'message' => $message, 'errors' => [$message]];
+            $code = match ($httpCode) {
+                401 => 'unauthorized',
+                403 => 'forbidden',
+                404 => 'not_found',
+                405 => 'method_not_allowed',
+                default => 'error',
+            };
+            return [
+                'success' => false,
+                'error' => [
+                    'code' => $code,
+                    'message' => $message,
+                ],
+            ];
         }
         return $message;
     }

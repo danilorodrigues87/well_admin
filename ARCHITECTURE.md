@@ -17,7 +17,7 @@ Single-tenant (sem multi-escola). Painel web para:
 - **Gestores** — agendamentos, clientes, rotas
 - **Coletores** — lançamento de coletas/MTR no browser
 
-**Fase 2 (futuro):** API REST, apps FlutterFlow, SINIR, banco PIX/boleto.
+**Fase 2:** API REST `/api/v1` (app coletor FlutterFlow), SINIR emissão, banco PIX/boleto.
 
 ---
 
@@ -155,3 +155,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-11 | SINIR: teste auth — `/gettoken` desativado (ago/2026); novo fluxo Token API WS → `POST /token`; doc em `docs/SINIR.md` |
 | 2026-09-11 | SINIR Fase A: migration `008_sinir`, services skeleton, códigos SINIR em tipos_residuos, badge na listagem coletas, smoke test CLI |
 | 2026-09-11 | Planos: tabela `plano_itens` (saldo incluso + valor excedente/kg), import legado, `PlanoCobrancaService` |
+| 2026-09-12 | API REST v1 app coletor: JWT, `routes/api.php`, controllers `App\Controller\Api\*`, `ApiAuthService`, `ColetaApiPresenter`, `docs/API.md` |
+| 2026-09-12 | FlutterFlow Fase 2a: App State + API Calls (Login, Auth Me, Clientes) no projeto well-coletas-by2777; guia `docs/FLUTTERFLOW.md` |

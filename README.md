@@ -40,12 +40,15 @@ Altere a senha após o primeiro acesso.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — arquitetura, pastas, RBAC (leitura obrigatória para IAs)
 - [docs/SECURITY.md](docs/SECURITY.md) — autenticação e permissões
 - [docs/DATABASE.md](docs/DATABASE.md) — schema e migrations
-- [docs/ROADMAP.md](docs/ROADMAP.md) — Fase 2 (API, SINIR, banco)
+- [docs/API.md](docs/API.md) — API REST v1 (app coletor FlutterFlow)
+- [docs/FLUTTERFLOW.md](docs/FLUTTERFLOW.md) — setup telas e API Calls no FlutterFlow
+- [docs/ROADMAP.md](docs/ROADMAP.md) — Fase 2 (SINIR, banco, portal cliente)
 
 ## Estrutura resumida
 
 ```
 app/Controller/Admin/   # Controllers do painel web
+app/Controller/Api/     # API REST /api/v1
 app/Service/            # Regras de negócio (fonte única)
 app/Model/Entity/       # Acesso a dados
 routes/admin/           # Rotas HTTP

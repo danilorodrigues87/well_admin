@@ -40,6 +40,11 @@ class Queue
             return (new RequireModule($slug))->handle($request, fn ($req) => $this->next($req));
         }
 
+        if (str_starts_with($middleware, 'required-api-module:')) {
+            $slug = substr($middleware, strlen('required-api-module:'));
+            return (new RequireApiModule($slug))->handle($request, fn ($req) => $this->next($req));
+        }
+
         if (!isset(self::$map[$middleware])) {
             throw new \RuntimeException('Middleware não mapeado: '.$middleware, 500);
         }
