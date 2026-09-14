@@ -18,6 +18,7 @@ class Coletas extends BaseApi
         $page = max(1, (int)($query['page'] ?? 1));
         $perPage = min(50, max(1, (int)($query['per_page'] ?? 15)));
         $status = trim((string)($query['status'] ?? ''));
+        $busca = trim((string)($query['busca'] ?? ''));
 
         $where = '1=1';
         $params = [];
@@ -29,6 +30,16 @@ class Coletas extends BaseApi
         if (in_array($status, ['rascunho', 'finalizada', 'cancelada'], true)) {
             $where .= ' AND c.status = ?';
             $params[] = $status;
+        }
+        if ($busca !== '') {
+            $where .= ' AND c.cliente_id IN (
+                SELECT id FROM clientes
+                WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cidade LIKE ?
+            )';
+            $like = '%'.$busca.'%';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
         }
 
         $total = EntityColeta::count($where, $params);

@@ -24,6 +24,14 @@ Erro:
 { "success": false, "error": { "code": "invalid_credentials", "message": "..." } }
 ```
 
+## RBAC (módulos)
+
+Login exige ao menos um módulo operacional do app (`dashboard`, `coletas`, `coleta_nova`, `agendamentos`, `clientes`, `rotas`, `relatorios`, `perfil`).
+
+Cada rota autenticada exige o módulo correspondente via middleware `required-api-module:{slug}`.
+
+Resposta `user` inclui: `modulos[]`, `modulos_csv` (slugs separados por vírgula, útil no FlutterFlow), `is_admin`, `funcao_nome`.
+
 ## Endpoints
 
 ### Saúde
@@ -37,38 +45,80 @@ Erro:
 { "email": "coletor@well.eco", "password": "senha" }
 ```
 Resposta: `{ token, expires_at, user }`  
-Requer módulo `coleta_nova` na função do usuário.
+Requer ao menos um módulo operacional do app.
 
-`GET /auth/me` — usuário autenticado
+`GET /auth/me` — usuário autenticado (qualquer módulo do app)
+
+### Dashboard
+
+`GET /dashboard/resumo` — módulo `dashboard`
+
+Resposta:
+```json
+{
+  "kpis": {
+    "coletas_mes": 12,
+    "rascunhos": 2,
+    "urgentes": 3,
+    "atrasados": 5
+  }
+}
+```
+
+Coletor vê KPIs filtrados por `coletor_id`; admin vê totais.
+
+### Agendamentos
+
+`GET /agendamentos?page=1&per_page=20&busca=` — módulo `agendamentos`
+
+Clientes ativos ordenados por prioridade e `proxima_coleta`.
+
+### Perfil
+
+| Método | Endpoint | Módulo | Ação |
+|--------|----------|--------|------|
+| GET | `/perfil` | `perfil` | Dados do usuário logado |
+| POST | `/perfil/senha` | `perfil` | Trocar senha |
+
+Body trocar senha:
+```json
+{
+  "senha_atual": "...",
+  "nova_senha": "...",
+  "confirmacao": "..."
+}
+```
 
 ### Clientes para coleta
 
-`GET /clientes/coleta?page=1&per_page=15&busca=&prioridade=&escopo=pendentes`
+`GET /clientes/coleta?page=1&per_page=15&busca=&prioridade=&escopo=pendentes` — módulo `coleta_nova`
 
 - `escopo`: `pendentes` (default) ou `todos`
 - Mesma regra de rotas do painel web (`ColetaService::clientesParaColetaPaginado`)
 
 ### Catálogos
 
-| Endpoint | Conteúdo |
-|----------|----------|
-| `GET /catalogos/veiculos` | Veículos ativos |
-| `GET /catalogos/tipos-residuos` | Tipos de resíduo ativos |
-| `GET /catalogos/tratamentos` | Lista de tratamentos |
+| Endpoint | Módulo | Conteúdo |
+|----------|--------|----------|
+| `GET /catalogos/veiculos` | `coleta_nova` | Veículos ativos |
+| `GET /catalogos/tipos-residuos` | `coleta_nova` | Tipos de resíduo ativos |
+| `GET /catalogos/tratamentos` | `coleta_nova` | Lista de tratamentos |
 
 ### Coletas
 
-| Método | Endpoint | Ação |
-|--------|----------|------|
-| GET | `/coletas` | Listar (coletor vê só as suas) |
-| POST | `/coletas` | Iniciar rascunho `{ "cliente_id": 1 }` |
-| GET | `/coletas/{id}` | Detalhe completo (wizard) |
-| PATCH | `/coletas/{id}/transporte` | Salvar transporte/destinador |
-| POST | `/coletas/{id}/itens` | Adicionar resíduo |
-| DELETE | `/coletas/{id}/itens/{itemId}` | Remover resíduo |
-| POST | `/coletas/{id}/finalizar` | Finalizar (multipart, fotos opcionais) |
-| POST | `/coletas/{id}/cancelar` | Cancelar rascunho |
-| GET | `/coletas/{id}/evidencias/{ordem}` | Imagem da evidência |
+| Método | Endpoint | Módulo | Ação |
+|--------|----------|--------|------|
+| GET | `/coletas?busca=&status=&page=&per_page=` | `coletas` | Listar (coletor vê só as suas) |
+| POST | `/coletas` | `coleta_nova` | Iniciar rascunho `{ "cliente_id": 1 }` |
+| GET | `/coletas/{id}` | `coletas` | Detalhe completo (wizard) |
+| PATCH | `/coletas/{id}/transporte` | `coleta_nova` | Salvar transporte/destinador |
+| POST | `/coletas/{id}/itens` | `coleta_nova` | Adicionar resíduo |
+| DELETE | `/coletas/{id}/itens/{itemId}` | `coleta_nova` | Remover resíduo |
+| POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais) |
+| POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar rascunho |
+| GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
+
+Query `busca` em listagem: filtra por nome/cidade do cliente.
 
 ### Finalizar — campos multipart
 
@@ -81,14 +131,6 @@ Espelha o wizard web: `veiculo_id`, `relatorio`, `tratamento`, `situacao_recebim
 ## FlutterFlow
 
 Guia passo a passo das telas: [FLUTTERFLOW.md](FLUTTERFLOW.md)
-
-**Já no projeto `well-coletas-by2777`:**
-- App State: `authToken`, `userName`, `userId`, `apiBaseUrl`, `activeColetaId`
-- API Calls: Login, Auth Me, Clientes Coleta, catálogos (veículos, tipos, tratamentos), coletas CRUD completo (iniciar, detalhe, transporte, itens, finalizar, cancelar)
-
-1. Passar `baseUrl` = App State `apiBaseUrl` em cada call
-2. Passar `authToken` = App State `authToken` nas calls autenticadas
-3. Login → salvar response fields no App State → navegar para Home
 
 ## Segurança
 

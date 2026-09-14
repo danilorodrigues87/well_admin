@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\ApiAppModules;
 use App\Common\ApiConfig;
 use App\Common\Helpers\ModuleGateHelper;
 use App\Model\Entity\Usuario as EntityUsuario;
@@ -31,10 +32,10 @@ class ApiAuthService
         }
 
         $sessionUser = self::userToSessionArray($usuario);
-        if (!ModuleGateHelper::podeAcessar('coleta_nova', $sessionUser)) {
-            throw new \InvalidArgumentException('Usuário sem permissão para o app coletor.');
-        }
         $sessionUser['modulos'] = ModuleGateHelper::getModulosEfetivos($sessionUser);
+        if (!ApiAppModules::temAcessoApp($sessionUser['modulos'])) {
+            throw new \InvalidArgumentException('Usuário sem permissão para o app.');
+        }
 
         $expiresAt = time() + ApiConfig::jwtTtlSeconds();
         $token = JWT::encode([

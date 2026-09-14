@@ -13,6 +13,9 @@ Projeto: **well-coletas-by2777** (`Well Coletas`)
 | `userId` | Integer | ID do usuário |
 | `apiBaseUrl` | String | Base da API (default **produção**) |
 | `activeColetaId` | Integer | ID da coleta em andamento (wizard) |
+| `isAdmin` | Boolean | Flag admin (`$.data.user.is_admin` no login) |
+| `funcaoNome` | String | Nome da função do usuário |
+| `userModulesCsv` | String | Slugs RBAC separados por vírgula (ex.: `dashboard,coletas,coleta_nova`) |
 
 ### API Calls criadas
 
@@ -32,8 +35,14 @@ Projeto: **well-coletas-by2777** (`Well Coletas`)
 | **WellAdmin Coleta Remove Item** | DELETE | `[baseUrl]/coletas/[coletaId]/itens/[itemId]` |
 | **WellAdmin Coleta Finalizar** | POST | `[baseUrl]/coletas/[coletaId]/finalizar` → `numeroMtr` |
 | **WellAdmin Coleta Cancelar** | POST | `[baseUrl]/coletas/[coletaId]/cancelar` |
+| **WellAdmin Dashboard Resumo** | GET | `[baseUrl]/dashboard/resumo` |
+| **WellAdmin Agendamentos** | GET | `[baseUrl]/agendamentos?page=&per_page=&busca=` |
+| **WellAdmin Perfil** | GET | `[baseUrl]/perfil` |
+| **WellAdmin Perfil Senha** | POST | `[baseUrl]/perfil/senha` |
 
 Todas usam variável `baseUrl` → mapear para **App State `apiBaseUrl`** em cada chamada.
+
+**Coletas Listar** inclui query `busca` além de `status`, `page`, `per_page`.
 
 Contratos completos: [API.md](API.md)
 
@@ -46,14 +55,30 @@ Contratos completos: [API.md](API.md)
 | Página | Função |
 |--------|--------|
 | **SplashPage** | Logo + loading; redireciona para Home (com token) ou Login |
-| **LoginPage** | E-mail/senha → API Login → salva App State → Home |
-| **HomePage** | Saudação + botão "Lançar coleta" + logout |
+| **LoginPage** | E-mail/senha → API Login → salva App State (incl. RBAC) → Home |
+| **HomePage** | Menu: Lançar coleta, Minhas coletas, Dashboard, Agendamentos, Perfil, Sair |
+| **ClientesColetaPage** | Stub: busca + botão (ligar ListView — Sprint 2.2) |
+| **ColetasListPage** | Stub: título (ligar API + filtros — Sprint 2.2) |
+| **DashboardPage** | Stub (ligar **WellAdmin Dashboard Resumo**) |
+| **AgendamentosPage** | Stub (ligar **WellAdmin Agendamentos**) |
+| **PerfilPage** | Stub (ligar **WellAdmin Perfil** + senha) |
 
 ### O que já está ligado
 
 - **SplashPage** — `On Init State`: se `authToken` preenchido → Home, senão → Login
-- **LoginPage** — botão Entrar → **WellAdmin Login** → grava `authToken`, `userName`, `userId` → Home
-- **HomePage** — "Lançar coleta" → snackbar placeholder; "Sair" → limpa sessão → Login
+- **LoginPage** — botão Entrar → **WellAdmin Login** → grava App State (token, user, RBAC) → Home
+- **HomePage** — navegação para as páginas acima; logout limpa sessão → Login
+
+### RBAC no editor (visibilidade condicional)
+
+Use App State `userModulesCsv` com função **Contains**:
+- Botão "Lançar coleta" → contém `coleta_nova`
+- "Minhas coletas" → contém `coletas`
+- "Dashboard" → contém `dashboard`
+- "Agendamentos" → contém `agendamentos`
+- "Perfil" → contém `perfil`
+
+Admin (`isAdmin=true`) normalmente já tem todos os slugs no CSV após login.
 
 ### Login — configurar no editor (obrigatório)
 
@@ -100,6 +125,9 @@ Isso é comum quando a API foi criada via MCP. Use **JSON Path customizado** (fu
 | `authToken` | `loginResult` | `$.data.token` |
 | `userName` | `loginResult` | `$.data.user.nome` |
 | `userId` | `loginResult` | `$.data.user.id` |
+| `isAdmin` | `loginResult` | `$.data.user.is_admin` |
+| `funcaoNome` | `loginResult` | `$.data.user.funcao_nome` |
+| `userModulesCsv` | `loginResult` | `$.data.user.modulos_csv` |
 
 **Forçar Predefined Paths a aparecer (opcional):**
 

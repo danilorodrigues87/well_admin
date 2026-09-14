@@ -23,6 +23,7 @@ class ColetaApiPresenter
             'funcao_nome' => (string)($user['funcao_nome'] ?? ''),
             'is_admin' => !empty($user['is_admin']),
             'modulos' => array_values($user['modulos'] ?? []),
+            'modulos_csv' => implode(',', array_values($user['modulos'] ?? [])),
         ];
     }
 

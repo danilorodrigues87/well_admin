@@ -55,4 +55,50 @@ class DashboardService
             'clientes_ativos' => $clientesAtivos,
         ];
     }
+
+    /** KPIs resumidos para o app coletor (escopo do usuário). */
+    public static function kpisColetor(int $userId, bool $isAdmin): array
+    {
+        $db = new Database();
+        $hoje = date('Y-m-d');
+        $mesInicio = date('Y-m-01');
+        $mesFim = date('Y-m-t');
+
+        if ($isAdmin) {
+            $coletorFilter = '';
+            $paramsMes = [$mesInicio, $mesFim];
+            $paramsRasc = [];
+        } else {
+            $coletorFilter = ' AND c.coletor_id = ?';
+            $paramsMes = [$mesInicio, $mesFim, $userId];
+            $paramsRasc = [$userId];
+        }
+
+        $coletasMes = EntityColeta::count(
+            "c.status = 'finalizada' AND c.data_coleta BETWEEN ? AND ?".$coletorFilter,
+            $paramsMes
+        );
+
+        $rascunhos = EntityColeta::count(
+            "c.status = 'rascunho'".$coletorFilter,
+            $paramsRasc
+        );
+
+        $urgentes = (int)$db->execute(
+            "SELECT COUNT(*) AS qtd FROM clientes WHERE status = 'ativo' AND prioridade = 'urgente'"
+        )->fetch(\PDO::FETCH_ASSOC)['qtd'];
+
+        $atrasados = (int)$db->execute(
+            "SELECT COUNT(*) AS qtd FROM clientes
+             WHERE status = 'ativo' AND proxima_coleta IS NOT NULL AND proxima_coleta <= ?",
+            [$hoje]
+        )->fetch(\PDO::FETCH_ASSOC)['qtd'];
+
+        return [
+            'coletas_mes' => $coletasMes,
+            'rascunhos' => $rascunhos,
+            'urgentes' => $urgentes,
+            'atrasados' => $atrasados,
+        ];
+    }
 }

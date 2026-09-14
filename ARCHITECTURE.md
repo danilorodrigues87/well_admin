@@ -162,3 +162,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-12 | FlutterFlow Fase 2a: App State + API Calls (Login, Auth Me, Clientes) no projeto well-coletas-by2777; guia `docs/FLUTTERFLOW.md` |
 | 2026-09-14 | SINIR Fase B: `SinirManifestoService`, envio em `ColetaService::finalizar()`, reenvio no painel, `clientes.sinir_cod_unidade` |
 | 2026-09-14 | Branding Well Coletas: paleta Light/Dark em `panel-theme.css`, tema padrão `prefers-color-scheme`, doc `docs/BRANDING.md` |
+| 2026-09-14 | API app coletor: login multi-módulo (`ApiAppModules`), RBAC por rota, `GET /dashboard/resumo`, `GET /agendamentos`, `GET/POST /perfil`, busca em `GET /coletas`; FF: App State RBAC, menu Home, páginas stub |
