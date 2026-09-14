@@ -57,7 +57,8 @@ Contratos completos: [API.md](API.md)
 | **SplashPage** | Logo + loading; redireciona para Home (com token) ou Login |
 | **LoginPage** | E-mail/senha → API Login → salva App State (incl. RBAC) → Home |
 | **HomePage** | Menu: Lançar coleta, Minhas coletas, Dashboard, Agendamentos, Perfil, Sair |
-| **ClientesColetaPage** | Stub: busca + botão (ligar ListView — Sprint 2.2) |
+| **ClientesColetaPage** | ListView API clientes + filtros + iniciar coleta → wizard |
+| **ColetaWizardPage** | Mínima: carrega detalhe da coleta (cliente + status) |
 | **ColetasListPage** | Stub: título (ligar API + filtros — Sprint 2.2) |
 | **DashboardPage** | Stub (ligar **WellAdmin Dashboard Resumo**) |
 | **AgendamentosPage** | Stub (ligar **WellAdmin Agendamentos**) |
@@ -68,6 +69,34 @@ Contratos completos: [API.md](API.md)
 - **SplashPage** — `On Init State`: se `authToken` preenchido → Home, senão → Login
 - **LoginPage** — botão Entrar → **WellAdmin Login** → grava App State (token, user, RBAC) → Home
 - **HomePage** — navegação para as páginas acima; logout limpa sessão → Login
+
+### Sprint 2.2 — Clientes + Wizard ✅ (via MCP)
+
+**ClientesColetaPage**
+
+- Filtros **Pendentes** / **Todos** (page state `escopo`)
+- Campo **Buscar** → atualiza page state `busca`
+- **ListView** com Backend Query **WellAdmin Clientes Coleta** (`busca`, `escopo`, paginação)
+- Tap no cliente → **WellAdmin Coleta Criar** → grava `activeColetaId` → **ColetaWizardPage**
+
+**ColetaWizardPage**
+
+- `On Page Load` → **WellAdmin Coleta Detalhe** (`activeColetaId`) → exibe cliente e status
+
+**Correção API:** `WellAdmin Coleta Criar` — JSON Path `coletaId` = `$.data.coleta.id`
+
+#### Passo manual no editor (ListView — obrigatório)
+
+A API MCP **não consegue** gravar *Generate Children from Variable* no ListView. Se a lista aparecer vazia no Test/Run:
+
+1. Abra **ClientesColetaPage** → widget **ListView**
+2. Backend Query já deve estar em **WellAdmin Clientes Coleta**
+3. **Generate Children from Variable**:
+   - Source: resultado da query (API Response)
+   - **JSON Body** → JSON Path: `$.data.items`
+4. Salve e teste de novo
+
+Os textos **ItemNome** / **ItemCidade** já usam `GENERATOR_VARIABLE` com `$.nome_fantasia` e `$.cidade`.
 
 ### RBAC no editor (visibilidade condicional)
 
