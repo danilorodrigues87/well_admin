@@ -1,27 +1,41 @@
 /**
- * Tema claro/escuro dos painéis escola e Master.
- * Preferência em localStorage (chave painel-cti-theme).
+ * Tema claro/escuro — Well Eco Admin.
+ * Padrão: prefers-color-scheme do sistema (se usuário não escolheu manualmente).
  */
 (function () {
   'use strict';
 
   var KEY = 'well-eco-theme';
 
-  function current() {
+  function systemTheme() {
     try {
-      var t = localStorage.getItem(KEY);
-      return t === 'dark' ? 'dark' : 'light';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     } catch (e) {
       return 'light';
     }
   }
 
-  function apply(theme) {
+  function storedTheme() {
+    try {
+      var t = localStorage.getItem(KEY);
+      return t === 'dark' || t === 'light' ? t : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function current() {
+    return storedTheme() || systemTheme();
+  }
+
+  function apply(theme, persist) {
     var t = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-bs-theme', t);
-    try {
-      localStorage.setItem(KEY, t);
-    } catch (e) {}
+    if (persist) {
+      try {
+        localStorage.setItem(KEY, t);
+      } catch (e) {}
+    }
     syncToggleLabel(t);
     try {
       document.dispatchEvent(new CustomEvent('painel-theme-change', { detail: { theme: t } }));
@@ -38,11 +52,23 @@
   }
 
   function toggle() {
-    apply(current() === 'dark' ? 'light' : 'dark');
+    apply(current() === 'dark' ? 'light' : 'dark', true);
+  }
+
+  function bindSystemListener() {
+    try {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      mq.addEventListener('change', function () {
+        if (!storedTheme()) {
+          apply(systemTheme(), false);
+        }
+      });
+    } catch (e) {}
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    apply(current());
+    syncToggleLabel(current());
+    bindSystemListener();
     var el = document.getElementById('btn-toggle-theme');
     if (el) {
       el.addEventListener('click', function (e) {
@@ -52,5 +78,10 @@
     }
   });
 
-  window.PainelTheme = { apply: apply, toggle: toggle, current: current };
+  window.PainelTheme = {
+    apply: function (theme) { apply(theme, true); },
+    toggle: toggle,
+    current: current,
+    resolveInitial: current,
+  };
 })();

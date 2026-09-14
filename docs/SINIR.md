@@ -141,8 +141,29 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 ### Smoke test (CLI)
 
 ```bash
-php database/scripts/sinir_smoke_token.php
+php database/scripts/sinir_diagnose_rede.php   # 1º — testa se o servidor alcança a API
+php database/scripts/sinir_smoke_token.php       # 2º — testa token de integração
 ```
+
+### Timeout / `http_status: 0`
+
+Se o smoke test retorna `Operation timed out` com `http_status: 0`, **não é erro do token** — o PHP no servidor **não consegue conectar** a `admin.sinir.gov.br`.
+
+No SSH da HostGator:
+
+```bash
+curl -v --connect-timeout 15 -X POST https://admin.sinir.gov.br/apiws/rest/token \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN"
+```
+
+| Resultado curl | Ação |
+|----------------|------|
+| Timeout / Connection refused | Abrir ticket **HostGator**: liberar outbound HTTPS para `admin.sinir.gov.br:443` |
+| Conecta mas 401/403 | Token inválido ou expirado — gerar novo no portal MTR |
+| Conecta e retorna JSON | Rede OK — rodar `sinir_smoke_token.php` de novo |
+
+Em hospedagem compartilhada, o SINIR pode bloquear IPs de datacenter. Se a HostGator liberar e ainda falhar, contatar **mtr@sinir.gov.br** informando o IP público do servidor (cPanel → Informações gerais).
 
 ### Fluxo ao finalizar coleta
 

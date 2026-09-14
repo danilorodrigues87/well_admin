@@ -55,12 +55,19 @@ class SinirAuthService
         $response = $this->gateway->post('token', [], $integrationToken);
 
         if (!$response['ok']) {
+            $error = $response['error'] ?? ('HTTP '.$response['status']);
+            if (!empty($response['hint'])) {
+                $error .= ' — '.$response['hint'];
+            }
+
             return [
                 'ok' => false,
                 'token' => null,
                 'expires_in' => null,
-                'error' => $response['error'] ?? ('HTTP '.$response['status']),
+                'error' => $error,
                 'raw_status' => $response['status'],
+                'curl_errno' => $response['curl_errno'] ?? null,
+                'primary_ip' => $response['primary_ip'] ?? null,
             ];
         }
 

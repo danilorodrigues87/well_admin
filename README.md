@@ -42,6 +42,7 @@ Altere a senha após o primeiro acesso.
 - [docs/DATABASE.md](docs/DATABASE.md) — schema e migrations
 - [docs/API.md](docs/API.md) — API REST v1 (app coletor FlutterFlow)
 - [docs/FLUTTERFLOW.md](docs/FLUTTERFLOW.md) — setup telas e API Calls no FlutterFlow
+- [docs/BRANDING.md](docs/BRANDING.md) — paleta de cores Well Coletas (app + painel)
 - [docs/ROADMAP.md](docs/ROADMAP.md) — Fase 2 (SINIR, banco, portal cliente)
 
 ## Estrutura resumida

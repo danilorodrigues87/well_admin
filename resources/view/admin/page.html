@@ -8,8 +8,11 @@
     <script>
         (function () {
             try {
-                var t = localStorage.getItem('well-eco-theme');
-                document.documentElement.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
+                var saved = localStorage.getItem('well-eco-theme');
+                var t = saved === 'dark' || saved === 'light'
+                    ? saved
+                    : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-bs-theme', t);
             } catch (e) {
                 document.documentElement.setAttribute('data-bs-theme', 'light');
             }

@@ -161,3 +161,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-12 | API REST v1 app coletor: JWT, `routes/api.php`, controllers `App\Controller\Api\*`, `ApiAuthService`, `ColetaApiPresenter`, `docs/API.md` |
 | 2026-09-12 | FlutterFlow Fase 2a: App State + API Calls (Login, Auth Me, Clientes) no projeto well-coletas-by2777; guia `docs/FLUTTERFLOW.md` |
 | 2026-09-14 | SINIR Fase B: `SinirManifestoService`, envio em `ColetaService::finalizar()`, reenvio no painel, `clientes.sinir_cod_unidade` |
+| 2026-09-14 | Branding Well Coletas: paleta Light/Dark em `panel-theme.css`, tema padrão `prefers-color-scheme`, doc `docs/BRANDING.md` |

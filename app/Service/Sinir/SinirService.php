@@ -100,6 +100,8 @@ class SinirService
                 'base_url' => SinirConfig::baseUrl(),
                 'unidade' => SinirConfig::unidade(),
                 'http_status' => $result['raw_status'],
+                'curl_errno' => $result['curl_errno'] ?? null,
+                'primary_ip' => $result['primary_ip'] ?? null,
                 'expires_in' => $result['expires_in'],
                 'token_preview' => $result['token']
                     ? substr($result['token'], 0, 8).'…'
