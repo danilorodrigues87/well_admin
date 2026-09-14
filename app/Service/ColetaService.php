@@ -3,7 +3,9 @@
 namespace App\Service;
 
 use App\Common\ColetaDefaults;
+use App\Common\SinirConfig;
 use App\Model\Db\Database;
+use App\Service\Sinir\SinirManifestoService;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
@@ -186,14 +188,29 @@ class ColetaService
                 [$dias, 'normal', $coleta->cliente_id]
             );
 
+            if (SinirConfig::isEnabled()) {
+                $db->execute(
+                    'UPDATE coletas SET sinir_status = ? WHERE id = ?',
+                    ['pendente', $coletaId]
+                );
+            }
+
             $db->commit();
+
+            if (SinirConfig::isEnabled()) {
+                try {
+                    (new SinirManifestoService())->enviarColeta($coletaId);
+                } catch (\Throwable) {
+                    // Falha SINIR não reverte a finalização local.
+                }
+            }
+
             return $numeroMtr;
         } catch (\Throwable $e) {
             $db->rollBack();
             throw $e;
         }
     }
-
 
     public static function cancelar(int $coletaId): void
     {

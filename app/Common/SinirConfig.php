@@ -23,6 +23,14 @@ class SinirConfig
         return (int)Environment::get('SINIR_UNIDADE', 0);
     }
 
+    /** Unidade destinador (default: mesma da Well). */
+    public static function destinadorUnidade(): int
+    {
+        $dest = (int)Environment::get('SINIR_UNIDADE_DESTINADOR', 0);
+
+        return $dest > 0 ? $dest : self::unidade();
+    }
+
     public static function cnpj(): string
     {
         return preg_replace('/\D/', '', (string)Environment::get('SINIR_CNPJ', ''));

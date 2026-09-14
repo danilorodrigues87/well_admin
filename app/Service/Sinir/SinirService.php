@@ -63,6 +63,14 @@ class SinirService
     }
 
     /**
+     * @return array{ok:bool,skipped?:bool,message:string,details?:array<string,mixed>}
+     */
+    public static function enviarColeta(int $coletaId, bool $force = false): array
+    {
+        return (new SinirManifestoService())->enviarColeta($coletaId, $force);
+    }
+
+    /**
      * Smoke test: valida POST /token (Fase A).
      *
      * @return array{ok:bool,message:string,details:array<string,mixed>}

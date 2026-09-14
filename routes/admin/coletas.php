@@ -67,6 +67,7 @@ foreach ($coletaCrud as $route) {
             $content = match ($acao) {
                 'listar' => $ctrl::list($request),
                 'get' => $ctrl::get($request),
+                'sinir_reenviar' => $ctrl === Coletas::class ? Coletas::sinirReenviar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 default => json_encode(['success' => false, 'message' => 'Ação inválida']),
             };

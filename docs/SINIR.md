@@ -82,8 +82,11 @@ SINIR_ENV=production
 SINIR_UNIDADE=135551
 SINIR_CNPJ=18675233000150
 SINIR_INTEGRATION_TOKEN=   # gerado em Configurações > Gerar Token API WS
-SINIR_ENABLED=false
+SINIR_ENABLED=true
+SINIR_UNIDADE_DESTINADOR=
 ```
+
+`SINIR_UNIDADE_DESTINADOR` é opcional (default = `SINIR_UNIDADE`).
 
 ---
 
@@ -117,10 +120,35 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 
 ---
 
-## Próximos passos Well Eco
+## Implementação Well Eco (Fase B)
 
-1. [ ] Gerar **Token API WS** no portal MTR (admin logado via Gov.br)
-2. [ ] Validar `POST /token` com token de integração
-3. [ ] Implementar `SinirAuthService` + `SinirGateway` no projeto
-4. [ ] Mapear `tipos_residuos.cod_ibama` → códigos SINIR (`traCodigo`, `tieCodigo`, etc.)
-5. [ ] Hook em `ColetaService::finalizar()` para `salvarManifestoLote`
+| Peça | Arquivo |
+|------|---------|
+| Auth token | `app/Service/Sinir/SinirAuthService.php` |
+| HTTP API | `app/Service/Sinir/SinirGateway.php` |
+| Payload MTR | `app/Service/Sinir/SinirPayloadBuilder.php` |
+| Envio + auditoria | `app/Service/Sinir/SinirManifestoService.php` |
+| Hook finalizar | `ColetaService::finalizar()` → `salvarManifestoLote` |
+| Reenvio manual | Coletas → detalhe → **Reenviar SINIR** |
+
+### Pré-requisitos antes do envio
+
+1. `.env`: `SINIR_ENABLED=true`, token, unidade e CNPJ configurados
+2. **Cliente (gerador):** campo **Cód. unidade SINIR** (`clientes.sinir_cod_unidade`) — código da unidade no portal MTR
+3. **Tipo de resíduo:** códigos IBAMA + mapeamento SINIR (`codigoTecnologia`, `codigoTipoEstado`, `codigoAcondicionamento`, `codigoClasse`, `codigoUnidade`)
+4. Migration `010_clientes_sinir_unidade.sql` aplicada
+
+### Smoke test (CLI)
+
+```bash
+php database/scripts/sinir_smoke_token.php
+```
+
+### Fluxo ao finalizar coleta
+
+1. Coleta recebe MTR local e status `finalizada`
+2. Se `SINIR_ENABLED=true`, status SINIR → `pendente` e dispara envio
+3. Sucesso → `sinir_status=enviado`, `sinir_man_numero`, `sinir_codigo_barras`
+4. Falha → `sinir_status=erro`, histórico em `sinir_envios` (reenvio pelo painel)
+
+> Falha no SINIR **não cancela** a finalização local da coleta.

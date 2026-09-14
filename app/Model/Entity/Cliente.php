@@ -11,6 +11,7 @@ class Cliente
     public string $nome_fantasia = '';
     public string $razao_social = '';
     public string $cnpj = '';
+    public ?int $sinir_cod_unidade = null;
     public string $email = '';
     public string $telefone = '';
     public ?int $plano_id = null;
@@ -98,6 +99,9 @@ class Cliente
         $c->nome_fantasia = (string)$row['nome_fantasia'];
         $c->razao_social = (string)$row['razao_social'];
         $c->cnpj = (string)($row['cnpj'] ?? '');
+        $c->sinir_cod_unidade = isset($row['sinir_cod_unidade']) && $row['sinir_cod_unidade'] !== null
+            ? (int)$row['sinir_cod_unidade']
+            : null;
         $c->email = (string)($row['email'] ?? '');
         $c->telefone = (string)($row['telefone'] ?? '');
         $c->plano_id = isset($row['plano_id']) ? (int)$row['plano_id'] : null;

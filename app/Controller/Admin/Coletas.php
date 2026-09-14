@@ -10,6 +10,8 @@ use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Service\ColetaService;
 use App\Service\Sinir\SinirService;
+use App\Model\Entity\SinirEnvio as EntitySinirEnvio;
+use App\Common\SinirConfig;
 use App\Utils\View;
 
 class Coletas extends Page
@@ -121,8 +123,15 @@ class Coletas extends Page
             ? '<a href="'.$mtrPrintUrl.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir MTR</a>'
             : '';
 
+        $sinirHtml = self::renderSinirDetalhe($c);
+        $sinirReenviarBtn = ($c->status === 'finalizada' && SinirConfig::isEnabled())
+            ? '<button type="button" class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')"><i class="fas fa-sync me-1"></i> Reenviar SINIR</button>'
+            : '';
+
         $html = View::render('admin/modules/coletas/detalhe', [
             'mtr_print_btn' => $mtrPrintBtn,
+            'sinir_reenviar_btn' => $sinirReenviarBtn,
+            'sinir_html' => $sinirHtml,
             'numero_mtr' => $c->numero_mtr ? '#'.$c->numero_mtr : 'Rascunho',
             'cliente' => CrudHelper::e($c->cliente_nome),
             'coletor' => CrudHelper::e($c->coletor_nome),
@@ -141,6 +150,80 @@ class Coletas extends Page
         ]);
 
         return CrudHelper::jsonOk(['html' => $html]);
+    }
+
+    public static function sinirReenviar($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        if (!SinirConfig::isEnabled()) {
+            return CrudHelper::jsonError('Integração SINIR desabilitada no .env.');
+        }
+
+        $result = SinirService::enviarColeta($id, true);
+        if (!empty($result['skipped'])) {
+            return CrudHelper::jsonOk(['message' => $result['message']]);
+        }
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk([
+            'message' => $result['message'],
+            'details' => $result['details'] ?? [],
+        ]);
+    }
+
+    private static function renderSinirDetalhe(EntityColeta $c): string
+    {
+        if ($c->status !== 'finalizada') {
+            return '<p class="text-muted mb-0">Disponível após finalizar a coleta.</p>';
+        }
+
+        if (!SinirConfig::isEnabled()) {
+            return '<p class="text-muted mb-0">Integração SINIR desabilitada (<code>SINIR_ENABLED=false</code>).</p>';
+        }
+
+        $badge = SinirService::renderStatusBadge($c->sinir_status, $c->status);
+        $man = $c->sinir_man_numero ? CrudHelper::e($c->sinir_man_numero) : '—';
+        $bar = $c->sinir_codigo_barras ? CrudHelper::e($c->sinir_codigo_barras) : '—';
+        $enviado = $c->sinir_enviado_em
+            ? date('d/m/Y H:i', strtotime($c->sinir_enviado_em))
+            : '—';
+
+        $historico = '';
+        foreach (EntitySinirEnvio::listByColeta($c->id, 3) as $envio) {
+            $histBadge = match ($envio->status) {
+                'enviado' => 'success',
+                'erro' => 'danger',
+                default => 'secondary',
+            };
+            $historico .= '<li><span class="badge bg-'.$histBadge.'">T'.$envio->tentativa.' · '.$envio->status.'</span>';
+            if ($envio->mensagem_erro) {
+                $historico .= ' — '.CrudHelper::e($envio->mensagem_erro);
+            }
+            $historico .= '</li>';
+        }
+
+        $histHtml = $historico !== ''
+            ? '<ul class="small mb-0 ps-3">'.$historico.'</ul>'
+            : '<p class="text-muted small mb-0">Nenhuma tentativa registrada.</p>';
+
+        return '
+            <p class="mb-1"><strong>Status:</strong> '.$badge.'</p>
+            <p class="mb-1"><strong>MTR SINIR:</strong> '.$man.'</p>
+            <p class="mb-1"><strong>Cód. barras:</strong> '.$bar.'</p>
+            <p class="mb-2"><strong>Enviado em:</strong> '.$enviado.'</p>
+            <p class="mb-1"><strong>Últimas tentativas:</strong></p>
+            '.$histHtml;
     }
 
     public static function mtrPrint($request, int $id): string

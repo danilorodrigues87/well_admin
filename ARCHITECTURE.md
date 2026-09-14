@@ -106,21 +106,24 @@ docs/                  Documentação complementar
 | `006_coletas.sql` | Coletas/MTR, snapshot, itens, evidências |
 | `007_coletas_legacy_prep.sql` | Colunas ETL legado em coletas |
 | `008_sinir.sql` | Colunas SINIR em coletas/tipos_residuos + tabela `sinir_envios` |
+| `010_clientes_sinir_unidade.sql` | `clientes.sinir_cod_unidade` (gerador no portal MTR) |
 
 Novas migrations: prefixo numérico crescente. Atualizar `docs/DATABASE.md`.
 
-### Integração SINIR (Fase A)
+### Integração SINIR
 
 ```
 app/Common/SinirConfig.php          — leitura .env SINIR_*
 app/Service/Sinir/
   SinirAuthService.php              — POST /token (Token API WS → acesso)
   SinirGateway.php                  — HTTP cURL para admin.sinir.gov.br
-  SinirPayloadBuilder.php           — monta salvarManifestoLote (Fase B)
-  SinirService.php                  — badge listagem + auditoria catálogo
+  SinirPayloadBuilder.php           — manifestoJSONDtos → salvarManifestoLote
+  SinirManifestoService.php         — envio, parse resposta, sinir_envios
+  SinirService.php                  — badge, smoke test, reenvio
+app/Model/Entity/SinirEnvio.php     — histórico de tentativas
 ```
 
-Envio real em `ColetaService::finalizar()` — **Fase B** (após token do cliente). Doc: `docs/SINIR.md`.
+`ColetaService::finalizar()` dispara envio SINIR quando `SINIR_ENABLED=true`. Doc: `docs/SINIR.md`.
 
 ---
 
@@ -157,3 +160,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-11 | Planos: tabela `plano_itens` (saldo incluso + valor excedente/kg), import legado, `PlanoCobrancaService` |
 | 2026-09-12 | API REST v1 app coletor: JWT, `routes/api.php`, controllers `App\Controller\Api\*`, `ApiAuthService`, `ColetaApiPresenter`, `docs/API.md` |
 | 2026-09-12 | FlutterFlow Fase 2a: App State + API Calls (Login, Auth Me, Clientes) no projeto well-coletas-by2777; guia `docs/FLUTTERFLOW.md` |
+| 2026-09-14 | SINIR Fase B: `SinirManifestoService`, envio em `ColetaService::finalizar()`, reenvio no painel, `clientes.sinir_cod_unidade` |

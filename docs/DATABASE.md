@@ -83,15 +83,17 @@ Legado para ETL: banco `well_antigo` (dump `wellec99_app.sql`).
 | `coletas.sinir_codigo_barras` | Código de barras do manifesto SINIR |
 | `coletas.sinir_status` | `pendente` / `enviado` / `erro` (listagem) |
 | `coletas.sinir_enviado_em` | Timestamp do último envio bem-sucedido |
-| `tipos_residuos.tra_codigo` … `uni_codigo` | Mapeamento códigos API (`traCodigo`, `tieCodigo`, etc.) |
+| `tipos_residuos.tra_codigo` … `uni_codigo` | Mapeamento códigos API (`codigoTecnologia`, `codigoTipoEstado`, etc.) |
+| `clientes.sinir_cod_unidade` | Código unidade do gerador no portal MTR (`010_clientes_sinir_unidade.sql`) |
 | `sinir_envios` | Histórico de tentativas (payload JSON, erro, tentativa) |
 
 ```bash
 mysql -u root well_admin < database/migrations/008_sinir.sql
-php database/scripts/_test_sinir_token.php
+mysql -u root well_admin < database/migrations/010_clientes_sinir_unidade.sql
+php database/scripts/sinir_smoke_token.php
 ```
 
-Smoke test exige `SINIR_INTEGRATION_TOKEN` no `.env` (gerado no portal MTR). Apagar `_test_sinir_token.php` após validar.
+Smoke test exige `SINIR_INTEGRATION_TOKEN` no `.env` (gerado no portal MTR).
 
 ## Planos — itens de resíduo (`009_plano_itens.sql`)
 
