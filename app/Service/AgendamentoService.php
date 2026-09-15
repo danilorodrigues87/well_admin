@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
+use App\Service\PlanoService;
 
 class AgendamentoService
 {
@@ -40,14 +41,15 @@ class AgendamentoService
         $items = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $c = EntityCliente::fromRow($row);
+            $planoId = (int)($c->plano_id ?? 0);
             $items[] = [
                 'id' => (int)$c->id,
                 'nome_fantasia' => (string)$c->nome_fantasia,
                 'cidade' => (string)($c->cidade ?? ''),
                 'proxima_coleta' => $c->proxima_coleta,
                 'prioridade' => (string)$c->prioridade,
-                'saldo_residuo' => (float)$c->saldo_residuo,
                 'plano_nome' => (string)($row['plano_nome'] ?? ''),
+                'saldo_plano' => $planoId > 0 ? PlanoService::totalSaldoIncluso($planoId) : 0.0,
             ];
         }
 

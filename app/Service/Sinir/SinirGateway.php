@@ -54,6 +54,11 @@ class SinirGateway
             $opts[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
         }
 
+        if (!SinirConfig::sslVerify()) {
+            $opts[CURLOPT_SSL_VERIFYPEER] = false;
+            $opts[CURLOPT_SSL_VERIFYHOST] = 0;
+        }
+
         if ($method === 'POST') {
             $opts[CURLOPT_POSTFIELDS] = json_encode($body, JSON_UNESCAPED_UNICODE);
         }

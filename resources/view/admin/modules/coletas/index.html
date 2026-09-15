@@ -6,11 +6,21 @@
         <a href="{{URL}}/painel/coleta/nova" class="btn btn-primary btn-sm flex-shrink-0"><i class="fas fa-plus"></i> Nova coleta</a>
     </div>
     <div class="card-body">
-        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2 align-items-center">
+        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2 align-items-end">
             <div class="col-md-4 col-lg-3">
+                <label class="form-label small mb-0">Busca</label>
                 <input type="text" id="crud-busca" name="busca" class="form-control" placeholder="MTR, cliente, CNPJ..." />
             </div>
+            <div class="col-md-2 col-lg-2">
+                <label class="form-label small mb-0">De</label>
+                <input type="date" name="data_inicio" class="form-control crud-filter" />
+            </div>
+            <div class="col-md-2 col-lg-2">
+                <label class="form-label small mb-0">Até</label>
+                <input type="date" name="data_fim" class="form-control crud-filter" />
+            </div>
             <div class="col-md-3 col-lg-2">
+                <label class="form-label small mb-0">Status</label>
                 <select name="status" class="form-select crud-filter">
                     <option value="">Status: todos</option>
                     <option value="finalizada">Finalizadas</option>
@@ -18,6 +28,7 @@
                 </select>
             </div>
             <div class="col-md-3 col-lg-2">
+                <label class="form-label small mb-0">Recebimento</label>
                 <select name="situacao_recebimento" class="form-select crud-filter">
                     <option value="">Recebimento: todos</option>
                     <option value="recebido">Recebido</option>

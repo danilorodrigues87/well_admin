@@ -4,28 +4,18 @@
  * Importa plano_itens a partir de well_antigo.planos (saldo_residuo + valor_exced).
  * Uso: php database/scripts/import_plano_itens_legacy.php
  */
-
 declare(strict_types=1);
 
 require dirname(__DIR__, 2).'/vendor/autoload.php';
 require dirname(__DIR__, 2).'/includes/app.php';
 
+use App\Common\Helpers\TipoResiduoMatcher;
 use App\Model\Db\Database;
+use PDO;
 use App\Model\Entity\PlanoItem;
 use App\Service\LegacyPlanoParser;
-use App\Service\PlanoService;
 
 $db = new Database();
-
-$col = $db->execute(
-    "SELECT COUNT(*) AS c FROM information_schema.TABLES
-     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'plano_itens'"
-)->fetch(PDO::FETCH_ASSOC);
-
-if ((int)($col['c'] ?? 0) === 0) {
-    fwrite(STDERR, "Erro: aplique database/migrations/009_plano_itens.sql antes.\n");
-    exit(1);
-}
 
 $rows = $db->execute(
     'SELECT p.ID AS id, p.saldo_residuo, p.valor_exced
@@ -35,11 +25,25 @@ $rows = $db->execute(
 
 $totalItens = 0;
 foreach ($rows as $row) {
-    $itens = LegacyPlanoParser::parseParSaldoExced(
+    $parsed = LegacyPlanoParser::parseParSaldoExced(
         (string)($row['saldo_residuo'] ?? ''),
         (string)($row['valor_exced'] ?? '')
     );
-    $itens = PlanoService::enrichItensWithTipoResiduo($itens);
+    $itens = [];
+    foreach ($parsed as $item) {
+        $tipoId = TipoResiduoMatcher::resolve($item['cod_ibama'] ?? null, $item['nome'] ?? '');
+        if ($tipoId === null) {
+            echo '  [skip] plano #'.$row['id'].' — sem tipo: '.($item['nome'] ?? '')."\n";
+            continue;
+        }
+        $itens[] = [
+            'tipo_residuo_id' => $tipoId,
+            'saldo_incluso' => $item['saldo_incluso'],
+            'unidade' => $item['unidade'],
+            'valor_excedente' => $item['valor_excedente'],
+            'saldo_compartilhado' => 0,
+        ];
+    }
     PlanoItem::replaceForPlano((int)$row['id'], $itens);
     $totalItens += count($itens);
     echo 'Plano #'.$row['id'].': '.count($itens)." itens\n";

@@ -57,6 +57,18 @@ sequenceDiagram
    ```
 5. Usar o token de acesso retornado nas demais rotas (`salvarManifestoLote`, etc.).
 
+Resposta atual de `POST /token` (set/2026):
+
+```json
+{
+  "mensagem": "Autenticado com sucesso",
+  "objetoResposta": "Bearer {token_acesso}",
+  "erro": false
+}
+```
+
+O `SinirAuthService` extrai o token de `objetoResposta` (com ou sem prefixo `Bearer`).
+
 Erro se faltar token de integração:
 ```json
 {"mensagem":"Token de integração não informado no header Authorization (Bearer).","erro":true}
@@ -97,8 +109,12 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Ação | Método | Rota |
 |------|--------|------|
 | Obter token acesso | POST | `/token` |
-| Listar resíduos | POST | `/retornaListaResiduo` |
+| Listar resíduos | GET | `/retornaListaResiduo` |
+| Listar classes | GET | `/retornaListaClasse` |
+| Listar unidades | GET | `/retornaListaUnidade` |
 | Listar tratamentos | GET | `/retornaListaTratamento` |
+| Listar estados físicos | GET | `/retornaListaEstadoFisico` |
+| Listar acondicionamentos | GET | `/retornaListaAcondicionamento` |
 | Emitir MTR | POST | `/salvarManifestoLote` |
 | PDF MTR | POST | `/buscaPdfManifestoPorCodigoBarras/{cod}` |
 | Cancelar | POST | `/cancelarManifesto` |
@@ -143,7 +159,31 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 ```bash
 php database/scripts/sinir_diagnose_rede.php   # 1º — testa se o servidor alcança a API
 php database/scripts/sinir_smoke_token.php       # 2º — testa token de integração
+php database/scripts/sinir_sync_residuos.php --dry-run --csv=storage/sinir_sync.csv
+php database/scripts/sinir_sync_residuos.php     # aplica códigos sugeridos
 ```
+
+### Sync códigos em tipos_residuos
+
+Script `sinir_sync_residuos.php` consulta as listas oficiais e preenche `cod_ibama` + `tra/tie/tia/cla/uni_codigo` em `tipos_residuos`.
+
+| Flag | Efeito |
+|------|--------|
+| `--dry-run` | Simula sem gravar no banco |
+| `--force` | Sobrescreve tipos que já têm códigos |
+| `--all` | Inclui tipos já completos (default: só vazios) |
+| `--csv=caminho` | Exporta sugestões para revisão |
+| `--dump-lists=caminho` | Salva JSON bruto das listas SINIR |
+
+**Defaults operacionais Well** (quando a API não amarra resíduo → tecnologia/estado/etc.):
+
+- Unidade: Quilograma (kg)
+- Estado: Sólido (líquido se nome contém óleo/água)
+- Acondicionamento: inferido do nome (big bag, tambor, granel…)
+- Classe: Classe II A para recicláveis; Classe I para perigosos / `(*)`
+- Tecnologia: Reciclagem (RSS/saúde → incineração quando existir na lista)
+
+Revisar o CSV antes de aplicar em produção. Em XAMPP local, se curl falhar com certificado SSL: `SINIR_SSL_VERIFY=false` no `.env`.
 
 ### Timeout / `http_status: 0`
 

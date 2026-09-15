@@ -72,7 +72,7 @@ class SinirAuthService
         }
 
         $body = $response['body'] ?? [];
-        $accessToken = (string)($body['token'] ?? $body['access_token'] ?? $body['accessToken'] ?? '');
+        $accessToken = self::extractAccessToken($body);
         if ($accessToken === '') {
             return [
                 'ok' => false,
@@ -102,5 +102,46 @@ class SinirAuthService
     public static function clearCache(): void
     {
         self::$cachedToken = null;
+    }
+
+    /** @param array<string,mixed> $body */
+    private static function extractAccessToken(array $body): string
+    {
+        $candidates = [
+            $body['token'] ?? null,
+            $body['access_token'] ?? null,
+            $body['accessToken'] ?? null,
+        ];
+
+        $obj = $body['objetoResposta'] ?? null;
+        if (is_string($obj)) {
+            $candidates[] = $obj;
+        } elseif (is_array($obj)) {
+            $candidates[] = $obj['token'] ?? null;
+            $candidates[] = $obj['access_token'] ?? null;
+            $candidates[] = $obj['accessToken'] ?? null;
+        }
+
+        foreach ($candidates as $candidate) {
+            $token = self::normalizeBearerToken((string)$candidate);
+            if ($token !== '') {
+                return $token;
+            }
+        }
+
+        return '';
+    }
+
+    private static function normalizeBearerToken(string $raw): string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return '';
+        }
+        if (stripos($raw, 'Bearer ') === 0) {
+            $raw = trim(substr($raw, 7));
+        }
+
+        return $raw;
     }
 }

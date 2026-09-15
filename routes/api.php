@@ -8,6 +8,7 @@ use App\Controller\Api\Clientes;
 use App\Controller\Api\Coletas;
 use App\Controller\Api\Dashboard;
 use App\Controller\Api\Perfil;
+use App\Controller\Api\Webhooks\InterCobranca as InterCobrancaWebhook;
 use App\Http\Response;
 
 $apiAuth = ['api-cors', 'required-api-auth'];
@@ -32,6 +33,13 @@ $obRouter->post('/api/v1/auth/login', [
     'middlewares' => $apiPublic,
     function ($request) {
         return Auth::login($request);
+    },
+]);
+
+$obRouter->post('/api/v1/webhooks/inter/cobranca', [
+    'middlewares' => $apiPublic,
+    function ($request) {
+        return InterCobrancaWebhook::receber($request);
     },
 ]);
 

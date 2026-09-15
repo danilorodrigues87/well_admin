@@ -2,10 +2,12 @@
 
 namespace App\Service;
 
+use App\Common\Helpers\IbamaCodigoHelper;
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Plano as EntityPlano;
 use App\Model\Entity\PlanoItem as EntityPlanoItem;
+use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
 use PDO;
 
 /**
@@ -18,7 +20,7 @@ class PlanoCobrancaService
      *   valor_fixo:float,
      *   valor_residuos:float,
      *   valor_total:float,
-     *   itens: list<array{nome:string,coletado:float,saldo:float,excedente:float,valor:float,unidade:string}>
+     *   itens: list<array{nome:string,coletado:float,saldo:float,excedente:float,valor:float,unidade:string,saldo_info?:string}>
      * }
      */
     public static function calcularMes(int $clienteId, string $competenciaYm): array
@@ -37,26 +39,110 @@ class PlanoCobrancaService
         $inicio = sprintf('%04d-%02d-01', $ano, $mes);
         $fim = date('Y-m-t', strtotime($inicio));
 
-        $coletado = self::coletasPorResiduo($clienteId, $inicio, $fim);
-        $planoItens = EntityPlanoItem::getByPlanoId($plano->id);
+        $coletadoMap = self::coletasPorTipoMap($clienteId, $inicio, $fim);
+        $legacyByCod = self::coletasLegacyPorCodMap($clienteId, $inicio, $fim);
 
-        $valorResiduos = 0.0;
-        $detalhes = [];
+        $planoItens = EntityPlanoItem::getByPlanoId($plano->id);
+        usort($planoItens, fn (EntityPlanoItem $a, EntityPlanoItem $b) => $a->ordem <=> $b->ordem);
+
+        /** @var list<EntityPlanoItem> $creditItems */
+        $creditItems = [];
+        /** @var list<EntityPlanoItem> $individual */
+        $individual = [];
+        /** @var array<string,list<EntityPlanoItem>> $sharedGroups */
+        $sharedGroups = [];
 
         foreach ($planoItens as $item) {
-            $key = self::matchKey($item);
-            $qtd = (float)($coletado[$key] ?? 0);
-            $excedente = max(0, $qtd - $item->saldo_incluso);
+            if ($item->gera_credito) {
+                $creditItems[] = $item;
+            } elseif ($item->saldo_compartilhado) {
+                $key = (string)round($item->valor_excedente, 2);
+                $sharedGroups[$key][] = $item;
+            } else {
+                $individual[] = $item;
+            }
+        }
+
+        $valorResiduos = 0.0;
+        /** @var list<array<string,mixed>> $detalhesOrder */
+        $detalhesOrder = [];
+
+        foreach ($sharedGroups as $items) {
+            $poolSaldo = 0.0;
+            /** @var array<int,float> $coletadoPorItem */
+            $coletadoPorItem = [];
+            $totalColetado = 0.0;
+
+            foreach ($items as $item) {
+                $poolSaldo += $item->saldo_incluso;
+                $qtd = self::takeColetado($item->tipo_residuo_id, $coletadoMap, $legacyByCod);
+                $coletadoPorItem[$item->id] = $qtd;
+                $totalColetado += $qtd;
+            }
+
+            $excedenteGrupo = max(0.0, $totalColetado - $poolSaldo);
+            $valorGrupo = round($excedenteGrupo * $items[0]->valor_excedente, 2);
+            $valorResiduos += $valorGrupo;
+
+            $poolLabel = count($items) > 1
+                ? number_format($poolSaldo, 2, ',', '.').' (saldo compartilhado)'
+                : null;
+
+            $first = true;
+            foreach ($items as $item) {
+                $detalhesOrder[] = [
+                    'ordem' => $item->ordem,
+                    'nome' => $item->tipo_nome,
+                    'coletado' => $coletadoPorItem[$item->id] ?? 0.0,
+                    'saldo' => $item->saldo_incluso,
+                    'saldo_info' => $poolLabel,
+                    'excedente' => $first ? $excedenteGrupo : 0.0,
+                    'valor' => $first ? $valorGrupo : 0.0,
+                    'unidade' => $item->unidade,
+                ];
+                $first = false;
+            }
+        }
+
+        foreach ($creditItems as $item) {
+            $qtd = self::takeColetado($item->tipo_residuo_id, $coletadoMap, $legacyByCod);
+            $tarifa = abs($item->valor_excedente);
+            $valor = round(-1 * $qtd * $tarifa, 2);
+            $valorResiduos += $valor;
+            $detalhesOrder[] = [
+                'ordem' => $item->ordem,
+                'nome' => $item->tipo_nome,
+                'coletado' => $qtd,
+                'saldo' => 0.0,
+                'saldo_info' => 'Crédito — desconto na mensalidade',
+                'excedente' => $qtd,
+                'valor' => $valor,
+                'unidade' => $item->unidade,
+                'gera_credito' => true,
+            ];
+        }
+
+        foreach ($individual as $item) {
+            $qtd = self::takeColetado($item->tipo_residuo_id, $coletadoMap, $legacyByCod);
+            $excedente = max(0.0, $qtd - $item->saldo_incluso);
             $valor = round($excedente * $item->valor_excedente, 2);
             $valorResiduos += $valor;
-            $detalhes[] = [
-                'nome' => $item->nome,
+            $detalhesOrder[] = [
+                'ordem' => $item->ordem,
+                'nome' => $item->tipo_nome,
                 'coletado' => $qtd,
                 'saldo' => $item->saldo_incluso,
                 'excedente' => $excedente,
                 'valor' => $valor,
                 'unidade' => $item->unidade,
             ];
+        }
+
+        usort($detalhesOrder, fn ($a, $b) => ($a['ordem'] ?? 0) <=> ($b['ordem'] ?? 0));
+        $detalhes = [];
+        foreach ($detalhesOrder as $row) {
+            unset($row['ordem']);
+            $detalhes[] = $row;
         }
 
         $valorFixo = (float)$plano->valor_mensal;
@@ -69,44 +155,82 @@ class PlanoCobrancaService
         ];
     }
 
-    /** @return array<string,float> */
-    private static function coletasPorResiduo(int $clienteId, string $inicio, string $fim): array
+    /** @return array<int,float> tipo_residuo_id => total */
+    private static function coletasPorTipoMap(int $clienteId, string $inicio, string $fim): array
     {
         $db = new Database();
         $stmt = $db->execute(
-            "SELECT ci.nome, ci.cod_ibama, ci.unidade, SUM(ci.quantidade) AS total
+            'SELECT ci.tipo_residuo_id, SUM(ci.quantidade) AS total
              FROM coleta_itens ci
              INNER JOIN coletas c ON c.id = ci.coleta_id
              WHERE c.cliente_id = ?
-               AND c.status = 'finalizada'
+               AND c.status = \'finalizada\'
                AND c.data_coleta BETWEEN ? AND ?
-             GROUP BY ci.nome, ci.cod_ibama, ci.unidade",
+               AND ci.tipo_residuo_id IS NOT NULL
+             GROUP BY ci.tipo_residuo_id',
             [$clienteId, $inicio, $fim]
         );
 
         $map = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $key = self::rowKey($row);
-            $map[$key] = ($map[$key] ?? 0) + (float)$row['total'];
+            $map[(int)$row['tipo_residuo_id']] = (float)$row['total'];
         }
+
         return $map;
     }
 
-    private static function matchKey(EntityPlanoItem $item): string
+    /** @return array<string,float> cod_ibama normalizado => total (coletas sem tipo_residuo_id) */
+    private static function coletasLegacyPorCodMap(int $clienteId, string $inicio, string $fim): array
     {
-        if ($item->cod_ibama) {
-            return 'cod:'.trim($item->cod_ibama);
+        $db = new Database();
+        $stmt = $db->execute(
+            'SELECT ci.cod_ibama, SUM(ci.quantidade) AS total
+             FROM coleta_itens ci
+             INNER JOIN coletas c ON c.id = ci.coleta_id
+             WHERE c.cliente_id = ?
+               AND c.status = \'finalizada\'
+               AND c.data_coleta BETWEEN ? AND ?
+               AND ci.tipo_residuo_id IS NULL
+               AND ci.cod_ibama IS NOT NULL AND ci.cod_ibama != \'\'
+             GROUP BY ci.cod_ibama',
+            [$clienteId, $inicio, $fim]
+        );
+
+        $map = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $cod = IbamaCodigoHelper::normalize((string)$row['cod_ibama']);
+            if ($cod === '') {
+                continue;
+            }
+            $map[$cod] = ($map[$cod] ?? 0) + (float)$row['total'];
         }
-        return 'nome:'.mb_strtolower(trim($item->nome));
+
+        return $map;
     }
 
-    /** @param array<string,mixed> $row */
-    private static function rowKey(array $row): string
+    /** @param array<int,float> $coletadoMap @param array<string,float> $legacyByCod */
+    private static function takeColetado(int $tipoResiduoId, array &$coletadoMap, array &$legacyByCod): float
     {
-        $cod = trim((string)($row['cod_ibama'] ?? ''));
-        if ($cod !== '') {
-            return 'cod:'.$cod;
+        if (isset($coletadoMap[$tipoResiduoId])) {
+            $q = $coletadoMap[$tipoResiduoId];
+            unset($coletadoMap[$tipoResiduoId]);
+
+            return $q;
         }
-        return 'nome:'.mb_strtolower(trim((string)$row['nome']));
+
+        $tipo = EntityTipoResiduo::getById($tipoResiduoId);
+        if (!$tipo) {
+            return 0.0;
+        }
+
+        $cod = IbamaCodigoHelper::normalize($tipo->cod_ibama);
+        if ($cod !== '' && isset($legacyByCod[$cod])) {
+            $q = $legacyByCod[$cod];
+            unset($legacyByCod[$cod]);
+
+            return $q;
+        }
+
+        return 0.0;
     }
 }

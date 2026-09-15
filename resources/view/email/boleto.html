@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Boleto Well Eco</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <p>Olá, <strong>{{cliente_nome}}</strong>,</p>
+    <p>Segue o boleto referente à competência <strong>{{competencia}}</strong>.</p>
+    <ul>
+        <li><strong>Valor:</strong> R$ {{valor}}</li>
+        <li><strong>Vencimento:</strong> {{vencimento}}</li>
+    </ul>
+    {{bloco_linha}}
+    {{bloco_pix}}
+    <p>O PDF do boleto está em anexo quando disponível.</p>
+    <p>Atenciosamente,<br>Well Eco</p>
+</body>
+</html>

@@ -8,7 +8,7 @@
             <div class="col-md-3"><select name="rota_id" class="form-select crud-filter">{{rotas_options}}</select></div>
             <div class="col-md-2"><select name="prioridade" class="form-select crud-filter"><option value="">Prioridade: todas</option><option value="normal">Normal</option><option value="urgente">Urgente</option></select></div>
         </div>
-        <table class="table table-striped"><thead><tr><th>Cliente</th><th>Cidade</th><th>Próxima coleta</th><th>Saldo resíduo</th><th>Ações</th></tr></thead>
+        <table class="table table-striped"><thead><tr><th>Cliente</th><th>Plano</th><th>Cidade</th><th>Próxima coleta</th><th>Saldo plano</th><th>Ações</th></tr></thead>
         <tbody id="crud-tbody"></tbody></table>
         <div id="crud-pagination"></div>
     </div>
@@ -17,9 +17,9 @@
     <div class="modal-header"><h5 class="modal-title">Agendar coleta</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body"><form id="crud-form">{{csrf_field}}<input type="hidden" name="id" id="crud-id"/>
         <p id="crud-nome-label" class="fw-bold"></p>
+        <p id="crud-plano-info" class="small text-muted mb-3"></p>
         <div class="mb-2"><label>Próxima coleta</label><input type="date" class="form-control" name="proxima_coleta" id="crud-proxima_coleta"/></div>
         <div class="mb-2"><label>Prioridade</label><select class="form-select" name="prioridade" id="crud-prioridade"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></div>
-        <div class="mb-2"><label>Saldo resíduo (kg)</label><input type="number" step="0.01" class="form-control" name="saldo_residuo" id="crud-saldo_residuo"/></div>
     </form></div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
 </div></div></div>

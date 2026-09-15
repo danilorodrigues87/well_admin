@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Common\ColetaDefaults;
+use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\CsrfHelper;
 use App\Model\Db\Pagination;
@@ -53,10 +54,16 @@ class ColetaNova extends Page
             $veiculosOptions .= '<option value="'.$v->id.'"'.$sel.'>'.CrudHelper::e($v->marca.' '.$v->modelo.' — '.$v->placa).'</option>';
         }
 
-        $tiposOptions = '<option value="">— Selecione —</option>';
-        foreach (EntityTipoResiduo::list('t.ativo = 1', [], '999') as $t) {
-            $tiposOptions .= '<option value="'.$t->id.'">'.CrudHelper::e($t->nome).' ('.CrudHelper::e($t->classe_nome).' / '.$t->grupo_codigo.')</option>';
+        $tiposOptions = self::tiposResiduoOptionsHtml();
+        $motoristaColetorId = ColetorSelectHelper::resolveSelectedId(
+            $snapshot->motorista_nome ?? '',
+            (int)$coleta->coletor_id
+        );
+        $motoristaLocked = ColetorSelectHelper::isColetorSession($usuario);
+        if ($motoristaLocked) {
+            $motoristaColetorId = (int)($usuario['id'] ?? 0);
         }
+        $motoristaOptions = ColetorSelectHelper::optionsHtml($motoristaColetorId, !$motoristaLocked);
 
         $tratamentosOptions = '';
         foreach (ColetaDefaults::tratamentos() as $tr) {
@@ -73,7 +80,12 @@ class ColetaNova extends Page
             'gerador_endereco' => CrudHelper::e($snapshot->gerador_endereco ?? ''),
             'transportador_nome' => CrudHelper::e($snapshot->transportador_nome ?? ''),
             'transportador_cnpj' => CrudHelper::e($snapshot->transportador_cnpj ?? ''),
-            'motorista_nome' => CrudHelper::e($snapshot->motorista_nome ?? ''),
+            'motorista_coletor_id' => $motoristaColetorId,
+            'motorista_options' => $motoristaOptions,
+            'motorista_locked' => $motoristaLocked ? 'disabled' : '',
+            'motorista_hidden' => $motoristaLocked
+                ? '<input type="hidden" name="motorista_coletor_id" value="'.$motoristaColetorId.'"/>'
+                : '',
             'destinador_nome' => CrudHelper::e($snapshot->destinador_nome ?? ''),
             'destinador_cnpj' => CrudHelper::e($snapshot->destinador_cnpj ?? ''),
             'destinador_endereco' => CrudHelper::e($snapshot->destinador_endereco ?? ''),
@@ -89,8 +101,10 @@ class ColetaNova extends Page
             'data_recebimento' => $coleta->data_recebimento ?? '',
         ]);
 
-        $scripts = self::crudScripts('/painel/coleta/nova/'.$coletaId, false)
-            . '<script src="'.URL.'/resources/js/coleta-wizard.js"></script>';
+        $scripts = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css">'
+            . self::crudScripts('/painel/coleta/nova/'.$coletaId, false)
+            . '<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
+            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20260915"></script>';
 
         return self::getPage('Coleta #'.$coletaId, $content, 'coleta_nova', $scripts);
     }
@@ -128,12 +142,12 @@ class ColetaNova extends Page
             return match ($acao) {
                 'listar_clientes' => self::acaoListarClientes($post, $usuario),
                 'iniciar' => self::acaoIniciar($post, $usuario),
-                'salvar_transporte' => self::acaoSalvarTransporte($coletaId, $post),
-                'adicionar_item' => self::acaoAdicionarItem($coletaId, $post),
-                'remover_item' => self::acaoRemoverItem($coletaId, $post),
-                'listar_itens' => self::acaoListarItens($coletaId),
-                'finalizar' => self::acaoFinalizar($request, $coletaId),
-                'cancelar' => self::acaoCancelar($coletaId),
+                'salvar_transporte' => self::acaoSalvarTransporte($coletaId, $post, $usuario),
+                'adicionar_item' => self::acaoAdicionarItem($coletaId, $post, $usuario),
+                'remover_item' => self::acaoRemoverItem($coletaId, $post, $usuario),
+                'listar_itens' => self::acaoListarItens($coletaId, $usuario),
+                'finalizar' => self::acaoFinalizar($request, $coletaId, $usuario),
+                'cancelar' => self::acaoCancelar($coletaId, $usuario),
                 default => CrudHelper::jsonError('Ação inválida.'),
             };
         } catch (\InvalidArgumentException $e) {
@@ -192,20 +206,56 @@ class ColetaNova extends Page
         return CrudHelper::jsonOk(['coleta_id' => $coletaId, 'redirect' => URL.'/painel/coleta/nova/'.$coletaId]);
     }
 
-    private static function acaoSalvarTransporte(?int $coletaId, array $post): string
+    private static function tiposResiduoOptionsHtml(): string
+    {
+        $html = '<option value="">— Selecione —</option>';
+        foreach (EntityTipoResiduo::list('t.ativo = 1', [], '999') as $t) {
+            $label = $t->nome.' ('.$t->classe_nome.' / '.$t->grupo_codigo.')';
+            $html .= '<option value="'.$t->id.'">'.CrudHelper::e($label).'</option>';
+        }
+
+        return $html;
+    }
+
+    private static function assertColetaAccess(?int $coletaId, array $usuario): void
     {
         if (!$coletaId) {
-            return CrudHelper::jsonError('Coleta inválida.');
+            throw new \InvalidArgumentException('Coleta inválida.');
         }
+        $coleta = EntityColeta::getById($coletaId);
+        if (!$coleta || $coleta->status !== 'rascunho') {
+            throw new \InvalidArgumentException('Coleta não encontrada ou já finalizada.');
+        }
+        if ((int)$coleta->coletor_id !== (int)($usuario['id'] ?? 0) && empty($usuario['is_admin'])) {
+            throw new \InvalidArgumentException('Sem permissão para esta coleta.');
+        }
+    }
+
+    private static function resolveMotoristaPost(array $post, array $usuario): string
+    {
+        $motoristaId = (int)($post['motorista_coletor_id'] ?? 0);
+        if (ColetorSelectHelper::isColetorSession($usuario)) {
+            $motoristaId = (int)($usuario['id'] ?? 0);
+        }
+        if (!ColetorSelectHelper::isColetorAtivo($motoristaId)) {
+            throw new \InvalidArgumentException('Selecione um coletor válido como motorista.');
+        }
+
+        return ColetorSelectHelper::nomeById($motoristaId);
+    }
+
+    private static function acaoSalvarTransporte(?int $coletaId, array $post, array $usuario): string
+    {
+        self::assertColetaAccess($coletaId, $usuario);
+        $post['motorista_nome'] = self::resolveMotoristaPost($post, $usuario);
         ColetaService::salvarTransporte($coletaId, $post);
+
         return CrudHelper::jsonOk(['message' => 'Dados salvos.']);
     }
 
-    private static function acaoAdicionarItem(?int $coletaId, array $post): string
+    private static function acaoAdicionarItem(?int $coletaId, array $post, array $usuario): string
     {
-        if (!$coletaId) {
-            return CrudHelper::jsonError('Coleta inválida.');
-        }
+        self::assertColetaAccess($coletaId, $usuario);
         ColetaService::adicionarItem(
             $coletaId,
             (int)($post['tipo_residuo_id'] ?? 0),
@@ -215,28 +265,24 @@ class ColetaNova extends Page
         return CrudHelper::jsonOk(['itens_html' => self::renderItens(EntityColetaItem::getByColetaId($coletaId))]);
     }
 
-    private static function acaoRemoverItem(?int $coletaId, array $post): string
+    private static function acaoRemoverItem(?int $coletaId, array $post, array $usuario): string
     {
-        if (!$coletaId) {
-            return CrudHelper::jsonError('Coleta inválida.');
-        }
+        self::assertColetaAccess($coletaId, $usuario);
         ColetaService::removerItem($coletaId, (int)($post['item_id'] ?? 0));
+
         return CrudHelper::jsonOk(['itens_html' => self::renderItens(EntityColetaItem::getByColetaId($coletaId))]);
     }
 
-    private static function acaoListarItens(?int $coletaId): string
+    private static function acaoListarItens(?int $coletaId, array $usuario): string
     {
-        if (!$coletaId) {
-            return CrudHelper::jsonError('Coleta inválida.');
-        }
+        self::assertColetaAccess($coletaId, $usuario);
+
         return CrudHelper::jsonOk(['itens_html' => self::renderItens(EntityColetaItem::getByColetaId($coletaId))]);
     }
 
-    private static function acaoFinalizar($request, ?int $coletaId): string
+    private static function acaoFinalizar($request, ?int $coletaId, array $usuario): string
     {
-        if (!$coletaId) {
-            return CrudHelper::jsonError('Coleta inválida.');
-        }
+        self::assertColetaAccess($coletaId, $usuario);
 
         $files = [];
         foreach (['evidencia_1', 'evidencia_2', 'evidencia_3'] as $key) {
@@ -246,18 +292,21 @@ class ColetaNova extends Page
         }
 
         $numeroMtr = ColetaService::finalizar($coletaId, $files);
+        $msg = 'Coleta finalizada! MTR nº '.$numeroMtr.'.';
+        if (\App\Common\SinirConfig::isEnabled()) {
+            $msg .= ' Envio ao SINIR ficará pendente — use Reenviar SINIR em Coletas se necessário.';
+        }
+
         return CrudHelper::jsonOk([
-            'message' => 'Coleta finalizada! MTR nº '.$numeroMtr,
+            'message' => $msg,
             'numero_mtr' => $numeroMtr,
             'redirect' => URL.'/painel/coletas',
         ]);
     }
 
-    private static function acaoCancelar(?int $coletaId): string
+    private static function acaoCancelar(?int $coletaId, array $usuario): string
     {
-        if (!$coletaId) {
-            return CrudHelper::jsonError('Coleta inválida.');
-        }
+        self::assertColetaAccess($coletaId, $usuario);
         ColetaService::cancelar($coletaId);
         return CrudHelper::jsonOk(['redirect' => URL.'/painel/coleta/nova']);
     }

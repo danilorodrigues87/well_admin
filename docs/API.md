@@ -71,7 +71,7 @@ Coletor vê KPIs filtrados por `coletor_id`; admin vê totais.
 
 `GET /agendamentos?page=1&per_page=20&busca=` — módulo `agendamentos`
 
-Clientes ativos ordenados por prioridade e `proxima_coleta`.
+Clientes ativos ordenados por prioridade e `proxima_coleta`. Cada item inclui `plano_nome` e `saldo_plano` (soma do saldo incluso em `plano_itens` — substitui o antigo `saldo_residuo` por cliente).
 
 ### Perfil
 

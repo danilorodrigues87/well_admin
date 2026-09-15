@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Common\Helpers\CrudHelper;
+use App\Common\Helpers\IbamaCodigoHelper;
 use App\Common\Helpers\MoneyHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Plano as EntityPlano;
@@ -15,14 +16,11 @@ class Planos extends Page
 {
     private static function tiposResiduosOptions(int $selected = 0): string
     {
-        $html = '<option value="">— Resíduo do catálogo (opcional) —</option>';
+        $html = '<option value="">— Selecione o resíduo —</option>';
         foreach (EntityTipoResiduo::list('t.ativo = 1', [], '9999') as $t) {
-            $label = $t->nome;
-            if ($t->cod_ibama !== '') {
-                $label = $t->cod_ibama.' — '.$label;
-            }
+            $label = IbamaCodigoHelper::label($t->cod_ibama, $t->nome);
             $sel = $t->id === $selected ? ' selected' : '';
-            $html .= '<option value="'.$t->id.'" data-nome="'.CrudHelper::e($t->nome).'" data-cod="'.CrudHelper::e($t->cod_ibama).'"'.$sel.'>'.CrudHelper::e($label).'</option>';
+            $html .= '<option value="'.$t->id.'"'.$sel.'>'.CrudHelper::e($label).'</option>';
         }
         return $html;
     }
@@ -33,8 +31,10 @@ class Planos extends Page
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
             'tipos_residuos_options' => self::tiposResiduosOptions(),
         ]);
+        $jsPlanos = dirname(__DIR__, 3).'/resources/js/crud-planos.js';
+        $jsVer = is_file($jsPlanos) ? (string)filemtime($jsPlanos) : (string)time();
         $scripts = self::crudScripts('/painel/planos')
-            . '<script src="'.URL.'/resources/js/crud-planos.js"></script>';
+            . '<script src="'.URL.'/resources/js/crud-planos.js?v='.$jsVer.'"></script>';
         return self::getPage('Planos', $content, 'planos', $scripts);
     }
 
@@ -62,12 +62,10 @@ class Planos extends Page
         $itens = '';
         foreach ($rows as $p) {
             $itens .= '<tr>
-                <td>'.CrudHelper::e($p->nome).'</td>
-                <td class="small">'.CrudHelper::e($p->descricao).'</td>
+                <td>'.CrudHelper::e($p->nome).'<br><small class="text-muted">'.CrudHelper::e($p->tipo).'</small></td>
                 <td>'.MoneyHelper::format($p->valor_mensal).'</td>
                 <td class="small">'.PlanoService::renderResumoSaldo($p->id).'</td>
                 <td class="small">'.PlanoService::renderResumoExcedente($p->id).'</td>
-                <td>'.CrudHelper::e($p->tipo).'</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="editar('.$p->id.')"><i class="fas fa-edit"></i></button>
                     '.CrudHelper::btnDesativar($p->id).'
@@ -75,7 +73,7 @@ class Planos extends Page
             </tr>';
         }
         if ($itens === '') {
-            $itens = '<tr><td colspan="7" class="text-center text-muted">Nenhum plano.</td></tr>';
+            $itens = '<tr><td colspan="5" class="text-center text-muted">Nenhum plano.</td></tr>';
         }
 
         return self::jsonLista(['success' => true, 'itens' => $itens, 'pagination' => Pagination::renderNav($pagination)]);
@@ -112,7 +110,6 @@ class Planos extends Page
             'nome' => trim((string)($post['nome'] ?? '')),
             'descricao' => trim((string)($post['descricao'] ?? '')),
             'valor_mensal' => MoneyHelper::parse((string)($post['valor_mensal'] ?? '0')),
-            'coletas_mensais' => (float)str_replace(',', '.', (string)($post['coletas_mensais'] ?? '0')),
             'tipo' => trim((string)($post['tipo'] ?? '')),
             'ativo' => CrudHelper::parseAtivo($post, $id <= 0),
         ];
@@ -120,16 +117,18 @@ class Planos extends Page
             return CrudHelper::jsonError('Nome do plano é obrigatório.');
         }
 
-        $itens = PlanoService::enrichItensWithTipoResiduo(
-            PlanoService::decodeItensFromPost($post['itens_json'] ?? '')
-        );
+        $itensRaw = PlanoService::decodeItensFromPost($post['itens_json'] ?? '');
+        $validated = PlanoService::validateItens($itensRaw);
+        if (is_string($validated)) {
+            return CrudHelper::jsonError($validated);
+        }
 
         if ($id > 0) {
             EntityPlano::update($id, $data);
-            EntityPlanoItem::replaceForPlano($id, $itens);
+            EntityPlanoItem::replaceForPlano($id, $validated);
         } else {
             $id = EntityPlano::insert($data);
-            EntityPlanoItem::replaceForPlano($id, $itens);
+            EntityPlanoItem::replaceForPlano($id, $validated);
         }
         return CrudHelper::jsonOk(['message' => 'Salvo com sucesso.']);
     }

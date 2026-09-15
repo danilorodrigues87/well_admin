@@ -107,6 +107,9 @@ docs/                  Documentação complementar
 | `007_coletas_legacy_prep.sql` | Colunas ETL legado em coletas |
 | `008_sinir.sql` | Colunas SINIR em coletas/tipos_residuos + tabela `sinir_envios` |
 | `010_clientes_sinir_unidade.sql` | `clientes.sinir_cod_unidade` (gerador no portal MTR) |
+| `011_inter_cobrancas.sql` | Cobranças BolePix emitidas via API Banco Inter |
+| `012_faturas_inter.sql` | Competência, valor calculado, detalhes JSON, e-mail em `inter_cobrancas` |
+| `013_config_sistema.sql` | Config global multa/juros (`config_sistema`) |
 
 Novas migrations: prefixo numérico crescente. Atualizar `docs/DATABASE.md`.
 
@@ -119,11 +122,36 @@ app/Service/Sinir/
   SinirGateway.php                  — HTTP cURL para admin.sinir.gov.br
   SinirPayloadBuilder.php           — manifestoJSONDtos → salvarManifestoLote
   SinirManifestoService.php         — envio, parse resposta, sinir_envios
+  SinirCatalogService.php           — listas SINIR + sugestão mapeamento tipos_residuos
   SinirService.php                  — badge, smoke test, reenvio
 app/Model/Entity/SinirEnvio.php     — histórico de tentativas
 ```
 
 `ColetaService::finalizar()` dispara envio SINIR quando `SINIR_ENABLED=true`. Doc: `docs/SINIR.md`.
+
+### Integração Banco Inter + Faturamento
+
+```
+app/Common/InterConfig.php              — leitura .env INTER_*
+app/Common/CobrancaConfig.php           — multa/juros (.env + config_sistema)
+storage/inter/                          — certificado.crt, chave.key (fora do Git)
+storage/boletos/                        — PDFs locais (fora do Git)
+app/Service/Banco/BancoGatewayInterface.php
+app/Service/Inter/
+  InterGateway.php                      — HTTP cURL + mTLS
+  InterAuthService.php                  — OAuth2 + cache token
+  InterCobrancaService.php              — cobranca/v3 (emitir, consultar, cancelar)
+  InterPayloadBuilder.php               — Cliente → payload API v3
+  InterService.php                      — smoke test CLI
+app/Service/FaturamentoService.php      — relatório competência, lote, enriquecer PDF/PIX
+app/Service/PlanoCobrancaService.php    — valor plano + excedentes/mês
+app/Service/MailService.php             — envio SMTP boleto
+app/Controller/Admin/Pagamentos.php     — /painel/pagamentos
+app/Model/Entity/InterCobranca.php
+app/Model/Entity/ConfigSistema.php
+```
+
+Doc: `docs/INTER.md`. Smoke: `php database/scripts/inter_smoke_token.php`.
 
 ---
 
@@ -163,3 +191,13 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-14 | SINIR Fase B: `SinirManifestoService`, envio em `ColetaService::finalizar()`, reenvio no painel, `clientes.sinir_cod_unidade` |
 | 2026-09-14 | Branding Well Coletas: paleta Light/Dark em `panel-theme.css`, tema padrão `prefers-color-scheme`, doc `docs/BRANDING.md` |
 | 2026-09-14 | API app coletor: login multi-módulo (`ApiAppModules`), RBAC por rota, `GET /dashboard/resumo`, `GET /agendamentos`, `GET/POST /perfil`, busca em `GET /coletas`; FF: App State RBAC, menu Home, páginas stub |
+| 2026-09-15 | Banco Inter: `InterConfig`, services OAuth/cobrança, migration `011_inter_cobrancas`, certificados em `storage/inter/`, doc `docs/INTER.md` |
+| 2026-09-15 | Pagamentos: `/painel/pagamentos` — faturamento mensal, lote Inter, multa/juros, PDF/PIX/e-mail; migrations `012`/`013` |
+| 2026-09-15 | Fix `LegacyPesoParser`: peso legado `5.200 Kg` = 5,2 kg (não 5200); script `repair_legacy_peso.php` |
+| 2026-09-15 | Clientes: migration `010` (sinir_cod_unidade), ViaCEP no cadastro; Planos: fix save (`acao=salvar`), IBAMA via `IbamaCodigoHelper`; normalização `XX.XX.XX` |
+| 2026-09-15 | Planos: `plano_itens` só `tipo_residuo_id` (drop nome/cod_ibama), modal simplificado, cobrança por ID, `saldo_compartilhado` por valor excedente |
+| 2026-09-15 | Fase 5 planos: drop `clientes.saldo_residuo` (migration `016`), agendamentos exibem saldo do plano; remove `coletas_mensais` do CRUD; webhook Inter `POST /api/v1/webhooks/inter/cobranca` |
+| 2026-09-15 | Planos: `gera_credito` em `plano_itens` — recicláveis (papelão, alumínio) descontam mensalidade por kg coletado |
+| 2026-09-15 | Backfill coletas legado: `TipoResiduoMatcher` + `ColetaItemLegacyResolver` (embalagem truncada, cliente/plano) + `audit_coleta_itens_tipo.php` — 100% `tipo_residuo_id` |
+| 2026-09-15 | SINIR sync: `SinirCatalogService` + `sinir_sync_residuos.php` (listas API → códigos em `tipos_residuos`, `--dry-run`/`--csv`) |
+| 2026-09-15 | Coleta wizard: motorista = select de coletores (bloqueado para função Coletor); Tom Select nos resíduos; modal loading na finalização; SINIR não bloqueia HTTP |

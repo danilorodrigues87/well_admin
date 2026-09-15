@@ -95,14 +95,59 @@ php database/scripts/sinir_smoke_token.php
 
 Smoke test exige `SINIR_INTEGRATION_TOKEN` no `.env` (gerado no portal MTR).
 
-## Planos — itens de resíduo (`009_plano_itens.sql`)
+## Banco Inter — cobranças (`011_inter_cobrancas.sql`)
 
 | Tabela / coluna | Descrição |
 |-----------------|-----------|
-| `plano_itens` | Saldo incluso e valor excedente por resíduo (substitui texto legado) |
+| `inter_cobrancas` | Cobranças BolePix emitidas via API Inter |
+| `inter_cobrancas.codigo_solicitacao` | ID retornado pela API Inter |
+| `inter_cobrancas.cliente_id` | FK opcional para `clientes` |
+| `inter_cobrancas.status` | `PENDENTE`, `PAGO`, `CANCELADO`, etc. |
+| `inter_cobrancas.payload_request` / `payload_response` | JSON da requisição/resposta |
+| `inter_cobrancas.competencia` | Mês faturado (`YYYY-MM`), unique com `cliente_id` |
+| `inter_cobrancas.valor_calculado` | Total automático antes de ajuste manual |
+| `inter_cobrancas.detalhes_json` | Breakdown plano + excedentes |
+| `inter_cobrancas.multa_mora_json` | Multa/juros aplicados na emissão |
+| `inter_cobrancas.email_enviado_em` / `email_erro` | Controle de envio SMTP |
+
+**Config global:** `config_sistema` — chaves `cobranca.multa_*` e `cobranca.mora_*` (migration `013`).
+
+```powershell
+Get-Content database\migrations\011_inter_cobrancas.sql | C:\xampp\mysql\bin\mysql.exe -u root well_admin
+Get-Content database\migrations\012_faturas_inter.sql | C:\xampp\mysql\bin\mysql.exe -u root well_admin
+Get-Content database\migrations\013_config_sistema.sql | C:\xampp\mysql\bin\mysql.exe -u root well_admin
+php database/scripts/inter_smoke_token.php
+```
+
+Smoke test exige `INTER_CLIENT_ID`, `INTER_CLIENT_SECRET` e `INTER_CONTA_CORRENTE` no `.env` + certificados em `storage/inter/`. Ver `docs/INTER.md`.
+
+## Planos — itens de resíduo (`009` + `015`)
+
+| Tabela / coluna | Descrição |
+|-----------------|-----------|
+| `plano_itens` | Regra comercial por resíduo (FK `tipo_residuo_id` NOT NULL) |
+| `plano_itens.tipo_residuo_id` | FK → `tipos_residuos` (UNIQUE com `plano_id`) |
 | `plano_itens.saldo_incluso` | Quantidade incluída no plano (kg/l/un) |
 | `plano_itens.valor_excedente` | Preço por unidade acima do saldo (R$) |
+| `plano_itens.saldo_compartilhado` | `1` = saldo somado em pool com itens de mesmo `valor_excedente` |
+| `plano_itens.gera_credito` | `1` = reciclável: desconto na mensalidade = kg coletados × tarifa (ignora saldo) |
 
-Import legado: `php database/scripts/import_plano_itens_legacy.php`
+Nome e código IBAMA vêm de `JOIN tipos_residuos` — não duplicados em `plano_itens`.
+
+Scripts: `backfill_plano_itens_tipo.php`, `import_plano_itens_legacy.php`
 
 Cobrança mensal (regra): `valor_mensal` + excedentes via `PlanoCobrancaService::calcularMes(cliente_id, 'YYYY-MM')`.
+
+## Clientes — saldo do plano (`016`)
+
+| Alteração | Descrição |
+|-----------|-----------|
+| `clientes.saldo_residuo` | **Removido** — saldo incluso vem de `plano_itens` via plano do cliente |
+
+```powershell
+Get-Content database\migrations\016_drop_cliente_saldo_residuo.sql | C:\xampp\mysql\bin\mysql.exe -u root well_admin
+```
+
+Backfill legado: `php database/scripts/backfill_coleta_itens_tipo.php` (preenche `coleta_itens.tipo_residuo_id`).  
+Auditoria: `php database/scripts/audit_coleta_itens_tipo.php` (opcional `--csv=storage/audit_coleta_tipo.csv`).  
+Nomes truncados (`1 Sacos de`, `1 Granel de`…): `App\Common\Helpers\ColetaItemLegacyResolver` usa cliente, plano e contexto da coleta.

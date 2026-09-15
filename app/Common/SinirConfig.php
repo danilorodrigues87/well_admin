@@ -47,4 +47,10 @@ class SinirConfig
             && self::unidade() > 0
             && self::cnpj() !== '';
     }
+
+    /** false apenas em dev local (ex.: XAMPP sem CA bundle). Produção: sempre true. */
+    public static function sslVerify(): bool
+    {
+        return filter_var(Environment::get('SINIR_SSL_VERIFY', 'true'), FILTER_VALIDATE_BOOLEAN);
+    }
 }

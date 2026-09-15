@@ -26,7 +26,6 @@ class Cliente
     public string $telefone_resp = '';
     public string $plano_nome = '';
     public ?string $proxima_coleta = null;
-    public float $saldo_residuo = 0.0;
     public string $prioridade = 'normal';
 
     public static function count(string $where = '1=1', array $params = []): int
@@ -116,7 +115,6 @@ class Cliente
         $c->telefone_resp = (string)($row['telefone_resp'] ?? '');
         $c->plano_nome = (string)($row['plano_nome'] ?? '');
         $c->proxima_coleta = $row['proxima_coleta'] ?? null;
-        $c->saldo_residuo = (float)($row['saldo_residuo'] ?? 0);
         $c->prioridade = (string)($row['prioridade'] ?? 'normal');
         return $c;
     }

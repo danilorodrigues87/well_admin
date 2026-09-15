@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Common\Helpers\CrudHelper;
+use App\Common\Helpers\IbamaCodigoHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\ResiduoClasse as EntityResiduoClasse;
 use App\Model\Entity\ResiduoGrupo as EntityResiduoGrupo;
@@ -63,8 +64,8 @@ class TiposResiduos extends Page
             $params[] = $grupoId;
         }
         if ($busca !== '') {
-            $where .= ' AND (t.nome LIKE ? OR g.codigo LIKE ? OR c.nome LIKE ?)';
-            $params = array_merge($params, array_fill(0, 3, '%'.$busca.'%'));
+            $where .= ' AND (t.nome LIKE ? OR t.cod_ibama LIKE ? OR g.codigo LIKE ? OR c.nome LIKE ?)';
+            $params = array_merge($params, array_fill(0, 4, '%'.$busca.'%'));
         }
 
         $pagination = new Pagination(EntityTipoResiduo::count($where, $params), $page, 15);
@@ -142,7 +143,7 @@ class TiposResiduos extends Page
             'nome' => $nome,
             'classe_id' => $classeId,
             'grupo_id' => $grupoId,
-            'cod_ibama' => trim((string)($post['cod_ibama'] ?? '')),
+            'cod_ibama' => IbamaCodigoHelper::normalize(trim((string)($post['cod_ibama'] ?? ''))) ?: null,
             'tra_codigo' => self::parseOptionalInt($post['tra_codigo'] ?? null),
             'tie_codigo' => self::parseOptionalInt($post['tie_codigo'] ?? null),
             'tia_codigo' => self::parseOptionalInt($post['tia_codigo'] ?? null),

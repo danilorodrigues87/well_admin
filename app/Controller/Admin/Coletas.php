@@ -31,9 +31,19 @@ class Coletas extends Page
         $busca = trim((string)($post['busca'] ?? ''));
         $status = trim((string)($post['status'] ?? ''));
         $recebimento = trim((string)($post['situacao_recebimento'] ?? ''));
+        $dataInicio = trim((string)($post['data_inicio'] ?? ''));
+        $dataFim = trim((string)($post['data_fim'] ?? ''));
 
         $where = "c.status != 'cancelada'";
         $params = [];
+        if ($dataInicio !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataInicio)) {
+            $where .= ' AND c.data_coleta >= ?';
+            $params[] = $dataInicio;
+        }
+        if ($dataFim !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataFim)) {
+            $where .= ' AND c.data_coleta <= ?';
+            $params[] = $dataFim;
+        }
         if ($busca !== '') {
             if (ctype_digit($busca)) {
                 $where .= ' AND c.numero_mtr = ?';

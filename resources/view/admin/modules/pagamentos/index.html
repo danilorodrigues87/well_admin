@@ -1,0 +1,214 @@
+<h1 class="mt-2">Pagamentos</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Pagamentos</li>
+</ol>
+
+{{inter_alert}}
+
+<ul class="nav nav-tabs mb-3" id="pagamentos-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-faturamento" data-bs-toggle="tab" data-bs-target="#pane-faturamento" type="button">Faturamento do mês</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-historico" data-bs-toggle="tab" data-bs-target="#pane-historico" type="button">Cobranças emitidas</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-config" data-bs-toggle="tab" data-bs-target="#pane-config" type="button">Configurações</button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="pane-faturamento">
+        <div class="card mb-3">
+            <div class="card-header"><i class="fas fa-file-invoice-dollar me-1"></i> Relatório de faturamento</div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Competência</label>
+                        <input type="month" id="filtro-competencia" class="form-control" value="{{competencia_default}}"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-0">Plano</label>
+                        <select id="filtro-plano" class="form-select">{{planos_options}}</select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Situação</label>
+                        <select id="filtro-situacao" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="pendente" selected>Pendentes</option>
+                            <option value="emitida">Emitidas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-0">Buscar cliente</label>
+                        <input type="text" id="filtro-busca" class="form-control" placeholder="Nome da empresa"/>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary w-100" id="btn-carregar-relatorio"><i class="fas fa-sync me-1"></i> Carregar</button>
+                    </div>
+                </div>
+                <p class="text-muted small" id="relatorio-total"></p>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:36px"><input type="checkbox" id="chk-todos" class="form-check-input"/></th>
+                                <th>Cliente</th>
+                                <th>Plano</th>
+                                <th class="text-end">Valor plano</th>
+                                <th class="text-end">Excedentes</th>
+                                <th class="text-end">Total calc.</th>
+                                <th class="text-end">Valor a emitir</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-faturamento"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><i class="fas fa-bolt me-1"></i> Emissão em lote</div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Vencimento</label>
+                        <input type="date" id="lote-vencimento" class="form-control" value="{{vencimento_default}}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Multa</label>
+                        <select id="lote-multa-tipo" class="form-select">
+                            <option value="PERCENTUAL">Percentual</option>
+                            <option value="VALORFIXO">Valor fixo</option>
+                            <option value="ISENTO">Isento</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label small mb-0">Taxa %</label>
+                        <input type="number" step="0.01" id="lote-multa-taxa" class="form-control" value="{{multa_taxa}}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Juros</label>
+                        <select id="lote-mora-tipo" class="form-select">
+                            <option value="TAXAMENSAL">Taxa mensal</option>
+                            <option value="VALORDIA">Valor/dia</option>
+                            <option value="ISENTO">Isento</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label small mb-0">Taxa %</label>
+                        <input type="number" step="0.01" id="lote-mora-taxa" class="form-control" value="{{mora_taxa}}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="lote-enviar-email"/>
+                            <label class="form-check-label" for="lote-enviar-email">Enviar e-mail</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-success w-100" id="btn-emitir-lote" data-inter="{{inter_configured}}">
+                            <i class="fas fa-barcode me-1"></i> Gerar boletos
+                        </button>
+                    </div>
+                </div>
+                <p class="small text-muted mt-2 mb-0" id="resumo-multa-mora">{{resumo_multa_mora}}</p>
+                <div id="resultado-lote" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="pane-historico">
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Competência</label>
+                        <input type="month" id="hist-competencia" class="form-control" value="{{competencia_default}}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Status</label>
+                        <input type="text" id="hist-status" class="form-control" placeholder="EMITIDA, PAGO..."/>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary w-100" id="btn-carregar-historico"><i class="fas fa-sync me-1"></i> Carregar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Competência</th>
+                                <th class="text-end">Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>E-mail</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-historico"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="pane-config">
+        <div class="card">
+            <div class="card-header">Padrão global — multa e juros</div>
+            <div class="card-body">
+                <form id="form-config-cobranca">
+                    {{csrf_field}}
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Multa — tipo</label>
+                            <select name="multa_tipo" class="form-select">
+                                <option value="PERCENTUAL">Percentual</option>
+                                <option value="VALORFIXO">Valor fixo (R$)</option>
+                                <option value="ISENTO">Isento</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Multa — taxa (%)</label>
+                            <input type="number" step="0.01" name="multa_taxa" class="form-control" value="{{multa_taxa}}"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Multa — valor (R$)</label>
+                            <input type="number" step="0.01" name="multa_valor" class="form-control" value="{{multa_valor}}"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Juros — tipo</label>
+                            <select name="mora_tipo" class="form-select">
+                                <option value="TAXAMENSAL">Taxa mensal (%)</option>
+                                <option value="VALORDIA">Valor por dia (R$)</option>
+                                <option value="ISENTO">Isento</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Juros — taxa (%)</label>
+                            <input type="number" step="0.01" name="mora_taxa" class="form-control" value="{{mora_taxa}}"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Juros — valor/dia (R$)</label>
+                            <input type="number" step="0.01" name="mora_valor" class="form-control" value="{{mora_valor}}"/>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-save me-1"></i> Salvar padrão</button>
+                    <span id="config-msg" class="ms-2 small text-muted"></span>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.PAGAMENTOS_CFG = {
+    multa_tipo: '{{multa_tipo}}',
+    multa_taxa: '{{multa_taxa}}',
+    mora_tipo: '{{mora_tipo}}',
+    mora_taxa: '{{mora_taxa}}'
+};
+</script>

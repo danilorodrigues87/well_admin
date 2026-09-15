@@ -185,6 +185,13 @@
       if (data.nome && $('#crud-nome-label').length && !data.nome_fantasia) {
         $('#crud-nome-label').text(data.nome);
       }
+      if ($('#crud-plano-info').length) {
+        var planoInfo = data.plano_nome ? ('Plano: ' + data.plano_nome) : 'Sem plano';
+        if (parseFloat(data.saldo_plano) > 0) {
+          planoInfo += ' · Saldo incluso total: ' + Number(data.saldo_plano).toLocaleString('pt-BR') + ' kg';
+        }
+        $('#crud-plano-info').text(planoInfo);
+      }
       if (data.modulos_html) {
         $('#crud-modulos').html(data.modulos_html);
       }

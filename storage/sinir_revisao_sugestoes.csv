@@ -1,0 +1,53 @@
+﻿prioridade;categoria;id;nome;cod_ibama_atual;descricao_ibama_sinir;tra_atual;tie_atual;tia_atual;cla_atual;uni_atual;problema;sugestao
+urgente;servico_nao_residuo;82;LOCAÇÃO BANHEIRO CONTAINER;;;43;4;8;43;2;Não é resíduo — é serviço de locação;Desativar no catálogo ou excluir de tipos usados em coleta/MTR
+urgente;servico_nao_residuo;83;LOCAÇÃO CONTAINER;;;43;4;8;43;2;Não é resíduo — é serviço de locação;Desativar no catálogo ou excluir de tipos usados em coleta/MTR
+urgente;servico_nao_residuo;84;LOCAÇÃO CAÇAMBA 5M³;;;43;4;8;43;2;Não é resíduo — é serviço de locação;Desativar no catálogo ou excluir de tipos usados em coleta/MTR
+urgente;servico_nao_residuo;85;LOCAÇÃO CAÇAMBA 27M³;;;43;4;8;43;2;Não é resíduo — é serviço de locação;Desativar no catálogo ou excluir de tipos usados em coleta/MTR
+urgente;servico_nao_residuo;66;LOCAÇÃO DE BANHEIRO;00.00.01;;43;4;8;43;2;"Serviço de locação; IBAMA inválido/inexistente no SINIR";Desativar — não usar em manifesto
+urgente;servico_nao_residuo;58;LIMPEZA DE BANHEIROS QUÍMICOS;20.02.01;Resíduos de varrição/limpeza urbana biodegradáveis;43;4;8;43;2;"Nome indica serviço de limpeza; IBAMA genérico de limpeza urbana";Confirmar se é resíduo coletado ou serviço — se serviço, desativar
+urgente;registro_teste;43;teste;01.01.02;Resíduos da Extração de Minérios Não Metálicos;43;4;8;43;2;Registro de teste no catálogo produtivo;Desativar
+urgente;tecnologia;73;EMBALAGENS AGROTOXICOS E AFINS (agroquímicos);02.01.09;Resíduos agrotóxicos e afins não abrangidos em 02 01 08 (*);43;4;8;1;2;Tecnologia=Reciclagem (43) inaceitável para agrotóxico;"tra=73 (Incineração) ou tra=25 (Autoclave); cla=1 OK"
+alta;ibama;39;Filtros Papel;15.02.00;;43;4;8;43;2;Código IBAMA não existe na lista SINIR;"cod_ibama=15.02.02 (*) se contaminado; ou 15.02.03 se não perigoso"
+alta;ibama;81;EMBALAGEM CONTAMINADA;06.03.13;Sais no estado sólido contendo metais pesados;73;4;8;1;2;IBAMA não corresponde ao nome (embalagem vs sais);Revisar IBAMA — provável 15.01.10 (embalagem contaminada por perigosos)
+alta;ibama;33;PILHAS E BATERIAS;20.01.32;Medicamentos ANVISA Grupo B;43;4;8;1;2;IBAMA aponta para medicamentos, não pilhas;"cod_ibama=20.01.33 (*) ou 16.06.01 (*) conforme tipo; tra=73; cla=1"
+alta;ibama;69;ÓLEO USADO;13.07.01;Fuelóleo e óleo diesel;73;2;8;1;2;IBAMA errado — descrição é combustível, não óleo lubrificante usado;"cod_ibama=13.02.05 (*) óleos minerais us/contaminados; tie=2 OK"
+alta;ibama;29;Resíduo Equipamentos Eletrônicos;20.01.23;Eletroeletrônicos com CFC;73;4;8;1;2;"IBAMA muito específico (CFC); inadequado para REE genérico";"cod_ibama=20.01.35 (*) REE ou 16.02.14 equip. fora de uso; tra=43 ou 28 (desmontagem)"
+alta;ibama;70;SACARIAS;16.01.19;Plástico;43;4;8;43;2;Sacaria pode ser plástica ou de papel — IBAMA genérico;Confirmar material: 16.01.19 (plástico) ou 19.12.01 (papel)
+alta;classe_rss;16;RESÍDUO SÓLIDO DO SERVIÇO DE SAÚDE;18.01.01;Grupo A1 ANVISA RDC 222/2018;73;4;8;1;2;"Classe SINIR genérica (1=Classe I); descrição indica Grupo A1 RSS";"cla=21 (Grupo A1 RSS); manter tra=73 ou tra=25"
+alta;classe_rss;17;MATERIAIS PERFUROCORTANTES OU ESCARIFICANTES;18.04.01;Grupo E ANVISA RDC 222/2018;73;4;8;1;2;"Classe genérica Classe I; descrição indica Grupo E RSS";"cla=35 (Grupo E RSS); tra=73 ou tra=25 (Autoclave)"
+alta;classe_rss;18;MEDICAMENTO VENCIDOS;18.02.01;Grupo B ANVISA RDC 222/2018;73;4;8;1;2;"Classe genérica Classe I; descrição indica Grupo B RSS";"cla=32 (Grupo B RSS); tra=73"
+alta;classe_rss;49;Carcaças, peças anatômicas, vísceras;18.01.13;Grupo A4 ANVISA RDC 222/2018;73;4;8;1;2;"Classe genérica Classe I; descrição indica Grupo A4 RSS";"cla=24 (Grupo A4 RSS); tra=73"
+alta;classe_rcc;74;RESÍDUOS DE CONSTRUCAO CIVIL;17.09.04;Mistura RCC Classe A CONAMA 307;43;4;8;43;2;Classe II A (43) e Reciclagem inadequados para RCC;"cla=11 (Classe A RCC); tra=51 (Aterro Reservação RCC)"
+alta;tecnologia;54;RESÍDUOS BIODEGRADÁVEIS DE COZINHA E CANTINAS;20.01.08;Resíduos biodegradáveis de cozinha;43;4;8;43;2;Reciclagem inadequada para orgânicos;tra=50 (Compostagem) ou tra=27 (Biodigestão)
+alta;tecnologia;80;LODOS DE FOSSAS SÉPTICAS;20.03.04;Lodos de fossas sépticas;43;4;8;43;2;Reciclagem inadequada para lodo;tra=17 (Aterro II A/IIB) ou tratamento de lodo — confirmar destinador
+alta;tecnologia;79;LODOS DE TRATAMENTO DE EFLUENTEURBANOS;19.08.05;Lodos de tratamento de efluentes urbanos;43;4;8;43;2;Reciclagem inadequada para lodo;tra=17 (Aterro II) ou coprocessamento — confirmar destinador
+alta;tecnologia;65;LIMPEZA DE CAIXA DE GORDURA;20.01.08;Resíduos biodegradáveis de cozinha;43;4;21;43;2;Reciclagem inadequada para gordura/lodo de caixa;"tra=50 (Compostagem) ou tra=60 (Coprocessamento); tia=21 OK"
+alta;tecnologia;55;Misturas de gorduras e óleos, separação óleo/água;19.08.09;Misturas gorduras/óleos alimentares;43;2;8;43;2;Reciclagem inadequada;tra=44 (Rerrefino) ou tra=73 (Incineração)
+media;tecnologia;48;MASSA DE GORDURA E CINZAS;02.05.01;Materiais impróprios para consumo;43;4;8;43;2;Reciclagem questionável para gordura/cinzas;tra=50 (Compostagem) ou tra=73 — confirmar processo Well
+media;tecnologia;75;Resíduos indústria lacticínios MATERIAIS IM;02.05.01;Materiais impróprios para consumo;43;4;8;43;2;Reciclagem questionável;tra=50 ou tra=27 — confirmar destinador
+media;tecnologia;67;EQUIPAMENTOS FORA DE USO;16.02.14;Equipamento fora de uso;43;4;8;43;2;"Reciclagem pode ser OK; alternativa desmontagem";tra=43 OK ou tra=28 (Desmontagem) se aplicável
+media;classe;59;LIMPEZA DE CAIXA SAO;20.03.99;Resíduos urbanos não especificados;43;4;21;1;2;Classe I (1) provavelmente errada para resíduo urbano;"cla=43 (Classe II A) ou cla=2 (Outros); confirmar natureza"
+media;estado_fisico;35;ESTOPAS CONTAMINADOS POR ÓLEO;15.02.03;Absorventes/panos não abrangidos em 15 02 02;43;2;8;1;2;Estado=Líquido (2) incorreto — estopa é sólida;"tie=4 (Sólido); tra=73 OK; cla=1 OK"
+media;estado_fisico;76;DRENAGEM DE EFLUENTES;13.05.07;Água com óleo separadores;73;4;8;1;2;Estado=Sólido (4) para efluente líquido;tie=2 (Líquido)
+media;estado_fisico;55;Misturas de gorduras e óleos;19.08.09;Misturas gorduras/óleos alimentares;43;2;8;43;2;"Estado Líquido pode estar OK; confirmar se pastoso";Se pastoso: tie=1 (Semissólido)
+media;acondicionamento;22;PNEU MOTO;16.01.27;Pneus motocicletas;43;4;8;43;2;Granel (8) inadequado para pneus;tia=13 (Outros) — confirmar no portal MTR
+media;acondicionamento;26;PNEU TRATOR;16.01.28;Pneus tratores;43;4;8;43;2;Granel inadequado;tia=13 (Outros)
+media;acondicionamento;50;PNEUS AERONAUTICOS;16.01.23;Pneus aeronáuticos;43;4;8;43;2;Granel inadequado;tia=13 (Outros)
+media;acondicionamento;51;PNEUS AUTOMÓVEIS;16.01.24;Pneus automóveis;43;4;8;43;2;Granel inadequado;tia=13 (Outros)
+media;acondicionamento;52;PNEUS BICICLETAS;16.01.25;Pneus bicicletas;43;4;8;43;2;Granel inadequado;tia=13 (Outros)
+media;acondicionamento;57;PNEUS CAMINHÕES;16.01.26;Pneus caminhões/ônibus;43;4;8;43;2;Granel inadequado;tia=13 (Outros)
+media;acondicionamento;53;PNEUS ONIBUS;16.01.26;Pneus caminhões/ônibus;43;4;8;43;2;Granel inadequado;tia=13 (Outros)
+media;acondicionamento;36;Vasilhames Contaminado por Óleo;15.01.10;Embalagens contaminadas perigosas;73;2;8;1;2;Granel inadequado para vasilhame/tambor;tia=9 (Tambor) ou tia=11 (Tanque)
+media;acondicionamento;38;FILTROS CONTAMINADO POR ÓLEO;15.02.02;Absorventes/filtros contaminados;73;2;8;1;2;Granel para filtros — caixa/saco seria melhor;tia=21 (Caixa) ou tia=2 (Saco plástico)
+media;acondicionamento;69;ÓLEO USADO;13.07.01;Fuelóleo e óleo diesel;73;2;8;1;2;Granel inadequado para óleo;tia=9 (Tambor) ou tia=11 (Tanque) — após corrigir IBAMA
+baixa;acondicionamento;19;PAPEL;19.12.01;Papel e cartão;43;4;8;43;2;"Granel OK se a granel; se fardos na prática";tia=24 (Fardo) ou tia=26 (Big Bag) se aplicável
+baixa;acondicionamento;42;PAPELÃO;03.03.08;Triagem papel/papelão reciclagem;43;4;8;43;2;"Granel OK; se coleta em big bag";tia=26 (Big Bag)
+baixa;acondicionamento;64;RESÍDUOS TRIAGEM PAPEL/PAPELÃO;03.03.08;Triagem papel/papelão reciclagem;43;4;8;43;2;Idem papelão;tia=26 (Big Bag) se coleta em big bag
+baixa;acondicionamento;63;SACOS DE CIMENTO;17.01.01;Resíduos de cimento;43;4;2;43;2;tia=2 (Saco plástico) parece correto;Confirmar na operação
+baixa;tecnologia;32;Lâmpadas Fluorescentes G;20.01.21;Lâmpadas fluorescentes/vapor;73;4;8;1;2;"Incineração OK; alternativa específica";tra=24 (Descontaminação de Lâmpadas) se destinador usar
+baixa;tecnologia;31;Lâmpadas Fluorescentes M;20.01.21;Lâmpadas fluorescentes/vapor;73;4;8;1;2;Idem lâmpadas G;tra=24 se processo Well for descontaminação
+baixa;tecnologia;30;Lâmpadas Fluorescentes P;20.01.21;Lâmpadas fluorescentes/vapor;73;4;8;1;2;Idem;tra=24 se aplicável
+baixa;revisar;78;OUTROS RESÍDUOS URBANOS;20.03.01;Outros resíduos urbanos misturas;43;4;8;43;2;Código catch-all — revisar se tipos específicos cobrem;"Manter só se necessário; preferir tipos específicos"
+baixa;revisar;68;RESÍDUOS CONTAMINADOS;15.02.02;Absorventes/filtros contaminados;73;4;8;1;2;Nome genérico — difícil auditar no MTR;Especificar tipo (estopa, filtro, embalagem) nos planos/coletas
+baixa;revisar;47;Embalagem contaminados por resíduos perigosos;15.01.10;Embalagens contaminadas;73;4;8;1;2;Parece correto;Confirmar duplicata com #81 e #36 — evitar overlap confuso
+baixa;revisar;81;EMBALAGEM CONTAMINADA (duplicata?);06.03.13;Sais metais pesados;73;4;8;1;2;Possível duplicata de #47 com IBAMA errado;Unificar ou corrigir IBAMA (ver também linha alta ibama #81)

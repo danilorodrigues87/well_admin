@@ -25,13 +25,13 @@
             <div class="col-md-4 mb-2"><label>Telefone</label><input class="form-control" name="telefone" id="crud-telefone"/></div>
             <div class="col-md-6 mb-2"><label>Plano</label><select class="form-select" name="plano_id" id="crud-plano_id">{{planos_options_modal}}</select></div>
             <div class="col-md-6 mb-2"><label>Status</label><select class="form-select" name="status" id="crud-status"><option value="ativo">Ativo</option><option value="suspenso">Suspenso</option><option value="inativo">Inativo</option></select></div>
-            <div class="col-12"><hr><strong>Endereço</strong></div>
-            <div class="col-md-6 mb-2"><label>Logradouro</label><input class="form-control" name="logradouro" id="crud-logradouro"/></div>
+            <div class="col-12"><hr><strong>Endereço</strong> <small class="text-muted">(informe o CEP para preenchimento automático)</small></div>
+            <div class="col-md-3 mb-2"><label>CEP</label><input class="form-control" name="cep" id="crud-cep" inputmode="numeric" placeholder="00000-000" maxlength="9"/></div>
+            <div class="col-md-7 mb-2"><label>Logradouro</label><input class="form-control" name="logradouro" id="crud-logradouro"/></div>
             <div class="col-md-2 mb-2"><label>Nº</label><input class="form-control" name="numero" id="crud-numero"/></div>
             <div class="col-md-4 mb-2"><label>Bairro</label><input class="form-control" name="bairro" id="crud-bairro"/></div>
-            <div class="col-md-3 mb-2"><label>CEP</label><input class="form-control" name="cep" id="crud-cep"/></div>
             <div class="col-md-6 mb-2"><label>Cidade</label><input class="form-control" name="cidade" id="crud-cidade"/></div>
-            <div class="col-md-3 mb-2"><label>UF</label><input class="form-control" name="uf" id="crud-uf" maxlength="2"/></div>
+            <div class="col-md-2 mb-2"><label>UF</label><input class="form-control" name="uf" id="crud-uf" maxlength="2" style="text-transform:uppercase"/></div>
             <div class="col-12"><hr><strong>Responsável</strong></div>
             <div class="col-md-6 mb-2"><label>Nome</label><input class="form-control" name="responsavel" id="crud-responsavel"/></div>
             <div class="col-md-6 mb-2"><label>Telefone</label><input class="form-control" name="telefone_resp" id="crud-telefone_resp"/></div>

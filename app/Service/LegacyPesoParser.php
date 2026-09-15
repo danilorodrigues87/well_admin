@@ -70,17 +70,15 @@ class LegacyPesoParser
         ];
     }
 
+    /**
+     * Legado Well Eco usa ponto como decimal com 3 casas de exibição:
+     * "5.200 Kg" = 5,2 kg (não 5200 kg).
+     */
     private static function parseQuantity(string $raw): float
     {
         $raw = trim(str_replace(',', '.', $raw));
         if ($raw === '') {
             return 0.0;
-        }
-
-        if (preg_match('/^(\d+)\.(\d+)$/', $raw, $m)) {
-            if ($m[1] !== '0' && strlen($m[2]) === 3) {
-                return (float)($m[1].$m[2]);
-            }
         }
 
         return (float)$raw;

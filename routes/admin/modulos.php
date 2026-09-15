@@ -4,7 +4,6 @@ use App\Controller\Admin;
 use App\Http\Response;
 
 $modulosPendentes = [
-    ['/painel/pagamentos', 'pagamentos', 'Pagamentos'],
 ];
 
 foreach ($modulosPendentes as [$path, $module, $title]) {

@@ -26,7 +26,10 @@ class Clientes extends Page
             'planos_options' => self::planosOptions(true),
             'planos_options_modal' => self::planosOptions(false),
         ]);
-        return self::getPage('Clientes', $content, 'clientes', self::crudScripts('/painel/clientes'));
+        $scripts = self::crudScripts('/painel/clientes')
+            .'<script src="'.URL.'/resources/js/crud-clientes.js"></script>';
+
+        return self::getPage('Clientes', $content, 'clientes', $scripts);
     }
 
     public static function list($request): string
@@ -144,11 +147,16 @@ class Clientes extends Page
             return CrudHelper::jsonError('Nome fantasia e razão social são obrigatórios.');
         }
 
-        if ($id > 0) {
-            EntityCliente::update($id, $data);
-        } else {
-            EntityCliente::insert($data);
+        try {
+            if ($id > 0) {
+                EntityCliente::update($id, $data);
+            } else {
+                EntityCliente::insert($data);
+            }
+        } catch (\Throwable $e) {
+            return CrudHelper::jsonError('Erro ao salvar cliente. Verifique os dados e tente novamente.');
         }
+
         return CrudHelper::jsonOk(['message' => 'Cliente salvo com sucesso.']);
     }
 

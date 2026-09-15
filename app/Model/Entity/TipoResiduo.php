@@ -2,6 +2,7 @@
 
 namespace App\Model\Entity;
 
+use App\Common\Helpers\IbamaCodigoHelper;
 use App\Model\Db\Database;
 use PDO;
 
@@ -25,7 +26,10 @@ class TipoResiduo
     {
         $db = new Database();
         $stmt = $db->execute(
-            'SELECT COUNT(*) AS qtd FROM tipos_residuos t WHERE '.$where,
+            'SELECT COUNT(*) AS qtd FROM tipos_residuos t
+             LEFT JOIN residuo_classes c ON c.id = t.classe_id
+             LEFT JOIN residuo_grupos g ON g.id = t.grupo_id
+             WHERE '.$where,
             $params
         );
         return (int)$stmt->fetch(PDO::FETCH_ASSOC)['qtd'];
@@ -52,7 +56,7 @@ class TipoResiduo
 
     public static function findByCodIbama(string $codIbama): ?self
     {
-        $codIbama = trim($codIbama);
+        $codIbama = IbamaCodigoHelper::normalize(trim($codIbama));
         if ($codIbama === '') {
             return null;
         }
@@ -66,6 +70,7 @@ class TipoResiduo
             [$codIbama]
         );
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ? self::fromArray($row) : null;
     }
 

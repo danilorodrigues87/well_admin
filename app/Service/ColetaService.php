@@ -3,15 +3,16 @@
 namespace App\Service;
 
 use App\Common\ColetaDefaults;
+use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\SinirConfig;
 use App\Model\Db\Database;
-use App\Service\Sinir\SinirManifestoService;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
+use App\Model\Entity\Usuario as EntityUsuario;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 use PDO;
 
@@ -41,6 +42,9 @@ class ColetaService
 
         $transporte = ColetaDefaults::transportador();
         $destino = ColetaDefaults::destinador();
+        $motoristaNome = ColetorSelectHelper::isColetorAtivo($coletorId)
+            ? ColetorSelectHelper::nomeById($coletorId)
+            : '';
 
         $db = new Database();
         $db->beginTransaction();
@@ -77,7 +81,7 @@ class ColetaService
                     $cliente->plano_nome,
                     $transporte['nome'],
                     $transporte['cnpj'],
-                    $transporte['motorista'],
+                    $motoristaNome,
                     $destino['nome'],
                     $destino['cnpj'],
                     $destino['endereco'],
@@ -100,6 +104,10 @@ class ColetaService
 
         $veiculoId = (int)($dados['veiculo_id'] ?? 0);
         $veiculo = $veiculoId > 0 ? EntityVeiculo::getById($veiculoId) : null;
+        $motoristaNome = trim((string)($dados['motorista_nome'] ?? ''));
+        if ($motoristaNome === '') {
+            throw new \InvalidArgumentException('Selecione o motorista (coletor).');
+        }
 
         EntityColeta::update($coletaId, [
             'veiculo_id' => $veiculo ? $veiculoId : null,
@@ -112,7 +120,7 @@ class ColetaService
         EntityColetaSnapshot::update($coletaId, [
             'transportador_nome' => trim((string)($dados['transportador_nome'] ?? '')),
             'transportador_cnpj' => trim((string)($dados['transportador_cnpj'] ?? '')),
-            'motorista_nome' => trim((string)($dados['motorista_nome'] ?? '')),
+            'motorista_nome' => $motoristaNome,
             'veiculo_descricao' => $veiculo ? trim($veiculo->marca.' '.$veiculo->modelo) : trim((string)($dados['veiculo_descricao'] ?? '')),
             'veiculo_placa' => $veiculo ? $veiculo->placa : trim((string)($dados['veiculo_placa'] ?? '')),
             'destinador_nome' => trim((string)($dados['destinador_nome'] ?? '')),
@@ -165,6 +173,11 @@ class ColetaService
             throw new \InvalidArgumentException('Adicione ao menos um resíduo antes de finalizar.');
         }
 
+        $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
+        if (!$snapshot || trim((string)$snapshot->motorista_nome) === '') {
+            throw new \InvalidArgumentException('Salve os dados de transporte (motorista) antes de finalizar.');
+        }
+
         $coleta = EntityColeta::getById($coletaId);
         if (!$coleta) {
             throw new \InvalidArgumentException('Coleta não encontrada.');
@@ -197,13 +210,7 @@ class ColetaService
 
             $db->commit();
 
-            if (SinirConfig::isEnabled()) {
-                try {
-                    (new SinirManifestoService())->enviarColeta($coletaId);
-                } catch (\Throwable) {
-                    // Falha SINIR não reverte a finalização local.
-                }
-            }
+            // SINIR: status pendente — envio via reenvio no painel (não bloqueia HTTP da finalização).
 
             return $numeroMtr;
         } catch (\Throwable $e) {

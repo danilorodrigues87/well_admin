@@ -8,6 +8,11 @@
 !/storage/coletas/.gitkeep
 /storage/boletos/*
 !/storage/boletos/.gitkeep
+/storage/inter/*
+!/storage/inter/.gitkeep
+!/storage/inter/README.md
+/database/Inter_API-Chave_e_Certificado/*.crt
+/database/Inter_API-Chave_e_Certificado/*.key
 *.log
 .DS_Store
 Thumbs.db
