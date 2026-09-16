@@ -2,6 +2,7 @@
 
 namespace App\Service\Inter;
 
+use App\Common\DebugTrace;
 use App\Common\InterConfig;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use App\Service\Banco\BancoGatewayInterface;
@@ -33,6 +34,19 @@ class InterCobrancaService implements BancoGatewayInterface
     public function emitirCobranca(array $payload): array
     {
         $token = $this->requireToken();
+        // #region agent log
+        DebugTrace::log('A', 'InterCobrancaService.php:emitir', 'pre-cobranca config', [
+            'token_ok' => $token['ok'],
+            'token_status' => $token['raw_status'] ?? 0,
+            'inter_env' => InterConfig::env(),
+            'base_url' => InterConfig::baseUrl(),
+            'conta' => DebugTrace::maskConta(InterConfig::contaCorrente()),
+            'client_id' => DebugTrace::maskId(InterConfig::clientId()),
+            'cert_readable' => is_readable(InterConfig::certPath()),
+            'key_readable' => is_readable(InterConfig::keyPath()),
+            'valor_nominal' => $payload['valorNominal'] ?? null,
+        ]);
+        // #endregion
         if (!$token['ok']) {
             return [
                 'ok' => false,
@@ -49,17 +63,31 @@ class InterCobrancaService implements BancoGatewayInterface
             $payload,
             $token['token']
         );
+        // #region agent log
+        DebugTrace::log('A', 'InterCobrancaService.php:emitir', 'cobranca response', [
+            'ok' => $response['ok'],
+            'status' => $response['status'],
+            'error' => $response['error'],
+        ]);
+        // #endregion
 
         $body = $response['body'];
         $codigo = is_array($body) ? (string)($body['codigoSolicitacao'] ?? '') : '';
+
+        $error = $response['ok'] && $codigo === ''
+            ? 'Resposta sem codigoSolicitacao'
+            : $response['error'];
+        if ($response['status'] === 401) {
+            $error = 'Conta corrente Inter rejeitada (HTTP 401). Verifique INTER_CONTA_CORRENTE no .env — '
+                .'número real da conta PJ, somente dígitos, sem traço. '
+                .'Detalhe Inter: '.($response['error'] ?? 'Login/senha inválido');
+        }
 
         return [
             'ok' => $response['ok'] && $codigo !== '',
             'codigo_solicitacao' => $codigo !== '' ? $codigo : null,
             'body' => $body,
-            'error' => $response['ok'] && $codigo === ''
-                ? 'Resposta sem codigoSolicitacao'
-                : $response['error'],
+            'error' => $error,
             'raw_status' => $response['status'],
         ];
     }

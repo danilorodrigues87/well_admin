@@ -7,7 +7,8 @@ alwaysApply: true
 # Well Eco Admin — regras para agentes
 
 ## Contexto
-- Single-tenant Well Eco. **Sem** `id_admin`, **sem** painel Master, **sem** módulos escolares CTI.
+- Single-tenant Well Eco Admin (projeto interno). **Sem** `id_admin`, **sem** painel Master, **sem** módulos escolares CTI.
+- **Marca ao cliente:** `CompanyConfig::name()` → Well Soluções Ambientais · `CompanyConfig::shortName()` → Well S.A. — **nunca** "Well Eco" em e-mail, boleto ou comunicação externa. Variáveis: `COMPANY_NAME`, `COMPANY_SHORT_NAME`, `MAIL_FROM_NAME` no `.env`.
 - Banco novo: `well_admin`. Legado: `well_antigo` (somente leitura para ETL).
 
 ## Arquitetura

@@ -200,4 +200,6 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-15 | Planos: `gera_credito` em `plano_itens` — recicláveis (papelão, alumínio) descontam mensalidade por kg coletado |
 | 2026-09-15 | Backfill coletas legado: `TipoResiduoMatcher` + `ColetaItemLegacyResolver` (embalagem truncada, cliente/plano) + `audit_coleta_itens_tipo.php` — 100% `tipo_residuo_id` |
 | 2026-09-15 | SINIR sync: `SinirCatalogService` + `sinir_sync_residuos.php` (listas API → códigos em `tipos_residuos`, `--dry-run`/`--csv`) |
+| 2026-09-16 | Marca: `CompanyConfig` + `COMPANY_NAME` / `COMPANY_SHORT_NAME` no `.env` — e-mails e boletos usam Well S.A. / Well Soluções Ambientais (não "Well Eco") |
+| 2026-09-16 | Pagamentos: sync status Inter + baixa manual na aba Cobranças emitidas; histórico paginado (20/página) e filtro status select |
 | 2026-09-15 | Coleta wizard: motorista = select de coletores (bloqueado para função Coletor); Tom Select nos resíduos; modal loading na finalização; SINIR não bloqueia HTTP |

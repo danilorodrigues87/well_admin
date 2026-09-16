@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Common\CobrancaConfig;
 use App\Common\Helpers\CrudHelper;
 use App\Common\InterConfig;
+use App\Model\Db\Pagination;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use App\Model\Entity\Plano as EntityPlano;
@@ -60,7 +61,7 @@ class Pagamentos extends Page
         ], $cfg));
 
         $scripts = self::crudScripts('/painel/pagamentos', false)
-            .'<script src="'.URL.'/resources/js/pagamentos.js"></script>';
+            .'<script src="'.URL.'/resources/js/pagamentos.js?v=20260916e"></script>';
 
         return self::getPage('Pagamentos', $content, 'pagamentos', $scripts);
     }
@@ -146,30 +147,33 @@ class Pagamentos extends Page
             $params[] = $status;
         }
 
-        $rows = EntityInterCobranca::listHistorico($where, $params, 200);
+        $page = max(1, (int)($post['page'] ?? 1));
+        $perPage = 20;
+        $total = EntityInterCobranca::countHistorico($where, $params);
+        $pagination = new Pagination($total, $page, $perPage);
+        $rows = EntityInterCobranca::listHistorico($where, $params, $pagination->getLimit());
         $itens = '';
 
         foreach ($rows as $c) {
             $comp = $c->competencia ? date('m/Y', strtotime($c->competencia.'-01')) : '—';
             $venc = date('d/m/Y', strtotime($c->data_vencimento));
             $valor = number_format($c->valor_nominal, 2, ',', '.');
-            $emailBadge = $c->email_enviado_em
-                ? '<span class="badge bg-success">Enviado</span>'
-                : '<span class="badge bg-secondary">Não enviado</span>';
+            if ($c->email_enviado_em) {
+                $emailBadge = '<span class="badge bg-success">Enviado</span>';
+            } elseif ($c->email_erro) {
+                $emailBadge = '<span class="badge bg-danger" title="'.CrudHelper::e($c->email_erro).'">Falhou</span>';
+            } else {
+                $emailBadge = '<span class="badge bg-secondary">Não enviado</span>';
+            }
 
             $itens .= '<tr>
                 <td>'.CrudHelper::e((string)($c->cliente_nome ?? '')).'</td>
                 <td>'.$comp.'</td>
                 <td class="text-end">R$ '.$valor.'</td>
                 <td>'.$venc.'</td>
-                <td>'.CrudHelper::e($c->status).'</td>
+                <td>'.self::statusBadge($c->status).'</td>
                 <td>'.$emailBadge.'</td>
-                <td class="text-nowrap">
-                    <a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/pagamentos/'.$c->id.'/pdf" target="_blank" title="PDF"><i class="fas fa-file-pdf"></i></a>
-                    <button type="button" class="btn btn-sm btn-outline-secondary btn-copy" data-copy="'.CrudHelper::e((string)$c->linha_digitavel).'" title="Copiar linha" '.($c->linha_digitavel ? '' : 'disabled').'><i class="fas fa-barcode"></i></button>
-                    <button type="button" class="btn btn-sm btn-outline-info btn-copy" data-copy="'.CrudHelper::e((string)$c->pix_copia_cola).'" title="Copiar PIX" '.($c->pix_copia_cola ? '' : 'disabled').'><i class="fas fa-qrcode"></i></button>
-                    <button type="button" class="btn btn-sm btn-outline-success btn-email" data-id="'.$c->id.'" title="Enviar e-mail"><i class="fas fa-envelope"></i></button>
-                </td>
+                <td class="text-nowrap">'.self::historicoAcoesHtml($c).'</td>
             </tr>';
         }
 
@@ -180,8 +184,9 @@ class Pagamentos extends Page
         return self::jsonLista([
             'success' => true,
             'itens' => $itens,
-            'pagination' => '',
-            'total' => count($rows),
+            'pagination' => Pagination::renderNav($pagination, 'loadPageHistorico'),
+            'total' => $total,
+            'page' => $pagination->getCurrentPage(),
         ]);
     }
 
@@ -264,6 +269,47 @@ class Pagamentos extends Page
         ], JSON_UNESCAPED_UNICODE);
     }
 
+    public static function sincronizarStatus($request, int $id): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+
+        $result = FaturamentoService::sincronizarCobranca($id);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['error'] ?? 'Falha ao sincronizar');
+        }
+
+        $msg = $result['alterou']
+            ? 'Status atualizado: '.$result['status_anterior'].' → '.$result['status']
+            : 'Status já estava atualizado ('.$result['status'].')';
+
+        return CrudHelper::jsonOk([
+            'message' => $msg,
+            'status' => $result['status'],
+            'alterou' => $result['alterou'],
+        ]);
+    }
+
+    public static function baixaManual($request, int $id): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+
+        $result = FaturamentoService::baixaManual($id);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['error'] ?? 'Falha na baixa manual');
+        }
+
+        return CrudHelper::jsonOk([
+            'message' => 'Baixa manual registrada — status PAGO',
+            'status' => $result['status'],
+        ]);
+    }
+
     public static function enviarEmail($request, int $id): string
     {
         $post = $request->getPostVars();
@@ -319,6 +365,36 @@ class Pagamentos extends Page
         header('Content-Length: '.filesize($path));
         readfile($path);
         exit;
+    }
+
+    private static function statusBadge(string $status): string
+    {
+        $s = mb_strtoupper(trim($status));
+        $cls = match ($s) {
+            'PAGO' => 'success',
+            'EMITIDA' => 'primary',
+            'VENCIDO' => 'warning',
+            'CANCELADO' => 'secondary',
+            default => 'secondary',
+        };
+
+        return '<span class="badge bg-'.$cls.'">'.CrudHelper::e($status).'</span>';
+    }
+
+    private static function historicoAcoesHtml(EntityInterCobranca $c): string
+    {
+        $status = mb_strtoupper(trim($c->status));
+        $podeBaixa = !in_array($status, ['PAGO', 'CANCELADO'], true);
+        $baixaBtn = $podeBaixa
+            ? '<button type="button" class="btn btn-sm btn-outline-warning btn-baixa" data-id="'.$c->id.'" title="Baixa manual"><i class="fas fa-check"></i></button>'
+            : '';
+
+        return '<a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/pagamentos/'.$c->id.'/pdf" target="_blank" title="PDF"><i class="fas fa-file-pdf"></i></a>'
+            .'<button type="button" class="btn btn-sm btn-outline-secondary btn-copy" data-copy="'.CrudHelper::e((string)$c->linha_digitavel).'" title="Copiar linha" '.($c->linha_digitavel ? '' : 'disabled').'><i class="fas fa-barcode"></i></button>'
+            .'<button type="button" class="btn btn-sm btn-outline-info btn-copy" data-copy="'.CrudHelper::e((string)$c->pix_copia_cola).'" title="Copiar PIX" '.($c->pix_copia_cola ? '' : 'disabled').'><i class="fas fa-qrcode"></i></button>'
+            .'<button type="button" class="btn btn-sm btn-outline-success btn-email" data-id="'.$c->id.'" title="Enviar e-mail"><i class="fas fa-envelope"></i></button>'
+            .'<button type="button" class="btn btn-sm btn-outline-dark btn-sync" data-id="'.$c->id.'" title="Sincronizar com Inter"><i class="fas fa-sync"></i></button>'
+            .$baixaBtn;
     }
 
     /** @param list<array<string,mixed>> $itens */

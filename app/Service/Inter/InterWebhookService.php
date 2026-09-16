@@ -72,6 +72,19 @@ class InterWebhookService
         return [$decoded];
     }
 
+    /** Normaliza situação Inter para status interno (sync/consulta). */
+    public static function resolveStatus(string $situacao, string $fallback = 'EMITIDA'): string
+    {
+        $mapped = self::mapSituacaoInter($situacao);
+        if ($mapped !== null) {
+            return $mapped;
+        }
+
+        $s = mb_strtoupper(trim($situacao));
+
+        return $s !== '' ? $s : $fallback;
+    }
+
     private static function mapSituacaoInter(string $situacao): ?string
     {
         $s = mb_strtoupper(trim($situacao));
@@ -80,6 +93,7 @@ class InterWebhookService
             'RECEBIDO', 'MARCADO_RECEBIDO', 'PAGO', 'LIQUIDADO' => 'PAGO',
             'CANCELADO', 'CANCELADA' => 'CANCELADO',
             'EXPIRADO', 'ATRASADO', 'VENCIDO', 'VENCIDA' => 'VENCIDO',
+            'EMITIDA', 'A_RECEBER' => 'EMITIDA',
             default => null,
         };
     }

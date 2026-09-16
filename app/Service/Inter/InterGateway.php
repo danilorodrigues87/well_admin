@@ -2,6 +2,7 @@
 
 namespace App\Service\Inter;
 
+use App\Common\DebugTrace;
 use App\Common\InterConfig;
 
 class InterGateway
@@ -112,14 +113,36 @@ class InterGateway
         $decoded = json_decode($raw, true);
         $body = is_array($decoded) ? $decoded : null;
 
+        $error = $status >= 400
+            ? self::extractApiError($body, $raw)
+            : ($curlError !== '' ? $curlError : null);
+
+        // #region agent log
+        $logUrl = preg_replace('#/oauth/v2/token.*#', '/oauth/v2/token', $url);
+        $logUrl = preg_replace('#/cobranca/v3/cobrancas.*#', '/cobranca/v3/cobrancas', $logUrl);
+        DebugTrace::log(
+            str_contains($url, '/oauth/') ? 'D' : 'A',
+            'InterGateway.php:curlRequest',
+            'http response',
+            [
+                'method' => strtoupper($method),
+                'url' => $logUrl,
+                'status' => $status,
+                'ok' => $status >= 200 && $status < 300,
+                'error' => $error,
+                'curl_errno' => $curlErrno,
+                'with_mtls' => $withMtls,
+                'conta_header' => str_contains($url, 'cobranca') ? DebugTrace::maskConta(InterConfig::contaCorrente()) : null,
+            ]
+        );
+        // #endregion
+
         return [
             'ok' => $status >= 200 && $status < 300,
             'status' => $status,
             'body' => $body,
             'raw' => $raw,
-            'error' => $status >= 400
-                ? self::extractApiError($body, $raw)
-                : ($curlError !== '' ? $curlError : null),
+            'error' => $error,
         ];
     }
 

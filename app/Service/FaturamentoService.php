@@ -8,6 +8,7 @@ use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use App\Service\Inter\InterCobrancaService;
 use App\Service\Inter\InterPayloadBuilder;
+use App\Service\Inter\InterWebhookService;
 
 class FaturamentoService
 {
@@ -198,6 +199,67 @@ class FaturamentoService
     }
 
     /**
+     * Consulta o Inter e atualiza status, linha, PIX e PDF local.
+     *
+     * @return array{ok:bool,error:?string,status:?string,status_anterior:?string,alterou:bool}
+     */
+    public static function sincronizarCobranca(int $interCobrancaId): array
+    {
+        $entity = EntityInterCobranca::getById($interCobrancaId);
+        if (!$entity) {
+            return ['ok' => false, 'error' => 'Cobrança não encontrada', 'status' => null, 'status_anterior' => null, 'alterou' => false];
+        }
+
+        $statusAnterior = $entity->status;
+        $result = self::enriquecerCobranca($interCobrancaId);
+        if (!$result['ok']) {
+            return [
+                'ok' => false,
+                'error' => $result['error'],
+                'status' => $statusAnterior,
+                'status_anterior' => $statusAnterior,
+                'alterou' => false,
+            ];
+        }
+
+        $atualizada = EntityInterCobranca::getById($interCobrancaId);
+        $statusNovo = $atualizada?->status ?? $statusAnterior;
+
+        return [
+            'ok' => true,
+            'error' => null,
+            'status' => $statusNovo,
+            'status_anterior' => $statusAnterior,
+            'alterou' => $statusNovo !== $statusAnterior,
+        ];
+    }
+
+    /**
+     * Baixa manual — apenas registro local (webhook falhou ou pagamento confirmado fora do fluxo).
+     *
+     * @return array{ok:bool,error:?string,status:?string}
+     */
+    public static function baixaManual(int $interCobrancaId): array
+    {
+        $entity = EntityInterCobranca::getById($interCobrancaId);
+        if (!$entity) {
+            return ['ok' => false, 'error' => 'Cobrança não encontrada', 'status' => null];
+        }
+
+        $status = mb_strtoupper(trim($entity->status));
+        if ($status === 'PAGO') {
+            return ['ok' => false, 'error' => 'Cobrança já está paga', 'status' => $status];
+        }
+        if ($status === 'CANCELADO') {
+            return ['ok' => false, 'error' => 'Cobrança cancelada não pode receber baixa manual', 'status' => $status];
+        }
+
+        $entity->update(['status' => 'PAGO']);
+
+        return ['ok' => true, 'error' => null, 'status' => 'PAGO'];
+    }
+
+    /**
      * @return array{ok:bool,error:?string}
      */
     public static function enriquecerCobranca(int $interCobrancaId): array
@@ -216,7 +278,8 @@ class FaturamentoService
         $body = $consulta['body'];
         $linha = (string)($body['boleto']['linhaDigitavel'] ?? $body['linhaDigitavel'] ?? '');
         $pix = (string)($body['pix']['pixCopiaECola'] ?? $body['pixCopiaECola'] ?? '');
-        $status = (string)($body['cobranca']['situacao'] ?? $body['situacao'] ?? $entity->status);
+        $statusRaw = (string)($body['cobranca']['situacao'] ?? $body['situacao'] ?? '');
+        $status = InterWebhookService::resolveStatus($statusRaw, $entity->status);
 
         $pdfPath = self::salvarPdf($inter, $entity->codigo_solicitacao, $entity->id);
 
@@ -224,7 +287,7 @@ class FaturamentoService
             'linha_digitavel' => $linha !== '' ? $linha : null,
             'pix_copia_cola' => $pix !== '' ? $pix : null,
             'pdf_path' => $pdfPath,
-            'status' => $status !== '' ? $status : $entity->status,
+            'status' => $status,
             'payload_response' => json_encode($body, JSON_UNESCAPED_UNICODE),
         ]);
 

@@ -130,7 +130,13 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small mb-0">Status</label>
-                        <input type="text" id="hist-status" class="form-control" placeholder="EMITIDA, PAGO..."/>
+                        <select id="hist-status" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="EMITIDA">Emitida</option>
+                            <option value="PAGO">Pago</option>
+                            <option value="VENCIDO">Vencido</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
                     </div>
                     <div class="col-md-2">
                         <button type="button" class="btn btn-primary w-100" id="btn-carregar-historico"><i class="fas fa-sync me-1"></i> Carregar</button>
@@ -152,6 +158,8 @@
                         <tbody id="tbody-historico"></tbody>
                     </table>
                 </div>
+                <p class="text-muted small mb-1" id="hist-total"></p>
+                <div id="hist-pagination"></div>
             </div>
         </div>
     </div>

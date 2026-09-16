@@ -46,3 +46,17 @@ $obRouter->post('/painel/pagamentos/{id}/email', [
         return new Response(200, Pagamentos::enviarEmail($request, $id), 'application/json');
     },
 ]);
+
+$obRouter->post('/painel/pagamentos/{id}/sync', [
+    'middlewares' => ['required-admin-login', 'required-module:pagamentos'],
+    function ($request, int $id) {
+        return new Response(200, Pagamentos::sincronizarStatus($request, $id), 'application/json');
+    },
+]);
+
+$obRouter->post('/painel/pagamentos/{id}/baixa', [
+    'middlewares' => ['required-admin-login', 'required-module:pagamentos'],
+    function ($request, int $id) {
+        return new Response(200, Pagamentos::baixaManual($request, $id), 'application/json');
+    },
+]);

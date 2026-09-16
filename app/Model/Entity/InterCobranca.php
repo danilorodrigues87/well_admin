@@ -94,10 +94,21 @@ class InterCobranca
         return is_array($row) ? self::fromArray($row) : null;
     }
 
+    public static function countHistorico(string $where, array $params): int
+    {
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT COUNT(*) AS qtd FROM inter_cobrancas ic WHERE '.$where,
+            $params
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return (int)($row['qtd'] ?? 0);
+    }
+
     /**
      * @return list<self>
      */
-    public static function listHistorico(string $where, array $params, int $limit = 100): array
+    public static function listHistorico(string $where, array $params, string $limit): array
     {
         $db = new Database();
         $stmt = $db->execute(

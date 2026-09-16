@@ -122,6 +122,8 @@ class InterConfig
         }
         if (self::contaCorrente() === '') {
             $errors[] = 'INTER_CONTA_CORRENTE ausente no .env';
+        } elseif (self::contaCorrente() === '12345678') {
+            $errors[] = 'INTER_CONTA_CORRENTE ainda é o valor de exemplo (12345678) — use o número real da conta PJ no Inter';
         }
         if (!is_readable(self::certPath())) {
             $errors[] = 'Certificado não encontrado: '.self::certPath();

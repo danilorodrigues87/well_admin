@@ -110,9 +110,9 @@ Sandbox: `INTER_ENV=sandbox` → `https://cdpj-sandbox.partners.uatinter.co`
 5. **Gerar boletos** — emissão Inter em lote + PDF/linha/PIX
 
 **Valor mínimo:** a API Cobrança v3 do Inter exige `valorNominal >= 2.50`. Valores menores (ex.: R$ 1,00 para teste) são rejeitados pela API.
-6. Aba **Cobranças emitidas** — download PDF, copiar linha/PIX, reenviar e-mail
+6. Aba **Cobranças emitidas** — download PDF, copiar linha/PIX, reenviar e-mail, **sincronizar status** (consulta Inter) e **baixa manual** (marca PAGO localmente)
 
-**E-mail:** configure `MAIL_HOST`, `MAIL_USER`, `MAIL_PASS` no `.env`.
+**E-mail:** SMTP da hospedagem (ex.: `mail.well.eco.br`, porta **465**, `MAIL_ENCRYPTION=ssl`). Porta 587 usa `tls`. Não usar `tls` na porta 465 — trava a conexão.
 
 **Multa/juros padrão:** `.env` (`COBRANCA_MULTA_*`, `COBRANCA_MORA_*`) ou aba Configurações (persiste em `config_sistema`).
 

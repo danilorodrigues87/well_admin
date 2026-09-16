@@ -2,13 +2,44 @@
 
 namespace App\Service;
 
+use App\Common\CompanyConfig;
 use App\Common\Environment;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use App\Utils\View;
+use PHPMailer\PHPMailer\Exception as MailException;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class MailService
 {
+    /** @return array{host:string,user:string,pass:string,port:int,from:string,from_name:string,encryption:string} */
+    private static function smtpConfig(): array
+    {
+        $port = (int)Environment::get('MAIL_PORT', Environment::get('SMTP_PORT', '587'));
+        $encryption = strtolower(trim((string)Environment::get(
+            'MAIL_ENCRYPTION',
+            Environment::get('SMTP_ENCRYPTION', $port === 465 ? 'ssl' : 'tls')
+        )));
+
+        // Porta 465 = SSL implícito (SMTPS). Porta 587 = STARTTLS.
+        if ($port === 465 && $encryption === 'tls') {
+            $encryption = 'ssl';
+        }
+        if ($port === 587 && $encryption === 'ssl') {
+            $encryption = 'tls';
+        }
+
+        return [
+            'host' => trim((string)Environment::get('MAIL_HOST', Environment::get('SMTP_HOST', ''))),
+            'user' => trim((string)Environment::get('MAIL_USER', Environment::get('SMTP_USER', ''))),
+            'pass' => (string)Environment::get('MAIL_PASS', Environment::get('SMTP_PASS', '')),
+            'port' => $port,
+            'from' => trim((string)Environment::get('MAIL_FROM', Environment::get('SMTP_FROM_EMAIL', ''))),
+            'from_name' => CompanyConfig::mailFromName(),
+            'encryption' => $encryption,
+        ];
+    }
+
     /**
      * @return array{ok:bool,error:?string}
      */
@@ -21,11 +52,11 @@ class MailService
             return ['ok' => false, 'error' => 'E-mail do cliente ausente'];
         }
 
-        $host = trim((string)Environment::get('MAIL_HOST', ''));
-        if ($host === '') {
-            $cobranca->update(['email_erro' => 'MAIL_HOST não configurado no .env']);
+        $cfg = self::smtpConfig();
+        if ($cfg['host'] === '' || $cfg['user'] === '' || $cfg['from'] === '') {
+            $cobranca->update(['email_erro' => 'SMTP incompleto no .env']);
 
-            return ['ok' => false, 'error' => 'Servidor SMTP não configurado'];
+            return ['ok' => false, 'error' => 'SMTP incompleto (MAIL_HOST, MAIL_USER, MAIL_FROM no .env)'];
         }
 
         $competencia = $cobranca->competencia ?? '—';
@@ -38,6 +69,8 @@ class MailService
         $html = View::render('email/boleto', [
             'cliente_nome' => htmlspecialchars($cliente->nome_fantasia, ENT_QUOTES, 'UTF-8'),
             'competencia' => htmlspecialchars($competenciaLabel, ENT_QUOTES, 'UTF-8'),
+            'empresa_nome' => htmlspecialchars(CompanyConfig::name(), ENT_QUOTES, 'UTF-8'),
+            'empresa_sigla' => htmlspecialchars(CompanyConfig::shortName(), ENT_QUOTES, 'UTF-8'),
             'valor' => number_format($cobranca->valor_nominal, 2, ',', '.'),
             'vencimento' => date('d/m/Y', strtotime($cobranca->data_vencimento)),
             'bloco_linha' => $linha !== ''
@@ -49,9 +82,7 @@ class MailService
                 : '',
         ]);
 
-        $subject = 'Boleto Well Eco — competência '.$competenciaLabel;
-        $from = trim((string)Environment::get('MAIL_FROM', 'noreply@well.eco.br'));
-        $fromName = trim((string)Environment::get('MAIL_FROM_NAME', 'Well Eco'));
+        $subject = 'Boleto '.CompanyConfig::shortName().' — competência '.$competenciaLabel;
 
         $attachments = [];
         $pdfPath = $cobranca->pdfAbsolutePath();
@@ -59,18 +90,7 @@ class MailService
             $attachments[] = ['path' => $pdfPath, 'name' => 'boleto-'.$cobranca->id.'.pdf'];
         }
 
-        $sent = self::sendSmtp(
-            $host,
-            (int)Environment::get('MAIL_PORT', '587'),
-            trim((string)Environment::get('MAIL_USER', '')),
-            trim((string)Environment::get('MAIL_PASS', '')),
-            $from,
-            $fromName,
-            $cliente->email,
-            $subject,
-            $html,
-            $attachments
-        );
+        $sent = self::sendViaPhpMailer($cfg, trim($cliente->email), $subject, $html, $attachments);
 
         if ($sent['ok']) {
             $cobranca->update([
@@ -86,110 +106,71 @@ class MailService
         return $sent;
     }
 
+    /** @param list<array{path:string,name:string}> $attachments */
+    private static function resolveEncryption(string $encryption): string|bool
+    {
+        return match ($encryption) {
+            'ssl', 'smtps' => PHPMailer::ENCRYPTION_SMTPS,
+            'none' => false,
+            default => PHPMailer::ENCRYPTION_STARTTLS,
+        };
+    }
+
     /**
+     * @param array{host:string,user:string,pass:string,port:int,from:string,from_name:string,encryption:string} $cfg
      * @param list<array{path:string,name:string}> $attachments
      * @return array{ok:bool,error:?string}
      */
-    private static function sendSmtp(
-        string $host,
-        int $port,
-        string $user,
-        string $pass,
-        string $from,
-        string $fromName,
+    private static function sendViaPhpMailer(
+        array $cfg,
         string $to,
         string $subject,
         string $html,
         array $attachments = []
     ): array {
-        $socket = @stream_socket_client(
-            'tcp://'.$host.':'.$port,
-            $errno,
-            $errstr,
-            20
-        );
-        if (!$socket) {
-            return ['ok' => false, 'error' => 'Conexão SMTP falhou: '.$errstr];
-        }
+        $mail = new PHPMailer(true);
 
-        stream_set_timeout($socket, 20);
-        $read = fn () => fgets($socket, 515) ?: '';
-        $write = function (string $cmd) use ($socket): void {
-            fwrite($socket, $cmd."\r\n");
-        };
+        try {
+            $mail->isSMTP();
+            $mail->Host = $cfg['host'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $cfg['user'];
+            $mail->Password = $cfg['pass'];
+            $mail->SMTPSecure = self::resolveEncryption($cfg['encryption']);
+            $mail->Port = $cfg['port'];
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+            $mail->Timeout = max(5, (int)Environment::get('MAIL_TIMEOUT', '25'));
+            $mail->SMTPKeepAlive = false;
 
-        $read();
-        $write('EHLO well.eco');
-        $read();
-
-        if ($port === 587) {
-            $write('STARTTLS');
-            $read();
-            if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-                fclose($socket);
-
-                return ['ok' => false, 'error' => 'STARTTLS falhou'];
+            if (filter_var(Environment::get('MAIL_SSL_VERIFY', 'true'), FILTER_VALIDATE_BOOLEAN) === false) {
+                $mail->SMTPOptions = [
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true,
+                    ],
+                ];
             }
-            $write('EHLO well.eco');
-            $read();
-        }
 
-        if ($user !== '') {
-            $write('AUTH LOGIN');
-            $read();
-            $write(base64_encode($user));
-            $read();
-            $write(base64_encode($pass));
-            $resp = $read();
-            if (!str_starts_with($resp, '235')) {
-                fclose($socket);
+            $mail->setFrom($cfg['from'], $cfg['from_name']);
+            $mail->addAddress($to);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $html;
+            $mail->AltBody = strip_tags($html);
 
-                return ['ok' => false, 'error' => 'Autenticação SMTP recusada'];
+            foreach ($attachments as $att) {
+                if (is_file($att['path'])) {
+                    $mail->addAttachment($att['path'], $att['name']);
+                }
             }
+
+            $mail->send();
+
+            return ['ok' => true, 'error' => null];
+        } catch (MailException $e) {
+            return ['ok' => false, 'error' => 'SMTP: '.$mail->ErrorInfo];
         }
-
-        $boundary = 'well-eco-'.md5((string)microtime(true));
-        $write('MAIL FROM:<'.$from.'>');
-        $read();
-        $write('RCPT TO:<'.$to.'>');
-        $read();
-        $write('DATA');
-        $read();
-
-        $headers = [
-            'From: '.$fromName.' <'.$from.'>',
-            'To: '.$to,
-            'Subject: '.$subject,
-            'MIME-Version: 1.0',
-            'Content-Type: multipart/mixed; boundary="'.$boundary.'"',
-        ];
-
-        $body = '--'.$boundary."\r\n";
-        $body .= "Content-Type: text/html; charset=UTF-8\r\n\r\n";
-        $body .= $html."\r\n";
-
-        foreach ($attachments as $att) {
-            if (!is_file($att['path'])) {
-                continue;
-            }
-            $content = chunk_split(base64_encode((string)file_get_contents($att['path'])));
-            $body .= '--'.$boundary."\r\n";
-            $body .= 'Content-Type: application/pdf; name="'.$att['name']."\"\r\n";
-            $body .= "Content-Transfer-Encoding: base64\r\n";
-            $body .= 'Content-Disposition: attachment; filename="'.$att['name']."\"\r\n\r\n";
-            $body .= $content."\r\n";
-        }
-
-        $body .= '--'.$boundary."--\r\n";
-        $write(implode("\r\n", $headers)."\r\n\r\n".$body."\r\n.");
-        $resp = $read();
-        $write('QUIT');
-        fclose($socket);
-
-        if (!str_starts_with($resp, '250')) {
-            return ['ok' => false, 'error' => 'Envio SMTP rejeitado'];
-        }
-
-        return ['ok' => true, 'error' => null];
     }
 }

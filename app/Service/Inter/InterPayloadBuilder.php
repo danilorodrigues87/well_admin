@@ -3,6 +3,7 @@
 namespace App\Service\Inter;
 
 use App\Common\CobrancaConfig;
+use App\Common\CompanyConfig;
 use App\Model\Entity\Cliente as EntityCliente;
 
 class InterPayloadBuilder
@@ -42,7 +43,7 @@ class InterPayloadBuilder
             'numDiasAgenda' => 60,
             'pagador' => self::pagador($cliente),
             'mensagem' => [
-                'linha1' => 'Competência '.$competenciaLabel.' - Well Eco',
+                'linha1' => 'Competência '.$competenciaLabel.' - '.CompanyConfig::shortName(),
             ],
         ];
 

@@ -1,5 +1,15 @@
 # Identidade visual — Well Coletas / Well Eco Admin
 
+## Nome da empresa (comunicação ao cliente)
+
+| Uso | Variável `.env` | Padrão |
+|-----|-----------------|--------|
+| Razão / nome completo | `COMPANY_NAME` | Well Soluções Ambientais |
+| Abreviado (boleto, assunto e-mail) | `COMPANY_SHORT_NAME` | Well S.A. |
+| Remetente SMTP | `MAIL_FROM_NAME` | Well S.A. |
+
+Código: `App\Common\CompanyConfig`. Não usar "Well Eco" em textos visíveis ao cliente.
+
 Paleta compartilhada entre o app **FlutterFlow (Well Coletas)** e o **painel web admin**.
 
 Implementação web: [`resources/css/panel-theme.css`](../resources/css/panel-theme.css) (CSS variables Bootstrap 5).
