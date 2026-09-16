@@ -1,0 +1,17 @@
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Termos de Uso</h1>
+    <p class="text-muted">Versão {{versao}} — {{data_versao}}</p>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <p>Este termo regula o uso do painel administrativo da <strong>{{company_name}}</strong>.</p>
+            <ul>
+                <li>O usuário é responsável pela confidencialidade de suas credenciais.</li>
+                <li>Dados de clientes, coletas e MTR devem ser tratados conforme a LGPD.</li>
+                <li>O uso indevido do sistema pode resultar em suspensão do acesso.</li>
+            </ul>
+            <p>Consulte também a <a href="{{url_privacidade}}" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+            <form id="form-termos" onsubmit="return false;">{{csrf_field}}</form>
+            {{bloco_status}}
+        </div>
+    </div>
+</div>

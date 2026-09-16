@@ -2,8 +2,10 @@
 
 namespace App\Common\Helpers;
 
+use App\Common\OperadoraScope;
 use App\Common\SystemModules;
 use App\Model\Entity\FuncaoModulo as EntityFuncaoModulo;
+use App\Model\Entity\Operadora as EntityOperadora;
 use App\Model\Entity\UsuarioModulo as EntityUsuarioModulo;
 
 class ModuleGateHelper
@@ -32,11 +34,28 @@ class ModuleGateHelper
         return self::$cacheFuncao[$funcaoId];
     }
 
+    /** @return string[]|null NULL = todos os módulos da operadora */
+    public static function getSlugsOperadora(?int $operadoraId = null): ?array
+    {
+        $operadoraId = $operadoraId ?? OperadoraScope::getOperadoraId();
+        $operadora = EntityOperadora::getById($operadoraId);
+        if (!$operadora) {
+            return null;
+        }
+
+        return $operadora->getModulosLiberadosSlugs();
+    }
+
     public static function getModulosEfetivos(array $userSession): array
     {
         $funcaoId = (int)($userSession['funcao_id'] ?? 0);
         $isAdmin = !empty($userSession['is_admin']);
         $base = self::getSlugsFuncao($funcaoId, $isAdmin);
+
+        $operadoraSlugs = self::getSlugsOperadora((int)($userSession['operadora_id'] ?? 1));
+        if ($operadoraSlugs !== null) {
+            $base = array_values(array_intersect($base, $operadoraSlugs));
+        }
 
         $usuarioId = (int)($userSession['id'] ?? 0);
         if ($usuarioId <= 0) {

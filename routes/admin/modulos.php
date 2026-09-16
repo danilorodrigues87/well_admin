@@ -15,6 +15,20 @@ foreach ($modulosPendentes as [$path, $module, $title]) {
     ]);
 }
 
+$obRouter->get('/painel/operadora', [
+    'middlewares' => ['required-admin-login', 'required-module:operadora'],
+    function ($request) {
+        return new Response(200, Admin\Operadora::index($request));
+    },
+]);
+
+$obRouter->post('/painel/operadora', [
+    'middlewares' => ['required-admin-login', 'required-module:operadora'],
+    function ($request) {
+        Admin\Operadora::save($request);
+    },
+]);
+
 $obRouter->get('/painel/perfil', [
     'middlewares' => ['required-admin-login', 'required-module:perfil'],
     function ($request) {

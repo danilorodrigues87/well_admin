@@ -1,0 +1,75 @@
+<h1 class="mt-2">Rota do dia</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Rota do dia</li>
+</ol>
+
+<div id="rota-alerta-maps" class="alert alert-warning d-none">
+    Google Maps não configurado. Defina <code>GOOGLE_MAPS_API_KEY</code> no <code>.env</code>.
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row align-items-end g-2">
+            {{coletor_select}}
+            <div class="col-md-8">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary" id="btn-rota-gps">
+                        <i class="fas fa-location-crosshairs me-1"></i> Usar minha localização
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-rota-otimizar">
+                        <i class="fas fa-route me-1"></i> Otimizar rota
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-rota-salvar-ordem">
+                        <i class="fas fa-save me-1"></i> Salvar ordem
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-rota-recarregar">
+                        <i class="fas fa-sync me-1"></i> Recarregar
+                    </button>
+                </div>
+                <div class="small text-muted mt-2" id="rota-origin-info">Origem: não definida</div>
+                <div class="small text-muted" id="rota-resumo"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-list-ol me-1"></i> Paradas do dia</div>
+            <div class="card-body p-0">
+                <div id="rota-paradas-loading" class="text-center py-4 text-muted">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando...
+                </div>
+                <ul id="rota-paradas-list" class="list-group list-group-flush rota-sortable d-none"></ul>
+                <div id="rota-paradas-vazio" class="text-center py-4 text-muted d-none">
+                    Nenhuma coleta pendente na sua rota hoje.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-map me-1"></i> Mapa</div>
+            <div class="card-body p-0">
+                <div id="rota-mapa" style="height:520px;background:#e9ecef;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="rota-csrf" value="">
+<input type="hidden" id="rota-coletor-fixo" value="{{coletor_id}}">
+<input type="hidden" id="rota-is-coletor" value="{{is_coletor}}">
+<input type="hidden" id="rota-maps-configured" value="{{maps_configured}}">
+<input type="hidden" id="rota-fallback-lat" value="{{fallback_lat}}">
+<input type="hidden" id="rota-fallback-lng" value="{{fallback_lng}}">
+
+<script>
+window.WELL_ROTA_DIA = {
+    baseUrl: '{{URL}}/painel/rota-do-dia',
+    mapsKey: '{{maps_key}}',
+    urlColetaNova: '{{URL}}/painel/coleta/nova'
+};
+</script>

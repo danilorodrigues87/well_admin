@@ -2,6 +2,7 @@
   'use strict';
 
   var tipoResiduoTomSelect = null;
+  var rascunhoConferido = !!(window.COLETA_WIZARD && window.COLETA_WIZARD.rascunhoConferido);
 
   function baseUrl() {
     var path = (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl.replace(/^\/+/, '') : 'painel/coleta/nova';
@@ -59,6 +60,21 @@
         Swal.showLoading();
       }
     });
+  }
+
+  function setRascunhoConferido(resumoHtml, evidenciasHtml) {
+    rascunhoConferido = true;
+    if (window.COLETA_WIZARD) {
+      window.COLETA_WIZARD.rascunhoConferido = true;
+    }
+    $('#rascunho-resumo-wrap').removeClass('d-none');
+    if (resumoHtml) {
+      $('#resumo-rascunho').html(resumoHtml);
+    }
+    if (evidenciasHtml) {
+      $('#evidencias-preview').html(evidenciasHtml);
+    }
+    $('#btn-gerar-mtr').prop('disabled', false);
   }
 
   function tipoResiduoValor() {
@@ -151,44 +167,90 @@
     }, 'json');
   };
 
-  window.finalizarColeta = function () {
-    var executar = function () {
-      swalLoading(
-        'Finalizando coleta…',
-        'Gerando número MTR e salvando evidências.<br><small class="text-muted">Não feche esta página.</small>'
-      );
+  window.salvarRascunhoFinal = function () {
+    swalLoading(
+      'Salvando rascunho…',
+      'Enviando fotos e relatório.<br><small class="text-muted">Aguarde — pode demorar com fotos grandes.</small>'
+    );
 
-      var fd = new FormData(document.getElementById('form-finalizar'));
-      fd.append('acao', 'finalizar');
-      fd.append('_csrf', csrf());
+    var fd = new FormData(document.getElementById('form-finalizar'));
+    fd.append('acao', 'salvar_rascunho_final');
+    fd.append('_csrf', csrf());
+
+    $.ajax({
+      url: baseUrl(),
+      method: 'POST',
+      data: fd,
+      processData: false,
+      contentType: false,
+      dataType: 'json',
+      timeout: 180000
+    }).done(function (r) {
+      r = parseJsonResp(r);
+      if (typeof Swal !== 'undefined') Swal.close();
+      if (r.success) {
+        setRascunhoConferido(r.resumo_html, r.evidencias_html);
+        swalOk(r.message || 'Rascunho salvo!');
+        document.getElementById('form-finalizar').querySelectorAll('input[type="file"]').forEach(function (inp) {
+          inp.value = '';
+        });
+      } else {
+        swalErr(r.message || 'Não foi possível salvar o rascunho.');
+      }
+    }).fail(function (xhr) {
+      if (typeof Swal !== 'undefined') Swal.close();
+      var msg = 'Erro ao salvar rascunho.';
+      if (xhr.responseJSON && xhr.responseJSON.message) {
+        msg = xhr.responseJSON.message;
+      } else if (xhr.status === 0 || xhr.statusText === 'timeout') {
+        msg = 'Upload demorou demais. Tente fotos menores ou apenas o relatório.';
+      }
+      swalErr(msg);
+    });
+  };
+
+  window.gerarMtr = function () {
+    if (!rascunhoConferido) {
+      swalErr('Salve o rascunho antes de gerar o MTR.');
+      return;
+    }
+
+    var dataReceb = document.querySelector('#form-transporte input[name="data_recebimento"]')?.value || '';
+    if (!dataReceb) {
+      swalErr('Informe a data de recebimento na aba Transporte e clique em "Salvar e continuar" antes de gerar o MTR.');
+      bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#tab-transporte"]')).show();
+      return;
+    }
+
+    var executar = function () {
+      swalLoading('Gerando MTR…', 'Atribuindo número e finalizando coleta.');
 
       $.ajax({
         url: baseUrl(),
         method: 'POST',
-        data: fd,
-        processData: false,
-        contentType: false,
+        data: {
+          acao: 'finalizar',
+          _csrf: csrf()
+        },
         dataType: 'json',
-        timeout: 120000
+        timeout: 30000
       }).done(function (r) {
         r = parseJsonResp(r);
         if (typeof Swal !== 'undefined') Swal.close();
         if (r.success) {
-          swalOk(r.message || 'Coleta finalizada!', function () {
+          swalOk(r.message || 'MTR gerado!', function () {
             window.location = r.redirect || ((typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/painel/coletas');
           });
         } else {
-          swalErr(r.message || 'Não foi possível finalizar.');
+          swalErr(r.message || 'Não foi possível gerar o MTR.');
         }
       }).fail(function (xhr) {
         if (typeof Swal !== 'undefined') Swal.close();
-        var msg = 'Erro ao finalizar a coleta.';
+        var msg = 'Erro ao gerar MTR.';
         if (xhr.responseJSON && xhr.responseJSON.message) {
           msg = xhr.responseJSON.message;
         } else if (xhr.status === 0 || xhr.statusText === 'timeout') {
-          msg = 'A operação demorou demais. Verifique em Coletas se o MTR foi gerado antes de tentar de novo.';
-        } else if (xhr.responseText && xhr.responseText.indexOf('{') === -1) {
-          msg = 'Erro no servidor. Verifique os logs ou tente novamente.';
+          msg = 'Tempo esgotado. Verifique em Coletas se o MTR foi gerado antes de tentar de novo.';
         }
         swalErr(msg);
       });
@@ -196,16 +258,16 @@
 
     if (typeof Swal !== 'undefined') {
       Swal.fire({
-        title: 'Finalizar coleta?',
-        text: 'Será gerado o número MTR e a coleta não poderá mais ser editada.',
+        title: 'Gerar MTR?',
+        text: 'A coleta será finalizada e não poderá mais ser editada.',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sim, finalizar',
-        cancelButtonText: 'Cancelar'
+        confirmButtonText: 'Sim, gerar MTR',
+        cancelButtonText: 'Voltar'
       }).then(function (r) {
         if (r.isConfirmed) executar();
       });
-    } else if (confirm('Finalizar coleta e gerar número MTR?')) {
+    } else if (confirm('Gerar MTR e finalizar coleta?')) {
       executar();
     }
   };

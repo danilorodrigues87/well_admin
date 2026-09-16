@@ -2,11 +2,15 @@
 
 namespace App\Model\Entity;
 
+use App\Common\OperadoraScope;
 use App\Model\Db\Database;
+use App\Model\Entity\Concerns\TenantScoped;
 use PDO;
 
 class InterCobranca
 {
+    use TenantScoped;
+
     public int $id = 0;
     public ?int $cliente_id = null;
     public ?string $competencia = null;
@@ -22,18 +26,38 @@ class InterCobranca
     public ?string $cliente_nome = null;
     public ?string $email_enviado_em = null;
     public ?string $email_erro = null;
+    public ?string $detalhes_json = null;
+    public ?string $observacao_ajuste = null;
+
+    public function valorCobrado(): float
+    {
+        return $this->valor_nominal > 0 ? $this->valor_nominal : $this->valor_calculado;
+    }
+
+    /** @return array<string,mixed>|null */
+    public function getDetalhesParsed(): ?array
+    {
+        if ($this->detalhes_json === null || trim($this->detalhes_json) === '') {
+            return null;
+        }
+        $decoded = json_decode($this->detalhes_json, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
 
     /** @param array<string,mixed> $data */
     public static function create(array $data): self
     {
         $db = new Database();
+        $opId = OperadoraScope::getOperadoraId();
         $db->execute(
             'INSERT INTO inter_cobrancas
-                (cliente_id, competencia, codigo_solicitacao, seu_numero, valor_nominal, valor_calculado,
+                (operadora_id, cliente_id, competencia, codigo_solicitacao, seu_numero, valor_nominal, valor_calculado,
                  data_vencimento, status, linha_digitavel, pix_copia_cola, pdf_path,
                  payload_request, payload_response, detalhes_json, multa_mora_json, observacao_ajuste)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
+                $opId,
                 $data['cliente_id'] ?? null,
                 $data['competencia'] ?? null,
                 $data['codigo_solicitacao'],
@@ -62,8 +86,8 @@ class InterCobranca
     {
         $db = new Database();
         $row = $db->execute(
-            'SELECT * FROM inter_cobrancas WHERE codigo_solicitacao = ? LIMIT 1',
-            [$codigoSolicitacao]
+            'SELECT * FROM inter_cobrancas WHERE codigo_solicitacao = ? AND operadora_id = ? LIMIT 1',
+            [$codigoSolicitacao, ...self::tenantIdParams()]
         )->fetch(PDO::FETCH_ASSOC);
 
         return is_array($row) ? self::fromArray($row) : null;
@@ -73,8 +97,8 @@ class InterCobranca
     {
         $db = new Database();
         $row = $db->execute(
-            'SELECT * FROM inter_cobrancas WHERE cliente_id = ? AND competencia = ? LIMIT 1',
-            [$clienteId, $competencia]
+            'SELECT * FROM inter_cobrancas WHERE cliente_id = ? AND competencia = ? AND operadora_id = ? LIMIT 1',
+            [$clienteId, $competencia, ...self::tenantIdParams()]
         )->fetch(PDO::FETCH_ASSOC);
 
         return is_array($row) ? self::fromArray($row) : null;
@@ -87,8 +111,8 @@ class InterCobranca
             'SELECT ic.*, c.nome_fantasia AS cliente_nome
              FROM inter_cobrancas ic
              LEFT JOIN clientes c ON c.id = ic.cliente_id
-             WHERE ic.id = ? LIMIT 1',
-            [$id]
+             WHERE ic.id = ? AND ic.operadora_id = ? LIMIT 1',
+            [$id, ...self::tenantIdParams()]
         )->fetch(PDO::FETCH_ASSOC);
 
         return is_array($row) ? self::fromArray($row) : null;
@@ -96,6 +120,7 @@ class InterCobranca
 
     public static function countHistorico(string $where, array $params): int
     {
+        [$where, $params] = self::tenantWhere($where, $params, 'ic.operadora_id');
         $db = new Database();
         $row = $db->execute(
             'SELECT COUNT(*) AS qtd FROM inter_cobrancas ic WHERE '.$where,
@@ -110,11 +135,12 @@ class InterCobranca
      */
     public static function listHistorico(string $where, array $params, string $limit): array
     {
+        [$where, $params] = self::tenantWhere($where, $params, 'ic.operadora_id');
         $db = new Database();
         $stmt = $db->execute(
             'SELECT ic.*, c.nome_fantasia AS cliente_nome
              FROM inter_cobrancas ic
-             LEFT JOIN clientes c ON c.id = ic.cliente_id
+             LEFT JOIN clientes c ON c.id = ic.cliente_id AND c.operadora_id = ic.operadora_id
              WHERE '.$where.'
              ORDER BY ic.created_at DESC
              LIMIT '.$limit,
@@ -154,7 +180,11 @@ class InterCobranca
 
         $params[] = $this->id;
         $db = new Database();
-        $db->execute('UPDATE inter_cobrancas SET '.implode(', ', $sets).' WHERE id = ?', $params);
+        $params[] = OperadoraScope::getOperadoraId();
+        $db->execute(
+            'UPDATE inter_cobrancas SET '.implode(', ', $sets).' WHERE id = ? AND operadora_id = ?',
+            $params
+        );
 
         foreach ($allowed as $key) {
             if (array_key_exists($key, $fields) && property_exists($this, $key)) {
@@ -193,6 +223,8 @@ class InterCobranca
         $e->cliente_nome = isset($row['cliente_nome']) ? (string)$row['cliente_nome'] : null;
         $e->email_enviado_em = isset($row['email_enviado_em']) ? (string)$row['email_enviado_em'] : null;
         $e->email_erro = isset($row['email_erro']) ? (string)$row['email_erro'] : null;
+        $e->detalhes_json = isset($row['detalhes_json']) ? (string)$row['detalhes_json'] : null;
+        $e->observacao_ajuste = isset($row['observacao_ajuste']) ? (string)$row['observacao_ajuste'] : null;
 
         return $e;
     }

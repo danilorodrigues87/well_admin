@@ -27,7 +27,7 @@
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between flex-wrap gap-2">
         <span><i class="fas fa-users me-1"></i> Clientes × coletores</span>
-        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addClienteModal"><i class="fas fa-plus"></i> Adicionar cliente</button>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addClienteModal"><i class="fas fa-plus"></i> Adicionar cliente</button>
     </div>
     <div class="card-body">
         <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
@@ -48,18 +48,35 @@
     </div>
 </div>
 
-<div class="modal fade" id="addClienteModal">
-    <div class="modal-dialog"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Adicionar cliente à rota</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body">
-            <form id="add-cliente-form">{{csrf_field}}
-                <div class="mb-2"><label>Buscar cliente</label><input type="text" id="add-busca" class="form-control" placeholder="Digite e pressione Enter"/></div>
-                <div class="mb-2"><label>Cliente *</label><select name="cliente_id" id="add-cliente_id" class="form-select" required><option value="">— Selecione —</option></select></div>
-                <div class="mb-2"><label>Coletor (opcional)</label><select name="coletor_id" id="add-coletor_id" class="form-select"><option value="">— Sem coletor —</option>{{coletores_options}}</select></div>
-            </form>
+<div class="modal fade" id="addClienteModal" tabindex="-1" aria-labelledby="addClienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClienteModalLabel">Adicionar cliente à rota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-cliente-form">{{csrf_field}}
+                    <div class="mb-3">
+                        <label class="form-label" for="add-cliente_id">Cliente *</label>
+                        <select name="cliente_id" id="add-cliente_id" class="form-select" placeholder="Buscar cliente…">
+                            <option value="">— Selecione —</option>
+                            {{clientes_options}}
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label" for="add-coletor_id">Coletor (opcional)</label>
+                        <select name="coletor_id" id="add-coletor_id" class="form-select">
+                            <option value="">— Sem coletor —</option>
+                            {{coletores_options}}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="adicionarCliente()">Adicionar</button>
+            </div>
         </div>
-        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="adicionarCliente()">Adicionar</button></div>
-    </div></div>
+    </div>
 </div>
-
-<input type="hidden" id="csrf-atrib" value="" />

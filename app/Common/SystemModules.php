@@ -10,6 +10,7 @@ class SystemModules
         'coletas' => ['label' => 'Coletas / MTR', 'link' => '/painel/coletas', 'icon' => 'fa-truck', 'grupo' => 'Operação', 'ordem' => 20],
         'coleta_nova' => ['label' => 'Lançar Coleta', 'link' => '/painel/coleta/nova', 'icon' => 'fa-plus-circle', 'grupo' => 'Operação', 'ordem' => 21],
         'agendamentos' => ['label' => 'Agendamentos', 'link' => '/painel/agendamentos', 'icon' => 'fa-calendar', 'grupo' => 'Operação', 'ordem' => 22],
+        'rota_dia' => ['label' => 'Rota do dia', 'link' => '/painel/rota-do-dia', 'icon' => 'fa-map-location-dot', 'grupo' => 'Operação', 'ordem' => 23],
         'clientes' => ['label' => 'Clientes', 'link' => '/painel/clientes', 'icon' => 'fa-building', 'grupo' => 'Cadastros', 'ordem' => 30],
         'funcionarios' => ['label' => 'Funcionários', 'link' => '/painel/funcionarios', 'icon' => 'fa-users', 'grupo' => 'Cadastros', 'ordem' => 31],
         'veiculos' => ['label' => 'Veículos', 'link' => '/painel/veiculos', 'icon' => 'fa-car', 'grupo' => 'Cadastros', 'ordem' => 32],
@@ -22,6 +23,10 @@ class SystemModules
         'relatorios' => ['label' => 'Relatórios', 'link' => '/painel/relatorios', 'icon' => 'fa-chart-bar', 'grupo' => 'Financeiro', 'ordem' => 41],
         'usuarios' => ['label' => 'Usuários', 'link' => '/painel/usuarios', 'icon' => 'fa-user-gear', 'grupo' => 'Sistema', 'ordem' => 50],
         'funcoes' => ['label' => 'Funções e Módulos', 'link' => '/painel/funcoes', 'icon' => 'fa-shield-halved', 'grupo' => 'Sistema', 'ordem' => 51],
+        'operadora' => ['label' => 'Operadora', 'link' => '/painel/operadora', 'icon' => 'fa-building-circle-check', 'grupo' => 'Sistema', 'ordem' => 52],
+        'ajuda' => ['label' => 'Ajuda', 'link' => '/painel/ajuda', 'icon' => 'fa-circle-question', 'grupo' => 'Ajuda', 'ordem' => 62],
+        'contratos' => ['label' => 'Contratos', 'link' => '/painel/contratos', 'icon' => 'fa-file-signature', 'grupo' => 'Comercial', 'ordem' => 35],
+        'termos_de_uso' => ['label' => 'Termos de Uso', 'link' => '/painel/termos-de-uso', 'icon' => 'fa-file-contract', 'grupo' => 'Sistema', 'ordem' => 98],
         'perfil' => ['label' => 'Perfil', 'link' => '/painel/perfil', 'icon' => 'fa-id-badge', 'grupo' => 'Sistema', 'ordem' => 99],
     ];
 
@@ -43,6 +48,7 @@ class SystemModules
                 ['slug' => 'coletas', 'label' => 'Coletas / MTR', 'link' => '/painel/coletas'],
                 ['slug' => 'coleta_nova', 'label' => 'Lançar Coleta', 'link' => '/painel/coleta/nova'],
                 ['slug' => 'agendamentos', 'label' => 'Agendamentos', 'link' => '/painel/agendamentos'],
+                ['slug' => 'rota_dia', 'label' => 'Rota do dia', 'link' => '/painel/rota-do-dia'],
             ],
         ],
         [
@@ -73,12 +79,30 @@ class SystemModules
         ],
         [
             'type' => 'dropdown',
+            'label' => 'Comercial',
+            'icon' => 'fas fa-handshake',
+            'collapse_id' => 'Layouts-comercial',
+            'items' => [
+                ['slug' => 'contratos', 'label' => 'Contratos', 'link' => '/painel/contratos'],
+                ['slug' => 'contratos', 'label' => 'Modelo de contrato', 'link' => '/painel/config/contrato'],
+            ],
+        ],
+        [
+            'type' => 'link',
+            'slug' => 'ajuda',
+            'label' => 'Central de ajuda',
+            'icon' => 'fas fa-circle-question',
+            'link' => '/painel/ajuda',
+        ],
+        [
+            'type' => 'dropdown',
             'label' => 'Sistema',
             'icon' => 'fas fa-gear',
             'collapse_id' => 'Layouts-sistema',
             'items' => [
                 ['slug' => 'usuarios', 'label' => 'Usuários', 'link' => '/painel/usuarios'],
                 ['slug' => 'funcoes', 'label' => 'Funções e Módulos', 'link' => '/painel/funcoes'],
+                ['slug' => 'operadora', 'label' => 'Operadora', 'link' => '/painel/operadora'],
                 ['slug' => 'perfil', 'label' => 'Perfil', 'link' => '/painel/perfil'],
             ],
         ],

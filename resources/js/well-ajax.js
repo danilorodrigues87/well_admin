@@ -91,6 +91,28 @@
 
   window.getCrudFilterData = coletarFiltrosBarra;
 
+  function setListLoading(loading) {
+    var $btn = $('#btn-crud-buscar');
+    if (loading) {
+      var cols = $('#crud-tbody').closest('table').find('thead th').length || 7;
+      $('#crud-tbody').html(
+        '<tr><td colspan="' + cols + '" class="text-center text-muted py-4">' +
+        '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Carregando...</td></tr>'
+      );
+      $('#crud-pagination').html('');
+      if ($btn.length) {
+        if (!$btn.data('orig-html')) {
+          $btn.data('orig-html', $btn.html());
+        }
+        $btn.prop('disabled', true).html(
+          '<span class="spinner-border spinner-border-sm me-1"></span> Buscando...'
+        );
+      }
+    } else if ($btn.length && $btn.data('orig-html')) {
+      $btn.prop('disabled', false).html($btn.data('orig-html'));
+    }
+  }
+
   function listar(filtro, page) {
     if (!shouldHandleCrudList()) {
       return;
@@ -102,6 +124,8 @@
     if (_listarReq && typeof _listarReq.abort === 'function') {
       try { _listarReq.abort(); } catch (e) {}
     }
+
+    setListLoading(true);
 
     var payload = $.extend({
       acao: 'listar',
@@ -132,10 +156,15 @@
       }
       console.error('listar fail', status, xhr.status, xhr.responseText);
       swalError('Falha ao carregar a lista (' + (xhr.status || status) + ').');
+    }).always(function () {
+      setListLoading(false);
     });
   }
 
   window.listar = listar;
+  window.carregarLista = function (page) {
+    listar(null, page || 1);
+  };
   window.loadPage = function (page) {
     listar(null, page || 1);
   };
@@ -251,6 +280,59 @@
     });
   };
 
+  window.resetarSenha = function (id) {
+    var url = getApiUrl();
+    if (!url) {
+      return;
+    }
+
+    var executar = function () {
+      $.ajax({
+        url: url,
+        method: 'POST',
+        data: { acao: 'resetar_senha', id: id, _csrf: getCsrf() },
+        dataType: 'json'
+      }).done(function (resp) {
+        var data = parseResp(resp);
+        if (!data.success) {
+          swalError(data.message || 'Erro ao resetar senha.');
+          return;
+        }
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Senha redefinida',
+            text: data.message || 'Senha resetada com sucesso.',
+            icon: 'success'
+          });
+        }
+      }).fail(function (xhr) {
+        swalError('Erro ao resetar senha (' + xhr.status + ').');
+      });
+    };
+
+    if (typeof Swal === 'undefined') {
+      if (confirm('Resetar senha deste funcionário para 12345678?')) {
+        executar();
+      }
+      return;
+    }
+
+    Swal.fire({
+      title: 'Resetar senha?',
+      text: 'A senha será redefinida para 12345678. Informe o funcionário para alterá-la depois.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sim, resetar',
+      cancelButtonText: 'Cancelar'
+    }).then(function (result) {
+      if (result.isConfirmed) {
+        executar();
+      }
+    });
+  };
+
   window.excluir = function (id) {
     var url = getApiUrl();
     if (!url) {
@@ -314,6 +396,12 @@
     }
   });
 
+  $(document).on('click', '#btn-crud-buscar', function () {
+    if (shouldHandleCrudList()) {
+      listar(null, 1);
+    }
+  });
+
   $(document).on('input', '#barra-filtros-lista input[name="busca"], .crud-filters-row input[name="busca"]', function () {
     if (!shouldHandleCrudList()) {
       return;
@@ -339,6 +427,7 @@
     }
     var $bar = $(this).closest('#barra-filtros-lista, .crud-filters-row');
     $bar.find('input[name="busca"]').val('');
+    $bar.find('input[type="date"]').val('');
     $bar.find('select').each(function () {
       $(this).prop('selectedIndex', 0);
     });

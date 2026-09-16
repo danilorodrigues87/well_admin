@@ -41,6 +41,7 @@ class ApiAuthService
         $token = JWT::encode([
             'sub' => (int)$usuario->id,
             'email' => (string)$usuario->email,
+            'operadora_id' => (int)($usuario->operadora_id ?? 1),
             'iat' => time(),
             'exp' => $expiresAt,
         ], ApiConfig::jwtSecret(), self::ALGORITHM);
@@ -93,6 +94,7 @@ class ApiAuthService
             'funcao_id' => (int)$usuario->funcao_id,
             'funcao_nome' => (string)($usuario->funcao_nome ?? ''),
             'is_admin' => !empty($usuario->is_admin),
+            'operadora_id' => (int)($usuario->operadora_id ?? 1),
         ];
     }
 }

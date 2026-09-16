@@ -1,0 +1,30 @@
+<h1 class="mt-2">Financeiro</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/gerador">Início</a></li>
+    <li class="breadcrumb-item active">Boletos</li>
+</ol>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-transparent">
+        <i class="fas fa-file-invoice-dollar me-1 text-primary"></i> Boletos e cobranças
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Competência</th>
+                        <th class="text-end">Valor cobrado</th>
+                        <th>Vencimento</th>
+                        <th>Status</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>{{rows}}</tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent">{{pagination_nav}}</div>
+</div>
+
+<p class="text-muted small">Os valores exibidos correspondem ao boleto emitido (inclui ajustes feitos pela operadora).</p>

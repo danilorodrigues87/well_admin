@@ -4,7 +4,7 @@
  * Etapa 5 — Importa coletas/MTR históricos de well_antigo → well_admin.
  *
  * Uso:
- *   php database/scripts/etl_import_coletas.php [--dry-run] [--limit=100] [--purge-local]
+ *   php database/scripts/etl_import_coletas.php [--dry-run] [--limit=100] [--purge-local] [--operadora-id=1]
  */
 
 declare(strict_types=1);
@@ -26,6 +26,12 @@ foreach ($argv as $arg) {
 }
 
 $coletorPadrao = (int)Environment::get('ETL_COLETOR_ID', 1);
+$operadoraId = 1;
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--operadora-id=')) {
+        $operadoraId = max(1, (int)substr($arg, 15));
+    }
+}
 $db = new Database();
 
 $col = $db->execute(
@@ -80,7 +86,7 @@ if ($limit > 0) {
 
 $rows = $db->execute($sql)->fetchAll(\PDO::FETCH_ASSOC);
 $total = count($rows);
-echo "Importando {$total} coleta(s)...\n";
+echo "Importando {$total} coleta(s) (operadora_id={$operadoraId})...\n";
 
 $imported = 0;
 $skipped = 0;
@@ -112,6 +118,9 @@ foreach ($rows as $row) {
     $dataColeta = validDate($row['data_coleta'] ?? null);
     $docRef = validDate($row['doc_referencia'] ?? null);
     $dataReceb = validDate($row['data_recebimento'] ?? null);
+    if ($dataReceb === null && $dataColeta !== null) {
+        $dataReceb = $dataColeta;
+    }
     $hora = parseHora((string)($row['hora'] ?? ''));
     $placa = normalizePlaca((string)($row['placa'] ?? ''));
     $veiculoId = $veiculosPorPlaca[$placa] ?? null;
@@ -128,11 +137,12 @@ foreach ($rows as $row) {
     try {
         $db->execute(
             'INSERT INTO coletas (
-                numero_mtr, legacy_manifesto, cliente_id, coletor_id, veiculo_id, status,
+                operadora_id, numero_mtr, legacy_manifesto, cliente_id, coletor_id, veiculo_id, status,
                 doc_referencia, data_coleta, hora, relatorio, situacao_recebimento,
                 data_recebimento, tratamento, finalized_at
-             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
+                $operadoraId,
                 $manifesto,
                 $manifesto,
                 $clienteId,
@@ -217,7 +227,11 @@ foreach ($rows as $row) {
 
 if (!$dryRun && $imported > 0) {
     $maxMtr = (int)$db->execute('SELECT MAX(numero_mtr) FROM coletas')->fetchColumn();
-    $db->execute('UPDATE coleta_sequencia SET ultimo_mtr = ? WHERE id = 1', [$maxMtr]);
+    $db->execute(
+        'INSERT INTO coleta_sequencia (operadora_id, ultimo_mtr) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE ultimo_mtr = GREATEST(ultimo_mtr, VALUES(ultimo_mtr))',
+        [$operadoraId, $maxMtr]
+    );
     echo "Sequência MTR atualizada para {$maxMtr}.\n";
 }
 

@@ -1,0 +1,82 @@
+<h1 class="mt-2">Configurações da Operadora</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Operadora</li>
+</ol>
+
+{{msg_alert}}
+
+<p class="text-muted mb-4">Dados da operadora ativa (tenant). Multa e juros de cobrança continuam em <a href="{{URL}}/painel/pagamentos">Pagamentos → Configurações</a>.</p>
+
+<form method="post" action="{{URL}}/painel/operadora">
+    {{csrf_field}}
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-building me-1"></i> Identificação</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nome fantasia</label>
+                    <input type="text" name="nome_fantasia" class="form-control" value="{{nome_fantasia}}" required maxlength="180"/>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nome curto (boletos/e-mails)</label>
+                    <input type="text" name="nome_curto" class="form-control" value="{{nome_curto}}" maxlength="40"/>
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Razão social</label>
+                    <input type="text" name="razao_social" class="form-control" value="{{razao_social}}" maxlength="180"/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">CNPJ</label>
+                    <input type="text" name="cnpj" class="form-control" value="{{cnpj}}" maxlength="20"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-truck me-1"></i> Transportador padrão (MTR)</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Nome</label>
+                    <input type="text" name="transportador_nome" class="form-control" value="{{transportador_nome}}" maxlength="180"/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">CNPJ</label>
+                    <input type="text" name="transportador_cnpj" class="form-control" value="{{transportador_cnpj}}" maxlength="20"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-industry me-1"></i> Destinador padrão (MTR)</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Nome</label>
+                    <input type="text" name="destinador_nome" class="form-control" value="{{destinador_nome}}" maxlength="180"/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">CNPJ</label>
+                    <input type="text" name="destinador_cnpj" class="form-control" value="{{destinador_cnpj}}" maxlength="20"/>
+                </div>
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Endereço</label>
+                    <input type="text" name="destinador_endereco" class="form-control" value="{{destinador_endereco}}" maxlength="255"/>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" name="destinador_telefone" class="form-control" value="{{destinador_telefone}}" maxlength="20"/>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Responsável</label>
+                    <input type="text" name="destinador_responsavel" class="form-control" value="{{destinador_responsavel}}" maxlength="120"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Salvar configurações</button>
+</form>

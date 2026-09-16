@@ -43,6 +43,7 @@ if ($envHost && $requestHost && strcasecmp((string)$envHost, (string)$requestHos
 }
 
 define('URL', rtrim($appUrl, '/'));
+\App\Common\SessionBootstrap::configure();
 define('SITE', (string)Environment::get('SITE', 'Well Eco Admin'));
 define('TIMEZONE', (string)Environment::get('TIMEZONE', 'America/Cuiaba'));
 date_default_timezone_set(TIMEZONE);
@@ -53,8 +54,11 @@ MiddlewareQueue::setMap([
     'maintenance' => \App\Http\Middleware\Maintenance::class,
     'required-admin-logout' => \App\Http\Middleware\RequireAdminLogout::class,
     'required-admin-login' => \App\Http\Middleware\RequireAdminLogin::class,
+    'required-gerador-logout' => \App\Http\Middleware\RequireGeradorLogout::class,
+    'required-gerador-login' => \App\Http\Middleware\RequireGeradorLogin::class,
     'api-cors' => \App\Http\Middleware\ApiCors::class,
     'required-api-auth' => \App\Http\Middleware\RequireApiAuth::class,
+    'required-gerador-api-auth' => \App\Http\Middleware\RequireGeradorApiAuth::class,
 ]);
 
 MiddlewareQueue::setDefault(['maintenance']);

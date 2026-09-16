@@ -786,9 +786,82 @@ html[data-bs-theme="light"] .alert-info {
   --bs-alert-border-color: #b3e5fc;
 }
 
-/* Login — gradiente sutil sobre primary */
-body.bg-primary {
-  background: linear-gradient(160deg, var(--bs-secondary) 0%, var(--bs-primary) 55%, var(--well-tertiary) 100%) !important;
+/* Login — foto ecológica (--well-login-bg-image definido nas views de login) */
+body.well-login-page,
+body.well-login-page #layoutAuthentication {
+  background-color: #1b5e20 !important;
+  background-image: linear-gradient(
+    135deg,
+    rgba(27, 94, 32, 0.55) 0%,
+    rgba(46, 125, 50, 0.45) 50%,
+    rgba(0, 105, 92, 0.5) 100%
+  ), var(--well-login-bg-image) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+html:has(body.well-login-page),
+body.well-login-page {
+  min-height: 100%;
+}
+
+body.well-login-page #layoutAuthentication {
+  min-height: 100vh;
+}
+
+body.well-login-page #layoutAuthentication_content,
+body.well-login-page #layoutAuthentication_content main {
+  background: transparent !important;
+}
+
+body.well-login-page #layoutAuthentication .card.well-login-card {
+  border: 0;
+  box-shadow: 0 0.75rem 2.5rem rgba(0, 0, 0, 0.22);
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .login-brand {
+  padding: 0.75rem 1rem 0;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .card-header {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border-bottom: 0;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .card-body {
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .form-floating {
+  margin-bottom: 0.65rem !important;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .form-floating > .form-control {
+  min-height: calc(2.75rem + 2px);
+  padding-top: 1rem;
+  padding-bottom: 0.35rem;
+}
+
+body.well-login-page #layoutAuthentication .well-login-card .btn-primary {
+  padding: 0.35rem 1rem;
+  font-size: 0.9rem;
+}
+
+body.well-login-page #layoutAuthentication_footer footer {
+  background: rgba(18, 24, 20, 0.85) !important;
+  backdrop-filter: blur(4px);
 }
 
 /* ── Marca Well ── */
@@ -796,6 +869,10 @@ body.bg-primary {
   max-width: 160px;
   width: 100%;
   height: auto;
+}
+
+body.well-login-page .login-logo {
+  max-width: 108px;
 }
 
 /* Marca no topbar (alinha com largura do menu lateral — padrão SB Admin) */

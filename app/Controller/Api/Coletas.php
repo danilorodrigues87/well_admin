@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Common\Helpers\ApiHelper;
+use App\Common\OperadoraScope;
 use App\Http\ApiContext;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
@@ -34,8 +35,9 @@ class Coletas extends BaseApi
         if ($busca !== '') {
             $where .= ' AND c.cliente_id IN (
                 SELECT id FROM clientes
-                WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cidade LIKE ?
+                WHERE operadora_id = ? AND (nome_fantasia LIKE ? OR razao_social LIKE ? OR cidade LIKE ?)
             )';
+            $params[] = OperadoraScope::getOperadoraId();
             $like = '%'.$busca.'%';
             $params[] = $like;
             $params[] = $like;
@@ -74,7 +76,7 @@ class Coletas extends BaseApi
         $clienteId = (int)($body['cliente_id'] ?? 0);
 
         try {
-            $coletaId = ColetaService::iniciarRascunho($clienteId, ApiContext::userId());
+            $coletaId = ColetaService::iniciarRascunho($clienteId, ApiContext::userId(), ApiContext::isAdmin());
             $detalhe = ColetaService::detalhar($coletaId);
 
             return ApiHelper::ok(ColetaApiPresenter::coletaDetalhe($detalhe), 201);

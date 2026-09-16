@@ -2,19 +2,46 @@
 
 namespace App\Common;
 
+use App\Model\Entity\Operadora;
+
 /**
- * Nome da empresa — sempre via .env (nunca "Well Eco" em comunicações ao cliente).
+ * Nome da empresa — operadora ativa ou .env (nunca "Well Eco" em comunicações ao cliente).
  */
 class CompanyConfig
 {
-    public static function name(): string
+    public static function name(?int $operadoraId = null): string
     {
+        $fromOperadora = self::operadoraField($operadoraId, 'nome_fantasia');
+        if ($fromOperadora !== '') {
+            return $fromOperadora;
+        }
+
         return trim((string)Environment::get('COMPANY_NAME', 'Well Soluções Ambientais'));
     }
 
-    public static function shortName(): string
+    public static function shortName(?int $operadoraId = null): string
     {
+        $fromOperadora = self::operadoraField($operadoraId, 'nome_curto');
+        if ($fromOperadora !== '') {
+            return $fromOperadora;
+        }
+
         return trim((string)Environment::get('COMPANY_SHORT_NAME', 'Well S.A.'));
+    }
+
+    private static function operadoraField(?int $operadoraId, string $field): string
+    {
+        $id = $operadoraId ?? OperadoraScope::getOperadoraId();
+        if ($id <= 0) {
+            return '';
+        }
+
+        $op = Operadora::getById($id);
+        if (!$op) {
+            return '';
+        }
+
+        return trim((string)($op->$field ?? ''));
     }
 
     /** Remetente de e-mail (fallback: abreviado). */

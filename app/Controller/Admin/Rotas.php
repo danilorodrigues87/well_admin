@@ -11,6 +11,20 @@ use App\Utils\View;
 
 class Rotas extends Page
 {
+    private static function clientesDisponiveisOptionsHtml(int $rotaId): string
+    {
+        $html = '';
+        foreach (EntityRotaAtribuicao::clientesDisponiveis($rotaId) as $c) {
+            $label = $c['nome'];
+            if ($c['cidade'] !== '') {
+                $label .= ' — '.$c['cidade'];
+            }
+            $html .= '<option value="'.$c['id'].'">'.CrudHelper::e($label).'</option>';
+        }
+
+        return $html;
+    }
+
     private static function coletoresOptions(int $selected = 0, bool $emptyLabel = true): string
     {
         $html = $emptyLabel ? '<option value="">— Sem coletor —</option>' : '';
@@ -147,9 +161,13 @@ class Rotas extends Page
             'stats_total' => $stats['total'],
             'stats_sem_coletor' => $stats['sem_coletor'],
             'coletores_options' => self::coletoresOptions(0, false),
+            'clientes_options' => self::clientesDisponiveisOptionsHtml($rotaId),
         ]);
-        $scripts = '<script>window.ROTA_ATRIB = { rotaId: '.$rotaId.', baseUrl: "/painel/rotas/atribuicoes/'.$rotaId.'" };</script>'
-            .'<script src="'.URL.'/resources/js/crud-rota-atribuicoes.js"></script>';
+        $scripts = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css">'
+            .'<link rel="stylesheet" href="'.URL.'/resources/css/tom-select-well.css?v=20260916">'
+            .'<script>window.ROTA_ATRIB = { rotaId: '.$rotaId.', baseUrl: "/painel/rotas/atribuicoes/'.$rotaId.'" };</script>'
+            .'<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
+            .'<script src="'.URL.'/resources/js/crud-rota-atribuicoes.js?v=20260916g"></script>';
 
         return self::getPage('Atribuições — '.$rota->nome, $content, 'rotas', $scripts);
     }
@@ -274,14 +292,8 @@ class Rotas extends Page
 
     public static function clientesDisponiveis($request, int $rotaId): string
     {
-        $post = $request->getPostVars();
-        $busca = trim((string)($post['busca'] ?? ''));
-        $items = EntityRotaAtribuicao::clientesDisponiveis($rotaId, $busca);
-        $options = '<option value="">— Selecione —</option>';
-        foreach ($items as $c) {
-            $options .= '<option value="'.$c['id'].'">'.CrudHelper::e($c['nome']).'</option>';
-        }
-
-        return CrudHelper::jsonOk(['options' => $options]);
+        return CrudHelper::jsonOk([
+            'options_html' => self::clientesDisponiveisOptionsHtml($rotaId),
+        ]);
     }
 }

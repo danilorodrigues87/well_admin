@@ -1,8 +1,9 @@
-/** Atribuições rota × cliente × coletor */
+/** Atribuições rota × cliente × coletor — Tom Select igual ao wizard de coleta */
 (function ($) {
   'use strict';
 
   var _buscaTimer = null;
+  var clienteTomSelect = null;
 
   function apiUrl() {
     var cfg = window.ROTA_ATRIB || {};
@@ -41,6 +42,70 @@
     }
   }
 
+  function initTomSelectCliente() {
+    var el = document.getElementById('add-cliente_id');
+    if (!el) {
+      return;
+    }
+    if (typeof TomSelect === 'undefined') {
+      swalErr('Biblioteca de busca não carregou. Recarregue a página (Ctrl+F5).');
+      return;
+    }
+    if (clienteTomSelect) {
+      return;
+    }
+    try {
+      clienteTomSelect = new TomSelect(el, {
+        create: false,
+        maxOptions: 5000,
+        placeholder: 'Digite para buscar cliente…',
+        allowEmptyOption: true,
+        sortField: { field: 'text', direction: 'asc' },
+        plugins: ['dropdown_input'],
+        render: {
+          no_results: function () {
+            return '<div class="no-results px-2 py-1">Nenhum cliente encontrado</div>';
+          }
+        }
+      });
+    } catch (err) {
+      clienteTomSelect = null;
+      swalErr('Erro ao iniciar busca de clientes: ' + (err.message || 'erro desconhecido'));
+    }
+  }
+
+  function rebuildTomSelectCliente(optionsHtml) {
+    var el = document.getElementById('add-cliente_id');
+    if (!el) {
+      return;
+    }
+    if (clienteTomSelect) {
+      clienteTomSelect.destroy();
+      clienteTomSelect = null;
+    }
+    el.innerHTML = '<option value="">— Selecione —</option>' + (optionsHtml || '');
+    initTomSelectCliente();
+  }
+
+  function refreshClientesSelect(callback) {
+    $.post(apiUrl(), {
+      acao: 'clientes_disponiveis',
+      _csrf: getCsrf()
+    }, function (resp) {
+      resp = typeof resp === 'object' ? resp : JSON.parse(resp);
+      if (!resp.success) {
+        swalErr(resp.message || 'Erro ao atualizar lista de clientes.');
+        return;
+      }
+      rebuildTomSelectCliente(resp.options_html || '');
+      if (typeof callback === 'function') {
+        callback();
+      }
+    }, 'json').fail(function () {
+      swalErr('Erro ao atualizar lista de clientes.');
+    });
+  }
+
   window.loadPage = function (page) {
     page = page || 1;
     $.ajax({
@@ -75,6 +140,7 @@
         if (typeof Swal !== 'undefined') {
           Swal.fire({ title: 'Removido!', text: resp.message || 'Cliente removido da rota.', icon: 'success', timer: 2000, showConfirmButton: false });
         }
+        refreshClientesSelect();
         loadPage(1);
       }, 'json');
     };
@@ -139,7 +205,7 @@
   };
 
   window.adicionarCliente = function () {
-    var clienteId = $('#add-cliente_id').val();
+    var clienteId = clienteTomSelect ? clienteTomSelect.getValue() : ($('#add-cliente_id').val() || '');
     if (!clienteId) {
       swalErr('Selecione um cliente.');
       return;
@@ -155,25 +221,21 @@
         swalErr(resp.message || 'Erro');
         return;
       }
-      bootstrap.Modal.getInstance(document.getElementById('addClienteModal')).hide();
+      if (clienteTomSelect) {
+        clienteTomSelect.removeOption(clienteId);
+        clienteTomSelect.clear(true);
+      }
+      $('#add-coletor_id').val('');
+      var modalEl = document.getElementById('addClienteModal');
+      if (modalEl) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
       loadPage(1);
     }, 'json');
   };
 
-  function buscarClientesDisponiveis() {
-    $.post(apiUrl(), {
-      acao: 'clientes_disponiveis',
-      busca: $('input[name="busca"]', '#addClienteModal').val() || $('#add-busca').val() || '',
-      _csrf: getCsrf()
-    }, function (resp) {
-      resp = typeof resp === 'object' ? resp : JSON.parse(resp);
-      if (resp.success && resp.options) {
-        $('#add-cliente_id').html(resp.options);
-      }
-    }, 'json');
-  }
-
   $(function () {
+    initTomSelectCliente();
     loadPage(1);
 
     $(document).on('change', '#barra-filtros-lista select[name]', function () {
@@ -201,13 +263,18 @@
       }, 'json');
     });
 
-    $('#add-busca').on('keyup', function (e) {
-      if (e.key === 'Enter') buscarClientesDisponiveis();
+    document.getElementById('addClienteModal')?.addEventListener('shown.bs.modal', function () {
+      if (clienteTomSelect) {
+        clienteTomSelect.clear(true);
+        clienteTomSelect.close();
+      }
     });
-    $('#addClienteModal').on('show.bs.modal', function () {
-      $('#add-busca').val('');
-      $('#add-cliente_id').html('<option value="">— Selecione —</option>');
-      buscarClientesDisponiveis();
+
+    document.getElementById('addClienteModal')?.addEventListener('hidden.bs.modal', function () {
+      if (clienteTomSelect) {
+        clienteTomSelect.clear(true);
+      }
+      $('#add-coletor_id').val('');
     });
   });
 })(jQuery);

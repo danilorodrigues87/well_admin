@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Common\Helpers\IbamaCodigoHelper;
+use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Plano as EntityPlano;
@@ -20,7 +21,8 @@ class PlanoCobrancaService
      *   valor_fixo:float,
      *   valor_residuos:float,
      *   valor_total:float,
-     *   itens: list<array{nome:string,coletado:float,saldo:float,excedente:float,valor:float,unidade:string,saldo_info?:string}>
+     *   itens: list<array{nome:string,coletado:float,saldo:float,excedente:float,valor:float,unidade:string,saldo_info?:string,origens?:list<array{mtr:int,data:string,quantidade:float}>}>,
+     *   coletas_no_mes: int
      * }
      */
     public static function calcularMes(int $clienteId, string $competenciaYm): array
@@ -41,6 +43,8 @@ class PlanoCobrancaService
 
         $coletadoMap = self::coletasPorTipoMap($clienteId, $inicio, $fim);
         $legacyByCod = self::coletasLegacyPorCodMap($clienteId, $inicio, $fim);
+        $origensPorTipo = self::coletasPorTipoDetalhe($clienteId, $inicio, $fim);
+        $coletasNoMes = self::countColetasFinalizadas($clienteId, $inicio, $fim);
 
         $planoItens = EntityPlanoItem::getByPlanoId($plano->id);
         usort($planoItens, fn (EntityPlanoItem $a, EntityPlanoItem $b) => $a->ordem <=> $b->ordem);
@@ -99,6 +103,7 @@ class PlanoCobrancaService
                     'excedente' => $first ? $excedenteGrupo : 0.0,
                     'valor' => $first ? $valorGrupo : 0.0,
                     'unidade' => $item->unidade,
+                    'origens' => $origensPorTipo[$item->tipo_residuo_id] ?? [],
                 ];
                 $first = false;
             }
@@ -119,6 +124,7 @@ class PlanoCobrancaService
                 'valor' => $valor,
                 'unidade' => $item->unidade,
                 'gera_credito' => true,
+                'origens' => $origensPorTipo[$item->tipo_residuo_id] ?? [],
             ];
         }
 
@@ -135,6 +141,7 @@ class PlanoCobrancaService
                 'excedente' => $excedente,
                 'valor' => $valor,
                 'unidade' => $item->unidade,
+                'origens' => $origensPorTipo[$item->tipo_residuo_id] ?? [],
             ];
         }
 
@@ -152,7 +159,50 @@ class PlanoCobrancaService
             'valor_residuos' => round($valorResiduos, 2),
             'valor_total' => round($valorFixo + $valorResiduos, 2),
             'itens' => $detalhes,
+            'coletas_no_mes' => $coletasNoMes,
         ];
+    }
+
+    /** @return array<int, list<array{mtr:int,data:string,quantidade:float}>> */
+    private static function coletasPorTipoDetalhe(int $clienteId, string $inicio, string $fim): array
+    {
+        $db = new Database();
+        $stmt = $db->execute(
+            'SELECT ci.tipo_residuo_id, c.numero_mtr, c.data_coleta, ci.quantidade
+             FROM coleta_itens ci
+             INNER JOIN coletas c ON c.id = ci.coleta_id
+             WHERE c.cliente_id = ?
+               AND c.operadora_id = ?
+               AND c.status = \'finalizada\'
+               AND c.data_coleta BETWEEN ? AND ?
+               AND ci.tipo_residuo_id IS NOT NULL
+             ORDER BY ci.tipo_residuo_id, c.data_coleta, c.id',
+            [$clienteId, OperadoraScope::getOperadoraId(), $inicio, $fim]
+        );
+
+        $map = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $tipoId = (int)$row['tipo_residuo_id'];
+            $map[$tipoId][] = [
+                'mtr' => (int)$row['numero_mtr'],
+                'data' => (string)$row['data_coleta'],
+                'quantidade' => (float)$row['quantidade'],
+            ];
+        }
+
+        return $map;
+    }
+
+    private static function countColetasFinalizadas(int $clienteId, string $inicio, string $fim): int
+    {
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT COUNT(*) AS qtd FROM coletas
+             WHERE cliente_id = ? AND operadora_id = ? AND status = \'finalizada\' AND data_coleta BETWEEN ? AND ?',
+            [$clienteId, OperadoraScope::getOperadoraId(), $inicio, $fim]
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return (int)($row['qtd'] ?? 0);
     }
 
     /** @return array<int,float> tipo_residuo_id => total */
@@ -164,11 +214,12 @@ class PlanoCobrancaService
              FROM coleta_itens ci
              INNER JOIN coletas c ON c.id = ci.coleta_id
              WHERE c.cliente_id = ?
+               AND c.operadora_id = ?
                AND c.status = \'finalizada\'
                AND c.data_coleta BETWEEN ? AND ?
                AND ci.tipo_residuo_id IS NOT NULL
              GROUP BY ci.tipo_residuo_id',
-            [$clienteId, $inicio, $fim]
+            [$clienteId, OperadoraScope::getOperadoraId(), $inicio, $fim]
         );
 
         $map = [];
@@ -188,12 +239,13 @@ class PlanoCobrancaService
              FROM coleta_itens ci
              INNER JOIN coletas c ON c.id = ci.coleta_id
              WHERE c.cliente_id = ?
+               AND c.operadora_id = ?
                AND c.status = \'finalizada\'
                AND c.data_coleta BETWEEN ? AND ?
                AND ci.tipo_residuo_id IS NULL
                AND ci.cod_ibama IS NOT NULL AND ci.cod_ibama != \'\'
              GROUP BY ci.cod_ibama',
-            [$clienteId, $inicio, $fim]
+            [$clienteId, OperadoraScope::getOperadoraId(), $inicio, $fim]
         );
 
         $map = [];

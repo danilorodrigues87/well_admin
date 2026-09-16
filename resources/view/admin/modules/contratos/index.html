@@ -1,0 +1,73 @@
+<div class="container-fluid px-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 mb-3 gap-2">
+        <div>
+            <h1 class="mb-1">Contratos comerciais</h1>
+            <p class="text-muted mb-0">Gere contratos vinculados a planos e envie para assinatura do gerador no portal.</p>
+        </div>
+        <a href="{{URL}}/painel/config/contrato" class="btn btn-outline-secondary">
+            <i class="fas fa-file-lines me-1"></i> Modelo de contrato
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="get" action="{{URL}}/painel/contratos" class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label">Filtrar por cliente</label>
+                    <select name="cliente_id" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos os clientes</option>
+                        {{clientes_options}}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Novo contrato</label>
+                    <div class="input-group">
+                        <select id="cliente_novo_contrato" class="form-select">{{clientes_options_novo}}</select>
+                        <button type="button" class="btn btn-primary" id="btn_novo_contrato">
+                            <i class="fas fa-plus me-1"></i> Criar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Como funciona:</strong> escolha o cliente, crie o contrato com plano e valores, revise o documento e clique em
+        <em>Enviar para assinatura</em>. O gerador assina em <strong>Portal do Gerador → Contrato</strong>.
+    </div>
+
+    <div class="card shadow">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Plano</th>
+                        <th>Valor/mês</th>
+                        <th>Vigência</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>{{rows}}</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    var btn = document.getElementById('btn_novo_contrato');
+    var sel = document.getElementById('cliente_novo_contrato');
+    if (!btn || !sel) return;
+    btn.addEventListener('click', function () {
+        var id = sel.value;
+        if (!id) {
+            alert('Selecione um cliente para criar o contrato.');
+            return;
+        }
+        window.location.href = '{{URL}}/painel/clientes/' + id + '/contrato/novo';
+    });
+})();
+</script>

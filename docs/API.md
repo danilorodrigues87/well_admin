@@ -30,7 +30,9 @@ Login exige ao menos um módulo operacional do app (`dashboard`, `coletas`, `col
 
 Cada rota autenticada exige o módulo correspondente via middleware `required-api-module:{slug}`.
 
-Resposta `user` inclui: `modulos[]`, `modulos_csv` (slugs separados por vírgula, útil no FlutterFlow), `is_admin`, `funcao_nome`.
+Resposta `user` inclui: `modulos[]`, `modulos_csv` (slugs separados por vírgula, útil no FlutterFlow), `is_admin`, `funcao_nome`, `operadora_id` (MVP: sempre `1` — Well).
+
+JWT inclui claim `operadora_id` (desde migration multitenancy `022`).
 
 ## Endpoints
 
@@ -73,6 +75,18 @@ Coletor vê KPIs filtrados por `coletor_id`; admin vê totais.
 
 Clientes ativos ordenados por prioridade e `proxima_coleta`. Cada item inclui `plano_nome` e `saldo_plano` (soma do saldo incluso em `plano_itens` — substitui o antigo `saldo_residuo` por cliente).
 
+Coletor com rota atribuída: lista apenas paradas pendentes da sua rota (urgente ou `proxima_coleta` vencida/hoje).
+
+### Rota do dia
+
+| Método | Endpoint | Módulo | Ação |
+|--------|----------|--------|------|
+| GET | `/rota-do-dia/paradas` | `rota_dia` | Paradas do dia do coletor autenticado |
+| POST | `/rota-do-dia/otimizar` | `rota_dia` | Otimizar ordem (body: `origin_lat`, `origin_lng`, `cliente_ids[]` opcional) |
+| POST | `/rota-do-dia/salvar-ordem` | `rota_dia` | Persistir ordem manual (`ordem[]`: `cliente_id`, `ordem`) |
+
+Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`.
+
 ### Perfil
 
 | Método | Endpoint | Módulo | Ação |
@@ -114,19 +128,38 @@ Body trocar senha:
 | PATCH | `/coletas/{id}/transporte` | `coleta_nova` | Salvar transporte/destinador |
 | POST | `/coletas/{id}/itens` | `coleta_nova` | Adicionar resíduo |
 | DELETE | `/coletas/{id}/itens/{itemId}` | `coleta_nova` | Remover resíduo |
-| POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais) |
+| POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais). **Requer `data_recebimento` preenchida** (PATCH transporte antes). |
 | POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar rascunho |
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
 
 Query `busca` em listagem: filtra por nome/cidade do cliente.
 
-### Finalizar — campos multipart
+### Finalizar — requisitos
 
-- `evidencia_1`, `evidencia_2`, `evidencia_3` (JPEG/PNG/WebP, máx. 5 MB cada)
+- Rascunho com ao menos 1 resíduo e motorista salvos (PATCH transporte).
+- **`data_recebimento` obrigatória** — data de chegada do resíduo no destinador final. Rascunho pode ficar sem data; finalização retorna erro 422 se ausente.
+- Multipart opcional: `evidencia_1`, `evidencia_2`, `evidencia_3` (JPEG/PNG/WebP, máx. 5 MB cada)
 
 ### PATCH transporte — campos (JSON)
 
 Espelha o wizard web: `veiculo_id`, `relatorio`, `tratamento`, `situacao_recebimento`, `data_recebimento`, `transportador_nome`, `transportador_cnpj`, `motorista_nome`, `destinador_*`, etc.
+
+## API Gerador (portal cliente)
+
+Base: `{URL}/api/v1/gerador`  
+Autenticação: JWT com claim `tipo=gerador` (mesmo `API_JWT_SECRET` / TTL do coletor).
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/gerador/login` | Body: `email`, `password` (ou `senha`) |
+| GET | `/gerador/me` | Perfil + `cliente_id`, `cliente_nome` |
+| GET | `/gerador/coletas` | Coletas do cliente (query `page`, `per_page`) |
+| GET | `/gerador/coletas/{id}` | Detalhe (itens, snapshot, evidências) |
+| GET | `/gerador/coletas/{id}/evidencias/{ordem}` | Imagem |
+| GET | `/gerador/boletos` | Cobranças Inter do cliente |
+| GET | `/gerador/boletos/{id}` | Detalhe boleto (linha digitável, PIX, `pdf_url`) |
+
+Escopo: usuário só vê dados do `cliente_id` vinculado à credencial. Boletos emitidos pela conta Inter Well (repasse à operadora: processo futuro).
 
 ## FlutterFlow
 

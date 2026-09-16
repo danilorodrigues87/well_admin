@@ -1,0 +1,35 @@
+<h1 class="mt-2">Minhas coletas</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/gerador">Início</a></li>
+    <li class="breadcrumb-item active">Coletas</li>
+</ol>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span><i class="fas fa-truck me-1 text-primary"></i> Histórico de coletas</span>
+        <form method="get" action="{{URL}}/gerador/coletas" class="d-flex align-items-center gap-2 mb-0">
+            <label class="small text-muted mb-0">Status</label>
+            <select name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
+                {{status_options}}
+            </select>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>MTR</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Status</th>
+                        <th>Recebimento</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>{{rows}}</tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-transparent">{{pagination_nav}}</div>
+</div>

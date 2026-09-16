@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Common\ColetaDefaults;
 use App\Common\Helpers\ColetorSelectHelper;
+use App\Common\OperadoraScope;
 use App\Common\SinirConfig;
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
@@ -18,19 +19,33 @@ use PDO;
 
 class ColetaService
 {
-    public static function proximoNumeroMtr(Database $db): int
+    public static function proximoNumeroMtr(Database $db, ?int $operadoraId = null): int
     {
-        $db->execute('UPDATE coleta_sequencia SET ultimo_mtr = ultimo_mtr + 1 WHERE id = 1');
-        $row = $db->execute('SELECT ultimo_mtr FROM coleta_sequencia WHERE id = 1')->fetch(PDO::FETCH_ASSOC);
+        $operadoraId = $operadoraId ?? OperadoraScope::getOperadoraId();
+        $db->execute(
+            'INSERT INTO coleta_sequencia (operadora_id, ultimo_mtr) VALUES (?, 0)
+             ON DUPLICATE KEY UPDATE operadora_id = operadora_id',
+            [$operadoraId]
+        );
+        $db->execute(
+            'UPDATE coleta_sequencia SET ultimo_mtr = ultimo_mtr + 1 WHERE operadora_id = ?',
+            [$operadoraId]
+        );
+        $row = $db->execute(
+            'SELECT ultimo_mtr FROM coleta_sequencia WHERE operadora_id = ?',
+            [$operadoraId]
+        )->fetch(PDO::FETCH_ASSOC);
+
         return (int)($row['ultimo_mtr'] ?? 1);
     }
 
-    public static function iniciarRascunho(int $clienteId, int $coletorId): int
+    public static function iniciarRascunho(int $clienteId, int $coletorId, bool $isAdmin = false): int
     {
         $cliente = EntityCliente::getById($clienteId);
         if (!$cliente || $cliente->status !== 'ativo') {
             throw new \InvalidArgumentException('Cliente inválido ou inativo.');
         }
+        RotaScopeService::assertClientePermitido($clienteId, $coletorId, $isAdmin);
 
         $endereco = trim(implode(', ', array_filter([
             $cliente->logradouro,
@@ -49,10 +64,12 @@ class ColetaService
         $db = new Database();
         $db->beginTransaction();
         try {
+            $operadoraId = OperadoraScope::getOperadoraId();
             $db->execute(
-                'INSERT INTO coletas (cliente_id, coletor_id, status, doc_referencia, data_coleta, hora)
-                 VALUES (?,?,?,?,?,?)',
+                'INSERT INTO coletas (operadora_id, cliente_id, coletor_id, status, doc_referencia, data_coleta, hora)
+                 VALUES (?,?,?,?,?,?,?)',
                 [
+                    $operadoraId,
                     $clienteId,
                     $coletorId,
                     'rascunho',
@@ -165,17 +182,66 @@ class ColetaService
         EntityColetaItem::delete($itemId, $coletaId);
     }
 
-    public static function finalizar(int $coletaId, array $files = []): int
+    /**
+     * Salva relatório e evidências no rascunho (sem gerar MTR).
+     *
+     * @param array<string, array{name:string,type:string,tmp_name:string,error:int}> $filesByKey evidencia_1..3
+     * @return array{itens:int,evidencias:int,motorista:string}
+     */
+    public static function salvarRascunhoFinal(int $coletaId, string $relatorio, array $filesByKey = []): array
     {
         self::assertRascunho($coletaId);
+        self::assertRequisitosBasicos($coletaId);
 
-        if (EntityColetaItem::countByColeta($coletaId) === 0) {
-            throw new \InvalidArgumentException('Adicione ao menos um resíduo antes de finalizar.');
+        EntityColeta::update($coletaId, ['relatorio' => trim($relatorio)]);
+
+        foreach ($filesByKey as $key => $file) {
+            if (!is_array($file) || empty($file['tmp_name'])) {
+                continue;
+            }
+            $ordem = (int)preg_replace('/\D/', '', (string)$key);
+            if ($ordem < 1 || $ordem > 3) {
+                continue;
+            }
+            self::substituirEvidencia($coletaId, $ordem, $file);
+        }
+
+        if (!self::rascunhoFinalConferido($coletaId)) {
+            throw new \InvalidArgumentException('Informe o relatório ou envie ao menos uma foto antes de salvar.');
         }
 
         $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
-        if (!$snapshot || trim((string)$snapshot->motorista_nome) === '') {
-            throw new \InvalidArgumentException('Salve os dados de transporte (motorista) antes de finalizar.');
+
+        return [
+            'itens' => EntityColetaItem::countByColeta($coletaId),
+            'evidencias' => EntityColetaEvidencia::countByColeta($coletaId),
+            'motorista' => trim((string)($snapshot->motorista_nome ?? '')),
+        ];
+    }
+
+    public static function rascunhoFinalConferido(int $coletaId): bool
+    {
+        $coleta = EntityColeta::getById($coletaId);
+        if (!$coleta || $coleta->status !== 'rascunho') {
+            return false;
+        }
+
+        return trim((string)($coleta->relatorio ?? '')) !== ''
+            || EntityColetaEvidencia::countByColeta($coletaId) > 0;
+    }
+
+    public static function finalizar(int $coletaId, array $files = []): int
+    {
+        self::assertRascunho($coletaId);
+        self::assertRequisitosBasicos($coletaId);
+        self::assertDataRecebimentoParaFinalizar($coletaId);
+
+        if (!empty($files)) {
+            EvidenceStorageService::saveBatchForColeta($coletaId, $files);
+        } elseif (!self::rascunhoFinalConferido($coletaId)) {
+            throw new \InvalidArgumentException(
+                'Salve o rascunho (relatório e/ou fotos) e confira os dados antes de gerar o MTR.'
+            );
         }
 
         $coleta = EntityColeta::getById($coletaId);
@@ -192,8 +258,6 @@ class ColetaService
                 'UPDATE coletas SET numero_mtr = ?, status = ?, finalized_at = NOW() WHERE id = ?',
                 [$numeroMtr, 'finalizada', $coletaId]
             );
-
-            EvidenceStorageService::saveBatchForColeta($coletaId, $files);
 
             $dias = ColetaDefaults::diasProximaColeta();
             $db->execute(
@@ -251,27 +315,22 @@ class ColetaService
         string $prioridade = '',
         bool $somentePendentes = true
     ): array {
-        $hoje = date('Y-m-d');
-        $join = '';
-        $where = 'c.status = ?';
-        $params = ['ativo'];
+        $q = RotaScopeService::paradasDoDiaQuery($coletorId, $isAdmin);
+        $join = $q['join'];
+        $where = $q['where'];
+        $params = $q['params'];
 
-        if (!$isAdmin) {
-            $db = new Database();
-            $temRota = (bool)$db->execute(
-                'SELECT 1 FROM rota_atribuicoes WHERE coletor_id = ? LIMIT 1',
-                [$coletorId]
-            )->fetch();
-            if ($temRota) {
-                $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ?';
-                $params[] = $coletorId;
+        if (!$somentePendentes) {
+            $where = "c.status = 'ativo'";
+            $params = [];
+            if (!$isAdmin) {
+                if (!RotaScopeService::coletorTemRota($coletorId)) {
+                    $where .= ' AND 1=0';
+                } else {
+                    $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ?';
+                    $params[] = $coletorId;
+                }
             }
-        }
-
-        if ($somentePendentes) {
-            $where .= ' AND (c.prioridade = ? OR c.proxima_coleta IS NULL OR c.proxima_coleta <= ?)';
-            $params[] = 'urgente';
-            $params[] = $hoje;
         }
         if ($prioridade === 'normal' || $prioridade === 'urgente') {
             $where .= ' AND c.prioridade = ?';
@@ -340,6 +399,68 @@ class ColetaService
         $coleta = EntityColeta::getById($coletaId);
         if (!$coleta || $coleta->status !== 'rascunho') {
             throw new \InvalidArgumentException('Coleta não está em rascunho.');
+        }
+    }
+
+    private static function assertRequisitosBasicos(int $coletaId): void
+    {
+        if (EntityColetaItem::countByColeta($coletaId) === 0) {
+            throw new \InvalidArgumentException('Adicione ao menos um resíduo antes de continuar.');
+        }
+
+        $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
+        if (!$snapshot || trim((string)$snapshot->motorista_nome) === '') {
+            throw new \InvalidArgumentException('Salve os dados de transporte (motorista) antes de continuar.');
+        }
+    }
+
+    /** Rascunho pode ficar sem data; finalização exige data de chegada no destinador. */
+    private static function assertDataRecebimentoParaFinalizar(int $coletaId): void
+    {
+        $coleta = EntityColeta::getById($coletaId);
+        if (!$coleta) {
+            throw new \InvalidArgumentException('Coleta não encontrada.');
+        }
+
+        $data = trim((string)($coleta->data_recebimento ?? ''));
+        if ($data === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+            throw new \InvalidArgumentException(
+                'Informe a data de recebimento no destinador (aba Transporte) e clique em "Salvar e continuar" antes de gerar o MTR.'
+            );
+        }
+
+        if ($coleta->situacao_recebimento !== 'recebido') {
+            EntityColeta::update($coletaId, ['situacao_recebimento' => 'recebido']);
+        }
+    }
+
+    /** @param array{name:string,type:string,tmp_name:string,error:int,size?:int} $file */
+    private static function substituirEvidencia(int $coletaId, int $ordem, array $file): void
+    {
+        $existente = EntityColetaEvidencia::getByColetaOrdem($coletaId, $ordem);
+        if ($existente) {
+            self::unlinkEvidenciaArquivo($existente->arquivo);
+            EntityColetaEvidencia::deleteById($existente->id);
+        }
+
+        $saved = EvidenceStorageService::saveUploaded($coletaId, $ordem, $file);
+        if ($saved === null) {
+            throw new \InvalidArgumentException('Foto '.$ordem.' inválida ou maior que 5 MB (JPG/PNG/WebP).');
+        }
+
+        EntityColetaEvidencia::insert([
+            'coleta_id' => $coletaId,
+            'ordem' => $ordem,
+            'arquivo' => $saved['arquivo'],
+            'mime' => $saved['mime'],
+        ]);
+    }
+
+    private static function unlinkEvidenciaArquivo(string $arquivoRelativo): void
+    {
+        $path = dirname(__DIR__, 2).'/storage/'.ltrim($arquivoRelativo, '/');
+        if (is_file($path)) {
+            @unlink($path);
         }
     }
 }

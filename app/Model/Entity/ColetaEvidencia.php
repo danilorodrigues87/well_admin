@@ -28,6 +28,33 @@ class ColetaEvidencia
         return $items;
     }
 
+    public static function getByColetaOrdem(int $coletaId, int $ordem): ?self
+    {
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT * FROM coleta_evidencias WHERE coleta_id = ? AND ordem = ? LIMIT 1',
+            [$coletaId, $ordem]
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? self::fromArray($row) : null;
+    }
+
+    public static function countByColeta(int $coletaId): int
+    {
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT COUNT(*) AS qtd FROM coleta_evidencias WHERE coleta_id = ?',
+            [$coletaId]
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return (int)($row['qtd'] ?? 0);
+    }
+
+    public static function deleteById(int $id): void
+    {
+        (new Database())->execute('DELETE FROM coleta_evidencias WHERE id = ?', [$id]);
+    }
+
     public static function insert(array $data): int
     {
         return (int)(new Database('coleta_evidencias'))->insert($data);

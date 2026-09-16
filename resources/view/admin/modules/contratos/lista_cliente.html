@@ -1,0 +1,12 @@
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Contratos — {{cliente_nome}}</h1>
+    <a href="{{URL}}/painel/clientes/{{cliente_id}}/contrato/novo" class="btn btn-primary mb-3"><i class="fas fa-plus me-1"></i> Novo contrato</a>
+    <div class="card shadow">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Número</th><th>Plano</th><th>Status</th><th></th></tr></thead>
+                <tbody>{{rows}}</tbody>
+            </table>
+        </div>
+    </div>
+</div>

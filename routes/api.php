@@ -8,10 +8,13 @@ use App\Controller\Api\Clientes;
 use App\Controller\Api\Coletas;
 use App\Controller\Api\Dashboard;
 use App\Controller\Api\Perfil;
+use App\Controller\Api\RotaDoDia;
+use App\Controller\Api\Gerador as ApiGerador;
 use App\Controller\Api\Webhooks\InterCobranca as InterCobrancaWebhook;
 use App\Http\Response;
 
 $apiAuth = ['api-cors', 'required-api-auth'];
+$geradorAuth = ['api-cors', 'required-gerador-api-auth'];
 $apiPublic = ['api-cors'];
 $mod = static fn (string $slug): array => array_merge($apiAuth, ["required-api-module:{$slug}"]);
 
@@ -166,5 +169,75 @@ $obRouter->get('/api/v1/coletas/{id}/evidencias/{ordem}', [
     'middlewares' => $mod('coletas'),
     function ($request, int $id, int $ordem) {
         return Coletas::evidencia($request, $id, $ordem);
+    },
+]);
+
+$obRouter->get('/api/v1/rota-do-dia/paradas', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return RotaDoDia::paradas($request);
+    },
+]);
+
+$obRouter->post('/api/v1/rota-do-dia/otimizar', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return RotaDoDia::otimizar($request);
+    },
+]);
+
+$obRouter->post('/api/v1/rota-do-dia/salvar-ordem', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return RotaDoDia::salvarOrdem($request);
+    },
+]);
+
+$obRouter->post('/api/v1/gerador/login', [
+    'middlewares' => $apiPublic,
+    function ($request) {
+        return ApiGerador\Auth::login($request);
+    },
+]);
+
+$obRouter->get('/api/v1/gerador/me', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return ApiGerador\Auth::me($request);
+    },
+]);
+
+$obRouter->get('/api/v1/gerador/coletas', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return ApiGerador\Coletas::index($request);
+    },
+]);
+
+$obRouter->get('/api/v1/gerador/coletas/{id}', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id) {
+        return ApiGerador\Coletas::show($request, $id);
+    },
+]);
+
+$obRouter->get('/api/v1/gerador/coletas/{id}/evidencias/{ordem}', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id, int $ordem) {
+        return ApiGerador\Coletas::evidencia($request, $id, $ordem);
+    },
+]);
+
+$obRouter->get('/api/v1/gerador/boletos', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return ApiGerador\Boletos::index($request);
+    },
+]);
+
+$obRouter->get('/api/v1/gerador/boletos/{id}', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id) {
+        return ApiGerador\Boletos::show($request, $id);
     },
 ]);

@@ -1,0 +1,50 @@
+<h1 class="mt-2">Meu perfil</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/gerador">Início</a></li>
+    <li class="breadcrumb-item active">Perfil</li>
+</ol>
+
+{{msg_alert}}
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent"><i class="fas fa-user me-1 text-primary"></i> Dados da conta</div>
+            <div class="card-body">
+                <dl class="mb-0">
+                    <dt class="text-muted small">Nome</dt>
+                    <dd class="mb-3">{{nome}}</dd>
+                    <dt class="text-muted small">E-mail</dt>
+                    <dd class="mb-3">{{email}}</dd>
+                    <dt class="text-muted small">Cliente</dt>
+                    <dd class="mb-0">{{cliente_nome}}</dd>
+                </dl>
+                <p class="text-muted small mt-4 mb-0">Para alterar nome ou e-mail, entre em contato com a operadora.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent"><i class="fas fa-lock me-1 text-primary"></i> Trocar senha</div>
+            <div class="card-body">
+                <form method="post" action="{{URL}}/gerador/perfil">
+                    {{csrf_field}}
+                    <div class="mb-3">
+                        <label class="form-label">Senha atual</label>
+                        <input type="password" name="senha_atual" class="form-control" required autocomplete="current-password"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova senha</label>
+                        <input type="password" name="nova_senha" class="form-control" required minlength="8" autocomplete="new-password"/>
+                        <div class="form-text">Mínimo 8 caracteres.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar nova senha</label>
+                        <input type="password" name="confirmar_senha" class="form-control" required minlength="8" autocomplete="new-password"/>
+                    </div>
+                    <button type="submit" class="btn btn-warning"><i class="fas fa-key me-1"></i> Alterar senha</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

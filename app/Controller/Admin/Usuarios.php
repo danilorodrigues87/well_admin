@@ -10,6 +10,7 @@ use App\Utils\View;
 
 class Usuarios extends Page
 {
+    private const SENHA_PADRAO = '12345678';
     public static function index($request): string
     {
         $funcoes = EntityFuncao::getAll();
@@ -61,8 +62,9 @@ class Usuarios extends Page
                 <td>'.CrudHelper::e($u->email).'</td>
                 <td>'.CrudHelper::e($u->funcao_nome).'</td>
                 <td>'.$ativo.'</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="editar('.$u->id.')"><i class="fas fa-edit"></i></button>
+                <td class="text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editar('.$u->id.')" title="Editar"><i class="fas fa-edit"></i></button>
+                    '.CrudHelper::btnResetarSenha($u->id).'
                     '.CrudHelper::btnDesativar($u->id).'
                 </td>
             </tr>';
@@ -135,6 +137,7 @@ class Usuarios extends Page
                 'email' => $email,
                 'senha' => password_hash($senha, PASSWORD_DEFAULT),
                 'funcao_id' => $funcaoId,
+                'operadora_id' => \App\Common\OperadoraScope::getOperadoraId(),
                 'ativo' => $ativo,
             ]);
         }
@@ -154,5 +157,31 @@ class Usuarios extends Page
         }
         EntityUsuario::update($id, ['ativo' => 'n']);
         return CrudHelper::jsonOk(['message' => 'Usuário desativado.']);
+    }
+
+    public static function resetSenha($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('ID inválido.');
+        }
+
+        $u = EntityUsuario::getById($id);
+        if (!$u) {
+            return CrudHelper::jsonError('Usuário não encontrado.');
+        }
+
+        EntityUsuario::update($id, [
+            'senha' => password_hash(self::SENHA_PADRAO, PASSWORD_DEFAULT),
+        ]);
+
+        return CrudHelper::jsonOk([
+            'message' => 'Senha redefinida para '.self::SENHA_PADRAO.'. O funcionário deve alterá-la no próximo acesso.',
+        ]);
     }
 }

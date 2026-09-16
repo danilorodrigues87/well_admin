@@ -8,6 +8,7 @@ use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\CsrfHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Coleta as EntityColeta;
+use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
@@ -72,6 +73,8 @@ class ColetaNova extends Page
         }
 
         $itensHtml = self::renderItens($itens);
+        $evidencias = EntityColetaEvidencia::getByColetaId($coletaId);
+        $rascunhoConferido = ColetaService::rascunhoFinalConferido($coletaId);
 
         $content = View::render('admin/modules/coleta_nova/wizard', [
             'csrf_field' => CsrfHelper::field(),
@@ -97,14 +100,25 @@ class ColetaNova extends Page
             'tipos_options' => $tiposOptions,
             'tratamentos_options' => $tratamentosOptions,
             'itens_html' => $itensHtml,
+            'itens_count' => count($itens),
+            'motorista_nome' => CrudHelper::e($snapshot->motorista_nome ?? ''),
+            'evidencias_html' => self::renderEvidenciasHtml($evidencias),
+            'rascunho_conferido' => $rascunhoConferido ? '1' : '0',
+            'rascunho_resumo_class' => $rascunhoConferido ? '' : 'd-none',
+            'btn_gerar_disabled' => $rascunhoConferido ? '' : 'disabled',
+            'resumo_rascunho_html' => $rascunhoConferido
+                ? self::renderResumoRascunho($itens, $evidencias, $snapshot->motorista_nome ?? '')
+                : '',
             'situacao_recebido' => $coleta->situacao_recebimento === 'recebido' ? 'checked' : '',
             'data_recebimento' => $coleta->data_recebimento ?? '',
         ]);
 
         $scripts = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css">'
+            . '<link rel="stylesheet" href="'.URL.'/resources/css/tom-select-well.css?v=20260916">'
             . self::crudScripts('/painel/coleta/nova/'.$coletaId, false)
+            . '<script>window.COLETA_WIZARD = { rascunhoConferido: '.($rascunhoConferido ? 'true' : 'false').' };</script>'
             . '<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
-            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20260915"></script>';
+            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20260916i"></script>';
 
         return self::getPage('Coleta #'.$coletaId, $content, 'coleta_nova', $scripts);
     }
@@ -146,6 +160,7 @@ class ColetaNova extends Page
                 'adicionar_item' => self::acaoAdicionarItem($coletaId, $post, $usuario),
                 'remover_item' => self::acaoRemoverItem($coletaId, $post, $usuario),
                 'listar_itens' => self::acaoListarItens($coletaId, $usuario),
+                'salvar_rascunho_final' => self::acaoSalvarRascunhoFinal($request, $coletaId, $usuario),
                 'finalizar' => self::acaoFinalizar($request, $coletaId, $usuario),
                 'cancelar' => self::acaoCancelar($coletaId, $usuario),
                 default => CrudHelper::jsonError('Ação inválida.'),
@@ -202,7 +217,11 @@ class ColetaNova extends Page
     private static function acaoIniciar(array $post, array $usuario): string
     {
         $clienteId = (int)($post['cliente_id'] ?? 0);
-        $coletaId = ColetaService::iniciarRascunho($clienteId, (int)($usuario['id'] ?? 0));
+        $coletaId = ColetaService::iniciarRascunho(
+            $clienteId,
+            (int)($usuario['id'] ?? 0),
+            !empty($usuario['is_admin'])
+        );
         return CrudHelper::jsonOk(['coleta_id' => $coletaId, 'redirect' => URL.'/painel/coleta/nova/'.$coletaId]);
     }
 
@@ -280,16 +299,31 @@ class ColetaNova extends Page
         return CrudHelper::jsonOk(['itens_html' => self::renderItens(EntityColetaItem::getByColetaId($coletaId))]);
     }
 
+    private static function acaoSalvarRascunhoFinal($request, ?int $coletaId, array $usuario): string
+    {
+        self::assertColetaAccess($coletaId, $usuario);
+
+        $post = $request->getPostVars();
+        $relatorio = trim((string)($post['relatorio'] ?? ''));
+        $filesByKey = self::collectEvidenciaFiles();
+
+        $resumo = ColetaService::salvarRascunhoFinal($coletaId, $relatorio, $filesByKey);
+        $itens = EntityColetaItem::getByColetaId($coletaId);
+        $evidencias = EntityColetaEvidencia::getByColetaId($coletaId);
+
+        return CrudHelper::jsonOk([
+            'message' => 'Rascunho salvo. Confira o resumo e clique em Gerar MTR.',
+            'evidencias_html' => self::renderEvidenciasHtml($evidencias),
+            'resumo_html' => self::renderResumoRascunho($itens, $evidencias, $resumo['motorista']),
+            'rascunho_conferido' => true,
+        ]);
+    }
+
     private static function acaoFinalizar($request, ?int $coletaId, array $usuario): string
     {
         self::assertColetaAccess($coletaId, $usuario);
 
-        $files = [];
-        foreach (['evidencia_1', 'evidencia_2', 'evidencia_3'] as $key) {
-            if (!empty($_FILES[$key]['tmp_name'])) {
-                $files[] = $_FILES[$key];
-            }
-        }
+        $files = self::collectEvidenciaFilesList();
 
         $numeroMtr = ColetaService::finalizar($coletaId, $files);
         $msg = 'Coleta finalizada! MTR nº '.$numeroMtr.'.';
@@ -309,5 +343,57 @@ class ColetaNova extends Page
         self::assertColetaAccess($coletaId, $usuario);
         ColetaService::cancelar($coletaId);
         return CrudHelper::jsonOk(['redirect' => URL.'/painel/coleta/nova']);
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    private static function collectEvidenciaFiles(): array
+    {
+        $files = [];
+        foreach (['evidencia_1', 'evidencia_2', 'evidencia_3'] as $key) {
+            if (!empty($_FILES[$key]['tmp_name'])) {
+                $files[$key] = $_FILES[$key];
+            }
+        }
+
+        return $files;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function collectEvidenciaFilesList(): array
+    {
+        return array_values(self::collectEvidenciaFiles());
+    }
+
+    /** @param EntityColetaEvidencia[] $evidencias */
+    private static function renderEvidenciasHtml(array $evidencias): string
+    {
+        if ($evidencias === []) {
+            return '<p class="text-muted small mb-0">Nenhuma foto salva ainda.</p>';
+        }
+
+        $html = '<div class="row g-2">';
+        foreach ($evidencias as $e) {
+            $url = URL.'/storage/coletas/'.$e->coleta_id.'/'.basename($e->arquivo);
+            $html .= '<div class="col-md-4"><a href="'.$url.'" target="_blank">'
+                .'<img src="'.$url.'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"/></a></div>';
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * @param EntityColetaItem[] $itens
+     * @param EntityColetaEvidencia[] $evidencias
+     */
+    private static function renderResumoRascunho(array $itens, array $evidencias, string $motorista): string
+    {
+        $html = '<ul class="mb-0 small">';
+        $html .= '<li><strong>Resíduos:</strong> '.count($itens).' item(ns)</li>';
+        $html .= '<li><strong>Motorista:</strong> '.CrudHelper::e($motorista).'</li>';
+        $html .= '<li><strong>Fotos salvas:</strong> '.count($evidencias).'</li>';
+        $html .= '</ul>';
+
+        return $html;
     }
 }

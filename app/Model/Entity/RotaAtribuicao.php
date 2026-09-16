@@ -2,11 +2,15 @@
 
 namespace App\Model\Entity;
 
+use App\Common\OperadoraScope;
 use App\Model\Db\Database;
+use App\Model\Entity\Concerns\TenantScoped;
 use PDO;
 
 class RotaAtribuicao
 {
+    use TenantScoped;
+
     public int $id = 0;
     public int $rota_id = 0;
     public int $cliente_id = 0;
@@ -18,12 +22,12 @@ class RotaAtribuicao
     public static function countByRota(int $rotaId, string $whereExtra = '', array $params = []): int
     {
         $db = new Database();
-        $where = 'ra.rota_id = ?'.$whereExtra;
-        array_unshift($params, $rotaId);
+        $where = 'ra.rota_id = ? AND ra.operadora_id = ?'.$whereExtra;
+        array_unshift($params, $rotaId, OperadoraScope::getOperadoraId());
         $stmt = $db->execute(
             'SELECT COUNT(*) AS qtd FROM rota_atribuicoes ra
-             INNER JOIN clientes c ON c.id = ra.cliente_id
-             LEFT JOIN usuarios u ON u.id = ra.coletor_id
+             INNER JOIN clientes c ON c.id = ra.cliente_id AND c.operadora_id = ra.operadora_id
+             LEFT JOIN usuarios u ON u.id = ra.coletor_id AND u.operadora_id = ra.operadora_id
              WHERE '.$where,
             $params
         );
@@ -35,14 +39,14 @@ class RotaAtribuicao
     public static function listByRota(int $rotaId, string $whereExtra, array $params, string $limit): array
     {
         $db = new Database();
-        $where = 'ra.rota_id = ?'.$whereExtra;
-        array_unshift($params, $rotaId);
+        $where = 'ra.rota_id = ? AND ra.operadora_id = ?'.$whereExtra;
+        array_unshift($params, $rotaId, OperadoraScope::getOperadoraId());
         $stmt = $db->execute(
             'SELECT ra.*, c.nome_fantasia AS cliente_nome, c.cidade AS cliente_cidade,
                     u.nome AS coletor_nome
              FROM rota_atribuicoes ra
-             INNER JOIN clientes c ON c.id = ra.cliente_id
-             LEFT JOIN usuarios u ON u.id = ra.coletor_id
+             INNER JOIN clientes c ON c.id = ra.cliente_id AND c.operadora_id = ra.operadora_id
+             LEFT JOIN usuarios u ON u.id = ra.coletor_id AND u.operadora_id = ra.operadora_id
              WHERE '.$where.'
              ORDER BY c.nome_fantasia ASC
              LIMIT '.$limit,
@@ -63,10 +67,10 @@ class RotaAtribuicao
             'SELECT ra.*, c.nome_fantasia AS cliente_nome, c.cidade AS cliente_cidade,
                     u.nome AS coletor_nome
              FROM rota_atribuicoes ra
-             INNER JOIN clientes c ON c.id = ra.cliente_id
-             LEFT JOIN usuarios u ON u.id = ra.coletor_id
-             WHERE ra.id = ?',
-            [$id]
+             INNER JOIN clientes c ON c.id = ra.cliente_id AND c.operadora_id = ra.operadora_id
+             LEFT JOIN usuarios u ON u.id = ra.coletor_id AND u.operadora_id = ra.operadora_id
+             WHERE ra.id = ? AND ra.operadora_id = ?',
+            [$id, ...self::tenantIdParams()]
         );
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -80,8 +84,8 @@ class RotaAtribuicao
         $stmt = $db->execute(
             'SELECT COUNT(*) AS total,
                     SUM(CASE WHEN coletor_id IS NULL THEN 1 ELSE 0 END) AS sem_coletor
-             FROM rota_atribuicoes WHERE rota_id = ?',
-            [$rotaId]
+             FROM rota_atribuicoes WHERE rota_id = ? AND operadora_id = ?',
+            [$rotaId, ...self::tenantIdParams()]
         );
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -95,8 +99,8 @@ class RotaAtribuicao
     {
         $db = new Database();
         $row = $db->execute(
-            'SELECT 1 FROM rota_atribuicoes WHERE rota_id = ? AND cliente_id = ? LIMIT 1',
-            [$rotaId, $clienteId]
+            'SELECT 1 FROM rota_atribuicoes WHERE rota_id = ? AND cliente_id = ? AND operadora_id = ? LIMIT 1',
+            [$rotaId, $clienteId, ...self::tenantIdParams()]
         )->fetch();
 
         return (bool)$row;
@@ -105,6 +109,7 @@ class RotaAtribuicao
     public static function insert(int $rotaId, int $clienteId, ?int $coletorId = null): int
     {
         return (int)(new Database('rota_atribuicoes'))->insert([
+            'operadora_id' => OperadoraScope::getOperadoraId(),
             'rota_id' => $rotaId,
             'cliente_id' => $clienteId,
             'coletor_id' => $coletorId,
@@ -114,21 +119,24 @@ class RotaAtribuicao
     public static function updateColetor(int $id, ?int $coletorId): void
     {
         (new Database())->execute(
-            'UPDATE rota_atribuicoes SET coletor_id = ? WHERE id = ?',
-            [$coletorId, $id]
+            'UPDATE rota_atribuicoes SET coletor_id = ? WHERE id = ? AND operadora_id = ?',
+            [$coletorId, $id, ...self::tenantIdParams()]
         );
     }
 
     public static function delete(int $id): void
     {
-        (new Database())->execute('DELETE FROM rota_atribuicoes WHERE id = ?', [$id]);
+        (new Database())->execute(
+            'DELETE FROM rota_atribuicoes WHERE id = ? AND operadora_id = ?',
+            [$id, ...self::tenantIdParams()]
+        );
     }
 
     public static function setColetorEmLote(int $rotaId, int $coletorId, bool $onlySemColetor = true): int
     {
         $db = new Database();
-        $sql = 'UPDATE rota_atribuicoes SET coletor_id = ? WHERE rota_id = ?';
-        $params = [$coletorId, $rotaId];
+        $sql = 'UPDATE rota_atribuicoes SET coletor_id = ? WHERE rota_id = ? AND operadora_id = ?';
+        $params = [$coletorId, $rotaId, ...self::tenantIdParams()];
         if ($onlySemColetor) {
             $sql .= ' AND coletor_id IS NULL';
         }
@@ -137,33 +145,34 @@ class RotaAtribuicao
         return $stmt->rowCount();
     }
 
-    /** @return list<array{id:int,nome:string}> */
-    public static function clientesDisponiveis(int $rotaId, string $busca = ''): array
+    /** @return list<array{id:int,nome:string,cidade:string}> */
+    public static function clientesDisponiveis(int $rotaId): array
     {
         $db = new Database();
-        $where = "c.status = 'ativo' AND NOT EXISTS (
-            SELECT 1 FROM rota_atribuicoes ra WHERE ra.cliente_id = c.id AND ra.rota_id = ?
+        $where = "c.status = 'ativo' AND c.operadora_id = ? AND NOT EXISTS (
+            SELECT 1 FROM rota_atribuicoes ra
+            WHERE ra.cliente_id = c.id AND ra.rota_id = ? AND ra.operadora_id = c.operadora_id
         )";
-        $params = [$rotaId];
-        if ($busca !== '') {
-            $where .= ' AND (c.nome_fantasia LIKE ? OR c.cidade LIKE ?)';
-            $params[] = '%'.$busca.'%';
-            $params[] = '%'.$busca.'%';
-        }
+        $params = [...self::tenantIdParams(), $rotaId];
         $stmt = $db->execute(
-            'SELECT c.id, c.nome_fantasia AS nome FROM clientes c
+            'SELECT c.id, c.nome_fantasia AS nome, c.cidade FROM clientes c
              WHERE '.$where.'
-             ORDER BY c.nome_fantasia ASC LIMIT 50',
+             ORDER BY c.nome_fantasia ASC',
             $params
         );
         $items = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $items[] = ['id' => (int)$row['id'], 'nome' => (string)$row['nome']];
+            $items[] = [
+                'id' => (int)$row['id'],
+                'nome' => (string)$row['nome'],
+                'cidade' => (string)($row['cidade'] ?? ''),
+            ];
         }
 
         return $items;
     }
 
+    /** @param array<string, mixed> $row */
     private static function fromArray(array $row): self
     {
         $a = new self();

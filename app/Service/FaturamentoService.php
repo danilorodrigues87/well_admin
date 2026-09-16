@@ -4,8 +4,12 @@ namespace App\Service;
 
 use App\Common\CobrancaConfig;
 use App\Common\InterConfig;
+use App\Common\OperadoraScope;
+use App\Model\Db\Database;
+use App\Model\Db\Pagination;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
+use PDO;
 use App\Service\Inter\InterCobrancaService;
 use App\Service\Inter\InterPayloadBuilder;
 use App\Service\Inter\InterWebhookService;
@@ -13,14 +17,119 @@ use App\Service\Inter\InterWebhookService;
 class FaturamentoService
 {
     /**
-     * @param array{plano_id?:int,situacao?:string} $filtros
-     * @return array{rows:list<array<string,mixed>>,competencia:string}
+     * @param array{plano_id?:int,situacao?:string,busca?:string} $filtros
+     * @return array{rows:list<array<string,mixed>>,competencia:string,total:int,page:int,pages:int}
      */
-    public static function relatorioCompetencia(string $competenciaYm, array $filtros = []): array
+    public static function relatorioCompetencia(
+        string $competenciaYm,
+        array $filtros = [],
+        int $page = 1,
+        int $perPage = 25
+    ): array {
+        $competenciaYm = self::normalizeCompetencia($competenciaYm);
+        $perPage = max(10, min(50, $perPage));
+        $total = self::countFaturamentoClientes($competenciaYm, $filtros);
+        $pagination = new Pagination($total, $page, $perPage);
+        $clientes = self::listFaturamentoClientes($competenciaYm, $filtros, $pagination->getLimit());
+        $rows = [];
+
+        foreach ($clientes as $row) {
+            $cliente = $row['cliente'];
+            $calculo = PlanoCobrancaService::calcularMes($cliente->id, $competenciaYm);
+            $emitida = $row['emitida'];
+
+            $rows[] = [
+                'cliente_id' => $cliente->id,
+                'cliente_nome' => $cliente->nome_fantasia,
+                'plano_nome' => $cliente->plano_nome,
+                'email' => $cliente->email,
+                'valor_fixo' => $calculo['valor_fixo'],
+                'valor_residuos' => $calculo['valor_residuos'],
+                'valor_total' => $calculo['valor_total'],
+                'situacao' => $emitida ? 'emitida' : 'pendente',
+                'inter_cobranca_id' => $row['inter_cobranca_id'],
+                'inter_status' => $row['inter_status'],
+                'validacao' => InterPayloadBuilder::build(
+                    $cliente,
+                    $competenciaYm,
+                    max(InterPayloadBuilder::VALOR_MINIMO_INTER, $calculo['valor_total']),
+                    date('Y-m-d', strtotime('+10 days')),
+                    null
+                )['error'],
+            ];
+        }
+
+        return [
+            'rows' => $rows,
+            'competencia' => $competenciaYm,
+            'total' => $total,
+            'page' => $pagination->getCurrentPage(),
+            'pages' => $pagination->getTotalPages(),
+        ];
+    }
+
+    /** @param array{plano_id?:int,situacao?:string,busca?:string} $filtros */
+    public static function countFaturamentoClientes(string $competenciaYm, array $filtros = []): int
+    {
+        [$where, $params] = self::faturamentoWhere($competenciaYm, $filtros);
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT COUNT(*) AS qtd
+             FROM clientes c
+             LEFT JOIN inter_cobrancas ic ON ic.cliente_id = c.id
+               AND ic.competencia = ?
+               AND ic.operadora_id = c.operadora_id
+             WHERE '.$where,
+            $params
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return (int)($row['qtd'] ?? 0);
+    }
+
+    /**
+     * @param array{plano_id?:int,situacao?:string,busca?:string} $filtros
+     * @return list<array{cliente:EntityCliente,emitida:bool,inter_cobranca_id:?int,inter_status:?string}>
+     */
+    private static function listFaturamentoClientes(string $competenciaYm, array $filtros, string $limit): array
+    {
+        [$where, $params] = self::faturamentoWhere($competenciaYm, $filtros);
+        $db = new Database();
+        $stmt = $db->execute(
+            'SELECT c.*, p.nome AS plano_nome, ic.id AS inter_cobranca_id, ic.status AS inter_status
+             FROM clientes c
+             LEFT JOIN planos p ON p.id = c.plano_id AND p.operadora_id = c.operadora_id
+             LEFT JOIN inter_cobrancas ic ON ic.cliente_id = c.id
+               AND ic.competencia = ?
+               AND ic.operadora_id = c.operadora_id
+             WHERE '.$where.'
+             ORDER BY c.nome_fantasia ASC
+             LIMIT '.$limit,
+            $params
+        );
+
+        $items = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $cliente = EntityCliente::fromRow($row);
+            $items[] = [
+                'cliente' => $cliente,
+                'emitida' => !empty($row['inter_cobranca_id']),
+                'inter_cobranca_id' => isset($row['inter_cobranca_id']) ? (int)$row['inter_cobranca_id'] : null,
+                'inter_status' => isset($row['inter_status']) ? (string)$row['inter_status'] : null,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param array{plano_id?:int,situacao?:string,busca?:string} $filtros
+     * @return array{0:string,1:array<int,mixed>}
+     */
+    private static function faturamentoWhere(string $competenciaYm, array $filtros): array
     {
         $competenciaYm = self::normalizeCompetencia($competenciaYm);
-        $where = "c.status = 'ativo' AND c.plano_id IS NOT NULL";
-        $params = [];
+        $where = "c.status = 'ativo' AND c.plano_id IS NOT NULL AND c.operadora_id = ?";
+        $params = [$competenciaYm, OperadoraScope::getOperadoraId()];
 
         $planoId = (int)($filtros['plano_id'] ?? 0);
         if ($planoId > 0) {
@@ -36,47 +145,14 @@ class FaturamentoService
             $params[] = $like;
         }
 
-        $clientes = EntityCliente::list($where, $params, '1000');
-        $rows = [];
-
-        foreach ($clientes as $cliente) {
-            $calculo = PlanoCobrancaService::calcularMes($cliente->id, $competenciaYm);
-            $existente = EntityInterCobranca::getByClienteCompetencia($cliente->id, $competenciaYm);
-            $situacao = $existente ? 'emitida' : 'pendente';
-
-            $situacaoFiltro = trim((string)($filtros['situacao'] ?? ''));
-            if ($situacaoFiltro === 'pendente' && $existente) {
-                continue;
-            }
-            if ($situacaoFiltro === 'emitida' && !$existente) {
-                continue;
-            }
-
-            $rows[] = [
-                'cliente_id' => $cliente->id,
-                'cliente_nome' => $cliente->nome_fantasia,
-                'plano_nome' => $cliente->plano_nome,
-                'email' => $cliente->email,
-                'valor_fixo' => $calculo['valor_fixo'],
-                'valor_residuos' => $calculo['valor_residuos'],
-                'valor_total' => $calculo['valor_total'],
-                'itens' => $calculo['itens'],
-                'situacao' => $situacao,
-                'inter_cobranca_id' => $existente?->id,
-                'inter_status' => $existente?->status,
-                'validacao' => InterPayloadBuilder::build(
-                    $cliente,
-                    $competenciaYm,
-                    max(InterPayloadBuilder::VALOR_MINIMO_INTER, $calculo['valor_total']),
-                    date('Y-m-d', strtotime('+10 days')),
-                    null
-                )['error'],
-            ];
+        $situacaoFiltro = trim((string)($filtros['situacao'] ?? ''));
+        if ($situacaoFiltro === 'pendente') {
+            $where .= ' AND ic.id IS NULL';
+        } elseif ($situacaoFiltro === 'emitida') {
+            $where .= ' AND ic.id IS NOT NULL';
         }
 
-        usort($rows, fn ($a, $b) => strcmp($a['cliente_nome'], $b['cliente_nome']));
-
-        return ['rows' => $rows, 'competencia' => $competenciaYm];
+        return [$where, $params];
     }
 
     /**

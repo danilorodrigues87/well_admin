@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\ColetaDefaults;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;

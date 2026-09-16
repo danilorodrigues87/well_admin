@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Common\Helpers\ApiHelper;
+use App\Common\OperadoraScope;
 use App\Http\ApiContext;
 use App\Service\ApiAuthService;
 
@@ -21,6 +22,7 @@ class RequireApiAuth
         }
 
         ApiContext::setUser($user);
+        OperadoraScope::setOverride((int)($user['operadora_id'] ?? 1));
 
         return $next($request);
     }

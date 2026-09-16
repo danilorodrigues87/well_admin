@@ -1,0 +1,59 @@
+<ol class="breadcrumb mb-3">
+    <li class="breadcrumb-item"><a href="{{URL}}/gerador">Início</a></li>
+    <li class="breadcrumb-item"><a href="{{URL}}/gerador/coletas">Coletas</a></li>
+    <li class="breadcrumb-item active">Detalhes</li>
+</ol>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="mt-0 mb-2">Coleta MTR {{numero_mtr}}</h1>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            {{status_badge}}
+            {{recebimento_badge}}
+            <span class="text-muted small">Data: {{data_coleta}} · Hora: {{hora}}</span>
+        </div>
+    </div>
+    <div class="d-flex gap-2">{{mtr_link}}</div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="small text-muted">Recebimento no destinador</div>
+                <div class="fs-5 fw-semibold">{{data_recebimento}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent">Operação</div>
+            <div class="card-body">
+                <div class="row g-3">{{transportador_html}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{relatorio_html}}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-transparent"><i class="fas fa-recycle me-1 text-primary"></i> Resíduos coletados</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Resíduo</th><th>Classe</th><th class="text-end">Quantidade</th></tr>
+                </thead>
+                <tbody>{{itens_rows}}</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-transparent"><i class="fas fa-camera me-1 text-primary"></i> Evidências fotográficas</div>
+    <div class="card-body">{{evidencias_html}}</div>
+</div>
+
+<p class="mb-0"><a href="{{URL}}/gerador/coletas" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Voltar à lista</a></p>

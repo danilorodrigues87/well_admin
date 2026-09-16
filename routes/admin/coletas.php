@@ -3,7 +3,30 @@
 use App\Controller\Admin\Agendamentos;
 use App\Controller\Admin\ColetaNova;
 use App\Controller\Admin\Coletas;
+use App\Controller\Admin\RotaDoDia;
 use App\Http\Response;
+
+// ── Rota do dia (mapa + otimização) ──
+$obRouter->get('/painel/rota-do-dia', [
+    'middlewares' => ['required-admin-login', 'required-module:rota_dia'],
+    function ($request) {
+        return new Response(200, RotaDoDia::index($request));
+    },
+]);
+
+$obRouter->post('/painel/rota-do-dia', [
+    'middlewares' => ['required-admin-login', 'required-module:rota_dia'],
+    function ($request) {
+        $acao = $request->getPostVars()['acao'] ?? '';
+        $content = match ($acao) {
+            'paradas' => RotaDoDia::paradas($request),
+            'otimizar' => RotaDoDia::otimizar($request),
+            'salvar_ordem' => RotaDoDia::salvarOrdem($request),
+            default => json_encode(['success' => false, 'message' => 'Ação inválida']),
+        };
+        return new Response(200, $content, 'application/json');
+    },
+]);
 
 // ── Lançar coleta (wizard) ──
 $obRouter->get('/painel/coleta/nova', [

@@ -1,0 +1,63 @@
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Novo contrato</h1>
+    <p class="text-muted">Cliente: <strong>{{cliente_nome}}</strong></p>
+    {{alerta}}
+    <form method="post" action="{{URL}}/painel/clientes/{{cliente_id}}/contrato/novo" class="card shadow p-4" id="form_contrato">
+        {{csrf_field}}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Plano</label>
+                <select name="plano_id" class="form-select" required>{{planos_options}}</select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Valor mensal (R$)</label>
+                <input type="text" name="valor_mensal" class="form-control" placeholder="Do plano">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Duração (meses)</label>
+                <input type="number" name="qtd_meses" class="form-control" value="12" min="1" max="120" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Início</label>
+                <input type="date" name="data_inicio" class="form-control" value="{{data_inicio}}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Dia vencimento</label>
+                <input type="number" name="dia_vencimento" class="form-control" value="10" min="1" max="28">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">1ª competência</label>
+                <input type="month" name="primeira_competencia" class="form-control" value="{{primeira_competencia}}" required>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="enviar_assinatura" value="1" id="enviar_assinatura">
+                    <label class="form-check-label" for="enviar_assinatura">Enviar para assinatura do gerador após salvar</label>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Salvar contrato</button>
+            <a href="{{URL}}/painel/clientes/{{cliente_id}}/contratos" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+<script>
+(function () {
+    var semPlanos = '{{sem_planos}}' === '1';
+    if (semPlanos) {
+        var btn = document.querySelector('#form_contrato button[type="submit"]');
+        if (btn) btn.disabled = true;
+    }
+    var sel = document.querySelector('select[name="plano_id"]');
+    var valor = document.querySelector('input[name="valor_mensal"]');
+    if (sel && valor) {
+        sel.addEventListener('change', function () {
+            var opt = sel.options[sel.selectedIndex];
+            var v = opt && opt.getAttribute('data-valor');
+            if (v && !valor.value) valor.placeholder = 'Padrão: R$ ' + v.replace('.', ',');
+        });
+        sel.dispatchEvent(new Event('change'));
+    }
+})();
+</script>

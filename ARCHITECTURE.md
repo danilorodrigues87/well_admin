@@ -11,7 +11,7 @@
 
 ## 1. Visão do produto
 
-Single-tenant (sem multi-escola). Painel web para:
+Multitenancy **preparado** (`operadoras` + `operadora_id`); MVP ativo só **Well id=1** (sem Painel Plataforma). Painel web para:
 
 - **Administradores** — usuários, funções, módulos, cadastros
 - **Gestores** — agendamentos, clientes, rotas
@@ -110,8 +110,29 @@ docs/                  Documentação complementar
 | `011_inter_cobrancas.sql` | Cobranças BolePix emitidas via API Banco Inter |
 | `012_faturas_inter.sql` | Competência, valor calculado, detalhes JSON, e-mail em `inter_cobrancas` |
 | `013_config_sistema.sql` | Config global multa/juros (`config_sistema`) |
+| `021_operadoras.sql` | Tabela `operadoras` (tenant); seed Well id=1 |
+| `022_operadora_id_tenant.sql` | `operadora_id DEFAULT 1` em dados operacionais; `coleta_sequencia` por operadora |
+| `023_operadora_config.sql` | Config por operadora (`operadora_config`) |
+| `024_tipos_residuos_complementares.sql` | Tipos nacionais faltantes (agrotóxicos, efluentes, gorduras) |
+| `025_cliente_usuarios.sql` | Login portal/API gerador (`cliente_usuarios`) |
 
 Novas migrations: prefixo numérico crescente. Atualizar `docs/DATABASE.md`.
+
+### Multitenancy (operadoras)
+
+```
+operadoras (id=1 Well) ── operadora_id ──► usuarios, clientes, coletas, rotas, planos…
+App\Common\OperadoraScope::getOperadoraId()  — sessão ou default 1
+App\Model\Entity\Operadora                   — branding, SINIR, defaults MTR por tenant
+operadora_config                             — multa/juros e chaves editáveis (`OperadoraConfig` entity)
+App\Model\Entity\OperadoraConfig             — get/set key-value por operadora_id
+/painel/operadora                            — branding + transportador/destinador MTR (admin)
+```
+
+- **Catálogo compartilhado:** `tipos_residuos`, `residuo_classes`, `residuo_grupos` (sem `operadora_id`). Edição **somente no Painel Master/Plataforma** (futuro); no admin da operadora permanecem read-only / como estão hoje.
+- **Painel Plataforma** (`/plataforma`, CRUD operadoras): postergado até operadora 2+.
+- **Portal gerador:** `/gerador` (sessão `well-eco-gerador`) + API `/api/v1/gerador/*` (JWT `tipo=gerador`). Credenciais em `cliente_usuarios`; gestão no admin Clientes.
+- Aplicar: `php database/scripts/apply_multitenancy_migrations.php` + `seed_operadora_well.php`.
 
 ### Integração SINIR
 
@@ -152,6 +173,22 @@ app/Model/Entity/ConfigSistema.php
 ```
 
 Doc: `docs/INTER.md`. Smoke: `php database/scripts/inter_smoke_token.php`.
+
+**Modelo financeiro SaaS (decisão):** todos os boletos/PIX são emitidos pela **conta Inter da Well** (único par de credenciais/mTLS). Valores ficam registrados por `operadora_id` + `cliente_id` em `inter_cobrancas`; a Well **repassa** às operadoras assinantes (processo manual ou automatizado futuro). Vantagens: sem tokens/certificados por tenant; possibilidade de **taxa por transação** na plataforma. Repasse e taxas: implementação futura (Painel Plataforma / financeiro scoped).
+
+### Portal gerador
+
+```
+/gerador/login              — sessão PHP (cliente_usuarios)
+/gerador                    — dashboard (coletas + boletos)
+/gerador/coletas            — listagem e MTR (somente do cliente logado)
+/gerador/boletos            — cobranças Inter do cliente
+
+/api/v1/gerador/login       — JWT tipo=gerador
+/api/v1/gerador/me|coletas|boletos
+```
+
+`App\Service\GeradorAuthService`, `GeradorPortalService`, `GeradorScope`, `ClienteUsuario`.
 
 ---
 
@@ -202,4 +239,18 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-15 | SINIR sync: `SinirCatalogService` + `sinir_sync_residuos.php` (listas API → códigos em `tipos_residuos`, `--dry-run`/`--csv`) |
 | 2026-09-16 | Marca: `CompanyConfig` + `COMPANY_NAME` / `COMPANY_SHORT_NAME` no `.env` — e-mails e boletos usam Well S.A. / Well Soluções Ambientais (não "Well Eco") |
 | 2026-09-16 | Pagamentos: sync status Inter + baixa manual na aba Cobranças emitidas; histórico paginado (20/página) e filtro status select |
+| 2026-09-16 | Coleta wizard: fluxo em 2 passos — salvar rascunho (fotos/relatório) e depois Gerar MTR (rápido, sem reupload) |
+| 2026-09-16 | Rotas Google Maps: geolocalização em `clientes`, `RotaScopeService` (RBAC rota/coletor), painel `/painel/rota-do-dia`, API `/rota-do-dia/*`, `GoogleMapsService` (Geocoding + Routes API) |
+| 2026-09-16 | Funcionários/Usuários: ação `resetar_senha` — botão chave na listagem redefine senha para `12345678` (hash via `password_hash`) |
+| 2026-09-16 | Coletas: `data_recebimento` obrigatória para gerar MTR (rascunho pode ficar sem); doc `docs/MIGRACAO_DADOS.md`; script `repair_coletas_data_recebimento.php`; fallback no ETL |
+| 2026-09-16 | Multitenancy Fase 3 (parcial): trait `TenantScoped` — entities clientes/coletas/rotas/planos/veículos/usuários/inter_cobrancas/rota_atribuicoes filtram `operadora_id`; services Dashboard, RotaScope, Relatorio, PlanoCobranca, RotaDoDia |
+| 2026-09-16 | Multitenancy Fase 1: migrations `021`–`024`, `OperadoraScope`, `Operadora`, JWT `operadora_id`, ETL `--operadora-id`; catálogo SINIR revisado (58 tipos, 100% mapeados) |
+| 2026-09-16 | Financeiro SaaS: boletos via conta Inter única Well + repasse futuro; catálogo resíduos editável só no master (futuro) |
+| 2026-09-16 | Portal gerador Fase 6: migration `025`, `/gerador/*`, API `/api/v1/gerador/*`, CRUD acessos em Clientes |
+| 2026-09-16 | Multitenancy Fase 4: `OperadoraConfig` entity, `CobrancaConfig`/`ColetaDefaults`/`CompanyConfig` por tenant; admin `/painel/operadora` |
+| 2026-09-16 | Portal gerador refinado: badge portal em Clientes, `/gerador/perfil` (trocar senha), paginação coletas/boletos, filtro status, evidências na web |
+| 2026-09-16 | UI portal gerador: template padrão admin (sidebar, tema dark/light, Chart.js), dashboard KPIs+gráficos, detalhe coleta/boleto, datas BR, valor cobrado = admin |
+| 2026-09-16 | Dashboard admin: KPIs visuais + gráficos coletas/faturamento/status (Chart.js `dashboard-charts.js`) |
+| 2026-09-16 | Suporte/termos/ajuda/contratos: migrations `027`–`033`; tickets `/painel/suporte`; ajuda `/painel/ajuda`; termos aceite admin+gerador; `/privacidade`; contratos comerciais operadora↔cliente (`clientes_contratos`, assinatura portal gerador) |
+| 2026-09-16 | UX contratos/ajuda: tickets ocultos do menu; Central de ajuda com artigo por módulo (`034` + `seed_help_modulos.php`); `/painel/contratos` com listagem e criação; botão contrato em Clientes; preview em iframe |
 | 2026-09-15 | Coleta wizard: motorista = select de coletores (bloqueado para função Coletor); Tom Select nos resíduos; modal loading na finalização; SINIR não bloqueia HTTP |

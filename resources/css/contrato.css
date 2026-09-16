@@ -1,0 +1,23 @@
+.bto {
+    padding: 1%;
+    background: #dedede;
+    margin-bottom: 1%;
+    border-bottom: 1px solid #ccc;
+}
+.bto button.btn-impress {
+    padding: 9px 16px;
+    border: 0;
+    cursor: pointer;
+    color: #fff;
+    background: #198754;
+}
+#content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    font-family: Georgia, serif;
+    line-height: 1.5;
+}
+@media print {
+    .bto { display: none; }
+}

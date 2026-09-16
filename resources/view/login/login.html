@@ -1,7 +1,7 @@
-<div class="col-lg-5">
-    <div class="card shadow-lg border-0 rounded-lg mt-3">
-        <div class="text-center my-3 px-3">
-            <img src="{{URL}}/resources/assets/imgs/logo.png" alt="Well Soluções Ambientais" class="login-logo mb-2" width="160" />
+<div class="col-11 col-sm-9 col-md-6 col-lg-4 mx-auto">
+    <div class="card shadow-lg border-0 rounded-lg mt-3 well-login-card">
+        <div class="text-center login-brand">
+            <img src="{{URL}}/resources/assets/imgs/logo.png" alt="Well Soluções Ambientais" class="login-logo mb-1" />
             <p class="text-muted small mb-0">Painel Administrativo</p>
         </div>
         <div class="card-header">
@@ -11,16 +11,17 @@
             {{status}}
             <form method="post">
                 {{csrf_field}}
-                <div class="form-floating mb-3">
+                <div class="form-floating mb-2">
                     <input class="form-control" name="email" type="email" placeholder="nome@email.com" required />
                     <label>E-mail</label>
                 </div>
-                <div class="form-floating mb-3">
+                <div class="form-floating mb-2">
                     <input class="form-control" name="senha" type="password" placeholder="******" required />
                     <label>Senha</label>
                 </div>
-                <div class="d-flex align-items-center justify-content-end mt-4 mb-0">
-                    <button type="submit" class="btn btn-primary">Entrar</button>
+                <div class="d-flex align-items-center justify-content-between mt-3 mb-0">
+                    <a href="{{URL}}/gerador/login" class="small">Portal do gerador</a>
+                    <button type="submit" class="btn btn-primary btn-sm">Entrar</button>
                 </div>
             </form>
         </div>

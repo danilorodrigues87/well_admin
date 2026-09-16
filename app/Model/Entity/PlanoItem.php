@@ -2,6 +2,7 @@
 
 namespace App\Model\Entity;
 
+use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use PDO;
 
@@ -27,9 +28,10 @@ class PlanoItem
             'SELECT pi.*, t.nome AS tipo_nome, t.cod_ibama AS tipo_cod_ibama
              FROM plano_itens pi
              INNER JOIN tipos_residuos t ON t.id = pi.tipo_residuo_id
-             WHERE pi.plano_id = ?
+             INNER JOIN planos p ON p.id = pi.plano_id AND p.operadora_id = pi.operadora_id
+             WHERE pi.plano_id = ? AND pi.operadora_id = ?
              ORDER BY pi.ordem, pi.id',
-            [$planoId]
+            [$planoId, OperadoraScope::getOperadoraId()]
         );
         $items = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -44,7 +46,11 @@ class PlanoItem
         $db = new Database();
         $db->beginTransaction();
         try {
-            $db->execute('DELETE FROM plano_itens WHERE plano_id = ?', [$planoId]);
+            $opId = OperadoraScope::getOperadoraId();
+            $db->execute(
+                'DELETE FROM plano_itens WHERE plano_id = ? AND operadora_id = ?',
+                [$planoId, $opId]
+            );
             $ordem = 0;
             foreach ($rows as $row) {
                 $tipoId = (int)($row['tipo_residuo_id'] ?? 0);
@@ -54,9 +60,10 @@ class PlanoItem
                 $geraCredito = !empty($row['gera_credito']);
                 $db->execute(
                     'INSERT INTO plano_itens
-                     (plano_id, tipo_residuo_id, saldo_incluso, unidade, valor_excedente, saldo_compartilhado, gera_credito, ordem)
-                     VALUES (?,?,?,?,?,?,?,?)',
+                     (operadora_id, plano_id, tipo_residuo_id, saldo_incluso, unidade, valor_excedente, saldo_compartilhado, gera_credito, ordem)
+                     VALUES (?,?,?,?,?,?,?,?,?)',
                     [
+                        $opId,
                         $planoId,
                         $tipoId,
                         $geraCredito ? 0.0 : (float)($row['saldo_incluso'] ?? 0),

@@ -11,7 +11,9 @@ if (str_contains($requestUri, '/api/')) {
     $obRouter->setContentType('application/json');
 }
 
+include __DIR__.'/routes/public.php';
 include __DIR__.'/routes/api.php';
+include __DIR__.'/routes/gerador.php';
 include __DIR__.'/routes/admin.php';
 
 $obRouter->run()->sendResponse();

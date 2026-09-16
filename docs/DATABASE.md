@@ -36,8 +36,9 @@ mysql -u root well_admin < database/migrations/002_seed.sql
 | `tipos_residuos` | Catálogo de resíduos (FK classe_id + grupo_id) |
 | `veiculos` | Frota |
 | `rotas` | Rotas de coleta |
-| `clientes` | Clientes (endereço inline na Fase 1) |
+| `clientes` | Clientes (endereço inline; geolocalização em `018_clientes_geolocalizacao.sql`) |
 | `rota_atribuicoes` | Cliente ↔ rota ↔ coletor (uso na Etapa 3) |
+| `rota_dia_ordem` | Ordem das paradas do dia por coletor (`019_rota_dia_ordem.sql`) |
 
 ## Migrations adicionais
 
@@ -85,6 +86,7 @@ Legado para ETL: banco `well_antigo` (dump `wellec99_app.sql`).
 | `coletas.sinir_enviado_em` | Timestamp do último envio bem-sucedido |
 | `tipos_residuos.tra_codigo` … `uni_codigo` | Mapeamento códigos API (`codigoTecnologia`, `codigoTipoEstado`, etc.) |
 | `clientes.sinir_cod_unidade` | Código unidade do gerador no portal MTR (`010_clientes_sinir_unidade.sql`) |
+| `clientes.latitude`, `longitude`, `maps_link`, `geocode_status` | Geolocalização para rotas Google Maps (`018_clientes_geolocalizacao.sql`) |
 | `sinir_envios` | Histórico de tentativas (payload JSON, erro, tentativa) |
 
 ```bash
@@ -151,3 +153,66 @@ Get-Content database\migrations\016_drop_cliente_saldo_residuo.sql | C:\xampp\my
 Backfill legado: `php database/scripts/backfill_coleta_itens_tipo.php` (preenche `coleta_itens.tipo_residuo_id`).  
 Auditoria: `php database/scripts/audit_coleta_itens_tipo.php` (opcional `--csv=storage/audit_coleta_tipo.csv`).  
 Nomes truncados (`1 Sacos de`, `1 Granel de`…): `App\Common\Helpers\ColetaItemLegacyResolver` usa cliente, plano e contexto da coleta.
+
+## Multitenancy — operadoras (`021`–`024`)
+
+| Tabela | Descrição |
+|--------|-----------|
+| `operadoras` | Tenant (Well = id 1): branding, defaults MTR, credenciais SINIR |
+| `operadora_config` | Config key/value por operadora (multa/juros, etc.) |
+| `*.operadora_id` | FK DEFAULT 1 em: `usuarios`, `clientes`, `veiculos`, `rotas`, `planos`, `coletas`, `plano_itens`, `rota_atribuicoes`, `rota_dia_ordem`, `inter_cobrancas` |
+| `coleta_sequencia` | PK `operadora_id` (sequencial MTR por tenant) |
+
+**Globais (sem operadora_id):** `modulos`, `funcoes`, `tipos_residuos`, `residuo_classes`, `residuo_grupos` — edição futura só no Painel Master.
+
+## Portal gerador (`025_cliente_usuarios.sql`)
+
+| Tabela | Descrição |
+|--------|-----------|
+| `cliente_usuarios` | Login do gerador — **1 por cliente**. FK `cliente_id` UNIQUE, e-mail unique `(operadora_id, email)` |
+
+```bash
+php database/scripts/apply_migration_025.php
+php database/scripts/apply_migration_026.php
+```
+
+Gestão: Admin → Clientes → cadeado. Pré-preenche **responsável** + **e-mail** do cadastro. Senha padrão: `12345678`. Login: `/gerador/login`.
+
+```bash
+php database/scripts/apply_multitenancy_migrations.php
+php database/scripts/seed_operadora_well.php
+```
+
+Código: `App\Common\OperadoraScope`, `App\Model\Entity\Operadora`.  
+Go-live: ver seção 12 em **[MIGRACAO_DADOS.md](MIGRACAO_DADOS.md)**.
+
+## Migração legado — documentação completa
+
+Ver **[MIGRACAO_DADOS.md](MIGRACAO_DADOS.md)** — inventário de ETL, backfills, regras de transformação e checklist pós-migração (atualizar sempre que houver novo tratamento de dados).
+
+### Coletas — recebimento no destinador
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `situacao_recebimento` | enum | `pendente` / `recebido` |
+| `data_recebimento` | date NULL | Data de chegada no destinador final |
+
+**Produção nova:** obrigatória para finalizar MTR (`ColetaService::finalizar`).  
+**Legado:** muitos registros sem data — import ETL usa `data_coleta` como fallback; script `repair_coletas_data_recebimento.php` corrige registros já importados.
+
+## Suporte, termos, ajuda e contratos (`027`–`033`)
+
+Aplicar: `php database/scripts/apply_migrations_027_033.php`
+
+| Tabela / coluna | Descrição |
+|-----------------|-----------|
+| `chamados` | Tickets de suporte (`operadora_id`, `usuario_id`, status) |
+| `chamado_mensagens` | Thread do ticket (`autor_tipo`: usuario/admin) |
+| `usuarios.termos_*` | Aceite termos de uso admin |
+| `cliente_usuarios.termos_*` | Aceite termos portal gerador |
+| `help_categorias` / `help_artigos` | Central de ajuda (read-only seed) |
+| `planos.contrato_*` | Cláusulas HTML por plano |
+| `clientes_contratos` | Contrato comercial operadora↔cliente |
+| `clientes.contrato_ativo_id` | FK contrato vigente |
+
+Módulos RBAC: `suporte`, `ajuda`, `termos_de_uso`, `contratos`.

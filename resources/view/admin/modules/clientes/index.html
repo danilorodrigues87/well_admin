@@ -9,7 +9,7 @@
             <div class="col-md-3"><select name="plano_id" class="form-select crud-filter"><option value="">Plano: todos</option>{{planos_options}}</select></div>
             <div class="col-md-2"><select name="prioridade" class="form-select crud-filter"><option value="">Prioridade: todas</option><option value="normal">Normal</option><option value="urgente">Urgente</option></select></div>
         </div>
-        <table class="table table-striped"><thead><tr><th>Nome fantasia</th><th>CNPJ</th><th>Cidade</th><th>Plano</th><th>Status</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
+        <table class="table table-striped"><thead><tr><th>Nome fantasia</th><th>CNPJ</th><th>Cidade</th><th>Plano</th><th>Status</th><th>Portal</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
         <div id="crud-pagination"></div>
     </div>
 </div>
@@ -32,10 +32,33 @@
             <div class="col-md-4 mb-2"><label>Bairro</label><input class="form-control" name="bairro" id="crud-bairro"/></div>
             <div class="col-md-6 mb-2"><label>Cidade</label><input class="form-control" name="cidade" id="crud-cidade"/></div>
             <div class="col-md-2 mb-2"><label>UF</label><input class="form-control" name="uf" id="crud-uf" maxlength="2" style="text-transform:uppercase"/></div>
+            <div class="col-12 mb-2"><label>Link Google Maps</label><input class="form-control" name="maps_link" id="crud-maps_link" placeholder="https://maps.google.com/... (opcional, melhora geolocalização)"/></div>
             <div class="col-12"><hr><strong>Responsável</strong></div>
             <div class="col-md-6 mb-2"><label>Nome</label><input class="form-control" name="responsavel" id="crud-responsavel"/></div>
             <div class="col-md-6 mb-2"><label>Telefone</label><input class="form-control" name="telefone_resp" id="crud-telefone_resp"/></div>
         </div>
     </form></div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
+</div></div></div>
+<div class="modal fade" id="portalModal"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Portal do gerador — <span id="portal-cliente-nome"></span></h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <p class="text-muted small">Um login por cliente. Nome e e-mail vêm do cadastro (responsável / e-mail do cliente).</p>
+        <p class="small mb-3">URL: <a href="{{URL}}/gerador/login" target="_blank" id="portal-url-link">{{URL}}/gerador/login</a></p>
+        <input type="hidden" id="portal-cliente-id" value="0"/>
+        <form id="portal-form">{{csrf_field}}
+            <input type="hidden" name="id" id="portal-id" value="0"/>
+            <input type="hidden" name="cliente_id" id="portal-form-cliente-id" value="0"/>
+            <div class="mb-2"><label>Nome *</label><input class="form-control" name="nome" id="portal-nome" required/></div>
+            <div class="mb-2"><label>E-mail *</label><input class="form-control" name="email" id="portal-email" type="email" required/></div>
+            <div class="mb-2"><label>Senha</label><input class="form-control" name="senha" id="portal-senha" type="password" placeholder="Deixe vazio para manter ou usar padrão 12345678"/></div>
+            <div class="mb-2"><label>Ativo</label><select class="form-select" name="ativo" id="portal-ativo"><option value="1">Sim</option><option value="0">Não</option></select></div>
+            <p class="small text-muted mb-0" id="portal-ultimo-login"></p>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-warning btn-portal-reset-footer" id="btn-portal-reset" disabled><i class="fas fa-key"></i> Resetar senha</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" id="btn-portal-salvar">Salvar acesso</button>
+    </div>
 </div></div></div>

@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Common\Helpers\CsrfHelper;
 use App\Common\SystemModules;
+use App\Service\TermosDeUsoService;
 use App\Session\User\Login as SessionUser;
 use App\Utils\View;
 
@@ -40,6 +41,13 @@ class Page
 
     public static function getMenu(string $currentSlug, array $permittedSlugs): string
     {
+        $userData = SessionUser::getUserLogedData();
+        $usuarioId = (int)($userData['usuario']['id'] ?? 0);
+        if ($usuarioId > 0 && !TermosDeUsoService::usuarioAceitouVersaoAtual($usuarioId)) {
+            $permittedSlugs = ['termos_de_uso'];
+            $currentSlug = 'termos_de_uso';
+        }
+
         $links = '';
 
         foreach (SystemModules::getMenuGroups() as $group) {

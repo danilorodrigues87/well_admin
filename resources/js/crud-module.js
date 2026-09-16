@@ -214,6 +214,54 @@
     });
   };
 
+  window.resetarSenha = function (id) {
+    var doReset = function () {
+      $.ajax({
+        url: apiUrl(),
+        method: 'POST',
+        data: { acao: 'resetar_senha', id: id, _csrf: getCsrf() },
+        dataType: 'json'
+      }).done(function (resp) {
+        var data = parseResp(resp);
+        if (!data.success) {
+          swalError(data.message || 'Erro ao resetar senha.');
+          return;
+        }
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Senha redefinida',
+            text: data.message || 'Senha resetada com sucesso.',
+            icon: 'success'
+          });
+        }
+      }).fail(function (xhr) {
+        swalError('Erro ao resetar senha (' + xhr.status + ').');
+      });
+    };
+
+    if (typeof Swal === 'undefined') {
+      if (confirm('Resetar senha deste funcionário para 12345678?')) {
+        doReset();
+      }
+      return;
+    }
+
+    Swal.fire({
+      title: 'Resetar senha?',
+      text: 'A senha será redefinida para 12345678. Informe o funcionário para alterá-la depois.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sim, resetar',
+      cancelButtonText: 'Cancelar'
+    }).then(function (result) {
+      if (result.isConfirmed) {
+        doReset();
+      }
+    });
+  };
+
   window.excluir = function (id) {
     var doDelete = function () {
       $.ajax({

@@ -2,8 +2,9 @@
 
 namespace App\Session\User;
 
-use App\Common\Helpers\CsrfHelper;
 use App\Common\Helpers\ModuleGateHelper;
+use App\Common\SessionBootstrap;
+use App\Model\Entity\Operadora as EntityOperadora;
 use App\Model\Entity\Usuario as EntityUsuario;
 
 class Login
@@ -13,18 +14,7 @@ class Login
 
     private static function init(): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            $tempo = 86400;
-            session_set_cookie_params($tempo);
-            ini_set('session.gc_maxlifetime', (string)$tempo);
-            $path = __DIR__.'/../../sessions';
-            if (!is_dir($path)) {
-                mkdir($path, 0777, true);
-            }
-            session_save_path($path);
-            session_start();
-            CsrfHelper::init();
-        }
+        SessionBootstrap::start();
     }
 
     public static function login(object $usuario): bool
@@ -34,6 +24,13 @@ class Login
             return false;
         }
 
+        $operadoraId = (int)($usuario->operadora_id ?? 1);
+        $operadoraSnap = null;
+        $operadora = EntityOperadora::getById($operadoraId > 0 ? $operadoraId : 1);
+        if ($operadora) {
+            $operadoraSnap = $operadora->toSessionSnapshot();
+        }
+
         $_SESSION[self::SESSION_KEY] = [
             'id' => (int)$usuario->id,
             'nome' => (string)$usuario->nome,
@@ -41,6 +38,8 @@ class Login
             'funcao_id' => (int)$usuario->funcao_id,
             'funcao_nome' => (string)($usuario->funcao_nome ?? ''),
             'is_admin' => !empty($usuario->is_admin),
+            'operadora_id' => $operadoraId > 0 ? $operadoraId : 1,
+            'operadora' => $operadoraSnap,
         ];
 
         return true;
@@ -69,6 +68,9 @@ class Login
         $_SESSION[self::SESSION_KEY]['funcao_id'] = (int)$usuario->funcao_id;
         $_SESSION[self::SESSION_KEY]['funcao_nome'] = (string)($usuario->funcao_nome ?? '');
         $_SESSION[self::SESSION_KEY]['is_admin'] = !empty($usuario->is_admin);
+        $_SESSION[self::SESSION_KEY]['operadora_id'] = (int)($usuario->operadora_id ?? 1);
+        $operadora = EntityOperadora::getById((int)($_SESSION[self::SESSION_KEY]['operadora_id'] ?? 1));
+        $_SESSION[self::SESSION_KEY]['operadora'] = $operadora ? $operadora->toSessionSnapshot() : null;
 
         return true;
     }

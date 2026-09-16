@@ -7,7 +7,7 @@ alwaysApply: true
 # Well Eco Admin — regras para agentes
 
 ## Contexto
-- Single-tenant Well Eco Admin (projeto interno). **Sem** `id_admin`, **sem** painel Master, **sem** módulos escolares CTI.
+- Well Admin com multitenancy **preparado** (`operadoras`, `operadora_id`). MVP: só **operadora_id=1** (Well). **Sem** Painel Plataforma/Master até operadora 2+. **Sem** módulos escolares CTI.
 - **Marca ao cliente:** `CompanyConfig::name()` → Well Soluções Ambientais · `CompanyConfig::shortName()` → Well S.A. — **nunca** "Well Eco" em e-mail, boleto ou comunicação externa. Variáveis: `COMPANY_NAME`, `COMPANY_SHORT_NAME`, `MAIL_FROM_NAME` no `.env`.
 - Banco novo: `well_admin`. Legado: `well_antigo` (somente leitura para ETL).
 
@@ -36,7 +36,8 @@ alwaysApply: true
 
 ## O que NÃO fazer
 - Copiar módulos do painel-cti escolar (matrículas, EAD, CRM escola).
-- Introduzir multi-tenant.
+- Criar Painel Plataforma ou CRUD de operadoras antes da necessidade real (Fase 10).
+- Queries de negócio sem filtro `operadora_id` (usar `OperadoraScope`).
 - Commitar credenciais ou `.env`.
 - Deixar scripts de diagnóstico na raiz.
 

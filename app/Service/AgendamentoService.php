@@ -11,16 +11,28 @@ class AgendamentoService
     /**
      * @return array{items: list<array<string,mixed>>, meta: array<string,int>}
      */
-    public static function listar(string $busca = '', int $page = 1, int $perPage = 20): array
-    {
+    public static function listar(
+        string $busca = '',
+        int $page = 1,
+        int $perPage = 20,
+        int $coletorId = 0,
+        bool $isAdmin = true
+    ): array {
         $db = new Database();
         $page = max(1, $page);
         $perPage = min(50, max(1, $perPage));
         $busca = trim($busca);
 
-        $where = "c.status = 'ativo'";
-        $params = [];
-        $join = '';
+        if (!$isAdmin && RotaScopeService::coletorTemRota($coletorId)) {
+            $q = RotaScopeService::paradasDoDiaQuery($coletorId, false);
+            $where = $q['where'];
+            $params = $q['params'];
+            $join = $q['join'];
+        } else {
+            $where = "c.status = 'ativo'";
+            $params = [];
+            $join = '';
+        }
 
         if ($busca !== '') {
             $where .= ' AND (c.nome_fantasia LIKE ? OR c.razao_social LIKE ? OR c.cidade LIKE ?)';

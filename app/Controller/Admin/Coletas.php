@@ -9,7 +9,9 @@ use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Service\ColetaService;
+use App\Service\RotaScopeService;
 use App\Service\Sinir\SinirService;
+use App\Session\User\Login as SessionUser;
 use App\Model\Entity\SinirEnvio as EntitySinirEnvio;
 use App\Common\SinirConfig;
 use App\Utils\View;
@@ -20,6 +22,8 @@ class Coletas extends Page
     {
         $content = View::render('admin/modules/coletas/index', [
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
+            'data_inicio' => date('Y-m-01'),
+            'data_fim' => date('Y-m-t'),
         ]);
         return self::getPage('Coletas / MTR', $content, 'coletas', self::crudScripts('/painel/coletas'));
     }
@@ -61,6 +65,14 @@ class Coletas extends Page
         if (in_array($recebimento, ['pendente', 'recebido'], true)) {
             $where .= ' AND c.situacao_recebimento = ?';
             $params[] = $recebimento;
+        }
+
+        $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
+        if (empty($usuario['is_admin'])) {
+            $userId = (int)($usuario['id'] ?? 0);
+            [$extraWhere, $extraParams] = RotaScopeService::coletasWhereForColetor($userId);
+            $where .= $extraWhere;
+            $params = array_merge($params, $extraParams);
         }
 
         $pagination = new Pagination(EntityColeta::count($where, $params), $page, 15);

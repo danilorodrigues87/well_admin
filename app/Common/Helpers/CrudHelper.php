@@ -41,4 +41,9 @@ class CrudHelper
     {
         return '<button class="btn btn-sm btn-outline-warning" onclick="excluir('.$id.')" title="Desativar"><i class="fas fa-ban"></i></button>';
     }
+
+    public static function btnResetarSenha(int $id): string
+    {
+        return '<button class="btn btn-sm btn-outline-secondary" onclick="resetarSenha('.$id.')" title="Resetar senha"><i class="fas fa-key"></i></button>';
+    }
 }

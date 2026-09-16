@@ -1,0 +1,55 @@
+/**
+ * Well Admin — overrides Tom Select (carregar DEPOIS de tom-select.bootstrap5.min.css)
+ */
+
+html[data-bs-theme="dark"] .ts-wrapper .ts-control,
+html[data-bs-theme="dark"] .ts-wrapper.single .ts-control {
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+html[data-bs-theme="dark"] .ts-wrapper .ts-control input {
+  color: var(--bs-body-color);
+}
+
+html[data-bs-theme="dark"] .ts-dropdown {
+  background-color: var(--painel-surface, var(--bs-body-bg));
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+html[data-bs-theme="dark"] .ts-dropdown .option,
+html[data-bs-theme="dark"] .ts-dropdown .no-results,
+html[data-bs-theme="dark"] .ts-dropdown .optgroup-header {
+  color: var(--bs-body-color) !important;
+}
+
+html[data-bs-theme="dark"] .ts-dropdown .option.active,
+html[data-bs-theme="dark"] .ts-dropdown .option:hover,
+html[data-bs-theme="dark"] .ts-dropdown .option.selected {
+  background-color: rgba(var(--bs-primary-rgb), 0.25);
+  color: var(--bs-body-color) !important;
+}
+
+html[data-bs-theme="dark"] .ts-dropdown .dropdown-input {
+  background-color: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+html[data-bs-theme="dark"] .ts-dropdown .dropdown-input::placeholder {
+  color: var(--bs-secondary-color);
+}
+
+#addClienteModal .modal-body {
+  overflow: visible;
+}
+
+#addClienteModal .ts-dropdown {
+  z-index: 1060;
+}
+
+#addClienteModal .ts-dropdown-content {
+  max-height: min(280px, 45vh);
+}

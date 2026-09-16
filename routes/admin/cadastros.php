@@ -20,6 +20,11 @@ $extraActions = [
     '/painel/tipos-residuos' => [
         'grupos_por_classe' => Admin\TiposResiduos::class.'::gruposPorClasse',
     ],
+    '/painel/clientes' => [
+        'portal_acesso' => Admin\Clientes::class.'::getPortalAcesso',
+        'salvar_portal_usuario' => Admin\Clientes::class.'::savePortalUsuario',
+        'resetar_senha_portal' => Admin\Clientes::class.'::resetSenhaPortal',
+    ],
 ];
 
 $obRouter->get('/painel/rotas/atribuicoes/{id}', [
@@ -72,6 +77,9 @@ foreach ($crudRoutes as $route) {
                     'get' => $ctrl::get($request),
                     'salvar' => $ctrl::save($request),
                     'excluir' => $ctrl::delete($request),
+                    'resetar_senha' => method_exists($ctrl, 'resetSenha')
+                        ? $ctrl::resetSenha($request)
+                        : json_encode(['success' => false, 'message' => 'Ação inválida']),
                     default => json_encode(['success' => false, 'message' => 'Ação inválida']),
                 };
             }

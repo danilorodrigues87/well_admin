@@ -3,6 +3,7 @@
 namespace App\Common;
 
 use App\Model\Entity\ConfigSistema;
+use App\Model\Entity\OperadoraConfig;
 
 class CobrancaConfig
 {
@@ -67,7 +68,7 @@ class CobrancaConfig
     /** @param array<string,mixed> $post */
     public static function saveFromPost(array $post): void
     {
-        ConfigSistema::setMany([
+        OperadoraConfig::setMany([
             'cobranca.multa_tipo' => self::sanitizeMultaTipo((string)($post['multa_tipo'] ?? 'PERCENTUAL')),
             'cobranca.multa_taxa' => self::formatDecimal($post['multa_taxa'] ?? '0'),
             'cobranca.multa_valor' => self::formatDecimal($post['multa_valor'] ?? '0'),
@@ -121,11 +122,15 @@ class CobrancaConfig
     /** @param array{tipo:string,taxa:float,valor:float} $fallback */
     private static function loadMultaMora(string $prefix, array $fallback): array
     {
-        $db = ConfigSistema::getMany([
+        $keys = [
             'cobranca.'.$prefix.'_tipo',
             'cobranca.'.$prefix.'_taxa',
             'cobranca.'.$prefix.'_valor',
-        ]);
+        ];
+        $db = OperadoraConfig::getMany($keys);
+        if ($db === []) {
+            $db = ConfigSistema::getMany($keys);
+        }
 
         $tipoKey = 'cobranca.'.$prefix.'_tipo';
         if (!isset($db[$tipoKey])) {

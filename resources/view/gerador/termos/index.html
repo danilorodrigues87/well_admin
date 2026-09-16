@@ -1,0 +1,33 @@
+<div class="col-lg-5 well-login-card">
+    <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header"><h3 class="text-center fw-light my-2">Termos de Uso</h3></div>
+        <div class="card-body">
+            <p class="small text-muted">Portal do gerador — {{company_name}} (versão {{versao}})</p>
+            <ul class="small">
+                <li>Acesso restrito aos dados do seu estabelecimento.</li>
+                <li>Coletas, boletos e documentos são confidenciais.</li>
+                <li>Uso indevido pode resultar em bloqueio do portal.</li>
+            </ul>
+            <p class="small"><a href="{{url_privacidade}}" target="_blank" rel="noopener">Política de Privacidade</a></p>
+            <form id="form-termos-gerador" class="d-none">{{csrf_field}}</form>
+            {{bloco_status}}
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function aceitarTermosGerador() {
+    var csrf = document.querySelector('#form-termos-gerador [name="_csrf"]');
+    $.post(url_base + 'gerador/aceita-termos', { _csrf: csrf ? csrf.value : '' }, function (ok) {
+        if (String(ok).trim() === '1') {
+            Swal.fire({ title: 'Termos aceitos', icon: 'success', timer: 1600, showConfirmButton: false });
+            setTimeout(function () { window.location.href = url_base + 'gerador'; }, 1700);
+        } else {
+            Swal.fire({ title: 'Erro', text: 'Não foi possível registrar o aceite.', icon: 'error' });
+        }
+    }, 'text').fail(function () {
+        Swal.fire({ title: 'Erro', text: 'Falha de comunicação.', icon: 'error' });
+    });
+}
+</script>

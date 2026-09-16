@@ -7,7 +7,7 @@
 <ul class="nav nav-tabs mb-3" id="coletaTabs">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-transporte">1. Transporte</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-residuos">2. Resíduos</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-finalizar">3. Finalizar</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-finalizar">3. Conferir e MTR</button></li>
 </ul>
 
 <div class="tab-content">
@@ -32,7 +32,11 @@
                     <div class="col-md-6 mb-2"><label>Responsável</label><input class="form-control" name="destinador_responsavel" value="{{destinador_responsavel}}"/></div>
                     <div class="col-md-6 mb-2"><label>Obs. destinador</label><input class="form-control" name="observacao_destinador" value="{{observacao_destinador}}"/></div>
                     <div class="col-md-4 mb-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="situacao_recebimento" value="recebido" id="situacao_recebimento" {{situacao_recebido}}/><label class="form-check-label" for="situacao_recebimento">Recebido no destinador</label></div></div>
-                    <div class="col-md-4 mb-2"><label>Data recebimento</label><input type="date" class="form-control" name="data_recebimento" value="{{data_recebimento}}"/></div>
+                    <div class="col-md-4 mb-2">
+                        <label>Data recebimento</label>
+                        <input type="date" class="form-control" name="data_recebimento" id="data_recebimento" value="{{data_recebimento}}"/>
+                        <small class="text-muted">Obrigatória para gerar o MTR. Rascunho pode ficar sem data.</small>
+                    </div>
                 </div>
                 <button type="button" class="btn btn-primary mt-2" onclick="salvarTransporte()">Salvar e continuar</button>
             </form>
@@ -55,18 +59,35 @@
 
     <div class="tab-pane fade" id="tab-finalizar">
         <div class="card mb-3"><div class="card-body">
+            <p class="text-muted small mb-3">
+                <strong>Passo 1:</strong> salve o rascunho (relatório e/ou fotos). <strong>Passo 2:</strong> confira o resumo e gere o MTR.
+            </p>
             <form id="form-finalizar" enctype="multipart/form-data">
-                <div class="mb-3"><label>Relatório / observações</label><textarea class="form-control" name="relatorio" rows="3">{{relatorio}}</textarea></div>
-                <div class="mb-3"><label>Evidências (até 3 fotos JPG/PNG)</label>
+                <div class="mb-3"><label>Relatório / observações</label><textarea class="form-control" name="relatorio" id="relatorio" rows="3">{{relatorio}}</textarea></div>
+                <div class="mb-3"><label>Evidências (até 3 fotos JPG/PNG — máx. 5 MB cada)</label>
                     <div class="row g-2">
                         <div class="col-md-4"><input type="file" class="form-control" name="evidencia_1" accept="image/jpeg,image/png,image/webp"/></div>
                         <div class="col-md-4"><input type="file" class="form-control" name="evidencia_2" accept="image/jpeg,image/png,image/webp"/></div>
                         <div class="col-md-4"><input type="file" class="form-control" name="evidencia_3" accept="image/jpeg,image/png,image/webp"/></div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-success btn-lg" onclick="finalizarColeta()"><i class="fas fa-check"></i> Finalizar MTR</button>
-                <button type="button" class="btn btn-outline-danger ms-2" onclick="cancelarColeta()">Cancelar rascunho</button>
+                <button type="button" class="btn btn-primary btn-lg" id="btn-salvar-rascunho" onclick="salvarRascunhoFinal()">
+                    <i class="fas fa-save"></i> Salvar rascunho
+                </button>
             </form>
+
+            <div id="rascunho-resumo-wrap" class="mt-4 {{rascunho_resumo_class}}">
+                <div class="alert alert-success">
+                    <strong>Rascunho salvo — confira antes de gerar o MTR</strong>
+                    <div id="resumo-rascunho" class="mt-2">{{resumo_rascunho_html}}</div>
+                </div>
+                <div id="evidencias-preview" class="mb-3">{{evidencias_html}}</div>
+                <button type="button" class="btn btn-success btn-lg" id="btn-gerar-mtr" onclick="gerarMtr()" {{btn_gerar_disabled}}>
+                    <i class="fas fa-check"></i> Gerar MTR
+                </button>
+            </div>
+
+            <button type="button" class="btn btn-outline-danger ms-2 mt-3" onclick="cancelarColeta()">Cancelar rascunho</button>
         </div></div>
     </div>
 </div>

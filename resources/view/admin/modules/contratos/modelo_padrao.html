@@ -1,0 +1,29 @@
+<div class="bto">
+  <button class="btn-impress" type="button" onclick="window.print()">Imprimir</button>
+</div>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Contrato de Prestação de Serviços Ambientais</title>
+  <link rel="stylesheet" href="{{URL}}/resources/css/contrato.css">
+</head>
+<body>
+  <div id="content">
+    {{contratada}}
+    {{contratante}}
+    {{plano}}
+    <p>Por este instrumento particular, as partes acima qualificadas firmam o presente contrato de prestação de serviços de gestão e coleta de resíduos, nos termos abaixo:</p>
+    {{clausula_1}}
+    {{clausula_2}}
+    {{clausula_3}}
+    {{clausula_extra}}
+    <p><b>4ª — MTR e SINIR.</b> A CONTRATADA emitirá Manifesto de Transporte de Resíduos (MTR) e cumprirá as exigências do SINIR conforme legislação vigente.</p>
+    <p><b>5ª — Pagamento.</b> O CONTRATANTE pagará mensalmente o valor pactuado até o dia {{dia_vencimento}} de cada competência, via boleto bancário ou meio acordado.</p>
+    <p><b>6ª — Inadimplência.</b> Atraso implica multa de {{multa_atraso_pct}}% e juros de {{juros_mora_pct_mes}}% ao mês, após carência de {{carencia_dias}} dias.</p>
+    <p><b>7ª — Rescisão.</b> O descumprimento contratual pode ensejar rescisão com multa de {{multa_cancelamento_pct}}% sobre saldo remanescente, conforme legislação aplicável.</p>
+    <p><b>8ª — LGPD.</b> As partes comprometem-se a tratar dados pessoais conforme a Lei 13.709/2018 e a Política de Privacidade da CONTRATADA.</p>
+    {{data_contrato}}
+  </div>
+</body>
+</html>

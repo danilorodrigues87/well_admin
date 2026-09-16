@@ -61,7 +61,7 @@ class Pagamentos extends Page
         ], $cfg));
 
         $scripts = self::crudScripts('/painel/pagamentos', false)
-            .'<script src="'.URL.'/resources/js/pagamentos.js?v=20260916e"></script>';
+            .'<script src="'.URL.'/resources/js/pagamentos.js?v=20260916f"></script>';
 
         return self::getPage('Pagamentos', $content, 'pagamentos', $scripts);
     }
@@ -80,7 +80,9 @@ class Pagamentos extends Page
             'busca' => trim((string)($post['busca'] ?? '')),
         ];
 
-        $result = FaturamentoService::relatorioCompetencia($competencia, $filtros);
+        $page = max(1, (int)($post['page'] ?? 1));
+        $result = FaturamentoService::relatorioCompetencia($competencia, $filtros, $page, 25);
+        $pagination = new Pagination($result['total'], $result['page'], 25);
         $itens = '';
 
         foreach ($result['rows'] as $row) {
@@ -111,7 +113,6 @@ class Pagamentos extends Page
                 </td>
             </tr>';
 
-            $itens .= self::detalheRowHtml((int)$row['cliente_id'], $row['itens']);
         }
 
         if ($itens === '') {
@@ -121,8 +122,9 @@ class Pagamentos extends Page
         return self::jsonLista([
             'success' => true,
             'itens' => $itens,
-            'pagination' => '',
-            'total' => count($result['rows']),
+            'pagination' => Pagination::renderNav($pagination, 'loadPageRelatorio'),
+            'total' => $result['total'],
+            'page' => $result['page'],
             'competencia' => $result['competencia'],
         ]);
     }
@@ -398,7 +400,7 @@ class Pagamentos extends Page
     }
 
     /** @param list<array<string,mixed>> $itens */
-    private static function detalheRowHtml(int $clienteId, array $itens): string
+    private static function detalheRowHtml(int $clienteId, array $itens, int $coletasNoMes = 0): string
     {
         $linhas = '';
         foreach ($itens as $item) {
@@ -413,13 +415,28 @@ class Pagamentos extends Page
                 <td class="text-end">'.number_format((float)$item['excedente'], 3, ',', '.').'</td>
                 <td class="text-end">R$ '.number_format((float)$item['valor'], 2, ',', '.').'</td>
             </tr>';
+
+            foreach ($item['origens'] ?? [] as $origem) {
+                $dataLabel = !empty($origem['data']) ? date('d/m', strtotime((string)$origem['data'])) : '—';
+                $linhas .= '<tr class="table-light">
+                    <td colspan="2" class="small text-muted ps-4">↳ MTR '.(int)$origem['mtr'].' ('.$dataLabel.')</td>
+                    <td class="text-end small text-muted">'.number_format((float)$origem['quantidade'], 3, ',', '.').' '.CrudHelper::e((string)$item['unidade']).'</td>
+                    <td colspan="2"></td>
+                </tr>';
+            }
         }
         if ($linhas === '') {
             $linhas = '<tr><td colspan="5" class="text-muted">Sem itens de plano/resíduo.</td></tr>';
         }
 
+        $avisoColetas = $coletasNoMes > 1
+            ? '<p class="small text-muted mb-2"><i class="fas fa-info-circle"></i> '
+                .$coletasNoMes.' coleta(s) finalizada(s) nesta competência — o total <strong>soma todas</strong>.</p>'
+            : '';
+
         return '<tr class="detalhe-row d-none" data-detalhe-cliente="'.$clienteId.'">
             <td colspan="9" class="bg-light">
+                '.$avisoColetas.'
                 <table class="table table-sm mb-0">
                     <thead><tr>
                         <th>Resíduo</th><th class="text-end">Coletado</th><th class="text-end">Saldo incl.</th>

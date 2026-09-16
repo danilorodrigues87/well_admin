@@ -1,0 +1,32 @@
+<div class="col-lg-10 well-login-card">
+    <div class="card shadow-lg border-0 rounded-lg">
+        <div class="card-header"><h3 class="text-center fw-light my-2">Contrato {{numero}}</h3></div>
+        <div class="card-body contrato-preview" style="max-height:60vh;overflow:auto;font-size:0.9rem">
+            {{contrato_html}}
+        </div>
+        <div class="card-footer">
+            {{csrf_field}}
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="aceite_contrato">
+                <label class="form-check-label" for="aceite_contrato">Li e concordo com os termos deste contrato comercial.</label>
+            </div>
+            <button type="button" class="btn btn-primary w-100" id="btn-aceita-contrato" disabled>Assinar e continuar</button>
+        </div>
+    </div>
+</div>
+<script>
+document.getElementById('aceite_contrato').addEventListener('change', function () {
+    document.getElementById('btn-aceita-contrato').disabled = !this.checked;
+});
+document.getElementById('btn-aceita-contrato').addEventListener('click', function () {
+    var csrf = document.querySelector('[name=_csrf]');
+    fetch(url_base + 'gerador/aceita-contrato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: '_csrf=' + encodeURIComponent(csrf ? csrf.value : '')
+    }).then(r => r.text()).then(function (ok) {
+        if (ok === '1') window.location.href = url_base + 'gerador';
+        else alert('Não foi possível registrar a assinatura.');
+    });
+});
+</script>

@@ -3,11 +3,15 @@
 namespace App\Model\Entity;
 
 use App\Model\Db\Database;
+use App\Model\Entity\Concerns\TenantScoped;
 use PDO;
 
 class Coleta
 {
+    use TenantScoped;
+
     public int $id = 0;
+    public int $operadora_id = 1;
     public ?int $numero_mtr = null;
     public int $cliente_id = 0;
     public int $coletor_id = 0;
@@ -29,23 +33,26 @@ class Coleta
 
     public static function count(string $where = '1=1', array $params = []): int
     {
+        [$where, $params] = self::tenantWhere($where, $params, 'c.operadora_id');
         $db = new Database();
         $stmt = $db->execute(
             'SELECT COUNT(*) AS qtd FROM coletas c WHERE '.$where,
             $params
         );
+
         return (int)$stmt->fetch(PDO::FETCH_ASSOC)['qtd'];
     }
 
     /** @return self[] */
     public static function list(string $where, array $params, string $limit): array
     {
+        [$where, $params] = self::tenantWhere($where, $params, 'c.operadora_id');
         $db = new Database();
         $stmt = $db->execute(
             'SELECT c.*, cl.nome_fantasia AS cliente_nome, u.nome AS coletor_nome
              FROM coletas c
-             INNER JOIN clientes cl ON cl.id = c.cliente_id
-             INNER JOIN usuarios u ON u.id = c.coletor_id
+             INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
+             LEFT JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
              WHERE '.$where.' ORDER BY c.id DESC LIMIT '.$limit,
             $params
         );
@@ -53,6 +60,7 @@ class Coleta
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $items[] = self::fromArray($row);
         }
+
         return $items;
     }
 
@@ -62,37 +70,40 @@ class Coleta
         $stmt = $db->execute(
             'SELECT c.*, cl.nome_fantasia AS cliente_nome, u.nome AS coletor_nome
              FROM coletas c
-             INNER JOIN clientes cl ON cl.id = c.cliente_id
-             INNER JOIN usuarios u ON u.id = c.coletor_id
-             WHERE c.id = ?',
-            [$id]
+             INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
+             LEFT JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
+             WHERE c.id = ? AND c.operadora_id = ?',
+            [$id, ...self::tenantIdParams()]
         );
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ? self::fromArray($row) : null;
     }
 
     public static function insert(array $data): int
     {
-        return (int)(new Database('coletas'))->insert($data);
+        return (int)(new Database('coletas'))->insert(self::ensureTenantInsert($data));
     }
 
     public static function update(int $id, array $data): void
     {
-        if (empty($data)) {
+        if ($data === []) {
             return;
         }
         $db = new Database();
         $fields = array_keys($data);
         $db->execute(
-            'UPDATE coletas SET '.implode('=?, ', $fields).'=? WHERE id = ?',
-            [...array_values($data), $id]
+            'UPDATE coletas SET '.implode('=?, ', $fields).'=? WHERE id = ? AND operadora_id = ?',
+            [...array_values($data), $id, ...self::tenantIdParams()]
         );
     }
 
+    /** @param array<string, mixed> $row */
     private static function fromArray(array $row): self
     {
         $c = new self();
         $c->id = (int)$row['id'];
+        $c->operadora_id = (int)($row['operadora_id'] ?? 1);
         $c->numero_mtr = isset($row['numero_mtr']) ? (int)$row['numero_mtr'] : null;
         $c->cliente_id = (int)$row['cliente_id'];
         $c->coletor_id = (int)$row['coletor_id'];
@@ -111,6 +122,7 @@ class Coleta
         $c->sinir_codigo_barras = isset($row['sinir_codigo_barras']) ? (string)$row['sinir_codigo_barras'] : null;
         $c->sinir_status = isset($row['sinir_status']) ? (string)$row['sinir_status'] : null;
         $c->sinir_enviado_em = $row['sinir_enviado_em'] ?? null;
+
         return $c;
     }
 }

@@ -173,13 +173,23 @@
     return html;
   }
 
-  function carregarRelatorio() {
+  var relatorioPage = 1;
+
+  function carregarRelatorio(page) {
+    if (typeof page === 'number' && page > 0) {
+      relatorioPage = page;
+    } else {
+      relatorioPage = 1;
+    }
+
     setTableLoading('tbody-faturamento', 9, 'Carregando relatório de faturamento...');
     document.getElementById('relatorio-total').textContent = 'Carregando...';
+    document.getElementById('relatorio-pagination').innerHTML = '';
     setBtnLoading('btn-carregar-relatorio', true);
 
     var data = postData({
       acao: 'relatorio',
+      page: relatorioPage,
       competencia: document.getElementById('filtro-competencia').value,
       plano_id: document.getElementById('filtro-plano').value,
       situacao: document.getElementById('filtro-situacao').value,
@@ -187,31 +197,33 @@
     });
 
     fetch(apiUrl(), { method: 'POST', body: data, credentials: 'same-origin' })
-      .then(function (r) { return r.text(); })
-      .then(function (text) {
-        var json;
-        try { json = JSON.parse(text); } catch (e) {
-          console.error('Resposta inválida:', text);
-          throw new Error('Resposta inválida do servidor');
-        }
+      .then(parseJsonResponse)
+      .then(function (json) {
         if (!json.success && json.message) {
           throw new Error(json.message);
         }
         document.getElementById('tbody-faturamento').innerHTML = json.itens || '';
+        document.getElementById('relatorio-pagination').innerHTML = json.pagination || '';
         document.getElementById('relatorio-total').textContent =
-          (json.total || 0) + ' cliente(s) na competência ' + (json.competencia || '');
+          (json.total || 0) + ' cliente(s) na competência ' + (json.competencia || '') +
+          (json.page && json.total > 0 ? ' — página ' + json.page : '');
         bindFaturamentoEvents();
       })
       .catch(function (err) {
         document.getElementById('tbody-faturamento').innerHTML =
           '<tr><td colspan="9" class="text-center text-danger py-3">Erro ao carregar relatório.</td></tr>';
         document.getElementById('relatorio-total').textContent = '';
+        document.getElementById('relatorio-pagination').innerHTML = '';
         swalError('Erro ao carregar relatório: ' + (err.message || 'falha de rede'));
       })
       .finally(function () {
         setBtnLoading('btn-carregar-relatorio', false);
       });
   }
+
+  window.loadPageRelatorio = function (page) {
+    carregarRelatorio(page);
+  };
 
   var historicoPage = 1;
 
@@ -259,13 +271,88 @@
     carregarHistorico(page);
   };
 
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+  }
+
+  function formatNum(n, dec) {
+    return Number(n || 0).toLocaleString('pt-BR', {
+      minimumFractionDigits: dec,
+      maximumFractionDigits: dec
+    });
+  }
+
+  function buildDetalheHtml(clienteId, calculo) {
+    var linhas = '';
+    (calculo.itens || []).forEach(function (item) {
+      var saldoTxt = formatNum(item.saldo, 3);
+      if (item.saldo_info) {
+        saldoTxt += ' <small class="text-muted">(' + escapeHtml(item.saldo_info) + ')</small>';
+      }
+      linhas += '<tr>' +
+        '<td>' + escapeHtml(item.nome) + '</td>' +
+        '<td class="text-end">' + formatNum(item.coletado, 3) + ' ' + escapeHtml(item.unidade) + '</td>' +
+        '<td class="text-end">' + saldoTxt + '</td>' +
+        '<td class="text-end">' + formatNum(item.excedente, 3) + '</td>' +
+        '<td class="text-end">R$ ' + formatNum(item.valor, 2) + '</td>' +
+        '</tr>';
+      (item.origens || []).forEach(function (origem) {
+        var dataLabel = origem.data ? origem.data.split('-').reverse().slice(0, 2).join('/') : '—';
+        linhas += '<tr class="table-light">' +
+          '<td colspan="2" class="small text-muted ps-4">↳ MTR ' + parseInt(origem.mtr, 10) + ' (' + dataLabel + ')</td>' +
+          '<td class="text-end small text-muted">' + formatNum(origem.quantidade, 3) + ' ' + escapeHtml(item.unidade) + '</td>' +
+          '<td colspan="2"></td></tr>';
+      });
+    });
+    if (!linhas) {
+      linhas = '<tr><td colspan="5" class="text-muted">Sem itens de plano/resíduo.</td></tr>';
+    }
+
+    var avisoColetas = (calculo.coletas_no_mes || 0) > 1
+      ? '<p class="small text-muted mb-2"><i class="fas fa-info-circle"></i> ' +
+        calculo.coletas_no_mes + ' coleta(s) finalizada(s) nesta competência — o total <strong>soma todas</strong>.</p>'
+      : '';
+
+    return '<tr class="detalhe-row" data-detalhe-cliente="' + clienteId + '">' +
+      '<td colspan="9" class="bg-light">' + avisoColetas +
+      '<table class="table table-sm mb-0"><thead><tr>' +
+      '<th>Resíduo</th><th class="text-end">Coletado</th><th class="text-end">Saldo incl.</th>' +
+      '<th class="text-end">Excedente</th><th class="text-end">Valor R$</th>' +
+      '</tr></thead><tbody>' + linhas + '</tbody></table></td></tr>';
+  }
+
   function bindFaturamentoEvents() {
     document.querySelectorAll('.btn-detalhe').forEach(function (btn) {
       btn.onclick = function () {
         var cid = btn.getAttribute('data-cliente-id');
-        document.querySelectorAll('.detalhe-row[data-detalhe-cliente="' + cid + '"]').forEach(function (row) {
-          row.classList.toggle('d-none');
-        });
+        var competencia = document.getElementById('filtro-competencia').value;
+        var existing = document.querySelector('.detalhe-row[data-detalhe-cliente="' + cid + '"]');
+        if (existing) {
+          existing.remove();
+          return;
+        }
+
+        btn.disabled = true;
+        fetch(apiUrl() + '/' + cid + '/detalhe?competencia=' + encodeURIComponent(competencia), {
+          credentials: 'same-origin'
+        })
+          .then(parseJsonResponse)
+          .then(function (json) {
+            if (!json.success || !json.calculo) {
+              throw new Error(json.message || 'Detalhe indisponível');
+            }
+            var tr = document.querySelector('#tbody-faturamento tr[data-cliente-id="' + cid + '"]');
+            if (!tr) return;
+            tr.insertAdjacentHTML('afterend', buildDetalheHtml(cid, json.calculo));
+          })
+          .catch(function (err) {
+            swalError(err.message || 'Erro ao carregar detalhe.');
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
       };
     });
 
@@ -441,11 +528,11 @@
           var htmlBlock = renderResultadoLote(json);
           if (json.success) {
             swalSuccess(json.message || 'Boleto(s) emitido(s).', htmlBlock);
-            carregarRelatorio();
+            carregarRelatorio(relatorioPage);
             carregarHistorico();
           } else {
             swalWarning(json.message || 'Nenhum boleto emitido.', htmlBlock);
-            carregarRelatorio();
+            carregarRelatorio(relatorioPage);
           }
         })
         .catch(function (err) {
@@ -498,7 +585,21 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('btn-carregar-relatorio').addEventListener('click', carregarRelatorio);
+    document.getElementById('btn-carregar-relatorio').addEventListener('click', function () {
+      carregarRelatorio(1);
+    });
+    ['filtro-competencia', 'filtro-plano', 'filtro-situacao'].forEach(function (id) {
+      document.getElementById(id).addEventListener('change', function () {
+        carregarRelatorio(1);
+      });
+    });
+    var buscaTimer;
+    document.getElementById('filtro-busca').addEventListener('input', function () {
+      clearTimeout(buscaTimer);
+      buscaTimer = setTimeout(function () {
+        carregarRelatorio(1);
+      }, 400);
+    });
     document.getElementById('btn-carregar-historico').addEventListener('click', function () {
       carregarHistorico(1);
     });
@@ -510,7 +611,7 @@
     });
     document.getElementById('btn-emitir-lote').addEventListener('click', emitirLote);
     initConfigForm();
-    carregarRelatorio();
+    carregarRelatorio(1);
     carregarHistorico(1);
   });
 })();

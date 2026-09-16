@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use App\Model\Db\Pagination;
 use PDO;
@@ -22,8 +23,8 @@ class RelatorioService
                        cl.nome_fantasia AS cliente_nome, u.nome AS coletor_nome,
                        (SELECT COALESCE(SUM(ci.quantidade), 0) FROM coleta_itens ci WHERE ci.coleta_id = c.id) AS peso_total
                 FROM coletas c
-                INNER JOIN clientes cl ON cl.id = c.cliente_id
-                INNER JOIN usuarios u ON u.id = c.coletor_id
+                INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
+                INNER JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
                 WHERE '.$where.'
                 ORDER BY c.data_coleta DESC, c.id DESC
                 LIMIT '.$pagination->getLimit();
@@ -40,8 +41,8 @@ class RelatorioService
     /** @return array{0:string,1:array<int, mixed>} */
     private static function buildWhere(array $filtros): array
     {
-        $where = "c.status != 'cancelada'";
-        $params = [];
+        $where = "c.status != 'cancelada' AND c.operadora_id = ?";
+        $params = [OperadoraScope::getOperadoraId()];
 
         $inicio = trim((string)($filtros['data_inicio'] ?? ''));
         $fim = trim((string)($filtros['data_fim'] ?? ''));
@@ -93,8 +94,8 @@ class RelatorioService
                        cl.nome_fantasia AS cliente, cl.cnpj, u.nome AS coletor,
                        (SELECT COALESCE(SUM(ci.quantidade), 0) FROM coleta_itens ci WHERE ci.coleta_id = c.id) AS peso_kg
                 FROM coletas c
-                INNER JOIN clientes cl ON cl.id = c.cliente_id
-                INNER JOIN usuarios u ON u.id = c.coletor_id
+                INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
+                INNER JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
                 WHERE '.$where.'
                 ORDER BY c.data_coleta DESC, c.id DESC
                 LIMIT '.(int)$limit;

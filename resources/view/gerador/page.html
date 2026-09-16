@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{title}} — Portal Gerador</title>
+    <link rel="icon" href="{{URL}}/resources/assets/imgs/favicon.png" type="image/png" />
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('well-eco-theme');
+                var t = saved === 'dark' || saved === 'light'
+                    ? saved
+                    : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-bs-theme', t);
+            } catch (e) {
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+            }
+        })();
+    </script>
+    <link href="{{URL}}/resources/css/styles.css" rel="stylesheet" />
+    <link href="{{URL}}/resources/css/panel-theme.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand well-brand ps-3" href="{{URL}}/gerador">
+        <img src="{{URL}}/resources/assets/imgs/logo.png" alt="{{company_name}}" class="well-brand-logo" width="36" height="36" />
+        <span class="well-brand-text">Portal Gerador</span>
+    </a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" type="button" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    <ul class="navbar-nav ms-auto me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user fa-fw"></i> {{user_nome}}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><span class="dropdown-item-text small text-muted">{{cliente_nome}}</span></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="#" id="btn-toggle-theme"><i class="fa-regular fa-moon me-1"></i> Tema escuro</a></li>
+                <li><a class="dropdown-item" href="{{URL}}/gerador/perfil"><i class="fas fa-id-badge fa-fw"></i> Meu perfil</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="{{URL}}/gerador/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<div id="layoutSidenav">
+    {{menu}}
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4 py-4">
+                {{content}}
+            </div>
+        </main>
+        <footer class="py-4 bg-dark text-white mt-auto">
+            <div class="container-fluid px-4">
+                <div class="small text-muted">
+                    &copy; {{company_name}}
+                    <span class="mx-1">·</span>
+                    Portal do gerador de resíduos
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{URL}}/resources/js/sidebarToggle.js"></script>
+<script src="{{URL}}/resources/js/panel-theme.js"></script>
+{{scripts}}
+</body>
+</html>

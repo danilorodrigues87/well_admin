@@ -29,6 +29,11 @@ class ApiContext
         return !empty(self::$user['is_admin']);
     }
 
+    public static function operadoraId(): int
+    {
+        return (int)(self::$user['operadora_id'] ?? 1);
+    }
+
     public static function clear(): void
     {
         self::$user = null;

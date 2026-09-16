@@ -16,6 +16,7 @@ class ApiAppModules
             'coletas',
             'coleta_nova',
             'agendamentos',
+            'rota_dia',
             'clientes',
             'rotas',
             'relatorios',

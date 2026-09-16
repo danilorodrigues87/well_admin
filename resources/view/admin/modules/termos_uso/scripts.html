@@ -1,0 +1,62 @@
+<script>
+function ativaBtnTermos() {
+    var btn = document.getElementById('btn-termo');
+    if (btn) {
+        btn.disabled = !document.getElementById('termo_uso').checked;
+    }
+}
+
+function wellCsrfToken() {
+    var el = document.querySelector('#form-termos [name="_csrf"]')
+        || document.querySelector('#well-csrf-holder [name="_csrf"]')
+        || document.querySelector('[name="_csrf"]');
+    return el ? el.value : '';
+}
+
+function aceitarTermos() {
+    var btn = document.getElementById('btn-termo');
+    if (btn) {
+        btn.disabled = true;
+    }
+
+    $.ajax({
+        url: url_base + 'painel/aceita-termos',
+        method: 'POST',
+        data: { _csrf: wellCsrfToken() },
+        dataType: 'text'
+    }).done(function (result) {
+        if (String(result).trim() === '1') {
+            Swal.fire({
+                title: 'Termos aceitos',
+                text: 'Redirecionando ao painel…',
+                icon: 'success',
+                timer: 1600,
+                showConfirmButton: false
+            }).then(function () {
+                window.location.href = url_base + 'painel';
+            });
+            setTimeout(function () {
+                window.location.href = url_base + 'painel';
+            }, 1700);
+            return;
+        }
+        if (btn) {
+            btn.disabled = false;
+        }
+        Swal.fire({
+            title: 'Não foi possível registrar',
+            text: 'Tente novamente. Se persistir, saia e entre de novo.',
+            icon: 'error'
+        });
+    }).fail(function () {
+        if (btn) {
+            btn.disabled = false;
+        }
+        Swal.fire({
+            title: 'Erro de comunicação',
+            text: 'Verifique sua conexão e tente novamente.',
+            icon: 'error'
+        });
+    });
+}
+</script>

@@ -6,3 +6,4 @@ include __DIR__.'/admin/coletas.php';
 include __DIR__.'/admin/pagamentos.php';
 include __DIR__.'/admin/modulos.php';
 include __DIR__.'/admin/cadastros.php';
+include __DIR__.'/admin/suporte.php';
