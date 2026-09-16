@@ -114,6 +114,28 @@ Sandbox: `INTER_ENV=sandbox` → `https://cdpj-sandbox.partners.uatinter.co`
 
 **E-mail:** SMTP da hospedagem (ex.: `mail.well.eco.br`, porta **465**, `MAIL_ENCRYPTION=ssl`). Porta 587 usa `tls`. Não usar `tls` na porta 465 — trava a conexão.
 
+**Diagnóstico SMTP no servidor:**
+
+```bash
+cd /home2/wellec99/admin.well.eco.br
+php database/scripts/mail_smoke_test.php
+php database/scripts/mail_smoke_test.php --send=seu@email.com
+```
+
+`.env` produção (copiar do local que funciona):
+
+```env
+MAIL_HOST=mail.well.eco.br
+MAIL_PORT=465
+MAIL_ENCRYPTION=ssl
+MAIL_USER=noreply@well.eco.br
+MAIL_PASS=sua_senha
+MAIL_FROM=noreply@well.eco.br
+MAIL_FROM_NAME=Well S.A.
+```
+
+Se `mail.well.eco.br` falhar na hospedagem, tente `MAIL_HOST=localhost` (relay cPanel). Erro exato aparece no badge **Falhou** ao passar o mouse na aba Cobranças emitidas (`email_erro` no banco).
+
 **Multa/juros padrão:** `.env` (`COBRANCA_MULTA_*`, `COBRANCA_MORA_*`) ou aba Configurações (persiste em `config_sistema`).
 
 ## Webhook (baixa automática)
