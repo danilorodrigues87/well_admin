@@ -8,6 +8,7 @@ use App\Controller\Api\Clientes;
 use App\Controller\Api\Coletas;
 use App\Controller\Api\Dashboard;
 use App\Controller\Api\Perfil;
+use App\Controller\Api\Frota;
 use App\Controller\Api\RotaDoDia;
 use App\Controller\Api\Gerador as ApiGerador;
 use App\Controller\Api\Webhooks\InterCobranca as InterCobrancaWebhook;
@@ -190,6 +191,20 @@ $obRouter->post('/api/v1/rota-do-dia/salvar-ordem', [
     'middlewares' => $mod('rota_dia'),
     function ($request) {
         return RotaDoDia::salvarOrdem($request);
+    },
+]);
+
+$obRouter->post('/api/v1/frota/posicao', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return Frota::registrarPosicao($request);
+    },
+]);
+
+$obRouter->get('/api/v1/frota/posicoes', [
+    'middlewares' => $mod('frota_mapa'),
+    function ($request) {
+        return Frota::posicoes($request);
     },
 ]);
 

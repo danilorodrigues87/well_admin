@@ -87,6 +87,8 @@ Legado para ETL: banco `well_antigo` (dump `wellec99_app.sql`).
 | `tipos_residuos.tra_codigo` … `uni_codigo` | Mapeamento códigos API (`codigoTecnologia`, `codigoTipoEstado`, etc.) |
 | `clientes.sinir_cod_unidade` | Código unidade do gerador no portal MTR (`010_clientes_sinir_unidade.sql`) |
 | `clientes.latitude`, `longitude`, `maps_link`, `geocode_status` | Geolocalização para rotas Google Maps (`018_clientes_geolocalizacao.sql`) |
+| `frota_posicoes` | Histórico de GPS (web/app) por coletor (`035_frota_rastreamento.sql`) |
+| `rota_dia_parada_status` | Status da parada no dia (`pendente` / `coletado` / `pulado`) (`035_frota_rastreamento.sql`) |
 | `sinir_envios` | Histórico de tentativas (payload JSON, erro, tentativa) |
 
 ```bash

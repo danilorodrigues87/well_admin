@@ -3,6 +3,7 @@
 use App\Controller\Admin\Agendamentos;
 use App\Controller\Admin\ColetaNova;
 use App\Controller\Admin\Coletas;
+use App\Controller\Admin\FrotaMapa;
 use App\Controller\Admin\RotaDoDia;
 use App\Http\Response;
 
@@ -22,9 +23,26 @@ $obRouter->post('/painel/rota-do-dia', [
             'paradas' => RotaDoDia::paradas($request),
             'otimizar' => RotaDoDia::otimizar($request),
             'salvar_ordem' => RotaDoDia::salvarOrdem($request),
+            'geocode_paradas' => RotaDoDia::geocodeParadas($request),
+            'registrar_posicao' => RotaDoDia::registrarPosicao($request),
+            'parada_status' => RotaDoDia::paradaStatus($request),
             default => json_encode(['success' => false, 'message' => 'Ação inválida']),
         };
         return new Response(200, $content, 'application/json');
+    },
+]);
+
+$obRouter->get('/painel/frota/mapa', [
+    'middlewares' => ['required-admin-login', 'required-module:frota_mapa'],
+    function ($request) {
+        return new Response(200, FrotaMapa::index($request));
+    },
+]);
+
+$obRouter->post('/painel/frota/mapa', [
+    'middlewares' => ['required-admin-login', 'required-module:frota_mapa'],
+    function ($request) {
+        return new Response(200, FrotaMapa::post($request), 'application/json');
     },
 ]);
 
@@ -92,6 +110,7 @@ foreach ($coletaCrud as $route) {
                 'get' => $ctrl::get($request),
                 'sinir_reenviar' => $ctrl === Coletas::class ? Coletas::sinirReenviar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'agendar_rota' => $ctrl === Agendamentos::class ? Agendamentos::agendarRota($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 default => json_encode(['success' => false, 'message' => 'Ação inválida']),
             };
             return new Response(200, $content, 'application/json');

@@ -9,6 +9,58 @@
   var paradas = [];
   var origin = null;
   var mapsReady = false;
+  var gpsWatchId = null;
+  var gpsShareTimer = null;
+  var SHARE_KEY = 'well-rota-share-gps';
+
+  function swalError(message, title) {
+    var text = message || 'Operação não concluída.';
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({ title: title || 'Erro', text: text, icon: 'error' });
+    } else {
+      alert(text);
+    }
+  }
+
+  function swalInfo(message, title) {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({ title: title || 'Atenção', text: message, icon: 'info' });
+    } else {
+      alert(message);
+    }
+  }
+
+  function swalSuccess(message) {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Ok',
+        text: message,
+        icon: 'success',
+        timer: 2200,
+        showConfirmButton: false
+      });
+    } else {
+      alert(message);
+    }
+  }
+
+  function paradaLatLng(p) {
+    var lat = p.latitude != null ? p.latitude : p.lat;
+    var lng = p.longitude != null ? p.longitude : p.lng;
+    if (lat == null || lng == null || lat === '' || lng === '') {
+      return null;
+    }
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    if (isNaN(lat) || isNaN(lng)) {
+      return null;
+    }
+    return { lat: lat, lng: lng };
+  }
+
+  function paradaTemGps(p) {
+    return paradaLatLng(p) !== null;
+  }
 
   function csrfToken() {
     var el = document.querySelector('input[name="_csrf"]');
@@ -24,11 +76,25 @@
     return sel ? parseInt(sel.value, 10) || 0 : 0;
   }
 
+  function dataRota() {
+    var el = document.getElementById('rota-data');
+    return el && el.value ? el.value : '';
+  }
+
+  function rotaFiltroId() {
+    var el = document.getElementById('rota-filtro-id');
+    if (!el || !el.value) return '';
+    return el.value;
+  }
+
   function postJson(acao, data) {
     var body = new FormData();
     body.append('acao', acao);
     body.append('_csrf', csrfToken());
     body.append('coletor_id', String(coletorId()));
+    body.append('data', dataRota());
+    var rid = rotaFiltroId();
+    if (rid) body.append('rota_id', rid);
     Object.keys(data || {}).forEach(function (k) {
       var v = data[k];
       if (Array.isArray(v)) {
@@ -108,8 +174,9 @@
     }
 
     paradas.forEach(function (p, idx) {
-      if (p.latitude == null || p.longitude == null) return;
-      var pos = { lat: parseFloat(p.latitude), lng: parseFloat(p.longitude) };
+      var ll = paradaLatLng(p);
+      if (!ll) return;
+      var pos = ll;
       var m = new google.maps.Marker({
         position: pos,
         map: map,
@@ -147,6 +214,9 @@
     if (!paradas.length) {
       list.classList.add('d-none');
       vazio.classList.remove('d-none');
+      if (window._rotaSemRota) {
+        vazio.innerHTML = '<p class="mb-0 px-3">Este coletor não possui clientes atribuídos em nenhuma rota. Use <strong>Cadastros → Rotas → Atribuições</strong>.</p>';
+      }
       return;
     }
     vazio.classList.add('d-none');
@@ -162,30 +232,54 @@
 
       var prio = p.prioridade === 'urgente'
         ? '<span class="badge bg-danger ms-1">Urgente</span>' : '';
-      var geo = p.geocode_status !== 'ok'
+      var geo = !paradaTemGps(p)
         ? '<span class="badge bg-warning text-dark ms-1">Sem GPS</span>' : '';
+      var st = p.status_parada || 'pendente';
+      var stBadge = st === 'coletado'
+        ? '<span class="badge bg-success ms-1">Coletado</span>'
+        : (st === 'pulado'
+          ? '<span class="badge bg-secondary ms-1">Pulado</span>'
+          : '<span class="badge bg-light text-dark ms-1">Pendente</span>');
       var dataColeta = p.proxima_coleta
         ? new Date(p.proxima_coleta + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
       var nav = p.maps_url
         ? '<a class="btn btn-sm btn-outline-secondary" href="' + p.maps_url + '" target="_blank" rel="noopener"><i class="fas fa-directions"></i></a> '
         : '';
       var coletar = '<a class="btn btn-sm btn-primary" href="' + cfg.urlColetaNova + '?cliente_id=' + p.cliente_id + '"><i class="fas fa-truck"></i></a>';
+      var cid = String(p.cliente_id);
+      var statusBtns =
+        '<button type="button" class="btn btn-sm btn-outline-success btn-parada-status" data-cliente-id="' + cid + '" data-status="coletado" title="Marcar coletado"><i class="fas fa-check"></i></button> '
+        + '<button type="button" class="btn btn-sm btn-outline-secondary btn-parada-status" data-cliente-id="' + cid + '" data-status="pulado" title="Pular"><i class="fas fa-forward"></i></button>';
 
       li.innerHTML =
         '<div class="d-flex align-items-start gap-2">' +
         '<span class="badge bg-secondary mt-1 ordem-badge">' + (p.ordem || idx + 1) + '</span>' +
         '<div class="flex-grow-1">' +
-        '<div class="fw-semibold">' + escapeHtml(p.nome_fantasia) + prio + geo + '</div>' +
+        '<div class="fw-semibold">' + escapeHtml(p.nome_fantasia) + prio + geo + stBadge + '</div>' +
         '<div class="small text-muted">' + escapeHtml(p.endereco || '') + '</div>' +
         '<div class="small">Próxima: ' + dataColeta + '</div>' +
         '</div>' +
-        '<div class="btn-group">' + nav + coletar + '</div>' +
+        '<div class="btn-group well-btn-group-keep flex-wrap">' + nav + coletar + statusBtns + '</div>' +
         '</div>';
 
       li.addEventListener('dragstart', onDragStart);
       li.addEventListener('dragover', onDragOver);
       li.addEventListener('drop', onDrop);
       list.appendChild(li);
+    });
+
+    list.querySelectorAll('.btn-parada-status').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var clienteId = btn.getAttribute('data-cliente-id');
+        var status = btn.getAttribute('data-status');
+        postJson('parada_status', { cliente_id: clienteId, status: status }).then(function (data) {
+          if (!data.success) throw new Error(data.message || 'Erro');
+          paradas = data.paradas || paradas;
+          renderParadas();
+        }).catch(function (err) {
+          swalError(err.message || 'Não foi possível atualizar o status.');
+        });
+      });
     });
 
     renumberParadas();
@@ -235,15 +329,16 @@
       if (!data.success) throw new Error(data.message || 'Erro ao carregar paradas');
       paradas = data.paradas || [];
       window._rotaPolyline = null;
+      window._rotaSemRota = !!data.sem_rota;
       renderParadas();
     }).catch(function (err) {
-      alert(err.message || 'Erro ao carregar paradas');
+      swalError(err.message || 'Erro ao carregar paradas');
     });
   }
 
   function usarGps() {
     if (!navigator.geolocation) {
-      alert('Geolocalização não disponível neste navegador.');
+      swalInfo('Geolocalização não disponível neste navegador.');
       return;
     }
     navigator.geolocation.getCurrentPosition(function (pos) {
@@ -256,14 +351,14 @@
         setOrigin(lat, lng, 'Fallback (.env)');
         if (mapsReady) renderMap();
       } else {
-        alert('Não foi possível obter GPS. Configure MAPS_ORIGIN_FALLBACK_LAT/LNG no .env.');
+        swalInfo('Não foi possível obter GPS. Configure MAPS_ORIGIN_FALLBACK_LAT/LNG no .env.');
       }
     }, { enableHighAccuracy: true, timeout: 15000 });
   }
 
   function otimizarRota() {
     if (!origin) {
-      alert('Defina a origem com "Usar minha localização" antes de otimizar.');
+      swalInfo('Defina a origem com "Usar minha localização" antes de otimizar.');
       return;
     }
     var ids = paradas.map(function (p) { return p.cliente_id; });
@@ -289,9 +384,102 @@
       document.getElementById('rota-resumo').textContent = resumo;
       renderParadas();
     }).catch(function (err) {
-      alert(err.message || 'Erro ao otimizar rota');
+      swalError(err.message || 'Erro ao otimizar rota');
     }).finally(function () {
       document.getElementById('btn-rota-otimizar').disabled = false;
+    });
+  }
+
+  function atualizarGps() {
+    document.getElementById('btn-rota-geocode').disabled = true;
+    postJson('geocode_paradas', {}).then(function (data) {
+      if (!data.success) throw new Error(data.message || 'Erro ao geocodificar');
+      paradas = data.paradas || paradas;
+      window._rotaPolyline = null;
+      renderParadas();
+      if (data.message) {
+        swalSuccess(data.message);
+      }
+    }).catch(function (err) {
+      swalError(err.message || 'Erro ao atualizar GPS');
+    }).finally(function () {
+      document.getElementById('btn-rota-geocode').disabled = false;
+    });
+  }
+
+  function enviarPosicao(pos) {
+    return postJson('registrar_posicao', {
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      accuracy_m: pos.coords.accuracy,
+      heading: pos.coords.heading != null ? pos.coords.heading : '',
+      speed_mps: pos.coords.speed != null ? pos.coords.speed : ''
+    });
+  }
+
+  function stopGpsShare() {
+    if (gpsWatchId != null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(gpsWatchId);
+      gpsWatchId = null;
+    }
+    if (gpsShareTimer) {
+      clearInterval(gpsShareTimer);
+      gpsShareTimer = null;
+    }
+    var st = document.getElementById('rota-share-status');
+    if (st) st.textContent = '';
+  }
+
+  function startGpsShare() {
+    stopGpsShare();
+    if (!navigator.geolocation) {
+      swalInfo('Geolocalização indisponível neste dispositivo.');
+      return;
+    }
+    var st = document.getElementById('rota-share-status');
+    var onPos = function (pos) {
+      if (st) {
+        st.textContent = 'Último envio: ' + new Date().toLocaleTimeString('pt-BR')
+          + ' · precisão ~' + Math.round(pos.coords.accuracy || 0) + ' m';
+      }
+      enviarPosicao(pos).catch(function () { /* silencioso */ });
+    };
+    var onErr = function () {
+      if (st) st.textContent = 'Não foi possível obter GPS. Verifique permissões do navegador.';
+    };
+    gpsWatchId = navigator.geolocation.watchPosition(onPos, onErr, {
+      enableHighAccuracy: true,
+      maximumAge: 15000,
+      timeout: 20000
+    });
+    gpsShareTimer = setInterval(function () {
+      navigator.geolocation.getCurrentPosition(onPos, onErr, {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 15000
+      });
+    }, 30000);
+    navigator.geolocation.getCurrentPosition(onPos, onErr, { enableHighAccuracy: true });
+  }
+
+  function initGpsShareToggle() {
+    var chk = document.getElementById('rota-share-gps');
+    if (!chk) return;
+    try {
+      chk.checked = localStorage.getItem(SHARE_KEY) === '1';
+    } catch (e) { /* ignore */ }
+    if (chk.checked) {
+      startGpsShare();
+    }
+    chk.addEventListener('change', function () {
+      try {
+        localStorage.setItem(SHARE_KEY, chk.checked ? '1' : '0');
+      } catch (e) { /* ignore */ }
+      if (chk.checked) {
+        startGpsShare();
+      } else {
+        stopGpsShare();
+      }
     });
   }
 
@@ -302,9 +490,9 @@
     });
     postJson('salvar_ordem', { ordem: ordem }).then(function (data) {
       if (!data.success) throw new Error(data.message || 'Erro ao salvar');
-      alert(data.message || 'Ordem salva.');
+      swalSuccess(data.message || 'Ordem salva.');
     }).catch(function (err) {
-      alert(err.message || 'Erro ao salvar ordem');
+      swalError(err.message || 'Erro ao salvar ordem');
     });
   }
 
@@ -317,9 +505,15 @@
     document.getElementById('btn-rota-otimizar').addEventListener('click', otimizarRota);
     document.getElementById('btn-rota-salvar-ordem').addEventListener('click', salvarOrdem);
     document.getElementById('btn-rota-recarregar').addEventListener('click', carregarParadas);
+    var btnGeo = document.getElementById('btn-rota-geocode');
+    if (btnGeo) btnGeo.addEventListener('click', atualizarGps);
 
     var sel = document.getElementById('rota-coletor-id');
     if (sel) sel.addEventListener('change', carregarParadas);
+    var dataEl = document.getElementById('rota-data');
+    if (dataEl) dataEl.addEventListener('change', carregarParadas);
+    var rotaEl = document.getElementById('rota-filtro-id');
+    if (rotaEl) rotaEl.addEventListener('change', carregarParadas);
 
     var key = cfg.mapsKey;
     var start = function () {
@@ -330,7 +524,10 @@
       }).catch(function () {});
     };
 
+    initGpsShareToggle();
     start();
     usarGps();
   });
+
+  window.addEventListener('beforeunload', stopGpsShare);
 })();

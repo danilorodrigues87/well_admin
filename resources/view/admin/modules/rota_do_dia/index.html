@@ -7,13 +7,22 @@
 <div id="rota-alerta-maps" class="alert alert-warning d-none">
     Google Maps não configurado. Defina <code>GOOGLE_MAPS_API_KEY</code> no <code>.env</code>.
 </div>
+<div id="rota-alerta-server-key" class="alert alert-info {{maps_server_key_alert_class}}">
+    Para <strong>Otimizar rota</strong>, configure também <code>GOOGLE_MAPS_SERVER_API_KEY</code> no <code>.env</code>
+    (chave de servidor no Google Cloud: <em>Routes API</em> + <em>Geocoding API</em>, sem restrição de referrer).
+</div>
 
 <div class="card mb-3">
     <div class="card-body">
-        <div class="row align-items-end g-2">
+        <div class="row align-items-end g-2 well-rota-toolbar">
             {{coletor_select}}
-            <div class="col-md-8">
-                <div class="btn-group" role="group">
+            {{rota_select}}
+            <div class="col-md-3 mb-2">
+                <label class="form-label">Data da rota</label>
+                <input type="date" class="form-control" id="rota-data" value="{{data_hoje}}">
+            </div>
+            <div class="col-md-5">
+                <div class="btn-group well-btn-stack-mobile" role="group">
                     <button type="button" class="btn btn-outline-primary" id="btn-rota-gps">
                         <i class="fas fa-location-crosshairs me-1"></i> Usar minha localização
                     </button>
@@ -26,16 +35,26 @@
                     <button type="button" class="btn btn-outline-secondary" id="btn-rota-recarregar">
                         <i class="fas fa-sync me-1"></i> Recarregar
                     </button>
+                    <button type="button" class="btn btn-outline-warning" id="btn-rota-geocode">
+                        <i class="fas fa-location-dot me-1"></i> Atualizar GPS
+                    </button>
                 </div>
                 <div class="small text-muted mt-2" id="rota-origin-info">Origem: não definida</div>
                 <div class="small text-muted" id="rota-resumo"></div>
+                <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" id="rota-share-gps">
+                    <label class="form-check-label" for="rota-share-gps">
+                        Compartilhar localização com a central (mantenha esta aba aberta)
+                    </label>
+                </div>
+                <div class="small text-muted" id="rota-share-status"></div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row g-3">
-    <div class="col-lg-5">
+    <div class="col-lg-5 order-lg-1 order-2">
         <div class="card">
             <div class="card-header"><i class="fas fa-list-ol me-1"></i> Paradas do dia</div>
             <div class="card-body p-0">
@@ -43,17 +62,22 @@
                     <i class="fas fa-spinner fa-spin"></i> Carregando...
                 </div>
                 <ul id="rota-paradas-list" class="list-group list-group-flush rota-sortable d-none"></ul>
-                <div id="rota-paradas-vazio" class="text-center py-4 text-muted d-none">
-                    Nenhuma coleta pendente na sua rota hoje.
+                <div id="rota-paradas-vazio" class="text-center py-4 text-muted d-none px-3">
+                    <p class="mb-2">Nenhuma parada encontrada para esta data e coletor.</p>
+                    <p class="small mb-0 text-start">
+                        Verifique: (1) clientes na rota em <strong>Cadastros → Rotas → Atribuições</strong> com o coletor correto;
+                        (2) em <strong>Agendamentos</strong>, <em>próxima coleta</em> ≤ data selecionada (ou urgente);
+                        (3) clientes ativos com endereço/geolocalização para o mapa.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-7">
+    <div class="col-lg-7 order-lg-2 order-1">
         <div class="card">
             <div class="card-header"><i class="fas fa-map me-1"></i> Mapa</div>
             <div class="card-body p-0">
-                <div id="rota-mapa" style="height:520px;background:#e9ecef;"></div>
+                <div id="rota-mapa" class="well-rota-mapa" style="height:520px;background:#e9ecef;"></div>
             </div>
         </div>
     </div>

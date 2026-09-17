@@ -87,6 +87,15 @@ Coletor com rota atribuída: lista apenas paradas pendentes da sua rota (urgente
 
 Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`.
 
+Paradas incluem `status_parada` (`pendente` / `coletado` / `pulado`) quando persistido no painel web.
+
+### Frota (GPS)
+
+| Método | Endpoint | Módulo | Ação |
+|--------|----------|--------|------|
+| POST | `/frota/posicao` | `rota_dia` | Registrar posição (`latitude`, `longitude`; opcional: `accuracy_m`, `heading`, `speed_mps`) |
+| GET | `/frota/posicoes` | `frota_mapa` | Última posição por coletor (`?minutos=120` opcional) |
+
 ### Perfil
 
 | Método | Endpoint | Módulo | Ação |

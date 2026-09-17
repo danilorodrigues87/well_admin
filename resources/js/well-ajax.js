@@ -147,6 +147,7 @@
         if (typeof window.onCrudListLoaded === 'function') {
           window.onCrudListLoaded(result);
         }
+        document.dispatchEvent(new CustomEvent('well-crud-listed', { detail: result }));
       } else {
         swalError(result.message || 'Não foi possível carregar a lista.');
       }

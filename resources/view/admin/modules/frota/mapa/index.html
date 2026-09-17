@@ -1,0 +1,58 @@
+<h1 class="mt-2">Mapa da frota</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Mapa da frota</li>
+</ol>
+
+<div id="frota-alerta-maps" class="alert alert-warning d-none">
+    Google Maps não configurado. Defina <code>GOOGLE_MAPS_API_KEY</code> no <code>.env</code>.
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Mostrar posições dos últimos</label>
+                <select id="frota-minutos" class="form-select">
+                    <option value="30">30 minutos</option>
+                    <option value="60">1 hora</option>
+                    <option value="120" selected>2 horas</option>
+                    <option value="480">8 horas</option>
+                </select>
+            </div>
+            <div class="col-md-8">
+                <div class="well-btn-stack-mobile d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-primary" id="btn-frota-recarregar">
+                        <i class="fas fa-sync me-1"></i> Atualizar agora
+                    </button>
+                    <a class="btn btn-outline-secondary" href="{{URL}}/painel/rota-do-dia">
+                        <i class="fas fa-route me-1"></i> Rota do dia
+                    </a>
+                </div>
+                <div class="small text-muted mt-2" id="frota-resumo">Carregando...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="fas fa-satellite-dish me-1"></i> Coletores em tempo quase real</div>
+    <div class="card-body p-0">
+        <div id="frota-mapa" class="well-rota-mapa" style="height:520px;background:#e9ecef;"></div>
+    </div>
+</div>
+
+<ul id="frota-lista-coletores" class="list-group list-group-flush mt-3 d-none"></ul>
+
+<input type="hidden" id="frota-csrf" value="">
+<input type="hidden" id="frota-maps-configured" value="{{maps_configured}}">
+<input type="hidden" id="frota-fallback-lat" value="{{fallback_lat}}">
+<input type="hidden" id="frota-fallback-lng" value="{{fallback_lng}}">
+
+<script>
+window.WELL_FROTA_MAPA = {
+    baseUrl: '{{URL}}/painel/frota/mapa',
+    mapsKey: '{{maps_key}}',
+    pollMs: 15000
+};
+</script>

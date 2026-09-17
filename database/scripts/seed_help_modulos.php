@@ -163,12 +163,14 @@ HTML,
 <p>Calendário operacional para programar visitas de coleta antes do lançamento efetivo.</p>
 <h4>Como acessar</h4>
 <p>Menu <strong>Operação → Agendamentos</strong>.</p>
-<h4>Passo a passo</h4>
+<h4>Agendar rota inteira</h4>
 <ol>
-<li>Selecione data e cliente (ou rota).</li>
-<li>Defina horário previsto e observações para a equipe de campo.</li>
-<li>No dia, converta o agendamento em coleta via Lançar Coleta ou app de rota.</li>
+<li>No topo da página, escolha a <strong>rota cadastral</strong> e a <strong>próxima coleta</strong>.</li>
+<li>Clique em <strong>Aplicar</strong> — todos os clientes da rota recebem a mesma data.</li>
+<li>Na <strong>Rota do dia</strong>, selecione o coletor, a mesma data e (opcional) filtre pela rota.</li>
 </ol>
+<h4>Cliente individual</h4>
+<p>Use o ícone de calendário na tabela para ajustar um cliente.</p>
 HTML,
     ],
     [
@@ -184,12 +186,12 @@ HTML,
 <p>Menu <strong>Operação → Rota do dia</strong>.</p>
 <h4>Funcionalidades</h4>
 <ul>
-<li>Lista ordenada de clientes da rota atribuída ao veículo/motorista</li>
-<li>Mapa com geolocalização (quando o cliente possui coordenadas)</li>
-<li>Reordenação manual da sequência de paradas</li>
+<li>Filtro por <strong>coletor</strong>, <strong>data</strong> e <strong>rota cadastral</strong></li>
+<li>Lista ordenada de paradas elegíveis (urgente ou próxima coleta ≤ data)</li>
+<li>Mapa, otimização Google e reordenação manual</li>
 </ul>
 <h4>Pré-requisitos</h4>
-<p>Cadastre <strong>Rotas</strong>, <strong>Veículos</strong>, <strong>Funcionários</strong> e geolocalize clientes quando possível.</p>
+<p>Agende clientes em <strong>Agendamentos</strong> (individual ou rota inteira) e atribua coletores em <strong>Rotas → Atribuições</strong>.</p>
 HTML,
     ],
     [

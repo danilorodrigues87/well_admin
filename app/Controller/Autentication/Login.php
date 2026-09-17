@@ -2,7 +2,9 @@
 
 namespace App\Controller\Autentication;
 
+use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\Helpers\CsrfHelper;
+use App\Common\Helpers\ModuleGateHelper;
 use App\Controller\Admin\Alert;
 use App\Model\Entity\Usuario as EntityUsuario;
 use App\Session\User\Login as SessionLogin;
@@ -51,6 +53,11 @@ class Login
         }
 
         SessionLogin::login($usuario);
+        $session = SessionLogin::getUserLogedData();
+        $u = $session['usuario'] ?? [];
+        if (ColetorSelectHelper::isColetorSession($u) && ModuleGateHelper::podeAcessar('rota_dia', $u)) {
+            $request->getRouter()->redirect('/painel/rota-do-dia');
+        }
         $request->getRouter()->redirect('/painel');
     }
 

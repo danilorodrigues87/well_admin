@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\Helpers\CsrfHelper;
 use App\Common\SystemModules;
 use App\Service\TermosDeUsoService;
@@ -18,6 +19,15 @@ class Page
     ): string {
         $userData = SessionUser::getUserLogedData();
         $usuario = $userData['usuario'] ?? [];
+        $isColetor = ColetorSelectHelper::isColetorSession($usuario);
+        $coletorDock = self::renderColetorDock($usuario, $currentSlug);
+        $bodyClass = 'well-panel-mobile';
+        if ($isColetor) {
+            $bodyClass .= ' well-coletor-mode';
+        }
+        if ($coletorDock !== '') {
+            $bodyClass .= ' well-has-coletor-dock';
+        }
 
         return View::render('admin/page', [
             'title' => $title,
@@ -27,7 +37,43 @@ class Page
             'user' => htmlspecialchars($usuario['nome'] ?? '', ENT_QUOTES, 'UTF-8'),
             'funcao' => htmlspecialchars($usuario['funcao_nome'] ?? '', ENT_QUOTES, 'UTF-8'),
             'csrf_field' => CsrfHelper::field(),
+            'body_class' => $bodyClass,
+            'current_slug' => htmlspecialchars($currentSlug, ENT_QUOTES, 'UTF-8'),
+            'coletor_dock' => $coletorDock,
         ]);
+    }
+
+    private static function renderColetorDock(array $usuario, string $currentSlug): string
+    {
+        if (!ColetorSelectHelper::isColetorSession($usuario)) {
+            return '';
+        }
+
+        $modulos = $usuario['modulos'] ?? [];
+        $atalhos = [
+            'rota_dia' => ['label' => 'Rota', 'link' => '/painel/rota-do-dia', 'icon' => 'fa-map-location-dot'],
+            'coleta_nova' => ['label' => 'Nova coleta', 'link' => '/painel/coleta/nova', 'icon' => 'fa-plus-circle'],
+            'coletas' => ['label' => 'Coletas', 'link' => '/painel/coletas', 'icon' => 'fa-truck'],
+        ];
+
+        $items = '';
+        foreach ($atalhos as $slug => $meta) {
+            if (!in_array($slug, $modulos, true)) {
+                continue;
+            }
+            $active = $slug === $currentSlug ? ' active' : '';
+            $href = URL.$meta['link'];
+            $items .= '<a class="well-coletor-dock-link'.$active.'" href="'.htmlspecialchars($href, ENT_QUOTES, 'UTF-8').'" data-module="'
+                .htmlspecialchars($slug, ENT_QUOTES, 'UTF-8').'">'
+                .'<i class="fas '.htmlspecialchars($meta['icon'], ENT_QUOTES, 'UTF-8').'"></i>'
+                .'<span>'.htmlspecialchars($meta['label'], ENT_QUOTES, 'UTF-8').'</span></a>';
+        }
+
+        if ($items === '') {
+            return '';
+        }
+
+        return View::render('admin/_partials/coletor_dock', ['items' => $items]);
     }
 
     public static function crudScripts(string $baseUrl, bool $autoLoad = true): string

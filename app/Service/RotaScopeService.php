@@ -48,35 +48,59 @@ class RotaScopeService
         }
     }
 
-    /** @return array{join:string,where:string,params:array} */
-    public static function paradasDoDiaQuery(int $coletorId, bool $isAdmin): array
-    {
-        $hoje = date('Y-m-d');
-        $join = '';
+    /** @return array{join:string,where:string,params:array,data:string} */
+    public static function paradasDoDiaQuery(
+        int $coletorId,
+        bool $isAdmin,
+        ?string $dataReferencia = null,
+        ?int $rotaId = null
+    ): array {
+        $ref = ($dataReferencia !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataReferencia))
+            ? $dataReferencia
+            : date('Y-m-d');
         $opId = OperadoraScope::getOperadoraId();
-        $where = "c.status = 'ativo' AND c.operadora_id = ?";
-        $params = [$opId];
+        $join = '';
+        /** Ordem dos placeholders = ordem no SQL (JOIN antes do WHERE). */
+        $params = [];
 
         if (!$isAdmin) {
             if (!self::coletorTemRota($coletorId)) {
-                $where .= ' AND 1=0';
-
-                return ['join' => $join, 'where' => $where, 'params' => $params];
+                return [
+                    'join' => '',
+                    'where' => "c.status = 'ativo' AND c.operadora_id = ? AND 1=0",
+                    'params' => [$opId],
+                    'data' => $ref,
+                ];
             }
             $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ? AND ra.operadora_id = c.operadora_id';
             $params[] = $coletorId;
         }
 
-        $where .= " AND (c.prioridade = 'urgente' OR c.proxima_coleta IS NULL OR c.proxima_coleta <= ?)";
-        $params[] = $hoje;
+        $where = "c.status = 'ativo' AND c.operadora_id = ?";
+        $params[] = $opId;
 
-        return ['join' => $join, 'where' => $where, 'params' => $params];
+        if ($rotaId !== null && $rotaId > 0) {
+            if ($join === '') {
+                $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.operadora_id = c.operadora_id';
+            }
+            $where .= ' AND ra.rota_id = ?';
+            $params[] = $rotaId;
+        }
+
+        $where .= " AND (c.prioridade = 'urgente' OR c.proxima_coleta IS NULL OR c.proxima_coleta <= ?)";
+        $params[] = $ref;
+
+        return ['join' => $join, 'where' => $where, 'params' => $params, 'data' => $ref];
     }
 
     /** @return list<EntityCliente> */
-    public static function paradasDoDia(int $coletorId, bool $isAdmin): array
-    {
-        $q = self::paradasDoDiaQuery($coletorId, $isAdmin);
+    public static function paradasDoDia(
+        int $coletorId,
+        bool $isAdmin,
+        ?string $dataReferencia = null,
+        ?int $rotaId = null
+    ): array {
+        $q = self::paradasDoDiaQuery($coletorId, $isAdmin, $dataReferencia, $rotaId);
         $db = new Database();
         $sql = 'SELECT DISTINCT c.*, p.nome AS plano_nome FROM clientes c
                 LEFT JOIN planos p ON p.id = c.plano_id'.$q['join'].'

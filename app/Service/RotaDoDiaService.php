@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\MapsConfig;
 use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
@@ -10,13 +11,58 @@ use PDO;
 class RotaDoDiaService
 {
     /** @return list<array<string,mixed>> */
-    public static function listarParadas(int $coletorId, bool $isAdmin): array
-    {
-        $clientes = RotaScopeService::paradasDoDia($coletorId, $isAdmin);
+    public static function listarParadas(
+        int $coletorId,
+        bool $isAdmin,
+        ?string $dataReferencia = null,
+        ?int $rotaId = null
+    ): array {
+        $clientes = RotaScopeService::paradasDoDia($coletorId, $isAdmin, $dataReferencia, $rotaId);
+        if (MapsConfig::isServerConfigured()) {
+            foreach ($clientes as $i => $c) {
+                if ($c->latitude !== null && $c->longitude !== null) {
+                    continue;
+                }
+                if (GoogleMapsService::geocodeCliente($c->id)) {
+                    $atualizado = EntityCliente::getById($c->id);
+                    if ($atualizado !== null) {
+                        $clientes[$i] = $atualizado;
+                    }
+                }
+            }
+        }
         $paradas = array_map(fn (EntityCliente $c) => self::paradaFromCliente($c), $clientes);
-        $paradas = self::aplicarOrdemSalva($paradas, $coletorId);
+        $paradas = self::aplicarOrdemSalva($paradas, $coletorId, $dataReferencia);
+        $data = self::normalizarData($dataReferencia);
 
-        return $paradas;
+        return RotaParadaStatusService::enriquecerParadas($paradas, $coletorId, $data);
+    }
+
+    /** @return array{ok:int,falha:int,paradas:list<array<string,mixed>>} */
+    public static function atualizarGeocodeParadas(
+        int $coletorId,
+        bool $isAdmin,
+        ?string $dataReferencia = null,
+        ?int $rotaId = null
+    ): array {
+        $clientes = RotaScopeService::paradasDoDia($coletorId, $isAdmin, $dataReferencia, $rotaId);
+        $ok = 0;
+        $falha = 0;
+        if (MapsConfig::isServerConfigured()) {
+            foreach ($clientes as $c) {
+                if (GoogleMapsService::geocodeCliente($c->id)) {
+                    ++$ok;
+                } else {
+                    ++$falha;
+                }
+            }
+        }
+
+        return [
+            'ok' => $ok,
+            'falha' => $falha,
+            'paradas' => self::listarParadas($coletorId, $isAdmin, $dataReferencia, $rotaId),
+        ];
     }
 
     /**
@@ -28,9 +74,11 @@ class RotaDoDiaService
         bool $isAdmin,
         float $originLat,
         float $originLng,
-        array $clienteIds = []
+        array $clienteIds = [],
+        ?string $dataReferencia = null,
+        ?int $rotaId = null
     ): array {
-        $paradas = self::listarParadas($coletorId, $isAdmin);
+        $paradas = self::listarParadas($coletorId, $isAdmin, $dataReferencia, $rotaId);
         if ($clienteIds !== []) {
             $ids = array_flip(array_map('intval', $clienteIds));
             $paradas = array_values(array_filter($paradas, fn ($p) => isset($ids[(int)$p['cliente_id']])));
@@ -68,13 +116,16 @@ class RotaDoDiaService
         }
 
         if ($stops === [] && $semCoords !== []) {
-            throw new \RuntimeException('Nenhuma parada com coordenadas válidas. Verifique endereços ou links do Maps nos clientes.');
+            throw new \RuntimeException(
+                'Nenhuma parada com coordenadas válidas. Salve novamente os clientes com link maps.app.goo.gl ou endereço completo, '
+                .'ou execute: php database/scripts/geocode_clientes.php'
+            );
         }
 
         $result = GoogleMapsService::optimizeRoute($originLat, $originLng, $stops);
 
         if (!empty($result['ordem'])) {
-            self::salvarOrdem($coletorId, $result['ordem'], 'otimizada');
+            self::salvarOrdem($coletorId, $result['ordem'], 'otimizada', $dataReferencia);
         }
 
         foreach ($semCoords as $extra) {
@@ -84,6 +135,11 @@ class RotaDoDiaService
             ]);
         }
 
+        $result['paradas'] = array_map(
+            static fn (array $p) => GoogleMapsService::normalizarParadaCoords($p),
+            $result['paradas']
+        );
+
         $result['origin'] = ['lat' => $originLat, 'lng' => $originLng];
         $result['sem_coordenadas'] = count($semCoords);
 
@@ -91,12 +147,14 @@ class RotaDoDiaService
     }
 
     /** @param list<array{cliente_id:int,ordem:int}> $ordem */
-    public static function salvarOrdem(int $coletorId, array $ordem, string $origem = 'manual'): void
+    public static function salvarOrdem(int $coletorId, array $ordem, string $origem = 'manual', ?string $dataReferencia = null): void
     {
         if ($coletorId <= 0 || $ordem === []) {
             return;
         }
-        $data = date('Y-m-d');
+        $data = ($dataReferencia !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataReferencia))
+            ? $dataReferencia
+            : date('Y-m-d');
         $db = new Database();
         $db->beginTransaction();
         try {
@@ -123,18 +181,28 @@ class RotaDoDiaService
         }
     }
 
+    private static function normalizarData(?string $dataReferencia = null): string
+    {
+        if ($dataReferencia !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataReferencia)) {
+            return $dataReferencia;
+        }
+
+        return date('Y-m-d');
+    }
+
     /** @param list<array<string,mixed>> $paradas */
-    private static function aplicarOrdemSalva(array $paradas, int $coletorId): array
+    private static function aplicarOrdemSalva(array $paradas, int $coletorId, ?string $dataReferencia = null): array
     {
         if ($coletorId <= 0 || $paradas === []) {
             return $paradas;
         }
+        $data = self::normalizarData($dataReferencia);
         $db = new Database();
         $stmt = $db->execute(
             'SELECT cliente_id, ordem FROM rota_dia_ordem
              WHERE coletor_id = ? AND data = ? AND operadora_id = ?
              ORDER BY ordem ASC',
-            [$coletorId, date('Y-m-d'), OperadoraScope::getOperadoraId()]
+            [$coletorId, $data, OperadoraScope::getOperadoraId()]
         );
         $ordemMap = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -168,6 +236,8 @@ class RotaDoDiaService
         $lat = $c->latitude;
         $lng = $c->longitude;
 
+        $geoOk = $lat !== null && $lng !== null;
+
         return [
             'cliente_id' => $c->id,
             'nome_fantasia' => $c->nome_fantasia,
@@ -178,7 +248,7 @@ class RotaDoDiaService
             'proxima_coleta' => $c->proxima_coleta,
             'latitude' => $lat,
             'longitude' => $lng,
-            'geocode_status' => $c->geocode_status,
+            'geocode_status' => $geoOk ? 'ok' : $c->geocode_status,
             'maps_url' => ($lat !== null && $lng !== null)
                 ? GoogleMapsService::buildNavigationUrl((float)$lat, (float)$lng)
                 : null,

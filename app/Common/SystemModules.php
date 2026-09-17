@@ -11,6 +11,7 @@ class SystemModules
         'coleta_nova' => ['label' => 'Lançar Coleta', 'link' => '/painel/coleta/nova', 'icon' => 'fa-plus-circle', 'grupo' => 'Operação', 'ordem' => 21],
         'agendamentos' => ['label' => 'Agendamentos', 'link' => '/painel/agendamentos', 'icon' => 'fa-calendar', 'grupo' => 'Operação', 'ordem' => 22],
         'rota_dia' => ['label' => 'Rota do dia', 'link' => '/painel/rota-do-dia', 'icon' => 'fa-map-location-dot', 'grupo' => 'Operação', 'ordem' => 23],
+        'frota_mapa' => ['label' => 'Mapa da frota', 'link' => '/painel/frota/mapa', 'icon' => 'fa-satellite-dish', 'grupo' => 'Operação', 'ordem' => 24],
         'clientes' => ['label' => 'Clientes', 'link' => '/painel/clientes', 'icon' => 'fa-building', 'grupo' => 'Cadastros', 'ordem' => 30],
         'funcionarios' => ['label' => 'Funcionários', 'link' => '/painel/funcionarios', 'icon' => 'fa-users', 'grupo' => 'Cadastros', 'ordem' => 31],
         'veiculos' => ['label' => 'Veículos', 'link' => '/painel/veiculos', 'icon' => 'fa-car', 'grupo' => 'Cadastros', 'ordem' => 32],
@@ -49,6 +50,7 @@ class SystemModules
                 ['slug' => 'coleta_nova', 'label' => 'Lançar Coleta', 'link' => '/painel/coleta/nova'],
                 ['slug' => 'agendamentos', 'label' => 'Agendamentos', 'link' => '/painel/agendamentos'],
                 ['slug' => 'rota_dia', 'label' => 'Rota do dia', 'link' => '/painel/rota-do-dia'],
+                ['slug' => 'frota_mapa', 'label' => 'Mapa da frota', 'link' => '/painel/frota/mapa'],
             ],
         ],
         [

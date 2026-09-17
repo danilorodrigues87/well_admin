@@ -20,7 +20,10 @@ class Agendamentos extends BaseApi
             $page,
             $perPage,
             ApiContext::userId(),
-            ApiContext::isAdmin()
+            ApiContext::isAdmin(),
+            0,
+            '',
+            !ApiContext::isAdmin()
         );
 
         return ApiHelper::ok([

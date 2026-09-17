@@ -241,6 +241,12 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-16 | Pagamentos: sync status Inter + baixa manual na aba Cobranças emitidas; histórico paginado (20/página) e filtro status select |
 | 2026-09-16 | Coleta wizard: fluxo em 2 passos — salvar rascunho (fotos/relatório) e depois Gerar MTR (rápido, sem reupload) |
 | 2026-09-16 | Rotas Google Maps: geolocalização em `clientes`, `RotaScopeService` (RBAC rota/coletor), painel `/painel/rota-do-dia`, API `/rota-do-dia/*`, `GoogleMapsService` (Geocoding + Routes API) |
+| 2026-09-17 | Fix crítico `RotaScopeService::paradasDoDiaQuery` (ordem de bind SQL no JOIN coletor); Rota do dia com seletor de data e empty state explicativo |
+| 2026-09-17 | `GoogleMapsService`: resolve links `maps.app.goo.gl` (redirect + `!3d/!4d`); geocode automático ao carregar paradas na Rota do dia |
+| 2026-09-17 | Maps: `GOOGLE_MAPS_SERVER_API_KEY` para Routes/Geocoding no PHP; Rota do dia usa SweetAlert2 nos erros |
+| 2026-09-17 | Rotas R1: agendamento em lote por rota (`AgendamentoService::agendarRotaEmLote`), listagem com tenant, filtro `rota_id` na Rota do dia |
+| 2026-09-17 | UI mobile-first admin: `panel-mobile.css` / `panel-mobile.js` (CRUD cards, modais, filtros, sidebar); dock coletor; login coletor → Rota do dia |
+| 2026-09-17 | Rastreamento web: `frota_posicoes`, `rota_dia_parada_status` (035); `/painel/frota/mapa` + API frota; GPS na Rota do dia; PWA (`manifest.webmanifest`, `/sw.js`) |
 | 2026-09-16 | Funcionários/Usuários: ação `resetar_senha` — botão chave na listagem redefine senha para `12345678` (hash via `password_hash`) |
 | 2026-09-16 | Coletas: `data_recebimento` obrigatória para gerar MTR (rascunho pode ficar sem); doc `docs/MIGRACAO_DADOS.md`; script `repair_coletas_data_recebimento.php`; fallback no ETL |
 | 2026-09-16 | Multitenancy Fase 3 (parcial): trait `TenantScoped` — entities clientes/coletas/rotas/planos/veículos/usuários/inter_cobrancas/rota_atribuicoes filtram `operadora_id`; services Dashboard, RotaScope, Relatorio, PlanoCobranca, RotaDoDia |
