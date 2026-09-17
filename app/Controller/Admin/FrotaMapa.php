@@ -19,7 +19,7 @@ class FrotaMapa extends Page
             'fallback_lng' => $fallback['lng'] ?? '',
         ]);
 
-        $scripts = '<script src="'.URL.'/resources/js/frota-mapa.js?v=20260917"></script>';
+        $scripts = '<script src="'.URL.'/resources/js/frota-mapa.js?v=20260918b"></script>';
 
         return self::getPage('Mapa da frota', $content, 'frota_mapa', $scripts);
     }

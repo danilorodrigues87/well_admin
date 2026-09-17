@@ -1,11 +1,11 @@
-/** Mapa da frota — polling de posições GPS */
+/** Mapa da frota — atualização manual (preserva zoom/posição do mapa) */
 (function () {
   'use strict';
 
   var cfg = window.WELL_FROTA_MAPA || {};
   var map = null;
   var markers = [];
-  var pollTimer = null;
+  var lastPosicoes = [];
 
   function csrf() {
     var el = document.getElementById('frota-csrf')
@@ -43,30 +43,41 @@
     });
   }
 
-  function renderPosicoes(posicoes) {
+  function fitAllMarkers() {
+    if (!map || !markers.length) {
+      return;
+    }
+    var bounds = new google.maps.LatLngBounds();
+    markers.forEach(function (m) {
+      bounds.extend(m.getPosition());
+    });
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, 64);
+    }
+  }
+
+  function renderPosicoes(posicoes, fitBounds) {
     if (!map) {
       return;
     }
+    lastPosicoes = posicoes || [];
     clearMarkers();
-    var bounds = new google.maps.LatLngBounds();
     var resumo = document.getElementById('frota-resumo');
     var lista = document.getElementById('frota-lista-coletores');
 
     if (!posicoes.length) {
-      resumo.textContent = 'Nenhuma posição recente. Peça ao coletor para ativar “Compartilhar localização” na Rota do dia.';
+      resumo.textContent = 'Nenhuma posição recente. Peça ao coletor para ativar “Compartilhar localização” na Rota do dia. Use “Atualizar posições” quando quiser.';
       lista.classList.add('d-none');
       return;
     }
 
-    resumo.textContent = posicoes.length + ' coletor(es) com sinal nos últimos minutos · atualização automática a cada '
-      + Math.round((cfg.pollMs || 15000) / 1000) + 's';
+    resumo.textContent = posicoes.length + ' coletor(es) · atualize manualmente para não perder o zoom do mapa.';
 
     lista.classList.remove('d-none');
     lista.innerHTML = '';
 
     posicoes.forEach(function (p) {
       var pos = { lat: p.latitude, lng: p.longitude };
-      bounds.extend(pos);
       var marker = new google.maps.Marker({
         map: map,
         position: pos,
@@ -76,18 +87,19 @@
       markers.push(marker);
 
       var when = p.registrado_em ? new Date(p.registrado_em.replace(' ', 'T')).toLocaleString('pt-BR') : '—';
+      var acc = p.accuracy_m != null ? ' · ~' + Math.round(p.accuracy_m) + ' m' : '';
       var li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2';
       li.innerHTML =
         '<div><strong>' + escapeHtml(p.usuario_nome) + '</strong>'
         + ' <span class="badge bg-secondary">' + escapeHtml(p.fonte || 'web') + '</span>'
-        + '<div class="small text-muted">Último sinal: ' + when + '</div></div>'
+        + '<div class="small text-muted">Último sinal: ' + when + acc + '</div></div>'
         + '<a class="btn btn-sm btn-outline-primary" href="' + (typeof url_base !== 'undefined' ? url_base : '') + '/painel/rota-do-dia">Ver rota</a>';
       lista.appendChild(li);
     });
 
-    if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, 64);
+    if (fitBounds) {
+      fitAllMarkers();
     }
   }
 
@@ -97,23 +109,16 @@
     return d.innerHTML;
   }
 
-  function carregar() {
+  function carregar(fitBounds) {
     var minutos = document.getElementById('frota-minutos').value;
     return postJson({ acao: 'posicoes', minutos: minutos }).then(function (data) {
       if (!data.success) {
         throw new Error(data.message || 'Erro ao carregar posições');
       }
-      renderPosicoes(data.posicoes || []);
+      renderPosicoes(data.posicoes || [], !!fitBounds);
     }).catch(function (err) {
       document.getElementById('frota-resumo').textContent = err.message || 'Falha ao carregar.';
     });
-  }
-
-  function startPoll() {
-    if (pollTimer) {
-      clearInterval(pollTimer);
-    }
-    pollTimer = setInterval(carregar, cfg.pollMs || 15000);
   }
 
   function loadMaps(cb) {
@@ -137,19 +142,23 @@
     if (csrfEl) {
       document.getElementById('frota-csrf').value = csrfEl.value;
     }
-    document.getElementById('btn-frota-recarregar').addEventListener('click', carregar);
-    document.getElementById('frota-minutos').addEventListener('change', carregar);
+    document.getElementById('btn-frota-recarregar').addEventListener('click', function () {
+      carregar(false);
+    });
+    document.getElementById('btn-frota-centralizar').addEventListener('click', function () {
+      if (lastPosicoes.length) {
+        renderPosicoes(lastPosicoes, true);
+      } else {
+        carregar(true);
+      }
+    });
+    document.getElementById('frota-minutos').addEventListener('change', function () {
+      carregar(false);
+    });
 
     loadMaps(function () {
       initMap();
-      carregar();
-      startPoll();
+      carregar(true);
     });
-  });
-
-  window.addEventListener('beforeunload', function () {
-    if (pollTimer) {
-      clearInterval(pollTimer);
-    }
   });
 })();

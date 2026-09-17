@@ -75,7 +75,17 @@
     </div>
     <div class="col-lg-7 order-lg-2 order-1">
         <div class="card">
-            <div class="card-header"><i class="fas fa-map me-1"></i> Mapa</div>
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span><i class="fas fa-map me-1"></i> Mapa</span>
+                <div class="d-flex flex-wrap gap-1 well-btn-group-keep">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-rota-map-refresh" title="Atualiza marcadores sem mudar zoom">
+                        <i class="fas fa-sync-alt"></i><span class="d-none d-sm-inline ms-1">Atualizar mapa</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn-rota-map-fit" title="Mostrar rota inteira">
+                        <i class="fas fa-compress-arrows-alt"></i><span class="d-none d-sm-inline ms-1">Enquadrar</span>
+                    </button>
+                </div>
+            </div>
             <div class="card-body p-0">
                 <div id="rota-mapa" class="well-rota-mapa" style="height:520px;background:#e9ecef;"></div>
             </div>

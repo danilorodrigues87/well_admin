@@ -12,6 +12,10 @@
   var gpsWatchId = null;
   var gpsShareTimer = null;
   var SHARE_KEY = 'well-rota-share-gps';
+  var mapViewportLocked = false;
+  var mapDidInitialFit = false;
+  var lastShareAccuracy = Infinity;
+  var GEO_HIGH = { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 };
 
   function swalError(message, title) {
     var text = message || 'Operação não concluída.';
@@ -137,8 +141,16 @@
       zoom: 12,
       mapTypeControl: false
     });
+    map.addListener('dragstart', function () {
+      mapViewportLocked = true;
+    });
+    map.addListener('zoom_changed', function () {
+      if (mapDidInitialFit) {
+        mapViewportLocked = true;
+      }
+    });
     mapsReady = true;
-    renderMap();
+    renderMap({ fitBounds: true });
   }
 
   function clearMapOverlays() {
@@ -150,8 +162,9 @@
     }
   }
 
-  function renderMap() {
+  function renderMap(options) {
     if (!mapsReady || !map) return;
+    options = options || {};
     clearMapOverlays();
     var bounds = new google.maps.LatLngBounds();
 
@@ -200,8 +213,10 @@
       path.forEach(function (pt) { bounds.extend(pt); });
     }
 
-    if (!bounds.isEmpty()) {
+    var shouldFit = options.fitBounds === true || (!mapViewportLocked && !mapDidInitialFit);
+    if (!bounds.isEmpty() && shouldFit) {
       map.fitBounds(bounds, 48);
+      mapDidInitialFit = true;
     }
   }
 
@@ -283,7 +298,7 @@
     });
 
     renumberParadas();
-    renderMap();
+    renderMap({ fitBounds: false });
   }
 
   function escapeHtml(s) {
@@ -341,19 +356,29 @@
       swalInfo('Geolocalização não disponível neste navegador.');
       return;
     }
+    var info = document.getElementById('rota-origin-info');
+    if (info) {
+      info.textContent = 'Origem: buscando GPS de alta precisão…';
+    }
     navigator.geolocation.getCurrentPosition(function (pos) {
-      setOrigin(pos.coords.latitude, pos.coords.longitude, 'GPS atual');
-      if (mapsReady) renderMap();
+      var acc = Math.round(pos.coords.accuracy || 0);
+      setOrigin(pos.coords.latitude, pos.coords.longitude, 'GPS atual (~' + acc + ' m)');
+      if (mapsReady && map) {
+        if (!mapViewportLocked) {
+          map.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        }
+        renderMap({ fitBounds: false });
+      }
     }, function () {
       var lat = parseFloat(document.getElementById('rota-fallback-lat').value);
       var lng = parseFloat(document.getElementById('rota-fallback-lng').value);
       if (!isNaN(lat) && !isNaN(lng)) {
         setOrigin(lat, lng, 'Fallback (.env)');
-        if (mapsReady) renderMap();
+        if (mapsReady) renderMap({ fitBounds: false });
       } else {
         swalInfo('Não foi possível obter GPS. Configure MAPS_ORIGIN_FALLBACK_LAT/LNG no .env.');
       }
-    }, { enableHighAccuracy: true, timeout: 15000 });
+    }, GEO_HIGH);
   }
 
   function otimizarRota() {
@@ -383,6 +408,7 @@
       }
       document.getElementById('rota-resumo').textContent = resumo;
       renderParadas();
+      renderMap({ fitBounds: true });
     }).catch(function (err) {
       swalError(err.message || 'Erro ao otimizar rota');
     }).finally(function () {
@@ -436,30 +462,36 @@
       swalInfo('Geolocalização indisponível neste dispositivo.');
       return;
     }
+    lastShareAccuracy = Infinity;
     var st = document.getElementById('rota-share-status');
     var onPos = function (pos) {
+      var acc = pos.coords.accuracy || 9999;
+      if (acc > 150 && acc > lastShareAccuracy * 1.25) {
+        if (st) {
+          st.textContent = 'Aguardando sinal GPS melhor (última leitura ~' + Math.round(acc) + ' m)…';
+        }
+        return;
+      }
+      lastShareAccuracy = Math.min(lastShareAccuracy, acc);
       if (st) {
         st.textContent = 'Último envio: ' + new Date().toLocaleTimeString('pt-BR')
-          + ' · precisão ~' + Math.round(pos.coords.accuracy || 0) + ' m';
+          + ' · precisão ~' + Math.round(acc) + ' m';
+      }
+      setOrigin(pos.coords.latitude, pos.coords.longitude, 'GPS compartilhado (~' + Math.round(acc) + ' m)');
+      if (mapsReady && map && !mapViewportLocked) {
+        map.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        renderMap({ fitBounds: false });
       }
       enviarPosicao(pos).catch(function () { /* silencioso */ });
     };
     var onErr = function () {
       if (st) st.textContent = 'Não foi possível obter GPS. Verifique permissões do navegador.';
     };
-    gpsWatchId = navigator.geolocation.watchPosition(onPos, onErr, {
-      enableHighAccuracy: true,
-      maximumAge: 15000,
-      timeout: 20000
-    });
+    gpsWatchId = navigator.geolocation.watchPosition(onPos, onErr, GEO_HIGH);
     gpsShareTimer = setInterval(function () {
-      navigator.geolocation.getCurrentPosition(onPos, onErr, {
-        enableHighAccuracy: true,
-        maximumAge: 10000,
-        timeout: 15000
-      });
-    }, 30000);
-    navigator.geolocation.getCurrentPosition(onPos, onErr, { enableHighAccuracy: true });
+      navigator.geolocation.getCurrentPosition(onPos, onErr, GEO_HIGH);
+    }, 45000);
+    navigator.geolocation.getCurrentPosition(onPos, onErr, GEO_HIGH);
   }
 
   function initGpsShareToggle() {
@@ -504,16 +536,51 @@
     document.getElementById('btn-rota-gps').addEventListener('click', usarGps);
     document.getElementById('btn-rota-otimizar').addEventListener('click', otimizarRota);
     document.getElementById('btn-rota-salvar-ordem').addEventListener('click', salvarOrdem);
-    document.getElementById('btn-rota-recarregar').addEventListener('click', carregarParadas);
+    document.getElementById('btn-rota-recarregar').addEventListener('click', function () {
+      mapViewportLocked = false;
+      mapDidInitialFit = false;
+      carregarParadas();
+    });
     var btnGeo = document.getElementById('btn-rota-geocode');
     if (btnGeo) btnGeo.addEventListener('click', atualizarGps);
+    var btnMapRefresh = document.getElementById('btn-rota-map-refresh');
+    if (btnMapRefresh) {
+      btnMapRefresh.addEventListener('click', function () {
+        renderMap({ fitBounds: false });
+      });
+    }
+    var btnMapFit = document.getElementById('btn-rota-map-fit');
+    if (btnMapFit) {
+      btnMapFit.addEventListener('click', function () {
+        mapViewportLocked = false;
+        renderMap({ fitBounds: true });
+      });
+    }
 
     var sel = document.getElementById('rota-coletor-id');
-    if (sel) sel.addEventListener('change', carregarParadas);
+    if (sel) {
+      sel.addEventListener('change', function () {
+        mapViewportLocked = false;
+        mapDidInitialFit = false;
+        carregarParadas();
+      });
+    }
     var dataEl = document.getElementById('rota-data');
-    if (dataEl) dataEl.addEventListener('change', carregarParadas);
+    if (dataEl) {
+      dataEl.addEventListener('change', function () {
+        mapViewportLocked = false;
+        mapDidInitialFit = false;
+        carregarParadas();
+      });
+    }
     var rotaEl = document.getElementById('rota-filtro-id');
-    if (rotaEl) rotaEl.addEventListener('change', carregarParadas);
+    if (rotaEl) {
+      rotaEl.addEventListener('change', function () {
+        mapViewportLocked = false;
+        mapDidInitialFit = false;
+        carregarParadas();
+      });
+    }
 
     var key = cfg.mapsKey;
     var start = function () {

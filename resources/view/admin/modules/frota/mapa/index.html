@@ -23,7 +23,10 @@
             <div class="col-md-8">
                 <div class="well-btn-stack-mobile d-flex flex-wrap gap-2">
                     <button type="button" class="btn btn-primary" id="btn-frota-recarregar">
-                        <i class="fas fa-sync me-1"></i> Atualizar agora
+                        <i class="fas fa-sync me-1"></i> Atualizar posições
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btn-frota-centralizar">
+                        <i class="fas fa-compress-arrows-alt me-1"></i> Enquadrar frota
                     </button>
                     <a class="btn btn-outline-secondary" href="{{URL}}/painel/rota-do-dia">
                         <i class="fas fa-route me-1"></i> Rota do dia
@@ -52,7 +55,6 @@
 <script>
 window.WELL_FROTA_MAPA = {
     baseUrl: '{{URL}}/painel/frota/mapa',
-    mapsKey: '{{maps_key}}',
-    pollMs: 15000
+    mapsKey: '{{maps_key}}'
 };
 </script>

@@ -22,9 +22,18 @@
 
     nav.querySelectorAll('a.nav-link[href]').forEach(function (link) {
       link.addEventListener('click', function () {
-        if (MQ_TABLET.matches) {
-          closeSidebar();
+        if (!MQ_TABLET.matches) {
+          return;
         }
+        /* Grupos do menu (Operação, Cadastros…) usam href="#" + collapse — não fechar o drawer */
+        if (link.getAttribute('data-bs-toggle') === 'collapse') {
+          return;
+        }
+        var href = (link.getAttribute('href') || '').trim();
+        if (href === '' || href === '#') {
+          return;
+        }
+        closeSidebar();
       });
     });
 

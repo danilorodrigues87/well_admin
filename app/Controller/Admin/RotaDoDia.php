@@ -64,7 +64,7 @@ class RotaDoDia extends Page
             'data_hoje' => date('Y-m-d'),
         ]);
 
-        $scripts = '<script src="'.URL.'/resources/js/rota-mapa.js?v=20260917e"></script>';
+        $scripts = '<script src="'.URL.'/resources/js/rota-mapa.js?v=20260918b"></script>';
 
         return self::getPage('Rota do dia', $content, 'rota_dia', $scripts);
     }
