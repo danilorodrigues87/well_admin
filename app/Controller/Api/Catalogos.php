@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Common\ColetaDefaults;
 use App\Common\Helpers\ApiHelper;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
+use App\Model\Entity\Usuario as EntityUsuario;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 use App\Service\ColetaApiPresenter;
 
@@ -33,5 +34,15 @@ class Catalogos extends BaseApi
     public static function tratamentos($request): \App\Http\Response
     {
         return ApiHelper::ok(['items' => ColetaDefaults::tratamentos()]);
+    }
+
+    public static function coletores($request): \App\Http\Response
+    {
+        $items = array_map(
+            fn ($u) => ColetaApiPresenter::coletor($u),
+            EntityUsuario::getColetoresAtivos()
+        );
+
+        return ApiHelper::ok(['items' => $items]);
     }
 }

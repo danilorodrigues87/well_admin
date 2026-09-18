@@ -9,6 +9,7 @@ use App\Common\MapsConfig;
 use App\Model\Entity\Rota as EntityRota;
 use App\Model\Entity\Usuario as EntityUsuario;
 use App\Service\FrotaLocalizacaoService;
+use App\Service\RotaDoDiaRequestContext;
 use App\Service\RotaDoDiaService;
 use App\Service\RotaParadaStatusService;
 use App\Session\User\Login as SessionUser;
@@ -71,9 +72,11 @@ class RotaDoDia extends Page
 
     public static function paradas($request): string
     {
-        [$coletorId, $isAdmin] = self::resolveColetor($request);
-        $data = self::resolveData($request);
-        $rotaId = self::resolveRotaId($request);
+        $usuario = self::usuario();
+        $params = $request->getQueryParams();
+        [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor($usuario, $params);
+        $data = RotaDoDiaRequestContext::resolveData($params);
+        $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
 
         $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdmin, $data, $rotaId);
 
@@ -94,7 +97,7 @@ class RotaDoDia extends Page
             return CrudHelper::jsonError($err);
         }
 
-        [$coletorId, $isAdmin] = self::resolveColetor($request, $post);
+        [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor(self::usuario(), $post);
 
         $originLat = (float)($post['origin_lat'] ?? 0);
         $originLng = (float)($post['origin_lng'] ?? 0);
@@ -107,8 +110,8 @@ class RotaDoDia extends Page
             $clienteIds = array_map('intval', $post['cliente_ids']);
         }
 
-        $data = self::resolveData($request, $post);
-        $rotaId = self::resolveRotaId($request, $post);
+        $data = RotaDoDiaRequestContext::resolveData($post);
+        $rotaId = RotaDoDiaRequestContext::resolveRotaId($post);
 
         try {
             $result = RotaDoDiaService::otimizar($coletorId, $isAdmin, $originLat, $originLng, $clienteIds, $data, $rotaId);
@@ -126,9 +129,9 @@ class RotaDoDia extends Page
             return CrudHelper::jsonError($err);
         }
 
-        [$coletorId, $isAdmin] = self::resolveColetor($request, $post);
-        $data = self::resolveData($request, $post);
-        $rotaId = self::resolveRotaId($request, $post);
+        [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor(self::usuario(), $post);
+        $data = RotaDoDiaRequestContext::resolveData($post);
+        $rotaId = RotaDoDiaRequestContext::resolveRotaId($post);
 
         if (!MapsConfig::isServerConfigured()) {
             return CrudHelper::jsonError(
@@ -157,7 +160,7 @@ class RotaDoDia extends Page
             return CrudHelper::jsonError($err);
         }
 
-        [$coletorId] = self::resolveColetor($request, $post);
+        [$coletorId] = RotaDoDiaRequestContext::resolveColetor(self::usuario(), $post);
         $ordem = [];
         if (!empty($post['ordem']) && is_array($post['ordem'])) {
             foreach ($post['ordem'] as $item) {
@@ -171,7 +174,7 @@ class RotaDoDia extends Page
             }
         }
 
-        $data = self::resolveData($request, $post);
+        $data = RotaDoDiaRequestContext::resolveData($post);
 
         try {
             RotaDoDiaService::salvarOrdem($coletorId, $ordem, 'manual', $data);
@@ -221,8 +224,8 @@ class RotaDoDia extends Page
             return CrudHelper::jsonError($err);
         }
 
-        [$coletorId, $isAdmin] = self::resolveColetor($request, $post);
-        $data = self::resolveData($request, $post);
+        [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor(self::usuario(), $post);
+        $data = RotaDoDiaRequestContext::resolveData($post);
         $clienteId = (int)($post['cliente_id'] ?? 0);
         $status = trim((string)($post['status'] ?? ''));
 
@@ -232,7 +235,7 @@ class RotaDoDia extends Page
                 $coletorId,
                 $isAdmin,
                 $data,
-                self::resolveRotaId($request, $post)
+                RotaDoDiaRequestContext::resolveRotaId($post)
             );
 
             return CrudHelper::jsonOk([
@@ -246,45 +249,4 @@ class RotaDoDia extends Page
         }
     }
 
-    /** @return array{0:int,1:bool} */
-    private static function resolveColetor($request, ?array $post = null): array
-    {
-        $usuario = self::usuario();
-        $isAdmin = !empty($usuario['is_admin']);
-        $isColetor = ColetorSelectHelper::isColetorSession($usuario);
-
-        if ($isColetor) {
-            return [(int)($usuario['id'] ?? 0), false];
-        }
-
-        $data = $post ?? $request->getQueryParams();
-        $coletorId = (int)($data['coletor_id'] ?? 0);
-        if ($coletorId <= 0) {
-            $coletores = EntityUsuario::getColetoresAtivos();
-            $coletorId = $coletores !== [] ? $coletores[0]->id : (int)($usuario['id'] ?? 0);
-        }
-
-        if ($coletorId > 0 && ColetorSelectHelper::isColetorAtivo($coletorId)) {
-            return [$coletorId, false];
-        }
-
-        return [$coletorId, $isAdmin];
-    }
-
-    private static function resolveData($request, ?array $post = null): string
-    {
-        $data = trim((string)(($post ?? $request->getQueryParams())['data'] ?? ''));
-        if ($data !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
-            return $data;
-        }
-
-        return date('Y-m-d');
-    }
-
-    private static function resolveRotaId($request, ?array $post = null): ?int
-    {
-        $raw = (int)(($post ?? $request->getQueryParams())['rota_id'] ?? 0);
-
-        return $raw > 0 ? $raw : null;
-    }
 }

@@ -15,6 +15,9 @@ class Dashboard extends BaseApi
 
         return ApiHelper::ok([
             'kpis' => DashboardService::kpisColetor($userId, $isAdmin),
+            'graficos' => [
+                'coletas_por_mes' => DashboardService::coletasPorMesColetor($userId, $isAdmin, 6),
+            ],
         ]);
     }
 }

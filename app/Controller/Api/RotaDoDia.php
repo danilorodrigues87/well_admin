@@ -3,19 +3,35 @@
 namespace App\Controller\Api;
 
 use App\Common\Helpers\ApiHelper;
-use App\Http\ApiContext;
+use App\Service\RotaDoDiaRequestContext;
 use App\Service\RotaDoDiaService;
+use App\Service\RotaParadaStatusService;
+use App\Service\RotaScopeService;
 
 class RotaDoDia extends BaseApi
 {
     public static function paradas($request): \App\Http\Response
     {
+        $user = self::user();
+        if ($user === []) {
+            return ApiHelper::fail('unauthorized', 'Não autenticado.', 401);
+        }
+
+        $params = $request->getQueryParams();
+        [$coletorId, $isAdminScope] = RotaDoDiaRequestContext::resolveColetor($user, $params);
+        $data = RotaDoDiaRequestContext::resolveData($params);
+        $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
+
         try {
+            $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdminScope, $data, $rotaId);
+
             return ApiHelper::ok([
-                'paradas' => RotaDoDiaService::listarParadas(
-                    ApiContext::userId(),
-                    ApiContext::isAdmin()
-                ),
+                'paradas' => $paradas,
+                'coletor_id' => $coletorId,
+                'data' => $data,
+                'total' => count($paradas),
+                'rota_id' => $rotaId ?? 0,
+                'sem_rota' => !$isAdminScope && $coletorId > 0 && !RotaScopeService::coletorTemRota($coletorId),
             ]);
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiRotaDoDia::paradas');
@@ -24,6 +40,14 @@ class RotaDoDia extends BaseApi
 
     public static function otimizar($request): \App\Http\Response
     {
+        $user = self::user();
+        if ($user === []) {
+            return ApiHelper::fail('unauthorized', 'Não autenticado.', 401);
+        }
+
+        $params = RotaDoDiaRequestContext::mergeQueryAndBody($request);
+        [$coletorId, $isAdminScope] = RotaDoDiaRequestContext::resolveColetor($user, $params);
+
         $body = $request->getPostVars();
         $originLat = (float)($body['origin_lat'] ?? 0);
         $originLng = (float)($body['origin_lng'] ?? 0);
@@ -36,13 +60,18 @@ class RotaDoDia extends BaseApi
             $clienteIds = array_map('intval', $body['cliente_ids']);
         }
 
+        $data = RotaDoDiaRequestContext::resolveData($params);
+        $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
+
         try {
             $result = RotaDoDiaService::otimizar(
-                ApiContext::userId(),
-                ApiContext::isAdmin(),
+                $coletorId,
+                $isAdminScope,
                 $originLat,
                 $originLng,
-                $clienteIds
+                $clienteIds,
+                $data,
+                $rotaId
             );
 
             return ApiHelper::ok($result);
@@ -53,6 +82,14 @@ class RotaDoDia extends BaseApi
 
     public static function salvarOrdem($request): \App\Http\Response
     {
+        $user = self::user();
+        if ($user === []) {
+            return ApiHelper::fail('unauthorized', 'Não autenticado.', 401);
+        }
+
+        $params = RotaDoDiaRequestContext::mergeQueryAndBody($request);
+        [$coletorId] = RotaDoDiaRequestContext::resolveColetor($user, $params);
+
         $body = $request->getPostVars();
         $ordem = [];
         if (!empty($body['ordem']) && is_array($body['ordem'])) {
@@ -67,12 +104,46 @@ class RotaDoDia extends BaseApi
             }
         }
 
+        $data = RotaDoDiaRequestContext::resolveData($params);
+
         try {
-            RotaDoDiaService::salvarOrdem(ApiContext::userId(), $ordem, 'manual');
+            RotaDoDiaService::salvarOrdem($coletorId, $ordem, 'manual', $data);
 
             return ApiHelper::ok(['message' => 'Ordem salva.']);
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiRotaDoDia::salvarOrdem');
         }
     }
+
+    public static function paradaStatus($request): \App\Http\Response
+    {
+        $user = self::user();
+        if ($user === []) {
+            return ApiHelper::fail('unauthorized', 'Não autenticado.', 401);
+        }
+
+        $params = RotaDoDiaRequestContext::mergeQueryAndBody($request);
+        [$coletorId, $isAdminScope] = RotaDoDiaRequestContext::resolveColetor($user, $params);
+        $data = RotaDoDiaRequestContext::resolveData($params);
+        $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
+
+        $body = $request->getPostVars();
+        $clienteId = (int)($body['cliente_id'] ?? 0);
+        $status = trim((string)($body['status'] ?? ''));
+
+        try {
+            RotaParadaStatusService::definirStatus($coletorId, $data, $clienteId, $status);
+            $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdminScope, $data, $rotaId);
+
+            return ApiHelper::ok([
+                'message' => 'Status atualizado.',
+                'paradas' => $paradas,
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return ApiHelper::fail('validation', $e->getMessage(), 422);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiRotaDoDia::paradaStatus');
+        }
+    }
+
 }

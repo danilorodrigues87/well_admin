@@ -2,6 +2,8 @@
 
 Projeto: **well-coletas-by2777** (`Well Coletas`)
 
+Matriz **página → API → RBAC** e inventário `components/*_comp`: [FLUTTERFLOW_APP_MATRIX.md](FLUTTERFLOW_APP_MATRIX.md).
+
 ## Já configurado via API/MCP
 
 ### App State (persistido)
@@ -16,6 +18,8 @@ Projeto: **well-coletas-by2777** (`Well Coletas`)
 | `isAdmin` | Boolean | Flag admin (`$.data.user.is_admin` no login) |
 | `funcaoNome` | String | Nome da função do usuário |
 | `userModulesCsv` | String | Slugs RBAC separados por vírgula (ex.: `dashboard,coletas,coleta_nova`) |
+| `operadoraId` | Integer | (recomendado) `$.data.user.operadora_id` no login |
+| `operadoraNome` | String | (recomendado) `$.data.user.operadora_nome` no login |
 
 ### API Calls criadas
 
@@ -39,6 +43,19 @@ Projeto: **well-coletas-by2777** (`Well Coletas`)
 | **WellAdmin Agendamentos** | GET | `[baseUrl]/agendamentos?page=&per_page=&busca=` |
 | **WellAdmin Perfil** | GET | `[baseUrl]/perfil` |
 | **WellAdmin Perfil Senha** | POST | `[baseUrl]/perfil/senha` |
+| **WellAdmin Rota Paradas** | GET | `[baseUrl]/rota-do-dia/paradas?data=&coletor_id=&rota_id=` |
+| **WellAdmin Rota Otimizar** | POST | `[baseUrl]/rota-do-dia/otimizar?data=&coletor_id=&rota_id=` |
+| **WellAdmin Rota Salvar Ordem** | POST | `[baseUrl]/rota-do-dia/salvar-ordem?data=&coletor_id=` |
+| **WellAdmin Rota Parada Status** | POST | `[baseUrl]/rota-do-dia/parada-status?data=&coletor_id=` |
+| **WellAdmin Frota Posicao** | POST | `[baseUrl]/frota/posicao` |
+| **WellAdmin Frota Posicoes** | GET | `[baseUrl]/frota/posicoes?minutos=` |
+| **WellAdmin Catalogo Coletores** | GET | `[baseUrl]/catalogos/coletores` |
+
+**Login** — JSON Paths de resposta: `authToken`, `userName`, `userId`, `isAdmin`, `funcaoNome`, `userModulesCsv`, `operadoraId`, `operadoraNome`.
+
+**App State** (persistido): inclui `operadoraId`, `operadoraNome`, `rotaData`, `shareGpsEnabled`.
+
+**Dashboard Resumo** — usar resposta bruta ou JSON Path: `$.data.kpis.*`, `$.data.graficos.coletas_por_mes.labels` / `.values`.
 
 Todas usam variável `baseUrl` → mapear para **App State `apiBaseUrl`** em cada chamada.
 
@@ -157,20 +174,73 @@ Isso é comum quando a API foi criada via MCP. Use **JSON Path customizado** (fu
 | `isAdmin` | `loginResult` | `$.data.user.is_admin` |
 | `funcaoNome` | `loginResult` | `$.data.user.funcao_nome` |
 | `userModulesCsv` | `loginResult` | `$.data.user.modulos_csv` |
+| `operadoraId` | `loginResult` | `$.data.user.operadora_id` |
+| `operadoraNome` | `loginResult` | `$.data.user.operadora_nome` |
+
+**Navigate após login:** preferir **Dashboard** (não HomePage legada).
 
 **Forçar Predefined Paths a aparecer (opcional):**
 
 1. **API Calls → WellAdmin Login**
 2. Aba **JSON Paths** — confirme `authToken`, `userName`, `userId`
-3. **Add** de novo se faltar; clique **Save**
-4. Feche e reabra o Action Flow do botão Entrar
+3. **Add** de novo se faltar (`isAdmin`, `operadoraId`, etc.); clique **Save**
 
-### Ajustes opcionais no editor
+---
 
-- Adicionar logo/imagem da marca no lugar do ícone recycling
-- Campo `isLoading` no login (spinner no botão)
-- **HomePage On Page Load** → **WellAdmin Auth Me** (validar token expirado)
-- Trocar snackbar "em breve" por navegação à `ClientesColetaPage` (Sprint 2.2)
+## Rota do dia + Frota — wiring manual (2026-09-18)
+
+API Calls já existem no projeto (**25**). O MCP **não** liga páginas nem ListViews.
+
+### RouteOfTheDay — On Page Load
+
+1. **Update App State** `rotaData` = *Current Date* formatado `YYYY-MM-DD` (Custom Function ou texto fixo no MVP).
+2. **WellAdmin Rota Paradas**:
+   - `baseUrl` ← `apiBaseUrl`
+   - `authToken` ← `authToken`
+   - `data` ← `rotaData`
+   - `coletor_id` ← `0` (coletor; backend usa o JWT) ou `userId` se gestor escolher outro coletor
+   - `rota_id` ← `0` (todas) ou ID da rota cadastral
+3. Guardar resposta em page state `paradasResponse`.
+4. **ListView** de `RouteStop`:
+   - **Generate Children from Variable**
+   - JSON Path: `$.data.paradas`
+   - Bind params do componente: nome, endereço, `status_parada`, etc.
+
+### Marcar parada coletada / pulada
+
+1. **WellAdmin Rota Parada Status** no tap do botão do `RouteStop`:
+   - `cliente_id`, `status` (`coletado` ou `pulado`), `data`, `coletor_id` (mesma regra acima)
+2. Atualizar lista com a resposta `$.data.paradas` ou refazer GET Paradas.
+
+### GPS (SwitchComponent)
+
+1. Timer ou *On Toggle* → **WellAdmin Frota Posicao** com lat/lng do **Current Device Location**.
+2. Respeitar App State `shareGpsEnabled`.
+
+### FleetMap — On Page Load
+
+1. **WellAdmin Frota Posicoes** (`minutos` = 120).
+2. Markers no Google Map: iterar `$.data.items` (ver [API.md](API.md) estrutura).
+
+### Dashboard — gráfico
+
+1. **WellAdmin Dashboard Resumo** no load.
+2. Chart **BarChart**: eixo X ← `$.data.graficos.coletas_por_mes.labels`, valores ← `.values`.
+3. KPI cards ← `$.data.kpis` (`coletas_mes`, `paradas_hoje`, …).
+
+### Salvar ordem da rota (gestor)
+
+Body da call **WellAdmin Rota Salvar Ordem** deve ser JSON:
+
+```json
+{ "ordem": [ { "cliente_id": 12, "ordem": 1 }, { "cliente_id": 34, "ordem": 2 } ] }
+```
+
+No editor: **API Call → Body** edite o array `ordem` (ou Custom Function que monta o JSON). Query: `data`, `coletor_id`.
+
+**Deploy:** subir o PHP em `admin.well.eco.br` antes de testar login/rota em produção.
+
+Depois de editar JSON Paths do Login: feche e reabra o Action Flow do botão Entrar.
 
 ### 5. URL da API — dev vs produção
 

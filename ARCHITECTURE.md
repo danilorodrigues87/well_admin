@@ -246,6 +246,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-17 | Maps: `GOOGLE_MAPS_SERVER_API_KEY` para Routes/Geocoding no PHP; Rota do dia usa SweetAlert2 nos erros |
 | 2026-09-17 | Rotas R1: agendamento em lote por rota (`AgendamentoService::agendarRotaEmLote`), listagem com tenant, filtro `rota_id` na Rota do dia |
 | 2026-09-17 | UI mobile-first admin: `panel-mobile.css` / `panel-mobile.js` (CRUD cards, modais, filtros, sidebar); dock coletor; login coletor → Rota do dia |
+| 2026-09-18 | API app FF Fase 1: rota-do-dia (query data/coletor/rota), `POST parada-status`, `GET catalogos/coletores`, dashboard `graficos` + `paradas_hoje`, login `operadora_*`; `RotaDoDiaRequestContext`; doc `FLUTTERFLOW_APP_MATRIX.md` |
 | 2026-09-17 | Rastreamento web: `frota_posicoes`, `rota_dia_parada_status` (035); `/painel/frota/mapa` + API frota; GPS na Rota do dia; PWA (`manifest.webmanifest`, `/sw.js`) |
 | 2026-09-16 | Funcionários/Usuários: ação `resetar_senha` — botão chave na listagem redefine senha para `12345678` (hash via `password_hash`) |
 | 2026-09-16 | Coletas: `data_recebimento` obrigatória para gerar MTR (rascunho pode ficar sem); doc `docs/MIGRACAO_DADOS.md`; script `repair_coletas_data_recebimento.php`; fallback no ETL |

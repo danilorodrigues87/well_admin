@@ -194,6 +194,20 @@ $obRouter->post('/api/v1/rota-do-dia/salvar-ordem', [
     },
 ]);
 
+$obRouter->post('/api/v1/rota-do-dia/parada-status', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return RotaDoDia::paradaStatus($request);
+    },
+]);
+
+$obRouter->get('/api/v1/catalogos/coletores', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return Catalogos::coletores($request);
+    },
+]);
+
 $obRouter->post('/api/v1/frota/posicao', [
     'middlewares' => $mod('rota_dia'),
     function ($request) {

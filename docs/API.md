@@ -62,12 +62,20 @@ Resposta:
     "coletas_mes": 12,
     "rascunhos": 2,
     "urgentes": 3,
-    "atrasados": 5
+    "atrasados": 5,
+    "paradas_hoje": 8,
+    "hoje": "2026-09-18"
+  },
+  "graficos": {
+    "coletas_por_mes": {
+      "labels": ["Abr/26", "Mai/26"],
+      "values": [10, 12]
+    }
   }
 }
 ```
 
-Coletor vê KPIs filtrados por `coletor_id`; admin vê totais.
+Coletor vê KPIs e gráfico filtrados por `coletor_id`; admin/gestor vê totais da operadora.
 
 ### Agendamentos
 
@@ -81,13 +89,22 @@ Coletor com rota atribuída: lista apenas paradas pendentes da sua rota (urgente
 
 | Método | Endpoint | Módulo | Ação |
 |--------|----------|--------|------|
-| GET | `/rota-do-dia/paradas` | `rota_dia` | Paradas do dia do coletor autenticado |
-| POST | `/rota-do-dia/otimizar` | `rota_dia` | Otimizar ordem (body: `origin_lat`, `origin_lng`, `cliente_ids[]` opcional) |
-| POST | `/rota-do-dia/salvar-ordem` | `rota_dia` | Persistir ordem manual (`ordem[]`: `cliente_id`, `ordem`) |
+| GET | `/rota-do-dia/paradas` | `rota_dia` | Paradas do dia (query: `data`, gestor: `coletor_id`, `rota_id`) |
+| POST | `/rota-do-dia/otimizar` | `rota_dia` | Otimizar ordem (body/query: `data`, `coletor_id`, `rota_id`; body: `origin_lat`, `origin_lng`, `cliente_ids[]` opcional) |
+| POST | `/rota-do-dia/salvar-ordem` | `rota_dia` | Persistir ordem manual (`ordem[]`: `cliente_id`, `ordem`; query/body: `data`, `coletor_id`) |
+| POST | `/rota-do-dia/parada-status` | `rota_dia` | Status da parada (`cliente_id`, `status`: `pendente` \| `coletado` \| `pulado`; query/body: `data`, `coletor_id`) |
+
+Resposta `GET paradas`: `paradas`, `coletor_id`, `data`, `total`, `rota_id`, `sem_rota`.
 
 Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`.
 
-Paradas incluem `status_parada` (`pendente` / `coletado` / `pulado`) quando persistido no painel web.
+Paradas incluem `status_parada`, `maps_url`, coordenadas quando disponíveis.
+
+### Catálogos (gestor)
+
+| Método | Endpoint | Módulo | Ação |
+|--------|----------|--------|------|
+| GET | `/catalogos/coletores` | `rota_dia` | Lista coletores ativos (`id`, `nome`, `email`) |
 
 ### Frota (GPS)
 

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use App\Model\Entity\Coleta as EntityColeta;
+use App\Model\Entity\Usuario as EntityUsuario;
 
 class DashboardService
 {
@@ -169,12 +170,67 @@ class DashboardService
 
         $urgentesAtrasados = RotaScopeService::countUrgentesAtrasados($userId, $isAdmin);
 
+        $paradasHoje = self::paradasHoje($userId, $isAdmin);
+
         return [
             'coletas_mes' => $coletasMes,
             'rascunhos' => $rascunhos,
             'urgentes' => $urgentesAtrasados['urgentes'],
             'atrasados' => $urgentesAtrasados['atrasados'],
+            'paradas_hoje' => $paradasHoje,
             'hoje' => $hoje,
         ];
+    }
+
+    /** @return array{labels:list<string>,values:list<int>} */
+    public static function coletasPorMesColetor(int $userId, bool $isAdmin, int $meses = 6): array
+    {
+        $db = new Database();
+        $opId = OperadoraScope::getOperadoraId();
+        $labels = [];
+        $values = [];
+
+        for ($i = $meses - 1; $i >= 0; $i--) {
+            $ref = strtotime('-'.$i.' months');
+            $inicio = date('Y-m-01', $ref);
+            $fim = date('Y-m-t', $ref);
+            $labels[] = self::mesLabel($ref);
+            if ($isAdmin) {
+                $values[] = (int)$db->execute(
+                    "SELECT COUNT(*) AS qtd FROM coletas
+                     WHERE operadora_id = ? AND status = 'finalizada' AND data_coleta BETWEEN ? AND ?",
+                    [$opId, $inicio, $fim]
+                )->fetch(\PDO::FETCH_ASSOC)['qtd'];
+            } else {
+                $values[] = (int)$db->execute(
+                    "SELECT COUNT(*) AS qtd FROM coletas
+                     WHERE operadora_id = ? AND status = 'finalizada' AND data_coleta BETWEEN ? AND ?
+                     AND coletor_id = ?",
+                    [$opId, $inicio, $fim, $userId]
+                )->fetch(\PDO::FETCH_ASSOC)['qtd'];
+            }
+        }
+
+        return ['labels' => $labels, 'values' => $values];
+    }
+
+    public static function paradasHoje(int $userId, bool $isAdmin): int
+    {
+        $coletorId = $isAdmin ? 0 : $userId;
+        if (!$isAdmin && $coletorId <= 0) {
+            return 0;
+        }
+
+        if ($isAdmin) {
+            $coletores = EntityUsuario::getColetoresAtivos();
+            $total = 0;
+            foreach ($coletores as $c) {
+                $total += count(RotaDoDiaService::listarParadas($c->id, false, date('Y-m-d'), null));
+            }
+
+            return $total;
+        }
+
+        return count(RotaDoDiaService::listarParadas($coletorId, false, date('Y-m-d'), null));
     }
 }

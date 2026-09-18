@@ -9,6 +9,8 @@ use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
+use App\Model\Entity\Operadora;
+use App\Model\Entity\Usuario as EntityUsuario;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 
 class ColetaApiPresenter
@@ -16,6 +18,9 @@ class ColetaApiPresenter
     /** @param array<string,mixed> $user */
     public static function usuario(array $user): array
     {
+        $operadoraId = (int)($user['operadora_id'] ?? 1);
+        $operadoraNome = self::operadoraNome($operadoraId);
+
         return [
             'id' => (int)($user['id'] ?? 0),
             'nome' => (string)($user['nome'] ?? ''),
@@ -23,9 +28,35 @@ class ColetaApiPresenter
             'funcao_id' => (int)($user['funcao_id'] ?? 0),
             'funcao_nome' => (string)($user['funcao_nome'] ?? ''),
             'is_admin' => !empty($user['is_admin']),
+            'operadora_id' => $operadoraId,
+            'operadora_nome' => $operadoraNome,
             'modulos' => array_values($user['modulos'] ?? []),
             'modulos_csv' => implode(',', array_values($user['modulos'] ?? [])),
         ];
+    }
+
+    public static function coletor(EntityUsuario $u): array
+    {
+        return [
+            'id' => $u->id,
+            'nome' => $u->nome,
+            'email' => $u->email,
+        ];
+    }
+
+    private static function operadoraNome(int $operadoraId): string
+    {
+        $op = Operadora::getById($operadoraId);
+        if ($op === null) {
+            return '';
+        }
+        $nome = trim($op->nome_fantasia);
+        if ($nome !== '') {
+            return $nome;
+        }
+        $curto = trim($op->nome_curto);
+
+        return $curto !== '' ? $curto : trim($op->nome);
     }
 
     public static function cliente(EntityCliente $c): array
