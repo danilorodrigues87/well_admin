@@ -1,15 +1,28 @@
 FROM php:8.1-apache
 
-# Instalar extensões necessárias do PHP e MySQL
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+# Instalar dependências do sistema e do Composer
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip
 
-# Habilitar o mod_rewrite do Apache para suporte a reescrita de URLs (.htaccess)
+# Instalar o Composer dentro do container
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Habilitar mod_rewrite do Apache
 RUN a2enmod rewrite
 
-# Copiar os ficheiros do projeto para a pasta do servidor Apache
+# Copiar arquivos do projeto
 COPY . /var/www/html/
 
-# Ajustar permissões da pasta
+# Definir o diretório de trabalho
+WORKDIR /var/www/html/
+
+# Rodar o composer install para gerar a pasta vendor/
+RUN composer install --no-interaction --optimize-autoloader --ignore-platform-reqs
+
+# Definir permissões de acesso aos arquivos
 RUN chown -R www-data:www-data /var/www/html/
 
 EXPOSE 80
