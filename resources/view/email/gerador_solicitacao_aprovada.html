@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><title>Coleta aprovada</title></head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.5;">
+    <p>Olá, <strong>{{cliente_nome}}</strong>,</p>
+    <p>Sua solicitação de coleta foi <strong>aprovada</strong>.</p>
+    <ul>
+        <li><strong>Data agendada:</strong> {{data_coleta}}</li>
+        <li><strong>Tipo:</strong> {{tipo}}</li>
+        {{bloco_valor_extra}}
+    </ul>
+    {{bloco_resposta}}
+    <p>Acompanhe no portal: <a href="{{portal_url}}">{{portal_url}}</a></p>
+    <p>Atenciosamente,<br><strong>{{empresa_nome}}</strong> ({{empresa_sigla}})</p>
+</body>
+</html>

@@ -274,3 +274,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-21 | MTR pós-SINIR: `finalizar()` sem `numero_mtr` com SINIR ativo; número gravado no sucesso do manifesto; `ColetaMtrHelper`; wizard “Finalizar coleta”; portal gerador exibe próxima coleta agendada |
 | 2026-09-21 | Legado SINIR: migration `040` / `repair_sinir_legado.php`; `legacy_manifesto` na entity; import ETL trata MTR legado como válido |
 | 2026-09-21 | **Cutover em produção:** migração projeto antigo → admin novo concluída; doc operação pós-cutover em `MIGRACAO_DADOS.md` §15 |
+| 2026-09-21 | P0 SINIR: cancelar/consultar manifesto no painel Coletas; `sinir_status=cancelado` (`041`); `well-url.js` + `coletas-sinir.js` |
+| 2026-09-21 | P0 e-mail gerador: `GeradorNotificacaoService` (agendamento aprovado/recusado, MTR SINIR); `docs/MAIL_VPS.md`; `mail_smoke_test.php` |

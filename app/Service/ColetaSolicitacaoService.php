@@ -114,6 +114,8 @@ class ColetaSolicitacaoService
             'aprovado_por_usuario_id' => $adminUsuarioId,
             'aprovado_em' => date('Y-m-d H:i:s'),
         ]);
+
+        GeradorNotificacaoService::solicitacaoRecusada($solicitacaoId);
     }
 
     public static function aprovar(
@@ -153,6 +155,8 @@ class ColetaSolicitacaoService
         EntityCliente::update($s->cliente_id, [
             'proxima_coleta' => $dataAprovada,
         ]);
+
+        GeradorNotificacaoService::solicitacaoAprovada($solicitacaoId);
     }
 
     /** @return list<array<string, mixed>> */

@@ -48,6 +48,10 @@ class GeradorApiPresenter
         $base = ColetaApiPresenter::coletaDetalhe($detalhe);
         $base['coleta']['numero_mtr'] = ColetaMtrHelper::numeroExibicao($c);
         $base['coleta']['mtr_disponivel'] = ColetaMtrHelper::temMtr($c);
+        $base['coleta']['mtr_rotulo'] = ColetaMtrHelper::temMtr($c)
+            ? ColetaMtrHelper::numeroExibicao($c)
+            : ColetaMtrHelper::rotuloSemMtr($c);
+        $base['coleta']['sinir_status'] = $c->sinir_status;
         $base['coleta']['mtr_url'] = ColetaMtrHelper::temMtr($c)
             ? URL.'/gerador/coletas/'.$c->id.'/mtr'
             : null;

@@ -21,10 +21,14 @@ DB_PASS=
 
 ## Aplicar migrations
 
+**Produção:** cutover concluído — aplicar apenas migrations **novas** (número maior que a última já rodada na VPS), com backup prévio. Não rodar `002_seed.sql` em banco com usuários reais.
+
 ```bash
 mysql -u root well_admin < database/migrations/001_rbac.sql
 mysql -u root well_admin < database/migrations/002_seed.sql
 ```
+
+Correções em **dados já existentes** (sem mudar schema): preferir `database/scripts/repair_*.php` ou migrations SQL de dados documentadas em [MIGRACAO_DADOS.md](MIGRACAO_DADOS.md) §15.
 
 ## Tabelas cadastros (`003_cadastros.sql`)
 
@@ -82,7 +86,7 @@ Legado para ETL: banco `well_antigo` (dump `wellec99_app.sql`).
 |-----------------|-----------|
 | `coletas.sinir_man_numero` | Número MTR retornado pelo SINIR |
 | `coletas.sinir_codigo_barras` | Código de barras do manifesto SINIR |
-| `coletas.sinir_status` | `pendente` / `enviado` / `erro` (listagem) |
+| `coletas.sinir_status` | `pendente` / `enviado` / `erro` / `cancelado` (listagem) |
 | `coletas.sinir_enviado_em` | Timestamp do último envio bem-sucedido |
 | `tipos_residuos.tra_codigo` … `uni_codigo` | Mapeamento códigos API (`codigoTecnologia`, `codigoTipoEstado`, etc.) |
 | `clientes.sinir_cod_unidade` | Código unidade do gerador no portal MTR (`010_clientes_sinir_unidade.sql`) |

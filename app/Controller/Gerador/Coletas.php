@@ -121,13 +121,12 @@ class Coletas extends Page
             'numero_mtr' => CrudHelper::e(
                 !empty($coleta['mtr_disponivel']) && !empty($coleta['numero_mtr'])
                     ? (string)$coleta['numero_mtr']
-                    : (!empty($coleta['status']) && $coleta['status'] === 'finalizada'
-                        ? 'Aguard. registro SINIR'
-                        : '—')
+                    : (string)($coleta['mtr_rotulo'] ?? '—')
             ),
             'data_coleta' => FormatHelper::dateBr((string)($coleta['data_coleta'] ?? '')),
             'hora' => FormatHelper::horaBr((string)($coleta['hora'] ?? '')),
-            'status_badge' => FormatHelper::statusColetaBadge((string)($coleta['status'] ?? '')),
+            'status_badge' => FormatHelper::statusColetaBadge((string)($coleta['status'] ?? ''))
+                .FormatHelper::sinirStatusBadge($coleta['sinir_status'] ?? null, (string)($coleta['status'] ?? '')),
             'recebimento_badge' => FormatHelper::situacaoRecebimentoBadge((string)($coleta['situacao_recebimento'] ?? 'pendente')),
             'data_recebimento' => FormatHelper::dateBr((string)($coleta['data_recebimento'] ?? '')),
             'itens_rows' => $itensHtml,

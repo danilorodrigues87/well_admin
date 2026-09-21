@@ -20,6 +20,10 @@ class ColetaMtrHelper
             return $c->numero_mtr !== null && (int)$c->numero_mtr > 0;
         }
 
+        if (($c->sinir_status ?? '') === 'cancelado') {
+            return false;
+        }
+
         if (($c->sinir_status ?? '') === 'enviado') {
             return true;
         }
@@ -67,6 +71,7 @@ class ColetaMtrHelper
 
         return match ($c->sinir_status ?? '') {
             'erro' => 'Erro SINIR',
+            'cancelado' => 'Cancelado SINIR',
             'enviado' => '—',
             default => 'Aguard. SINIR',
         };

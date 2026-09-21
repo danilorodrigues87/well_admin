@@ -114,6 +114,21 @@ class FormatHelper
             : self::badge('Pendente', 'warning');
     }
 
+    public static function sinirStatusBadge(?string $sinirStatus, string $coletaStatus): string
+    {
+        if ($coletaStatus !== 'finalizada') {
+            return '';
+        }
+
+        return match ($sinirStatus) {
+            'enviado' => self::badge('MTR registrado (SINIR)', 'success'),
+            'erro' => self::badge('Falha registro SINIR', 'danger'),
+            'cancelado' => self::badge('MTR cancelado no SINIR', 'secondary'),
+            'pendente', null, '' => self::badge('Aguardando registro SINIR', 'warning'),
+            default => self::badge('SINIR: '.$sinirStatus, 'secondary'),
+        };
+    }
+
     public static function quantidade(float $qtd, string $unidade): string
     {
         return number_format($qtd, 3, ',', '.').' '.strtoupper($unidade);

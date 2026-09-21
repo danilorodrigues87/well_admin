@@ -22,8 +22,10 @@
         if (csrf) fd.append('_csrf', csrf.value);
       }
 
-      var base = (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl : '/painel/agendamentos';
-      fetch(base, {
+      var url = typeof wellAppUrl === 'function'
+        ? wellAppUrl(null, (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl : '/painel/agendamentos')
+        : (typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/painel/agendamentos';
+      fetch(url, {
         method: 'POST',
         body: fd
       }).then(function (r) { return r.json(); }).then(function (data) {

@@ -5,6 +5,9 @@
   var rascunhoConferido = !!(window.COLETA_WIZARD && window.COLETA_WIZARD.rascunhoConferido);
 
   function baseUrl() {
+    if (typeof wellAppUrl === 'function') {
+      return wellAppUrl(null, (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl : '/painel/coleta/nova');
+    }
     var path = (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl.replace(/^\/+/, '') : 'painel/coleta/nova';
     return (typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/' + path;
   }

@@ -109,6 +109,8 @@ foreach ($coletaCrud as $route) {
                 'listar' => $ctrl::list($request),
                 'get' => $ctrl::get($request),
                 'sinir_reenviar' => $ctrl === Coletas::class ? Coletas::sinirReenviar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_cancelar' => $ctrl === Coletas::class ? Coletas::sinirCancelar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_consultar' => $ctrl === Coletas::class ? Coletas::sinirConsultar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'agendar_rota' => $ctrl === Agendamentos::class ? Agendamentos::agendarRota($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'list_solicitacoes' => $ctrl === Agendamentos::class ? Agendamentos::listSolicitacoes($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),

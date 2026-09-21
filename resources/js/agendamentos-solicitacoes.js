@@ -4,7 +4,12 @@
   var solicPage = 1;
 
   function baseUrl() {
-    return (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl : '/painel/agendamentos';
+    if (typeof wellAppUrl === 'function') {
+      return wellAppUrl(null, (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl : '/painel/agendamentos');
+    }
+    var root = (typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '');
+    var path = (window.CRUD && window.CRUD.baseUrl) ? window.CRUD.baseUrl : '/painel/agendamentos';
+    return root + '/' + String(path).replace(/^\/+/, '');
   }
 
   function csrf() {
@@ -33,11 +38,24 @@
       page: String(solicPage),
       status: status ? status.value : 'pendente'
     }).then(function (data) {
-      if (!data.success) return;
+      if (typeof data === 'string') {
+        try { data = JSON.parse(data); } catch (e) { data = { success: false }; }
+      }
       var tbody = document.getElementById('solic-tbody');
       var pag = document.getElementById('solic-pagination');
+      if (!data || !data.success) {
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Não foi possível carregar solicitações.</td></tr>';
+        }
+        return;
+      }
       if (tbody) tbody.innerHTML = data.itens || '';
       if (pag) pag.innerHTML = data.pagination || '';
+    }).catch(function () {
+      var tbody = document.getElementById('solic-tbody');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Erro de comunicação ao carregar solicitações.</td></tr>';
+      }
     });
   };
 

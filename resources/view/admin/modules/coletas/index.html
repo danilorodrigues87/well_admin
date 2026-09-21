@@ -53,34 +53,3 @@
     <div class="modal-header"><h5 class="modal-title">Detalhe da coleta</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body" id="detalhe-body"></div>
 </div></div></div>
-<script>
-window.sinirReenviar = function (id) {
-    var csrf = document.querySelector('#crud-form input[name="_csrf"]');
-    var postUrl = (typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/painel/coletas';
-    var doPost = function () {
-        $.post(postUrl, { acao: 'sinir_reenviar', id: id, _csrf: csrf ? csrf.value : '' }, function (d) {
-            d = typeof d === 'object' ? d : JSON.parse(d);
-            if (d.success) {
-                if (typeof Swal !== 'undefined') { Swal.fire('SINIR', d.message || 'Enviado.', 'success'); } else { alert(d.message || 'Enviado.'); }
-                window.detalhar(id);
-                if (typeof listar === 'function') { listar(null, 1); }
-            } else if (typeof Swal !== 'undefined') { Swal.fire('Erro SINIR', d.message || 'Erro', 'error'); } else { alert(d.message || 'Erro'); }
-        }, 'json');
-    };
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({ title: 'Reenviar ao SINIR?', text: 'Será emitido um novo manifesto nacional.', icon: 'question', showCancelButton: true, confirmButtonText: 'Reenviar' }).then(function (r) { if (r.isConfirmed) { doPost(); } });
-    } else if (confirm('Reenviar ao SINIR?')) { doPost(); }
-};
-window.detalhar = function (id) {
-    var csrf = document.querySelector('#crud-form input[name="_csrf"]');
-    $.post((typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/painel/coletas', {
-        acao: 'get', id: id, _csrf: csrf ? csrf.value : ''
-    }, function (d) {
-        d = typeof d === 'object' ? d : JSON.parse(d);
-        if (d.success && d.html) {
-            $('#detalhe-body').html(d.html);
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('detalheModal')).show();
-        } else if (typeof Swal !== 'undefined') { Swal.fire('Erro', d.message || 'Erro', 'error'); } else { alert(d.message || 'Erro'); }
-    }, 'json');
-};
-</script>

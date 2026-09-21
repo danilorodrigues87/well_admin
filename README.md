@@ -43,6 +43,7 @@ Migração do painel antigo **concluída**. Correções em dados já lançados: 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — arquitetura, pastas, RBAC (leitura obrigatória para IAs)
 - [docs/SECURITY.md](docs/SECURITY.md) — autenticação e permissões
 - [docs/DATABASE.md](docs/DATABASE.md) — schema e migrations
+- [docs/MAIL_VPS.md](docs/MAIL_VPS.md) — SMTP na VPS e notificações ao portal gerador
 - [docs/API.md](docs/API.md) — API REST v1 (app coletor FlutterFlow)
 - [docs/FLUTTERFLOW.md](docs/FLUTTERFLOW.md) — setup telas e API Calls no FlutterFlow
 - [docs/BRANDING.md](docs/BRANDING.md) — paleta de cores Well Coletas (app + painel)

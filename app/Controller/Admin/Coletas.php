@@ -26,7 +26,12 @@ class Coletas extends Page
             'data_inicio' => date('Y-m-01'),
             'data_fim' => date('Y-m-t'),
         ]);
-        return self::getPage('Coletas', $content, 'coletas', self::crudScripts('/painel/coletas'));
+        return self::getPage(
+            'Coletas',
+            $content,
+            'coletas',
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20260921"></script>'
+        );
     }
 
     public static function list($request): string
@@ -107,6 +112,9 @@ class Coletas extends Page
                     '.($c->status === 'finalizada' && SinirConfig::isEnabled() && !ColetaMtrHelper::temMtr($c)
                         ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Registrar MTR no SINIR"><i class="fas fa-cloud-upload-alt"></i></button>'
                         : '').'
+                    '.($c->status === 'finalizada' && SinirConfig::isEnabled() && ($c->sinir_status ?? '') === 'enviado'
+                        ? '<button class="btn btn-sm btn-outline-secondary" onclick="sinirConsultar('.$c->id.')" title="Consultar SINIR"><i class="fas fa-search"></i></button>'
+                        : '').'
                     '.($c->status === 'rascunho' ? '<a class="btn btn-sm btn-outline-warning" href="'.URL.'/painel/coleta/nova/'.$c->id.'" title="Continuar"><i class="fas fa-edit"></i></a>' : '').'
                 </td>
             </tr>';
@@ -155,12 +163,20 @@ class Coletas extends Page
         $sinirHtml = self::renderSinirDetalhe($c);
         $sinirReenviarBtn = '';
         $sinirJaEnviado = ($c->sinir_status ?? '') === 'enviado';
-        if ($c->status === 'finalizada' && SinirConfig::isEnabled() && !$sinirJaEnviado) {
-            $label = ($c->sinir_status ?? '') === 'erro'
-                ? 'Tentar novamente no SINIR'
-                : 'Registrar MTR no SINIR';
+        $stSinir = $c->sinir_status ?? '';
+        $sinirPodeRegistrar = in_array($stSinir, ['erro', 'pendente', 'cancelado', ''], true) || $stSinir === null;
+        if ($c->status === 'finalizada' && SinirConfig::isEnabled() && !$sinirJaEnviado && $sinirPodeRegistrar) {
+            $label = match ($c->sinir_status ?? '') {
+                'erro' => 'Tentar novamente no SINIR',
+                'cancelado' => 'Emitir novo MTR no SINIR',
+                default => 'Registrar MTR no SINIR',
+            };
             $sinirReenviarBtn = '<button type="button" class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')"><i class="fas fa-sync me-1"></i> '
                 .CrudHelper::e($label).'</button>';
+        }
+        if ($c->status === 'finalizada' && SinirConfig::isEnabled() && $sinirJaEnviado) {
+            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-secondary" onclick="sinirConsultar('.$c->id.')"><i class="fas fa-search me-1"></i> Consultar SINIR</button>'
+                .' <button type="button" class="btn btn-sm btn-outline-danger" onclick="sinirCancelar('.$c->id.')"><i class="fas fa-ban me-1"></i> Cancelar no SINIR</button>';
         }
 
         $html = View::render('admin/modules/coletas/detalhe', [
@@ -219,6 +235,50 @@ class Coletas extends Page
         ]);
     }
 
+    public static function sinirCancelar($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+
+        $id = (int)($post['id'] ?? 0);
+        $justificativa = trim((string)($post['justificativa'] ?? ''));
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        $result = SinirService::cancelarColeta($id, $justificativa);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk(['message' => $result['message']]);
+    }
+
+    public static function sinirConsultar($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        $result = SinirService::consultarColeta($id);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk([
+            'message' => $result['message'],
+            'details' => $result['details'] ?? [],
+        ]);
+    }
+
     private static function renderSinirDetalhe(EntityColeta $c): string
     {
         if ($c->status !== 'finalizada') {
@@ -241,6 +301,8 @@ class Coletas extends Page
             $histBadge = match ($envio->status) {
                 'enviado' => 'success',
                 'erro' => 'danger',
+                'cancelado' => 'secondary',
+                'consulta' => 'info',
                 default => 'secondary',
             };
             $historico .= '<li><span class="badge bg-'.$histBadge.'">T'.$envio->tentativa.' · '.$envio->status.'</span>';

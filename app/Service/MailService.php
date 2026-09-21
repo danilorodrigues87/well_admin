@@ -12,6 +12,57 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class MailService
 {
+    public static function isConfigured(): bool
+    {
+        $cfg = self::smtpConfig();
+
+        return $cfg['host'] !== '' && $cfg['user'] !== '' && $cfg['from'] !== '';
+    }
+
+    public static function notificationsEnabled(): bool
+    {
+        if (!self::isConfigured()) {
+            return false;
+        }
+
+        return filter_var(Environment::get('MAIL_NOTIFICATIONS_ENABLED', 'true'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Teste de SMTP (ignora MAIL_NOTIFICATIONS_ENABLED).
+     *
+     * @return array{ok:bool,error:?string}
+     */
+    public static function enviarTesteSmtp(string $to, string $subject, string $html): array
+    {
+        $to = trim($to);
+        if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            return ['ok' => false, 'error' => 'E-mail destinatário inválido'];
+        }
+        if (!self::isConfigured()) {
+            return ['ok' => false, 'error' => 'SMTP incompleto no .env'];
+        }
+
+        return self::sendViaPhpMailer(self::smtpConfig(), $to, $subject, $html, []);
+    }
+
+    /**
+     * @return array{ok:bool,error:?string,skipped?:bool}
+     */
+    public static function enviarHtml(string $to, string $subject, string $html): array
+    {
+        $to = trim($to);
+        if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            return ['ok' => false, 'error' => 'E-mail destinatário inválido'];
+        }
+
+        if (!self::notificationsEnabled()) {
+            return ['ok' => false, 'skipped' => true, 'error' => 'Notificações desabilitadas ou SMTP incompleto'];
+        }
+
+        return self::sendViaPhpMailer(self::smtpConfig(), $to, $subject, $html, []);
+    }
+
     /** @return array{host:string,user:string,pass:string,port:int,from:string,from_name:string,encryption:string} */
     private static function smtpConfig(): array
     {

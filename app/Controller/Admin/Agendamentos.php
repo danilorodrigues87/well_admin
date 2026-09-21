@@ -59,8 +59,8 @@ class Agendamentos extends Page
             $content,
             'agendamentos',
             self::crudScripts('/painel/agendamentos')
-                .'<script src="'.URL.'/resources/js/agendamentos.js?v=20260921"></script>'
-                .'<script src="'.URL.'/resources/js/agendamentos-solicitacoes.js?v=20260921"></script>'
+                .'<script src="'.URL.'/resources/js/agendamentos.js?v=20260921b"></script>'
+                .'<script src="'.URL.'/resources/js/agendamentos-solicitacoes.js?v=20260921b"></script>'
         );
     }
 
@@ -218,7 +218,11 @@ class Agendamentos extends Page
 
         $pagination = new Pagination($result['total'], $page, 15);
 
-        return self::jsonLista(['success' => true, 'itens' => $itens, 'pagination' => Pagination::renderNav($pagination)]);
+        return self::jsonLista([
+            'success' => true,
+            'itens' => $itens,
+            'pagination' => Pagination::renderNav($pagination, 'loadPageSolicitacoes'),
+        ]);
     }
 
     public static function getSolicitacao($request): string

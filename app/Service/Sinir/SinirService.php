@@ -22,6 +22,7 @@ class SinirService
         [$label, $css] = match ($status) {
             'enviado' => ['MTR no SINIR', 'success'],
             'erro' => ['Falha registro', 'danger'],
+            'cancelado' => ['Cancelado SINIR', 'secondary'],
             default => ['Aguard. SINIR', 'warning'],
         };
 
@@ -68,6 +69,18 @@ class SinirService
     public static function enviarColeta(int $coletaId, bool $force = false): array
     {
         return (new SinirManifestoService())->enviarColeta($coletaId, $force);
+    }
+
+    /** @return array{ok:bool,message:string,details?:array<string,mixed>} */
+    public static function cancelarColeta(int $coletaId, string $justificativa): array
+    {
+        return (new SinirManifestoService())->cancelarColeta($coletaId, $justificativa);
+    }
+
+    /** @return array{ok:bool,message:string,details?:array<string,mixed>} */
+    public static function consultarColeta(int $coletaId): array
+    {
+        return (new SinirManifestoService())->consultarColeta($coletaId);
     }
 
     /**

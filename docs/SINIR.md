@@ -145,7 +145,9 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 | Payload MTR | `app/Service/Sinir/SinirPayloadBuilder.php` |
 | Envio + auditoria | `app/Service/Sinir/SinirManifestoService.php` |
 | Hook finalizar | `ColetaService::finalizar()` → `salvarManifestoLote` |
-| Reenvio manual | Coletas → detalhe → **Reenviar SINIR** |
+| Reenvio manual | Coletas → detalhe → **Registrar / reenviar SINIR** |
+| Cancelamento | Coletas → detalhe → **Cancelar no SINIR** (`POST /cancelarManifesto`) |
+| Consulta situação | Coletas → detalhe → **Consultar SINIR** (`POST /retornaManifesto/…` ou `retornaManifestoPorNumero/…`) |
 
 ### Pré-requisitos antes do envio
 

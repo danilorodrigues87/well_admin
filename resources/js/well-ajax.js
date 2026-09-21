@@ -49,6 +49,15 @@
   }
 
   function getApiUrl() {
+    if (typeof wellAppUrl === 'function') {
+      if (typeof listagem !== 'undefined' && listagem) {
+        return wellAppUrl(listagem);
+      }
+      if (window.CRUD && window.CRUD.baseUrl) {
+        return wellAppUrl(null, window.CRUD.baseUrl);
+      }
+      return '';
+    }
     var base = (typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '');
     if (typeof listagem !== 'undefined' && listagem) {
       return base + '/' + String(listagem).replace(/^\/+/, '');

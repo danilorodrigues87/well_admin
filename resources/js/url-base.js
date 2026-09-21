@@ -11,7 +11,7 @@
 		// Ex: /pjt/painel-cti/painel  →  base /pjt/painel-cti/
 		// Ex: /pjt/painel-cti/master/escolas → base /pjt/painel-cti/
 		// Ex: /painel/crm             →  base /
-		var match = path.match(/^(.*)\/(?:painel|master)(?:\/.*)?$/);
+		var match = path.match(/^(.*)\/(?:painel|master|gerador)(?:\/.*)?$/);
 
 		if (match) {
 			var basePath = match[1] || '';
@@ -19,7 +19,8 @@
 		}
 
 		if (path === '/painel' || path.indexOf('/painel/') === 0
-			|| path === '/master' || path.indexOf('/master/') === 0) {
+			|| path === '/master' || path.indexOf('/master/') === 0
+			|| path === '/gerador' || path.indexOf('/gerador/') === 0) {
 			return origin + '/';
 		}
 
