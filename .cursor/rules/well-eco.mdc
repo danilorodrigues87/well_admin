@@ -9,7 +9,8 @@ alwaysApply: true
 ## Contexto
 - Well Admin com multitenancy **preparado** (`operadoras`, `operadora_id`). MVP: só **operadora_id=1** (Well). **Sem** Painel Plataforma/Master até operadora 2+. **Sem** módulos escolares CTI.
 - **Marca ao cliente:** `CompanyConfig::name()` → Well Soluções Ambientais · `CompanyConfig::shortName()` → Well S.A. — **nunca** "Well Eco" em e-mail, boleto ou comunicação externa. Variáveis: `COMPANY_NAME`, `COMPANY_SHORT_NAME`, `MAIL_FROM_NAME` no `.env`.
-- Banco novo: `well_admin`. Legado: `well_antigo` (somente leitura para ETL).
+- Banco operacional: `well_admin` (produção VPS + local). Cutover concluído — legado `well_antigo` só referência/ETL inicial.
+- Correção de dados em produção: migration ou `database/scripts/repair_*.php` neste repo (documentar `MIGRACAO_DADOS.md` §15 + `ARCHITECTURE.md`); não reimportar legado sobre prod.
 
 ## Arquitetura
 1. Ler `ARCHITECTURE.md` antes de editar.

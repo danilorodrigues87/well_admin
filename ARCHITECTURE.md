@@ -3,9 +3,15 @@
 > Leia este arquivo **antes** de alterar o código. Público: desenvolvedores e agentes de IA.
 
 **Projeto:** `admin.well.eco`  
-**Banco local:** `well_admin`  
-**Banco legado (migração):** `well_antigo`  
+**Banco operacional:** `well_admin` (local e **produção VPS** — sistema em uso desde cutover 2026-09)  
+**Banco legado:** `well_antigo` — **somente referência histórica / ETL** (não é a base de produção)  
 **Stack:** PHP 8 MVC custom · MySQL InnoDB · Bootstrap 5 (SB Admin) · jQuery
+
+### Produção e correção de dados
+
+- **Cutover concluído:** painel antigo descontinuado; este repositório é o sistema oficial.
+- Mudanças que afetem **dados já lançados em produção** devem ser tratadas **neste projeto**: migration SQL numerada (`database/migrations/`) e/ou script `database/scripts/repair_*.php` (dry-run + `--apply`), documentados em `docs/MIGRACAO_DADOS.md` e changelog abaixo.
+- **Não** reimportar `well_antigo` sobre produção para “consertar” — corrigir in place no `well_admin` de produção (com backup).
 
 ---
 
@@ -266,3 +272,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-21 | Rotas: só cliente×rota (sem coletor em `rota_atribuicoes`); `RotaScopeService` + KPI `clientes_em_rotas`; migration `037`; coletor escolhe coleta (`coletas.coletor_id`) |
 | 2026-09-21 | Agendamento portal gerador: `coleta_solicitacoes` (`038`), cota plano (`039` + CRUD planos); `ColetaSolicitacaoService` (48h, mês civil/trimestre); fila em Agendamentos; `/gerador/agendamentos`; API `/api/v1/gerador/coleta-solicitacoes`; extras em Pagamentos; `repair_proxima_coleta.php` |
 | 2026-09-21 | MTR pós-SINIR: `finalizar()` sem `numero_mtr` com SINIR ativo; número gravado no sucesso do manifesto; `ColetaMtrHelper`; wizard “Finalizar coleta”; portal gerador exibe próxima coleta agendada |
+| 2026-09-21 | Legado SINIR: migration `040` / `repair_sinir_legado.php`; `legacy_manifesto` na entity; import ETL trata MTR legado como válido |
+| 2026-09-21 | **Cutover em produção:** migração projeto antigo → admin novo concluída; doc operação pós-cutover em `MIGRACAO_DADOS.md` §15 |

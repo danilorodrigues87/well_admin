@@ -154,9 +154,10 @@ class Coletas extends Page
 
         $sinirHtml = self::renderSinirDetalhe($c);
         $sinirReenviarBtn = '';
-        if ($c->status === 'finalizada' && SinirConfig::isEnabled()) {
-            $label = ColetaMtrHelper::temMtr($c)
-                ? 'Reenviar registro SINIR'
+        $sinirJaEnviado = ($c->sinir_status ?? '') === 'enviado';
+        if ($c->status === 'finalizada' && SinirConfig::isEnabled() && !$sinirJaEnviado) {
+            $label = ($c->sinir_status ?? '') === 'erro'
+                ? 'Tentar novamente no SINIR'
                 : 'Registrar MTR no SINIR';
             $sinirReenviarBtn = '<button type="button" class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')"><i class="fas fa-sync me-1"></i> '
                 .CrudHelper::e($label).'</button>';

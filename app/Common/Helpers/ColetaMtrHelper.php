@@ -24,7 +24,12 @@ class ColetaMtrHelper
             return true;
         }
 
-        // Importadas / finalizadas antes da regra “número só após SINIR”
+        // ETL well_antigo: MTR nacional já existia; numero_mtr = manifesto legado
+        if ($c->legacy_manifesto !== null && $c->numero_mtr) {
+            return true;
+        }
+
+        // Outras finalizadas com número e sem pendência/erro SINIR
         if ($c->numero_mtr && !in_array($c->sinir_status ?? '', ['pendente', 'erro'], true)) {
             return true;
         }

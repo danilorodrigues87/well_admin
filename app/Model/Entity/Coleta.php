@@ -13,6 +13,7 @@ class Coleta
     public int $id = 0;
     public int $operadora_id = 1;
     public ?int $numero_mtr = null;
+    public ?int $legacy_manifesto = null;
     public int $cliente_id = 0;
     public int $coletor_id = 0;
     public ?int $veiculo_id = null;
@@ -105,6 +106,8 @@ class Coleta
         $c->id = (int)$row['id'];
         $c->operadora_id = (int)($row['operadora_id'] ?? 1);
         $c->numero_mtr = isset($row['numero_mtr']) ? (int)$row['numero_mtr'] : null;
+        $c->legacy_manifesto = isset($row['legacy_manifesto']) && $row['legacy_manifesto'] !== null
+            ? (int)$row['legacy_manifesto'] : null;
         $c->cliente_id = (int)$row['cliente_id'];
         $c->coletor_id = (int)$row['coletor_id'];
         $c->veiculo_id = isset($row['veiculo_id']) ? (int)$row['veiculo_id'] : null;

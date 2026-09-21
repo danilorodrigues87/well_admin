@@ -2,9 +2,23 @@
 
 > **Manutenção:** atualizar este documento sempre que houver novo script ETL/backfill, regra de negócio que afete dados legados, ou correção retroativa. Registrar também no changelog de `ARCHITECTURE.md`.
 
-**Última revisão:** 2026-09-19 (cutover final + purge MTR teste)  
-**Banco legado (somente leitura):** `well_antigo` (dump `wellec99_app.sql`)  
-**Banco novo:** `well_admin`
+**Status (2026-09-21):** **Cutover concluído** — admin novo **online e em uso** (VPS). Dados operacionais vivem em **`well_admin` de produção**.  
+**Última revisão:** 2026-09-21 (política pós-cutover)  
+**Banco legado (arquivo):** `well_antigo` / dump `wellec99_app.sql` — **não** usar para corrigir produção  
+**Banco operacional:** `well_admin` (local espelha dev; produção = fonte da verdade)
+
+---
+
+## Operação atual (leia primeiro)
+
+| O quê | Onde |
+|--------|------|
+| Schema novo | `database/migrations/NNN_*.sql` — aplicar em prod na ordem numérica |
+| Corrigir dados já lançados | `database/scripts/repair_*.php` ou migration **dados** (ex.: `040_sinir_legado_enviado.sql`) |
+| Regra | Sempre **dry-run** → backup → `--apply` ou SQL em janela; registrar aqui + `ARCHITECTURE.md` |
+| Evitar | Re-ETL de `well_antigo` em cima do banco de produção |
+
+Seções **1–14** abaixo descrevem a **migração histórica** (one-time). Para o dia a dia, use **[§15 Operação em produção](#15-operação-em-produção-pós-cutover)**.
 
 ---
 
@@ -23,7 +37,8 @@
 11. [Checklist pós-migração](#11-checklist-pós-migração)
 12. [Multitenancy — operadora_id (021–024)](#12-multitenancy--operadora_id-021024)
 13. [Catálogo SINIR — revisão tipos_residuos](#13-catálogo-sinir--revisão-tipos_residuos)
-14. [Cutover final — projeto antigo × admin novo](#14-cutover-final--projeto-antigo--admin-novo)
+14. [Cutover final — projeto antigo × admin novo](#14-cutover-final--projeto-antigo--admin-novo) *(histórico — concluído)*
+15. [Operação em produção (pós-cutover)](#15-operação-em-produção-pós-cutover)
 
 ---
 
@@ -341,7 +356,9 @@ php database/scripts/seed_operadora_well.php   # roda automaticamente após appl
 
 ## 14. Cutover final — projeto antigo × admin novo
 
-Cenário: banco do **projeto antigo** já alinhado ao schema atual (`well_admin`); **admin novo** (código deste repositório) vai para produção (ex.: VPS). Evitar choque entre **MTRs de teste** no ambiente novo e **MTRs reais** vindos do legado/ETL.
+> **Concluído em produção (2026-09).** Mantido como registro do que foi feito na janela de migração.
+
+Cenário (histórico): banco do **projeto antigo** alinhado ao schema `well_admin`; **admin novo** (este repositório) em produção (VPS). Evitar choque entre **MTRs de teste** e **MTRs reais** do legado/ETL.
 
 ### Pontos de conflito (checklist)
 
@@ -383,7 +400,7 @@ SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id =
 2. **Purge** MTRs teste (comando acima).
 3. Aplicar migrations pendentes **034–039** (se ainda não).
 4. Se faltarem coletas legado no banco atual: `etl_import_coletas.php` (sem `--purge-local` salvo se souber o que apaga).
-5. Repairs: `repair_legacy_peso`, `backfill_coleta_itens_tipo`, `repair_coletas_data_recebimento`, `repair_proxima_coleta.php` (dry-run antes de `--apply`).
+5. Repairs: `repair_legacy_peso`, `backfill_coleta_itens_tipo`, `repair_coletas_data_recebimento`, `repair_proxima_coleta.php`, `repair_sinir_legado.php` (ou migration `040_sinir_legado_enviado.sql`) — SINIR já lançado manualmente no legado.
 6. **Deploy** código admin novo na VPS; `.env`; `composer install --no-dev`.
 7. Smoke: login, listagem coletas, imprimir MTR legado, **uma** coleta teste com MTR **11922+** (após confirmar sequência).
 8. DNS `admin.well.eco.br` → VPS; desativar painel antigo.
@@ -396,10 +413,47 @@ SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id =
 
 ---
 
+## 15. Operação em produção (pós-cutover)
+
+### Princípios
+
+1. **Produção** = MySQL `well_admin` na VPS + código deste repo (EasyPanel / deploy habitual).
+2. **Ajustes retroativos** (dados já digitados pelos usuários) são feitos **no projeto atual**, versionados no Git:
+   - **Schema:** `database/migrations/041_…sql` (próximo número livre).
+   - **Dados:** migration SQL idempotente quando possível, ou `database/scripts/repair_<tema>.php` com modo dry-run e `--apply`.
+3. **Documentar:** entrada neste arquivo (histórico) + linha no changelog de `ARCHITECTURE.md`.
+4. **`well_antigo`:** só para montar ambiente dev do zero ou consulta histórica — **não** rodar ETL de produção para “consertar” registros já operados no admin novo.
+
+### Fluxo recomendado (VPS)
+
+1. Backup (`mysqldump well_admin`, `storage/` se relevante).
+2. Testar SQL/script em local ou cópia do banco.
+3. Aplicar em produção (migration via phpMyAdmin/mysql CLI ou script PHP no container).
+4. Smoke test no painel (módulo afetado + amostra de registros).
+
+### Exemplos já usados em produção
+
+| Tema | Artefato |
+|------|-----------|
+| SINIR legado marcado como enviado | `040_sinir_legado_enviado.sql`, `repair_sinir_legado.php` (datas inválidas `0000-00-00` — usar `CASE` com `> '1000-01-01'`) |
+| `proxima_coleta` após import | `repair_proxima_coleta.php` |
+| Agendamento portal | migrations `038` / `039` |
+
+### Novos repairs
+
+Ao criar script:
+
+- Cabeçalho com propósito, escopo (`WHERE …`) e flags `--dry-run` / `--apply`.
+- Listar registros **não** alterados (ex.: coletas sem `legacy_manifesto`).
+- Apagar scripts temporários `_test_*.php` na raiz após uso (regra do repo).
+
+---
+
 ## Histórico de alterações deste documento
 
 | Data | Alteração |
 |------|-----------|
+| 2026-09-21 | Cutover concluído em produção; §15 operação pós-cutover; política de correção in-place no `well_admin` |
 | 2026-09-21 | Script `repair_proxima_coleta.php`; migrations `038`/`039` agendamento portal gerador |
 | 2026-09-19 | Seção 14 cutover final; script `purge_coletas_mtr_teste.php` (MTR 11917–11921) |
 | 2026-09-16 | Multitenancy: seções 12–13; migrations 021–024; ETL `--operadora-id`; checklist go-live; catálogo SINIR revisado |

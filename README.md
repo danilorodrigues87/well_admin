@@ -32,8 +32,11 @@ Altere a senha após o primeiro acesso.
 
 | Ambiente | Banco | Uso |
 |----------|-------|-----|
-| Local novo | `well_admin` | Painel Well Eco |
-| Local legado | `well_antigo` | Referência / migração ETL |
+| **Produção (VPS)** | `well_admin` | Sistema oficial em uso |
+| Local dev | `well_admin` | Desenvolvimento / testes |
+| Arquivo legado | `well_antigo` | Somente referência ou ETL inicial — **não** corrigir produção reimportando daqui |
+
+Migração do painel antigo **concluída**. Correções em dados já lançados: migrations e scripts em `database/` — ver [docs/MIGRACAO_DADOS.md](docs/MIGRACAO_DADOS.md) §15.
 
 ## Documentação
 
@@ -44,6 +47,7 @@ Altere a senha após o primeiro acesso.
 - [docs/FLUTTERFLOW.md](docs/FLUTTERFLOW.md) — setup telas e API Calls no FlutterFlow
 - [docs/BRANDING.md](docs/BRANDING.md) — paleta de cores Well Coletas (app + painel)
 - [docs/ROADMAP.md](docs/ROADMAP.md) — Fase 2 (SINIR, banco, portal cliente)
+- [docs/MIGRACAO_DADOS.md](docs/MIGRACAO_DADOS.md) — histórico ETL + **operação em produção (pós-cutover)**
 
 ## Estrutura resumida
 
