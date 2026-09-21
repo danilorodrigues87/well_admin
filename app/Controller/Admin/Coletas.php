@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\Helpers\CrudHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Coleta as EntityColeta;
@@ -25,7 +26,7 @@ class Coletas extends Page
             'data_inicio' => date('Y-m-01'),
             'data_fim' => date('Y-m-t'),
         ]);
-        return self::getPage('Coletas / MTR', $content, 'coletas', self::crudScripts('/painel/coletas'));
+        return self::getPage('Coletas', $content, 'coletas', self::crudScripts('/painel/coletas'));
     }
 
     public static function list($request): string
@@ -80,7 +81,10 @@ class Coletas extends Page
 
         $itens = '';
         foreach ($rows as $c) {
-            $mtr = $c->numero_mtr ? '#'.$c->numero_mtr : '<span class="text-muted">Rascunho</span>';
+            $numExib = ColetaMtrHelper::numeroExibicao($c);
+            $mtr = $numExib !== null
+                ? '#'.CrudHelper::e($numExib)
+                : '<span class="text-muted">'.CrudHelper::e(ColetaMtrHelper::rotuloSemMtr($c)).'</span>';
             $badge = match ($c->status) {
                 'finalizada' => 'success',
                 'rascunho' => 'warning',
@@ -97,8 +101,11 @@ class Coletas extends Page
                 <td>'.$sinirBadge.'</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="detalhar('.$c->id.')" title="Detalhe"><i class="fas fa-eye"></i></button>
-                    '.($c->status === 'finalizada' && $c->numero_mtr
+                    '.(ColetaMtrHelper::temMtr($c)
                         ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir MTR"><i class="fas fa-print"></i></a>'
+                        : '').'
+                    '.($c->status === 'finalizada' && SinirConfig::isEnabled() && !ColetaMtrHelper::temMtr($c)
+                        ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Registrar MTR no SINIR"><i class="fas fa-cloud-upload-alt"></i></button>'
                         : '').'
                     '.($c->status === 'rascunho' ? '<a class="btn btn-sm btn-outline-warning" href="'.URL.'/painel/coleta/nova/'.$c->id.'" title="Continuar"><i class="fas fa-edit"></i></a>' : '').'
                 </td>
@@ -137,7 +144,7 @@ class Coletas extends Page
             $evidHtml .= '<div class="col-md-4"><a href="'.$url.'" target="_blank"><img src="'.$url.'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"/></a></div>';
         }
 
-        $mtrPrintUrl = ($c->status === 'finalizada' && $c->numero_mtr)
+        $mtrPrintUrl = ColetaMtrHelper::temMtr($c)
             ? URL.'/painel/coletas/mtr/'.$c->id
             : '';
 
@@ -146,15 +153,22 @@ class Coletas extends Page
             : '';
 
         $sinirHtml = self::renderSinirDetalhe($c);
-        $sinirReenviarBtn = ($c->status === 'finalizada' && SinirConfig::isEnabled())
-            ? '<button type="button" class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')"><i class="fas fa-sync me-1"></i> Reenviar SINIR</button>'
-            : '';
+        $sinirReenviarBtn = '';
+        if ($c->status === 'finalizada' && SinirConfig::isEnabled()) {
+            $label = ColetaMtrHelper::temMtr($c)
+                ? 'Reenviar registro SINIR'
+                : 'Registrar MTR no SINIR';
+            $sinirReenviarBtn = '<button type="button" class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')"><i class="fas fa-sync me-1"></i> '
+                .CrudHelper::e($label).'</button>';
+        }
 
         $html = View::render('admin/modules/coletas/detalhe', [
             'mtr_print_btn' => $mtrPrintBtn,
             'sinir_reenviar_btn' => $sinirReenviarBtn,
             'sinir_html' => $sinirHtml,
-            'numero_mtr' => $c->numero_mtr ? '#'.$c->numero_mtr : 'Rascunho',
+            'numero_mtr' => ColetaMtrHelper::numeroExibicao($c)
+                ? '#'.ColetaMtrHelper::numeroExibicao($c)
+                : ColetaMtrHelper::rotuloSemMtr($c),
             'cliente' => CrudHelper::e($c->cliente_nome),
             'coletor' => CrudHelper::e($c->coletor_nome),
             'data_coleta' => $c->data_coleta ? date('d/m/Y H:i', strtotime($c->data_coleta.' '.($c->hora ?? '00:00:00'))) : '—',
@@ -258,7 +272,7 @@ class Coletas extends Page
 
         $c = $det['coleta'];
         $s = $det['snapshot'];
-        if ($c->status !== 'finalizada' || !$c->numero_mtr) {
+        if (!ColetaMtrHelper::temMtr($c)) {
             return View::render('erros/405', ['URL' => URL]);
         }
 
@@ -281,7 +295,7 @@ class Coletas extends Page
 
         return View::render('admin/modules/coletas/mtr_print', [
             'URL' => URL,
-            'numero_mtr' => (string)$c->numero_mtr,
+            'numero_mtr' => (string)(ColetaMtrHelper::numeroExibicao($c) ?? ''),
             'gerador_nome' => CrudHelper::e(mb_strtoupper((string)($s->gerador_nome_fantasia ?? ''), 'UTF-8')),
             'gerador_cnpj' => CrudHelper::e($s->gerador_cnpj ?? ''),
             'gerador_plano' => CrudHelper::e(mb_strtoupper((string)($s->gerador_plano ?? ''), 'UTF-8')),

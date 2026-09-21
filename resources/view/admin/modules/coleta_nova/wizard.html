@@ -1,13 +1,13 @@
 <h1 class="mt-2">Coleta — {{cliente_nome}}</h1>
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item"><a href="{{URL}}/painel/coleta/nova">Clientes</a></li>
-    <li class="breadcrumb-item active">Wizard MTR</li>
+    <li class="breadcrumb-item active">Registrar coleta</li>
 </ol>
 
 <ul class="nav nav-tabs mb-3" id="coletaTabs">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-transporte">1. Transporte</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-residuos">2. Resíduos</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-finalizar">3. Conferir e MTR</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-finalizar">3. Conferir e finalizar</button></li>
 </ul>
 
 <div class="tab-content">
@@ -35,7 +35,7 @@
                     <div class="col-md-4 mb-2">
                         <label>Data recebimento</label>
                         <input type="date" class="form-control" name="data_recebimento" id="data_recebimento" value="{{data_recebimento}}"/>
-                        <small class="text-muted">Obrigatória para gerar o MTR. Rascunho pode ficar sem data.</small>
+                        <small class="text-muted">Obrigatória para finalizar. Rascunho pode ficar sem data.</small>
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary mt-2" onclick="salvarTransporte()">Salvar e continuar</button>
@@ -60,7 +60,8 @@
     <div class="tab-pane fade" id="tab-finalizar">
         <div class="card mb-3"><div class="card-body">
             <p class="text-muted small mb-3">
-                <strong>Passo 1:</strong> salve o rascunho (relatório e/ou fotos). <strong>Passo 2:</strong> confira o resumo e gere o MTR.
+                <strong>Passo 1:</strong> salve o rascunho (relatório e/ou fotos).
+                <strong>Passo 2:</strong> finalize a coleta — o <strong>número MTR</strong> só é gerado após registro no SINIR.
             </p>
             <form id="form-finalizar" enctype="multipart/form-data">
                 <div class="mb-3"><label>Relatório / observações</label><textarea class="form-control" name="relatorio" id="relatorio" rows="3">{{relatorio}}</textarea></div>
@@ -78,12 +79,12 @@
 
             <div id="rascunho-resumo-wrap" class="mt-4 {{rascunho_resumo_class}}">
                 <div class="alert alert-success">
-                    <strong>Rascunho salvo — confira antes de gerar o MTR</strong>
+                    <strong>Rascunho salvo — confira antes de finalizar</strong>
                     <div id="resumo-rascunho" class="mt-2">{{resumo_rascunho_html}}</div>
                 </div>
                 <div id="evidencias-preview" class="mb-3">{{evidencias_html}}</div>
                 <button type="button" class="btn btn-success btn-lg" id="btn-gerar-mtr" onclick="gerarMtr()" {{btn_gerar_disabled}}>
-                    <i class="fas fa-check"></i> Gerar MTR
+                    <i class="fas fa-check"></i> Finalizar coleta
                 </button>
             </div>
 

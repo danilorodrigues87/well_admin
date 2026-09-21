@@ -7,6 +7,7 @@ use App\Common\Helpers\FormatHelper;
 use App\Common\Helpers\MoneyHelper;
 use App\Common\GeradorScope;
 use App\Service\ColetaSolicitacaoService;
+use App\Service\GeradorAgendamentoVisivelService;
 use App\Service\GeradorDashboardService;
 use App\Service\GeradorPortalService;
 use App\Session\Gerador\Login as GeradorSession;
@@ -18,7 +19,10 @@ class Dashboard extends Page
     {
         $session = GeradorSession::getData() ?? [];
         $kpis = GeradorDashboardService::kpis();
-        $cota = ColetaSolicitacaoService::resumoCota(GeradorScope::getClienteId());
+        $clienteId = GeradorScope::getClienteId();
+        $cota = ColetaSolicitacaoService::resumoCota($clienteId);
+        $agendamento = GeradorAgendamentoVisivelService::resumo($clienteId);
+        $agendamentoHtml = self::renderAgendamentoAlert($agendamento);
         $coletasChart = GeradorDashboardService::coletasPorMes();
         $faturamentoChart = GeradorDashboardService::faturamentoPorMes();
         $boletosChart = GeradorDashboardService::boletosPorStatus();
@@ -28,9 +32,9 @@ class Dashboard extends Page
 
         $coletasHtml = '';
         foreach ($coletas['items'] as $c) {
-            $mtr = !empty($c['numero_mtr'])
+            $mtr = !empty($c['mtr_disponivel']) && !empty($c['numero_mtr'])
                 ? CrudHelper::e((string)$c['numero_mtr'])
-                : '<span class="text-muted">—</span>';
+                : '<span class="text-muted">'.CrudHelper::e((string)($c['mtr_rotulo'] ?? '—')).'</span>';
             $coletasHtml .= '<tr>
                 <td>'.$mtr.'</td>
                 <td>'.FormatHelper::dateBr((string)($c['data_coleta'] ?? '')).'</td>
@@ -73,6 +77,7 @@ class Dashboard extends Page
             'valor_aberto' => MoneyHelper::format((float)$kpis['valor_aberto']),
             'proximo_vencimento' => $proximoVenc,
             'proximo_valor' => MoneyHelper::format((float)$kpis['proximo_valor']),
+            'agendamento_alert' => $agendamentoHtml,
             'coletas_rows' => $coletasHtml,
             'boletos_rows' => $boletosHtml,
             'chart_coletas_labels' => json_encode($coletasChart['labels'], JSON_UNESCAPED_UNICODE),
@@ -87,5 +92,32 @@ class Dashboard extends Page
             .'<script src="'.URL.'/resources/js/dashboard-charts.js?v=20260916i"></script>';
 
         return self::render('Início', $content, 'dashboard', $scripts);
+    }
+
+    /** @param array<string,mixed>|null $ag */
+    private static function renderAgendamentoAlert(?array $ag): string
+    {
+        if ($ag === null) {
+            return '';
+        }
+        $data = FormatHelper::dateBr((string)($ag['data'] ?? ''));
+        $css = match ($ag['situacao'] ?? '') {
+            'atrasada' => 'warning',
+            'pendente_aprovacao' => 'info',
+            'hoje' => 'success',
+            default => 'primary',
+        };
+        $titulo = match ($ag['situacao'] ?? '') {
+            'pendente_aprovacao' => 'Coleta solicitada',
+            'atrasada' => 'Coleta prevista (em atraso)',
+            'hoje' => 'Coleta prevista para hoje',
+            default => 'Próxima coleta agendada',
+        };
+
+        return '<div class="alert alert-'.$css.' d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">'
+            .'<div><strong>'.$titulo.':</strong> '.$data
+            .'<span class="d-block small mb-0">'.htmlspecialchars((string)($ag['mensagem'] ?? ''), ENT_QUOTES, 'UTF-8').'</span></div>'
+            .'<a href="'.URL.'/gerador/agendamentos" class="btn btn-sm btn-outline-'.$css.'">Ver agendamentos</a>'
+            .'</div>';
     }
 }

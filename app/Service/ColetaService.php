@@ -230,7 +230,12 @@ class ColetaService
             || EntityColetaEvidencia::countByColeta($coletaId) > 0;
     }
 
-    public static function finalizar(int $coletaId, array $files = []): int
+    /**
+     * Finaliza a coleta (operacional). Com SINIR ativo, o número MTR só é gravado após registro no SINIR.
+     *
+     * @return array{numero_mtr:?int,sinir:array{ok:bool,skipped?:bool,message:string}|null}
+     */
+    public static function finalizar(int $coletaId, array $files = []): array
     {
         self::assertRascunho($coletaId);
         self::assertRequisitosBasicos($coletaId);
@@ -240,7 +245,7 @@ class ColetaService
             EvidenceStorageService::saveBatchForColeta($coletaId, $files);
         } elseif (!self::rascunhoFinalConferido($coletaId)) {
             throw new \InvalidArgumentException(
-                'Salve o rascunho (relatório e/ou fotos) e confira os dados antes de gerar o MTR.'
+                'Salve o rascunho (relatório e/ou fotos) e confira os dados antes de finalizar.'
             );
         }
 
@@ -252,12 +257,24 @@ class ColetaService
         $db = new Database();
         $db->beginTransaction();
         try {
-            $numeroMtr = self::proximoNumeroMtr($db);
-
             $db->execute(
-                'UPDATE coletas SET numero_mtr = ?, status = ?, finalized_at = NOW() WHERE id = ?',
-                [$numeroMtr, 'finalizada', $coletaId]
+                'UPDATE coletas SET status = ?, finalized_at = NOW() WHERE id = ?',
+                ['finalizada', $coletaId]
             );
+
+            $numeroMtr = null;
+            if (!SinirConfig::isEnabled()) {
+                $numeroMtr = self::proximoNumeroMtr($db);
+                $db->execute(
+                    'UPDATE coletas SET numero_mtr = ? WHERE id = ?',
+                    [$numeroMtr, $coletaId]
+                );
+            } else {
+                $db->execute(
+                    'UPDATE coletas SET sinir_status = ? WHERE id = ?',
+                    ['pendente', $coletaId]
+                );
+            }
 
             $dias = ColetaDefaults::diasProximaColeta();
             $db->execute(
@@ -265,22 +282,25 @@ class ColetaService
                 [$dias, 'normal', $coleta->cliente_id]
             );
 
-            if (SinirConfig::isEnabled()) {
-                $db->execute(
-                    'UPDATE coletas SET sinir_status = ? WHERE id = ?',
-                    ['pendente', $coletaId]
-                );
-            }
-
             $db->commit();
-
-            // SINIR: status pendente — envio via reenvio no painel (não bloqueia HTTP da finalização).
-
-            return $numeroMtr;
         } catch (\Throwable $e) {
             $db->rollBack();
             throw $e;
         }
+
+        $sinirResult = null;
+        if (SinirConfig::isEnabled()) {
+            $sinirResult = Sinir\SinirService::enviarColeta($coletaId, false);
+            $coletaAtual = EntityColeta::getById($coletaId);
+            if ($coletaAtual && $coletaAtual->numero_mtr) {
+                $numeroMtr = (int)$coletaAtual->numero_mtr;
+            }
+        }
+
+        return [
+            'numero_mtr' => $numeroMtr,
+            'sinir' => $sinirResult,
+        ];
     }
 
     public static function cancelar(int $coletaId): void
@@ -424,7 +444,7 @@ class ColetaService
         $data = trim((string)($coleta->data_recebimento ?? ''));
         if ($data === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
             throw new \InvalidArgumentException(
-                'Informe a data de recebimento no destinador (aba Transporte) e clique em "Salvar e continuar" antes de gerar o MTR.'
+                'Informe a data de recebimento no destinador (aba Transporte) e clique em "Salvar e continuar" antes de finalizar.'
             );
         }
 

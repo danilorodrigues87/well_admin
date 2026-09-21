@@ -3,6 +3,7 @@
 namespace App\Controller\Gerador;
 
 use App\Common\GeradorScope;
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\FormatHelper;
 use App\Http\Response;
@@ -22,9 +23,9 @@ class Coletas extends Page
 
         $rows = '';
         foreach ($result['items'] as $c) {
-            $mtr = !empty($c['numero_mtr'])
+            $mtr = !empty($c['mtr_disponivel']) && !empty($c['numero_mtr'])
                 ? '<span class="fw-semibold">'.CrudHelper::e((string)$c['numero_mtr']).'</span>'
-                : '<span class="text-muted">—</span>';
+                : '<span class="text-muted">'.CrudHelper::e((string)($c['mtr_rotulo'] ?? '—')).'</span>';
             $rows .= '<tr>
                 <td>'.$mtr.'</td>
                 <td>'.FormatHelper::dateBr((string)($c['data_coleta'] ?? '')).'</td>
@@ -79,9 +80,9 @@ class Coletas extends Page
             $itensHtml = '<tr><td colspan="3" class="text-muted text-center py-3">Sem itens registrados.</td></tr>';
         }
 
-        $mtrLink = !empty($coleta['numero_mtr'])
+        $mtrLink = !empty($coleta['mtr_disponivel'])
             ? '<a class="btn btn-primary" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/mtr"><i class="fas fa-print me-1"></i> Imprimir MTR</a>'
-            : '';
+            : '<span class="text-muted small">MTR disponível após registro no SINIR.</span>';
 
         $evidenciasHtml = '';
         foreach ($detalhe['evidencias'] ?? [] as $ev) {
@@ -117,7 +118,13 @@ class Coletas extends Page
         }
 
         $content = View::render('gerador/coletas/show', [
-            'numero_mtr' => CrudHelper::e((string)($coleta['numero_mtr'] ?? '—')),
+            'numero_mtr' => CrudHelper::e(
+                !empty($coleta['mtr_disponivel']) && !empty($coleta['numero_mtr'])
+                    ? (string)$coleta['numero_mtr']
+                    : (!empty($coleta['status']) && $coleta['status'] === 'finalizada'
+                        ? 'Aguard. registro SINIR'
+                        : '—')
+            ),
             'data_coleta' => FormatHelper::dateBr((string)($coleta['data_coleta'] ?? '')),
             'hora' => FormatHelper::horaBr((string)($coleta['hora'] ?? '')),
             'status_badge' => FormatHelper::statusColetaBadge((string)($coleta['status'] ?? '')),
@@ -167,7 +174,7 @@ class Coletas extends Page
 
         $c = $det['coleta'];
         $s = $det['snapshot'];
-        if ($c->status !== 'finalizada' || !$c->numero_mtr) {
+        if (!ColetaMtrHelper::temMtr($c)) {
             return View::render('erros/405', ['URL' => URL]);
         }
 
@@ -190,7 +197,7 @@ class Coletas extends Page
 
         return View::render('admin/modules/coletas/mtr_print', [
             'URL' => URL,
-            'numero_mtr' => (string)$c->numero_mtr,
+            'numero_mtr' => (string)(ColetaMtrHelper::numeroExibicao($c) ?? ''),
             'gerador_nome' => CrudHelper::e(mb_strtoupper((string)($s->gerador_nome_fantasia ?? ''), 'UTF-8')),
             'gerador_cnpj' => CrudHelper::e($s->gerador_cnpj ?? ''),
             'gerador_plano' => CrudHelper::e(mb_strtoupper((string)($s->gerador_plano ?? ''), 'UTF-8')),

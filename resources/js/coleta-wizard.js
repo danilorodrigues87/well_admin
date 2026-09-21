@@ -211,19 +211,19 @@
 
   window.gerarMtr = function () {
     if (!rascunhoConferido) {
-      swalErr('Salve o rascunho antes de gerar o MTR.');
+      swalErr('Salve o rascunho antes de finalizar a coleta.');
       return;
     }
 
     var dataReceb = document.querySelector('#form-transporte input[name="data_recebimento"]')?.value || '';
     if (!dataReceb) {
-      swalErr('Informe a data de recebimento na aba Transporte e clique em "Salvar e continuar" antes de gerar o MTR.');
+      swalErr('Informe a data de recebimento na aba Transporte e clique em "Salvar e continuar" antes de finalizar.');
       bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#tab-transporte"]')).show();
       return;
     }
 
     var executar = function () {
-      swalLoading('Gerando MTR…', 'Atribuindo número e finalizando coleta.');
+      swalLoading('Finalizando…', 'Registrando coleta e enviando ao SINIR quando habilitado.');
 
       $.ajax({
         url: baseUrl(),
@@ -238,19 +238,19 @@
         r = parseJsonResp(r);
         if (typeof Swal !== 'undefined') Swal.close();
         if (r.success) {
-          swalOk(r.message || 'MTR gerado!', function () {
+          swalOk(r.message || 'Coleta finalizada!', function () {
             window.location = r.redirect || ((typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/painel/coletas');
           });
         } else {
-          swalErr(r.message || 'Não foi possível gerar o MTR.');
+          swalErr(r.message || 'Não foi possível finalizar a coleta.');
         }
       }).fail(function (xhr) {
         if (typeof Swal !== 'undefined') Swal.close();
-        var msg = 'Erro ao gerar MTR.';
+        var msg = 'Erro ao finalizar coleta.';
         if (xhr.responseJSON && xhr.responseJSON.message) {
           msg = xhr.responseJSON.message;
         } else if (xhr.status === 0 || xhr.statusText === 'timeout') {
-          msg = 'Tempo esgotado. Verifique em Coletas se o MTR foi gerado antes de tentar de novo.';
+          msg = 'Tempo esgotado. Verifique em Coletas se a coleta foi finalizada antes de tentar de novo.';
         }
         swalErr(msg);
       });
@@ -258,16 +258,16 @@
 
     if (typeof Swal !== 'undefined') {
       Swal.fire({
-        title: 'Gerar MTR?',
-        text: 'A coleta será finalizada e não poderá mais ser editada.',
+        title: 'Finalizar coleta?',
+        text: 'Os dados serão fechados. O número MTR aparecerá após registro no SINIR.',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sim, gerar MTR',
+        confirmButtonText: 'Sim, finalizar',
         cancelButtonText: 'Voltar'
       }).then(function (r) {
         if (r.isConfirmed) executar();
       });
-    } else if (confirm('Gerar MTR e finalizar coleta?')) {
+    } else if (confirm('Finalizar coleta?')) {
       executar();
     }
   };

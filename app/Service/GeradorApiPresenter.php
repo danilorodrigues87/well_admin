@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
@@ -26,7 +27,11 @@ class GeradorApiPresenter
     {
         return [
             'id' => $c->id,
-            'numero_mtr' => $c->numero_mtr,
+            'numero_mtr' => ColetaMtrHelper::numeroExibicao($c),
+            'mtr_disponivel' => ColetaMtrHelper::temMtr($c),
+            'mtr_rotulo' => ColetaMtrHelper::temMtr($c)
+                ? ColetaMtrHelper::numeroExibicao($c)
+                : ColetaMtrHelper::rotuloSemMtr($c),
             'status' => $c->status,
             'data_coleta' => $c->data_coleta,
             'hora' => $c->hora,
@@ -41,7 +46,9 @@ class GeradorApiPresenter
         $c = $detalhe['coleta'];
         $s = $detalhe['snapshot'];
         $base = ColetaApiPresenter::coletaDetalhe($detalhe);
-        $base['coleta']['mtr_url'] = $c->numero_mtr
+        $base['coleta']['numero_mtr'] = ColetaMtrHelper::numeroExibicao($c);
+        $base['coleta']['mtr_disponivel'] = ColetaMtrHelper::temMtr($c);
+        $base['coleta']['mtr_url'] = ColetaMtrHelper::temMtr($c)
             ? URL.'/gerador/coletas/'.$c->id.'/mtr'
             : null;
 

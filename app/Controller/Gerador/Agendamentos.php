@@ -8,6 +8,7 @@ use App\Common\Helpers\CsrfHelper;
 use App\Common\Helpers\FormatHelper;
 use App\Model\Entity\ColetaSolicitacao;
 use App\Service\ColetaSolicitacaoService;
+use App\Service\GeradorAgendamentoVisivelService;
 use App\Session\Gerador\Login as GeradorSession;
 use App\Utils\View;
 use InvalidArgumentException;
@@ -39,7 +40,16 @@ class Agendamentos extends Page
             $rows = '<tr><td colspan="5" class="text-muted text-center py-3">Nenhuma solicitação ainda.</td></tr>';
         }
 
+        $ag = GeradorAgendamentoVisivelService::resumo($clienteId);
+        $agAlert = '';
+        if ($ag) {
+            $agAlert = '<div class="alert alert-primary"><strong>Próxima data:</strong> '
+                .FormatHelper::dateBr((string)$ag['data']).' — '
+                .htmlspecialchars((string)($ag['mensagem'] ?? ''), ENT_QUOTES, 'UTF-8').'</div>';
+        }
+
         $content = View::render('gerador/agendamentos/index', [
+            'agendamento_alert' => $agAlert,
             'csrf_field' => CsrfHelper::field(),
             'data_min' => date('Y-m-d', strtotime('+2 days')),
             'cota_limite' => (int)$cota['limite'],

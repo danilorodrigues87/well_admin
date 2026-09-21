@@ -20,9 +20,9 @@ class SinirService
 
         $status = $sinirStatus ?: 'pendente';
         [$label, $css] = match ($status) {
-            'enviado' => ['Enviado SINIR', 'success'],
-            'erro' => ['Erro SINIR', 'danger'],
-            default => ['Pendente SINIR', 'warning'],
+            'enviado' => ['MTR no SINIR', 'success'],
+            'erro' => ['Falha registro', 'danger'],
+            default => ['Aguard. SINIR', 'warning'],
         };
 
         return '<span class="badge bg-'.$css.'">'.CrudHelper::e($label).'</span>';

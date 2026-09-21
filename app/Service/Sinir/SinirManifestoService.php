@@ -81,12 +81,17 @@ class SinirManifestoService
             $manNumero = (string)($primeiro['manifestoCodigo'] ?? '');
             $codigoBarras = (string)($primeiro['codigoBarra'] ?? $primeiro['codigoBarras'] ?? '');
 
-            EntityColeta::update($coletaId, [
+            $numeroMtr = self::manifestoParaNumeroMtr($manNumero);
+            $update = [
                 'sinir_man_numero' => $manNumero !== '' ? $manNumero : null,
                 'sinir_codigo_barras' => $codigoBarras !== '' ? $codigoBarras : null,
                 'sinir_status' => 'enviado',
                 'sinir_enviado_em' => date('Y-m-d H:i:s'),
-            ]);
+            ];
+            if ($numeroMtr !== null) {
+                $update['numero_mtr'] = $numeroMtr;
+            }
+            EntityColeta::update($coletaId, $update);
 
             EntitySinirEnvio::registrar(
                 $coletaId,
@@ -111,6 +116,20 @@ class SinirManifestoService
         $this->registrarFalha($coletaId, $payload, is_array($body) ? $body : $response, $msg);
 
         return ['ok' => false, 'message' => $msg, 'details' => ['http_status' => $response['status']]];
+    }
+
+    private static function manifestoParaNumeroMtr(string $manifestoCodigo): ?int
+    {
+        $manifestoCodigo = trim($manifestoCodigo);
+        if ($manifestoCodigo === '') {
+            return null;
+        }
+        if (ctype_digit($manifestoCodigo)) {
+            return (int)$manifestoCodigo;
+        }
+        $digits = preg_replace('/\D/', '', $manifestoCodigo);
+
+        return $digits !== '' ? (int)$digits : null;
     }
 
     /** @param array<string,mixed>|null $primeiro */

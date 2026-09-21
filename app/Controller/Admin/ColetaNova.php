@@ -312,7 +312,7 @@ class ColetaNova extends Page
         $evidencias = EntityColetaEvidencia::getByColetaId($coletaId);
 
         return CrudHelper::jsonOk([
-            'message' => 'Rascunho salvo. Confira o resumo e clique em Gerar MTR.',
+            'message' => 'Rascunho salvo. Confira o resumo e finalize a coleta.',
             'evidencias_html' => self::renderEvidenciasHtml($evidencias),
             'resumo_html' => self::renderResumoRascunho($itens, $evidencias, $resumo['motorista']),
             'rascunho_conferido' => true,
@@ -325,10 +325,23 @@ class ColetaNova extends Page
 
         $files = self::collectEvidenciaFilesList();
 
-        $numeroMtr = ColetaService::finalizar($coletaId, $files);
-        $msg = 'Coleta finalizada! MTR nº '.$numeroMtr.'.';
+        $result = ColetaService::finalizar($coletaId, $files);
+        $numeroMtr = $result['numero_mtr'];
+        $sinir = $result['sinir'];
+
         if (\App\Common\SinirConfig::isEnabled()) {
-            $msg .= ' Envio ao SINIR ficará pendente — use Reenviar SINIR em Coletas se necessário.';
+            if ($numeroMtr) {
+                $msg = 'Coleta finalizada e MTR nº '.$numeroMtr.' registrado no SINIR.';
+            } elseif ($sinir && !empty($sinir['ok'])) {
+                $msg = 'Coleta finalizada. MTR registrado no SINIR.';
+            } elseif ($sinir && !empty($sinir['skipped'])) {
+                $msg = 'Coleta finalizada. '.$sinir['message'];
+            } else {
+                $msg = 'Coleta finalizada, mas o MTR ainda não foi registrado no SINIR. '
+                    .($sinir['message'] ?? 'Use "Registrar MTR no SINIR" em Coletas.');
+            }
+        } else {
+            $msg = 'Coleta finalizada! Documento nº '.($numeroMtr ?? '—').'.';
         }
 
         return CrudHelper::jsonOk([

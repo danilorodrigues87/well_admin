@@ -186,11 +186,12 @@ class Coletas extends BaseApi
         }
 
         try {
-            $numeroMtr = ColetaService::finalizar($id, $files);
+            $result = ColetaService::finalizar($id, $files);
             $detalhe = ColetaService::detalhar($id);
 
             return ApiHelper::ok([
-                'numero_mtr' => $numeroMtr,
+                'numero_mtr' => $result['numero_mtr'],
+                'sinir' => $result['sinir'],
                 'coleta' => ColetaApiPresenter::coletaDetalhe($detalhe),
             ]);
         } catch (\InvalidArgumentException $e) {

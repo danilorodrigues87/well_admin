@@ -148,7 +148,7 @@ app/Service/Sinir/
 app/Model/Entity/SinirEnvio.php     — histórico de tentativas
 ```
 
-`ColetaService::finalizar()` dispara envio SINIR quando `SINIR_ENABLED=true`. Doc: `docs/SINIR.md`.
+Com `SINIR_ENABLED=true`, `ColetaService::finalizar()` **não** grava `numero_mtr`; tenta registro no SINIR e o número é preenchido no sucesso (`SinirManifestoService`). Impressão/portal usam `ColetaMtrHelper`. Doc: `docs/SINIR.md`.
 
 ### Integração Banco Inter + Faturamento
 
@@ -265,3 +265,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-21 | Dashboard admin: KPIs e gráficos principais clicáveis (RBAC por módulo); listagens CRUD aplicam filtros via query string (`well-ajax.js`) |
 | 2026-09-21 | Rotas: só cliente×rota (sem coletor em `rota_atribuicoes`); `RotaScopeService` + KPI `clientes_em_rotas`; migration `037`; coletor escolhe coleta (`coletas.coletor_id`) |
 | 2026-09-21 | Agendamento portal gerador: `coleta_solicitacoes` (`038`), cota plano (`039` + CRUD planos); `ColetaSolicitacaoService` (48h, mês civil/trimestre); fila em Agendamentos; `/gerador/agendamentos`; API `/api/v1/gerador/coleta-solicitacoes`; extras em Pagamentos; `repair_proxima_coleta.php` |
+| 2026-09-21 | MTR pós-SINIR: `finalizar()` sem `numero_mtr` com SINIR ativo; número gravado no sucesso do manifesto; `ColetaMtrHelper`; wizard “Finalizar coleta”; portal gerador exibe próxima coleta agendada |
