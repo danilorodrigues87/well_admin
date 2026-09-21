@@ -19,6 +19,7 @@ $obRouter->post('/painel/pagamentos', [
             'historico' => Pagamentos::historico($request),
             'emitir' => Pagamentos::emitirLote($request),
             'config' => Pagamentos::saveConfig($request),
+            'extras_competencia' => Pagamentos::extrasCompetencia($request),
             default => json_encode(['success' => false, 'message' => 'Ação inválida']),
         };
 

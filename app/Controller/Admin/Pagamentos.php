@@ -9,9 +9,11 @@ use App\Model\Db\Pagination;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use App\Model\Entity\Plano as EntityPlano;
+use App\Service\ColetaSolicitacaoService;
 use App\Service\FaturamentoService;
 use App\Service\MailService;
 use App\Service\PlanoCobrancaService;
+use App\Common\Helpers\MoneyHelper;
 use App\Utils\View;
 
 class Pagamentos extends Page
@@ -446,5 +448,35 @@ class Pagamentos extends Page
                 </table>
             </td>
         </tr>';
+    }
+
+    public static function extrasCompetencia($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $competencia = trim((string)($post['competencia'] ?? date('Y-m')));
+        $rows = ColetaSolicitacaoService::listExtrasCompetencia($competencia);
+        $itens = '';
+        $total = 0.0;
+        foreach ($rows as $row) {
+            $total += (float)$row['valor'];
+            $itens .= '<tr>
+                <td>'.CrudHelper::e((string)$row['cliente_nome']).'</td>
+                <td>'.date('d/m/Y', strtotime((string)$row['data'])).'</td>
+                <td class="text-end">'.MoneyHelper::format((float)$row['valor']).'</td>
+                <td class="small text-muted">'.CrudHelper::e(mb_strimwidth((string)$row['motivo'], 0, 60, '…')).'</td>
+            </tr>';
+        }
+        if ($itens === '') {
+            $itens = '<tr><td colspan="4" class="text-muted text-center">Nenhuma coleta extra aprovada nesta competência.</td></tr>';
+        }
+
+        return CrudHelper::jsonOk([
+            'itens' => $itens,
+            'total' => MoneyHelper::format($total),
+            'qtd' => count($rows),
+        ]);
     }
 }

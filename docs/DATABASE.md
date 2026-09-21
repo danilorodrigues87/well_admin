@@ -172,6 +172,9 @@ Nomes truncados (`1 Sacos de`, `1 Granel de`…): `App\Common\Helpers\ColetaItem
 | Tabela | Descrição |
 |--------|-----------|
 | `cliente_usuarios` | Login do gerador — **1 por cliente**. FK `cliente_id` UNIQUE, e-mail unique `(operadora_id, email)` |
+| `coleta_solicitacoes` | Solicitações de data de coleta pelo portal (`038`); status pendente/aprovada/recusada/cancelada; tipo inclusa/extra; `valor_cobranca_extra` na aprovação admin |
+
+Colunas em `planos` (`039_planos_frequencia.sql`): `coletas_periodo_meses`, `coletas_por_periodo` (ex.: 1 coleta a cada 3 meses). Cota mensal continua em `coletas_mensais` quando período não informado.
 
 ```bash
 php database/scripts/apply_migration_025.php

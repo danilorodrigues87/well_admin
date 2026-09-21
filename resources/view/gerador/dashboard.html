@@ -4,6 +4,7 @@
         <p class="text-muted mb-0">{{cliente_nome}} — acompanhe coletas e financeiro em tempo real.</p>
     </div>
     <div class="d-flex gap-2">
+        <a href="{{URL}}/gerador/agendamentos" class="btn btn-outline-success btn-sm"><i class="fas fa-calendar-check me-1"></i> Agendar</a>
         <a href="{{URL}}/gerador/coletas" class="btn btn-outline-primary btn-sm"><i class="fas fa-truck me-1"></i> Coletas</a>
         <a href="{{URL}}/gerador/boletos" class="btn btn-primary btn-sm"><i class="fas fa-file-invoice-dollar me-1"></i> Financeiro</a>
     </div>
@@ -28,10 +29,24 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
+                        <div class="text-muted small">Coletas no plano — {{cota_periodo}}</div>
+                        <div class="fs-2 fw-bold">{{cota_restantes}}<span class="fs-6 fw-normal text-muted"> / {{cota_limite}}</span></div>
+                        <div class="small"><a href="{{URL}}/gerador/agendamentos">Solicitar coleta</a></div>
+                    </div>
+                    <i class="fas fa-calendar-check fa-2x text-success opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 d-none d-xl-block">
+        <div class="card border-start border-secondary border-4 h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
                         <div class="text-muted small">Total de coletas</div>
                         <div class="fs-2 fw-bold">{{total_coletas}}</div>
                     </div>
-                    <i class="fas fa-recycle fa-2x text-success opacity-50"></i>
+                    <i class="fas fa-recycle fa-2x text-secondary opacity-50"></i>
                 </div>
             </div>
         </div>

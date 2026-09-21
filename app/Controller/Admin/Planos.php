@@ -92,6 +92,8 @@ class Planos extends Page
             'descricao' => $p->descricao,
             'valor_mensal' => $p->valor_mensal,
             'coletas_mensais' => $p->coletas_mensais,
+            'coletas_periodo_meses' => $p->coletas_periodo_meses,
+            'coletas_por_periodo' => $p->coletas_por_periodo,
             'tipo' => $p->tipo,
             'ativo' => $p->ativo,
             'itens' => PlanoService::serializeItensForForm($p->id),
@@ -106,10 +108,18 @@ class Planos extends Page
         }
 
         $id = (int)($post['id'] ?? 0);
+        $periodoMeses = trim((string)($post['coletas_periodo_meses'] ?? ''));
+        $periodoMesesInt = $periodoMeses !== '' ? max(1, (int)$periodoMeses) : null;
+        if ($periodoMesesInt !== null && $periodoMesesInt <= 1) {
+            $periodoMesesInt = null;
+        }
         $data = [
             'nome' => trim((string)($post['nome'] ?? '')),
             'descricao' => trim((string)($post['descricao'] ?? '')),
             'valor_mensal' => MoneyHelper::parse((string)($post['valor_mensal'] ?? '0')),
+            'coletas_mensais' => (float)str_replace(',', '.', (string)($post['coletas_mensais'] ?? '0')),
+            'coletas_periodo_meses' => $periodoMesesInt,
+            'coletas_por_periodo' => max(1, (int)($post['coletas_por_periodo'] ?? 1)),
             'tipo' => trim((string)($post['tipo'] ?? '')),
             'ativo' => CrudHelper::parseAtivo($post, $id <= 0),
         ];

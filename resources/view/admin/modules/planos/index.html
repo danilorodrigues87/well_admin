@@ -19,6 +19,9 @@
             <div class="col-md-6"><label>Nome *</label><input class="form-control" name="nome" id="crud-nome" required/></div>
             <div class="col-md-3"><label>Valor mensal (R$) *</label><input class="form-control" name="valor_mensal" id="crud-valor_mensal" inputmode="decimal" placeholder="0,00"/></div>
             <div class="col-md-3"><label>Tipo</label><select class="form-select" name="tipo" id="crud-tipo"><option value="">—</option><option value="Plano padrão">Plano padrão</option><option value="Plano personalizado">Plano personalizado</option></select></div>
+            <div class="col-md-2"><label>Coletas/mês</label><input class="form-control" name="coletas_mensais" id="crud-coletas_mensais" inputmode="decimal" placeholder="1" title="Cota mensal quando não usa período customizado"/></div>
+            <div class="col-md-2"><label>Período (meses)</label><input class="form-control" name="coletas_periodo_meses" id="crud-coletas_periodo_meses" inputmode="numeric" placeholder="—" title="Ex.: 3 = trimestre"/></div>
+            <div class="col-md-2"><label>Coletas no período</label><input class="form-control" name="coletas_por_periodo" id="crud-coletas_por_periodo" inputmode="numeric" value="1"/></div>
             <div class="col-md-6"><label>Descrição interna</label><textarea class="form-control" name="descricao" id="crud-descricao" rows="2" placeholder="Opcional"></textarea></div>
             <div class="col-md-3"><label>Status</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
         </div>

@@ -16,6 +16,8 @@ class Plano
     public string $descricao = '';
     public float $valor_mensal = 0;
     public float $coletas_mensais = 0;
+    public ?int $coletas_periodo_meses = null;
+    public int $coletas_por_periodo = 1;
     public string $tipo = '';
     public int $ativo = 1;
     public ?string $contrato_clausula_1 = null;
@@ -113,6 +115,9 @@ class Plano
         $p->descricao = (string)($row['descricao'] ?? '');
         $p->valor_mensal = (float)$row['valor_mensal'];
         $p->coletas_mensais = (float)$row['coletas_mensais'];
+        $p->coletas_periodo_meses = isset($row['coletas_periodo_meses']) && $row['coletas_periodo_meses'] !== null
+            ? (int)$row['coletas_periodo_meses'] : null;
+        $p->coletas_por_periodo = max(1, (int)($row['coletas_por_periodo'] ?? 1));
         $p->tipo = (string)($row['tipo'] ?? '');
         $p->ativo = (int)$row['ativo'];
         $p->contrato_clausula_1 = isset($row['contrato_clausula_1']) ? (string)$row['contrato_clausula_1'] : null;

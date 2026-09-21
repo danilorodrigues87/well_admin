@@ -96,6 +96,17 @@ class FormatHelper
         return self::badge($s['label'], $s['class']);
     }
 
+    public static function statusSolicitacaoBadge(string $status): string
+    {
+        return match ($status) {
+            'pendente' => self::badge('Pendente', 'primary'),
+            'aprovada' => self::badge('Aprovada', 'success'),
+            'recusada' => self::badge('Recusada', 'danger'),
+            'cancelada' => self::badge('Cancelada', 'secondary'),
+            default => self::badge(ucfirst($status), 'secondary'),
+        };
+    }
+
     public static function situacaoRecebimentoBadge(string $situacao): string
     {
         return $situacao === 'recebido'

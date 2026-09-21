@@ -264,3 +264,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-15 | Coleta wizard: motorista = select de coletores (bloqueado para função Coletor); Tom Select nos resíduos; modal loading na finalização; SINIR não bloqueia HTTP |
 | 2026-09-21 | Dashboard admin: KPIs e gráficos principais clicáveis (RBAC por módulo); listagens CRUD aplicam filtros via query string (`well-ajax.js`) |
 | 2026-09-21 | Rotas: só cliente×rota (sem coletor em `rota_atribuicoes`); `RotaScopeService` + KPI `clientes_em_rotas`; migration `037`; coletor escolhe coleta (`coletas.coletor_id`) |
+| 2026-09-21 | Agendamento portal gerador: `coleta_solicitacoes` (`038`), cota plano (`039` + CRUD planos); `ColetaSolicitacaoService` (48h, mês civil/trimestre); fila em Agendamentos; `/gerador/agendamentos`; API `/api/v1/gerador/coleta-solicitacoes`; extras em Pagamentos; `repair_proxima_coleta.php` |

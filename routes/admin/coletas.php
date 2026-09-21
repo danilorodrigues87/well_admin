@@ -111,6 +111,10 @@ foreach ($coletaCrud as $route) {
                 'sinir_reenviar' => $ctrl === Coletas::class ? Coletas::sinirReenviar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'agendar_rota' => $ctrl === Agendamentos::class ? Agendamentos::agendarRota($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'list_solicitacoes' => $ctrl === Agendamentos::class ? Agendamentos::listSolicitacoes($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'get_solicitacao' => $ctrl === Agendamentos::class ? Agendamentos::getSolicitacao($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'aprovar_solicitacao' => $ctrl === Agendamentos::class ? Agendamentos::aprovarSolicitacao($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'recusar_solicitacao' => $ctrl === Agendamentos::class ? Agendamentos::recusarSolicitacao($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 default => json_encode(['success' => false, 'message' => 'Ação inválida']),
             };
             return new Response(200, $content, 'application/json');

@@ -5,9 +5,12 @@ namespace App\Controller\Admin;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\ColetorSelectHelper;
 use App\Model\Db\Pagination;
+use App\Common\Helpers\MoneyHelper;
 use App\Model\Entity\Cliente as EntityCliente;
+use App\Model\Entity\ColetaSolicitacao;
 use App\Model\Entity\Rota as EntityRota;
 use App\Service\AgendamentoService;
+use App\Service\ColetaSolicitacaoService;
 use App\Service\PlanoService;
 use App\Session\User\Login as SessionUser;
 use App\Utils\View;
@@ -38,18 +41,26 @@ class Agendamentos extends Page
 
     public static function index($request): string
     {
+        $pendentes = ColetaSolicitacao::countPendentesOperadora();
+        $badgePendentes = $pendentes > 0
+            ? ' <span class="badge bg-danger ms-1">'.$pendentes.'</span>'
+            : '';
         $content = View::render('admin/modules/agendamentos/index', [
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
             'rotas_options' => self::rotasOptionsHtml(true),
             'rotas_options_lote' => self::rotasOptionsHtml(false),
             'data_hoje' => date('Y-m-d'),
+            'data_min_solic' => date('Y-m-d', strtotime('+2 days')),
+            'solicitacoes_pendentes_badge' => $badgePendentes,
         ]);
 
         return self::getPage(
             'Agendamentos',
             $content,
             'agendamentos',
-            self::crudScripts('/painel/agendamentos').'<script src="'.URL.'/resources/js/agendamentos.js?v=20260917"></script>'
+            self::crudScripts('/painel/agendamentos')
+                .'<script src="'.URL.'/resources/js/agendamentos.js?v=20260921"></script>'
+                .'<script src="'.URL.'/resources/js/agendamentos-solicitacoes.js?v=20260921"></script>'
         );
     }
 
@@ -163,5 +174,118 @@ class Agendamentos extends Page
                 .date('d/m/Y', strtotime($data)).'.',
             'atualizados' => $result['atualizados'],
         ]);
+    }
+
+    public static function listSolicitacoes($request): string
+    {
+        $post = $request->getPostVars();
+        $page = max(1, (int)($post['page'] ?? 1));
+        $status = trim((string)($post['status'] ?? 'pendente'));
+        $result = ColetaSolicitacao::listAdmin($status, $page, 15);
+
+        $itens = '';
+        foreach ($result['items'] as $s) {
+            $tipoBadge = $s->tipo === 'extra'
+                ? '<span class="badge bg-warning text-dark">Extra</span>'
+                : '<span class="badge bg-success">Inclusa</span>';
+            $statusBadge = match ($s->status) {
+                'pendente' => '<span class="badge bg-primary">Pendente</span>',
+                'aprovada' => '<span class="badge bg-success">Aprovada</span>',
+                'recusada' => '<span class="badge bg-danger">Recusada</span>',
+                default => '<span class="badge bg-secondary">'.CrudHelper::e($s->status).'</span>',
+            };
+            $data = date('d/m/Y', strtotime($s->data_desejada));
+            $acoes = '';
+            if ($s->status === 'pendente') {
+                $acoes = '<button type="button" class="btn btn-sm btn-success me-1" onclick="abrirAprovarSolicitacao('.(int)$s->id.')"><i class="fas fa-check"></i></button>'
+                    .'<button type="button" class="btn btn-sm btn-outline-danger" onclick="abrirRecusarSolicitacao('.(int)$s->id.')"><i class="fas fa-times"></i></button>';
+            } else {
+                $acoes = '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="verSolicitacao('.(int)$s->id.')"><i class="fas fa-eye"></i></button>';
+            }
+            $itens .= '<tr>
+                <td>'.CrudHelper::e($s->cliente_nome).'</td>
+                <td class="small">'.CrudHelper::e($s->solicitante_nome).'</td>
+                <td>'.$data.'</td>
+                <td>'.$tipoBadge.'</td>
+                <td>'.$statusBadge.'</td>
+                <td class="small text-muted">'.CrudHelper::e(mb_strimwidth((string)($s->motivo_gerador ?? ''), 0, 80, '…')).'</td>
+                <td>'.$acoes.'</td>
+            </tr>';
+        }
+        if ($itens === '') {
+            $itens = '<tr><td colspan="7" class="text-center text-muted">Nenhuma solicitação.</td></tr>';
+        }
+
+        $pagination = new Pagination($result['total'], $page, 15);
+
+        return self::jsonLista(['success' => true, 'itens' => $itens, 'pagination' => Pagination::renderNav($pagination)]);
+    }
+
+    public static function getSolicitacao($request): string
+    {
+        $id = (int)($request->getPostVars()['id'] ?? 0);
+        $s = ColetaSolicitacao::getById($id);
+        if (!$s) {
+            return CrudHelper::jsonError('Solicitação não encontrada.');
+        }
+        $cota = ColetaSolicitacaoService::resumoCota($s->cliente_id, $s->data_desejada);
+
+        return CrudHelper::jsonOk([
+            'id' => $s->id,
+            'cliente_nome' => $s->cliente_nome,
+            'solicitante_nome' => $s->solicitante_nome,
+            'data_desejada' => $s->data_desejada,
+            'status' => $s->status,
+            'tipo' => $s->tipo,
+            'motivo_gerador' => $s->motivo_gerador,
+            'resposta_admin' => $s->resposta_admin,
+            'valor_cobranca_extra' => $s->valor_cobranca_extra,
+            'data_aprovada' => $s->data_aprovada,
+            'cota' => $cota,
+        ]);
+    }
+
+    public static function aprovarSolicitacao($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
+        $valorRaw = trim((string)($post['valor_cobranca_extra'] ?? ''));
+        $valor = $valorRaw !== '' ? MoneyHelper::parse($valorRaw) : null;
+        try {
+            ColetaSolicitacaoService::aprovar(
+                (int)($post['id'] ?? 0),
+                (int)($usuario['id'] ?? 0),
+                trim((string)($post['data_aprovada'] ?? '')) ?: null,
+                $valor,
+                trim((string)($post['resposta_admin'] ?? ''))
+            );
+        } catch (\InvalidArgumentException $e) {
+            return CrudHelper::jsonError($e->getMessage());
+        }
+
+        return CrudHelper::jsonOk(['message' => 'Solicitação aprovada. Próxima coleta do cliente atualizada.']);
+    }
+
+    public static function recusarSolicitacao($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
+        try {
+            ColetaSolicitacaoService::recusar(
+                (int)($post['id'] ?? 0),
+                (int)($usuario['id'] ?? 0),
+                trim((string)($post['resposta_admin'] ?? ''))
+            );
+        } catch (\InvalidArgumentException $e) {
+            return CrudHelper::jsonError($e->getMessage());
+        }
+
+        return CrudHelper::jsonOk(['message' => 'Solicitação recusada.']);
     }
 }

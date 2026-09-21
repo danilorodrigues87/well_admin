@@ -257,6 +257,27 @@ $obRouter->get('/api/v1/gerador/coletas/{id}/evidencias/{ordem}', [
     },
 ]);
 
+$obRouter->get('/api/v1/gerador/coleta-solicitacoes', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return ApiGerador\ColetaSolicitacoes::index($request);
+    },
+]);
+
+$obRouter->post('/api/v1/gerador/coleta-solicitacoes', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return ApiGerador\ColetaSolicitacoes::store($request);
+    },
+]);
+
+$obRouter->post('/api/v1/gerador/coleta-solicitacoes/{id}/cancelar', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id) {
+        return ApiGerador\ColetaSolicitacoes::cancel($request, $id);
+    },
+]);
+
 $obRouter->get('/api/v1/gerador/boletos', [
     'middlewares' => $geradorAuth,
     function ($request) {

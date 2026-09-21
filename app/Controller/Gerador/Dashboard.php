@@ -5,6 +5,8 @@ namespace App\Controller\Gerador;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\FormatHelper;
 use App\Common\Helpers\MoneyHelper;
+use App\Common\GeradorScope;
+use App\Service\ColetaSolicitacaoService;
 use App\Service\GeradorDashboardService;
 use App\Service\GeradorPortalService;
 use App\Session\Gerador\Login as GeradorSession;
@@ -16,6 +18,7 @@ class Dashboard extends Page
     {
         $session = GeradorSession::getData() ?? [];
         $kpis = GeradorDashboardService::kpis();
+        $cota = ColetaSolicitacaoService::resumoCota(GeradorScope::getClienteId());
         $coletasChart = GeradorDashboardService::coletasPorMes();
         $faturamentoChart = GeradorDashboardService::faturamentoPorMes();
         $boletosChart = GeradorDashboardService::boletosPorStatus();
@@ -61,6 +64,9 @@ class Dashboard extends Page
         $content = View::render('gerador/dashboard', [
             'cliente_nome' => htmlspecialchars((string)($session['cliente_nome'] ?? ''), ENT_QUOTES, 'UTF-8'),
             'user_nome' => htmlspecialchars((string)($session['nome'] ?? ''), ENT_QUOTES, 'UTF-8'),
+            'cota_restantes' => (int)$cota['restantes'],
+            'cota_limite' => (int)$cota['limite'],
+            'cota_periodo' => htmlspecialchars((string)$cota['periodo_label'], ENT_QUOTES, 'UTF-8'),
             'coletas_mes' => (int)$kpis['coletas_mes'],
             'total_coletas' => (int)$kpis['total_coletas'],
             'boletos_abertos' => (int)$kpis['boletos_abertos'],

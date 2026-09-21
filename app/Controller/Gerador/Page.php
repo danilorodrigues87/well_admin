@@ -14,6 +14,7 @@ class Page
     private static array $menuItems = [
         ['slug' => 'dashboard', 'label' => 'Início', 'link' => '/gerador', 'icon' => 'fas fa-chart-line'],
         ['slug' => 'coletas', 'label' => 'Coletas', 'link' => '/gerador/coletas', 'icon' => 'fas fa-truck'],
+        ['slug' => 'agendamentos', 'label' => 'Agendamentos', 'link' => '/gerador/agendamentos', 'icon' => 'fas fa-calendar-check'],
         ['slug' => 'boletos', 'label' => 'Financeiro', 'link' => '/gerador/boletos', 'icon' => 'fas fa-file-invoice-dollar'],
         ['slug' => 'perfil', 'label' => 'Meu perfil', 'link' => '/gerador/perfil', 'icon' => 'fas fa-id-badge'],
     ];

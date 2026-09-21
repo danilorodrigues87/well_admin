@@ -208,6 +208,7 @@
           (json.total || 0) + ' cliente(s) na competência ' + (json.competencia || '') +
           (json.page && json.total > 0 ? ' — página ' + json.page : '');
         bindFaturamentoEvents();
+        carregarExtrasCompetencia();
       })
       .catch(function (err) {
         document.getElementById('tbody-faturamento').innerHTML =
@@ -224,6 +225,29 @@
   window.loadPageRelatorio = function (page) {
     carregarRelatorio(page);
   };
+
+  function carregarExtrasCompetencia() {
+    var tbody = document.getElementById('tbody-extras');
+    var resumo = document.getElementById('extras-resumo');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-center py-2">Carregando...</td></tr>';
+    var data = postData({
+      acao: 'extras_competencia',
+      competencia: document.getElementById('filtro-competencia').value
+    });
+    fetch(apiUrl(), { method: 'POST', body: data, credentials: 'same-origin' })
+      .then(parseJsonResponse)
+      .then(function (json) {
+        if (!json.success) return;
+        tbody.innerHTML = json.itens || '';
+        if (resumo) {
+          resumo.textContent = (json.qtd || 0) + ' extra(s) — total ' + (json.total || 'R$ 0,00');
+        }
+      })
+      .catch(function () {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-danger text-center">Erro ao carregar extras.</td></tr>';
+      });
+  }
 
   var historicoPage = 1;
 

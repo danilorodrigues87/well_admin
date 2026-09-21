@@ -110,7 +110,8 @@
 
   window.novoRegistro = function () {
     $('#crud-id').val(0);
-    $('#crud-nome, #crud-descricao, #crud-valor_mensal').val('');
+    $('#crud-nome, #crud-descricao, #crud-valor_mensal, #crud-coletas_mensais, #crud-coletas_periodo_meses').val('');
+    $('#crud-coletas_por_periodo').val('1');
     $('#crud-tipo').val('');
     $('#crud-ativo').val('1');
     $('#plano-itens-body').empty();
@@ -140,6 +141,9 @@
       $('#crud-nome').val(data.nome || '');
       $('#crud-descricao').val(data.descricao || '');
       $('#crud-valor_mensal').val(data.valor_mensal != null ? String(data.valor_mensal).replace('.', ',') : '');
+      $('#crud-coletas_mensais').val(data.coletas_mensais != null ? String(data.coletas_mensais).replace('.', ',') : '');
+      $('#crud-coletas_periodo_meses').val(data.coletas_periodo_meses != null && data.coletas_periodo_meses !== '' ? String(data.coletas_periodo_meses) : '');
+      $('#crud-coletas_por_periodo').val(data.coletas_por_periodo != null ? String(data.coletas_por_periodo) : '1');
       $('#crud-tipo').val(data.tipo || '');
       $('#crud-ativo').val(String(data.ativo != null ? data.ativo : 1));
       $('#plano-itens-body').empty();
@@ -172,6 +176,9 @@
       nome: $('#crud-nome').val(),
       descricao: $('#crud-descricao').val(),
       valor_mensal: $('#crud-valor_mensal').val(),
+      coletas_mensais: $('#crud-coletas_mensais').val(),
+      coletas_periodo_meses: $('#crud-coletas_periodo_meses').val(),
+      coletas_por_periodo: $('#crud-coletas_por_periodo').val(),
       tipo: $('#crud-tipo').val(),
       ativo: $('#crud-ativo').val(),
       itens_json: JSON.stringify(itens)

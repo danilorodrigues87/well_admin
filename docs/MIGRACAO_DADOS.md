@@ -381,9 +381,9 @@ SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id =
 
 1. **Backup** completo `well_admin` (+ arquivos `storage/` se já houver evidências locais).
 2. **Purge** MTRs teste (comando acima).
-3. Aplicar migrations pendentes **034–036** (se ainda não).
+3. Aplicar migrations pendentes **034–039** (se ainda não).
 4. Se faltarem coletas legado no banco atual: `etl_import_coletas.php` (sem `--purge-local` salvo se souber o que apaga).
-5. Repairs: `repair_legacy_peso`, `backfill_coleta_itens_tipo`, `repair_coletas_data_recebimento`.
+5. Repairs: `repair_legacy_peso`, `backfill_coleta_itens_tipo`, `repair_coletas_data_recebimento`, `repair_proxima_coleta.php` (dry-run antes de `--apply`).
 6. **Deploy** código admin novo na VPS; `.env`; `composer install --no-dev`.
 7. Smoke: login, listagem coletas, imprimir MTR legado, **uma** coleta teste com MTR **11922+** (após confirmar sequência).
 8. DNS `admin.well.eco.br` → VPS; desativar painel antigo.
@@ -400,6 +400,7 @@ SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id =
 
 | Data | Alteração |
 |------|-----------|
+| 2026-09-21 | Script `repair_proxima_coleta.php`; migrations `038`/`039` agendamento portal gerador |
 | 2026-09-19 | Seção 14 cutover final; script `purge_coletas_mtr_teste.php` (MTR 11917–11921) |
 | 2026-09-16 | Multitenancy: seções 12–13; migrations 021–024; ETL `--operadora-id`; checklist go-live; catálogo SINIR revisado |
 | 2026-09-16 | Criação: inventário completo ETL/backfill; regra `data_recebimento` obrigatória no MTR; script `repair_coletas_data_recebimento.php`; fallback no import |

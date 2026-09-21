@@ -61,6 +61,20 @@ $obRouter->get('/gerador', [
     },
 ]);
 
+$obRouter->get('/gerador/agendamentos', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return new Response(200, Gerador\Agendamentos::index($request));
+    },
+]);
+
+$obRouter->post('/gerador/agendamentos', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        return new Response(200, Gerador\Agendamentos::post($request), 'application/json');
+    },
+]);
+
 $obRouter->get('/gerador/coletas', [
     'middlewares' => $geradorAuth,
     function ($request) {

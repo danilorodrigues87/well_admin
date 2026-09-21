@@ -181,6 +181,9 @@ Autenticação: JWT com claim `tipo=gerador` (mesmo `API_JWT_SECRET` / TTL do co
 |--------|------|-----------|
 | POST | `/gerador/login` | Body: `email`, `password` (ou `senha`) |
 | GET | `/gerador/me` | Perfil + `cliente_id`, `cliente_nome` |
+| GET | `/gerador/coleta-solicitacoes` | Lista solicitações + resumo de cota do plano |
+| POST | `/gerador/coleta-solicitacoes` | Body: `data_desejada`, `motivo` |
+| POST | `/gerador/coleta-solicitacoes/{id}/cancelar` | Cancela solicitação pendente |
 | GET | `/gerador/coletas` | Coletas do cliente (query `page`, `per_page`) |
 | GET | `/gerador/coletas/{id}` | Detalhe (itens, snapshot, evidências) |
 | GET | `/gerador/coletas/{id}/evidencias/{ordem}` | Imagem |
