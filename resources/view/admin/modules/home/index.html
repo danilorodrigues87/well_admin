@@ -5,69 +5,86 @@
 
 <div class="row g-3 mb-4">
     <div class="col-xl-3 col-md-6">
+        {{wrap_coletas_mes_open}}
         <div class="card border-start border-primary border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">Coletas finalizadas (mês)</div>
                         <div class="fs-2 fw-bold text-primary">{{coletas_mes}}</div>
+                        <div class="small text-muted dashboard-kpi-hint">Ver coletas do mês</div>
                     </div>
                     <i class="fas fa-truck fa-2x text-primary opacity-50"></i>
                 </div>
             </div>
         </div>
+        {{wrap_coletas_mes_close}}
     </div>
     <div class="col-xl-3 col-md-6">
+        {{wrap_rascunhos_open}}
         <div class="card border-start border-warning border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">Rascunhos abertos</div>
                         <div class="fs-2 fw-bold">{{rascunhos}}</div>
+                        <div class="small text-muted dashboard-kpi-hint">Ver rascunhos</div>
                     </div>
                     <i class="fas fa-pen fa-2x text-warning opacity-50"></i>
                 </div>
             </div>
         </div>
+        {{wrap_rascunhos_close}}
     </div>
     <div class="col-xl-3 col-md-6">
+        {{wrap_urgentes_open}}
         <div class="card border-start border-danger border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">Clientes urgentes</div>
                         <div class="fs-2 fw-bold">{{urgentes}}</div>
+                        <div class="small text-muted dashboard-kpi-hint">Ver clientes urgentes</div>
                     </div>
                     <i class="fas fa-triangle-exclamation fa-2x text-danger opacity-50"></i>
                 </div>
             </div>
         </div>
+        {{wrap_urgentes_close}}
     </div>
     <div class="col-xl-3 col-md-6">
+        {{wrap_atrasados_open}}
         <div class="card border-start border-info border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-muted small">Coleta atrasada / hoje</div>
                         <div class="fs-2 fw-bold">{{atrasados}}</div>
+                        <div class="small text-muted dashboard-kpi-hint">Ver agendamentos</div>
                     </div>
                     <i class="fas fa-calendar-day fa-2x text-info opacity-50"></i>
                 </div>
             </div>
         </div>
+        {{wrap_atrasados_close}}
     </div>
 </div>
 
 <div class="row g-4 mb-4">
     <div class="col-xl-8">
+        {{wrap_chart_coletas_open}}
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-transparent"><i class="fas fa-chart-line me-1 text-primary"></i> Coletas finalizadas (6 meses)</div>
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-line me-1 text-primary"></i> Coletas finalizadas (6 meses)</span>
+                <span class="small text-muted dashboard-kpi-hint">Abrir listagem</span>
+            </div>
             <div class="card-body">
                 <div style="height:300px">
                     <canvas id="chartAdminColetas" data-well-chart="line" data-labels='{{chart_coletas_labels}}' data-values='{{chart_coletas_values}}' data-label="Coletas"></canvas>
                 </div>
             </div>
         </div>
+        {{wrap_chart_coletas_close}}
     </div>
     <div class="col-xl-4">
         <div class="card shadow-sm h-100">
@@ -83,42 +100,54 @@
 
 <div class="row g-4 mb-4">
     <div class="col-xl-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-transparent"><i class="fas fa-chart-column me-1 text-primary"></i> Faturamento emitido (6 meses)</div>
+        {{wrap_faturamento_open}}
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-column me-1 text-primary"></i> Faturamento emitido (6 meses)</span>
+                <span class="small text-muted dashboard-kpi-hint">Ver pagamentos</span>
+            </div>
             <div class="card-body">
                 <div style="height:260px">
                     <canvas id="chartAdminFaturamento" data-well-chart="bar" data-labels='{{chart_faturamento_labels}}' data-values='{{chart_faturamento_values}}' data-label="Faturamento" data-currency="1"></canvas>
                 </div>
             </div>
         </div>
+        {{wrap_faturamento_close}}
     </div>
     <div class="col-xl-4">
         <div class="row g-3">
             <div class="col-12">
+                {{wrap_clientes_ativos_open}}
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
                         <div class="text-muted small">Clientes ativos</div>
                         <div class="fs-3 fw-bold">{{clientes_ativos}}</div>
+                        <div class="small text-muted dashboard-kpi-hint">Ver clientes</div>
                     </div>
                 </div>
+                {{wrap_clientes_ativos_close}}
             </div>
             <div class="col-12">
+                {{wrap_sem_coletor_open}}
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
                         <div class="text-muted small">Atribuições sem coletor</div>
                         <div class="fs-3 fw-bold">{{sem_coletor}}</div>
-                        <a href="{{URL}}/painel/rotas" class="small">Ver rotas</a>
+                        <div class="small text-muted dashboard-kpi-hint">Ver rotas e atribuições</div>
                     </div>
                 </div>
+                {{wrap_sem_coletor_close}}
             </div>
             <div class="col-12">
+                {{wrap_pend_recebimento_open}}
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
                         <div class="text-muted small">MTR pendente recebimento</div>
                         <div class="fs-3 fw-bold">{{pend_recebimento}}</div>
-                        <a href="{{URL}}/painel/coletas" class="small">Ver coletas</a>
+                        <div class="small text-muted dashboard-kpi-hint">Ver coletas pendentes</div>
                     </div>
                 </div>
+                {{wrap_pend_recebimento_close}}
             </div>
         </div>
     </div>
@@ -128,6 +157,6 @@
     <div class="card-header bg-transparent"><i class="fas fa-leaf me-1"></i> Bem-vindo ao {{site}}</div>
     <div class="card-body">
         <p class="mb-2">Painel administrativo — coleta, MTR e gestão operacional.</p>
-        <p class="text-muted small mb-0">Use o menu lateral para acessar os módulos liberados para sua função.</p>
+        <p class="text-muted small mb-0">Use o menu lateral para acessar os módulos liberados para sua função. Os cartões acima abrem a listagem relacionada quando você tem permissão.</p>
     </div>
 </div>

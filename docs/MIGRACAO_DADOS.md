@@ -2,7 +2,7 @@
 
 > **Manutenção:** atualizar este documento sempre que houver novo script ETL/backfill, regra de negócio que afete dados legados, ou correção retroativa. Registrar também no changelog de `ARCHITECTURE.md`.
 
-**Última revisão:** 2026-09-16 (multitenancy + catálogo SINIR)  
+**Última revisão:** 2026-09-19 (cutover final + purge MTR teste)  
 **Banco legado (somente leitura):** `well_antigo` (dump `wellec99_app.sql`)  
 **Banco novo:** `well_admin`
 
@@ -23,6 +23,7 @@
 11. [Checklist pós-migração](#11-checklist-pós-migração)
 12. [Multitenancy — operadora_id (021–024)](#12-multitenancy--operadora_id-021024)
 13. [Catálogo SINIR — revisão tipos_residuos](#13-catálogo-sinir--revisão-tipos_residuos)
+14. [Cutover final — projeto antigo × admin novo](#14-cutover-final--projeto-antigo--admin-novo)
 
 ---
 
@@ -154,6 +155,7 @@ Flags: `--dry-run`, `--limit=N`, `--purge-local`, `--operadora-id=N`.
 | `audit_coleta_itens_tipo.php` | Diagnóstico (não altera dados) |
 | `repair_coletas_data_recebimento.php` | `data_recebimento ← data_coleta` onde NULL |
 | `etl_download_evidencias.php` | Cloudinary → WebP local |
+| `purge_coletas_mtr_teste.php` | Remove faixa de MTR teste; reajusta `coleta_sequencia` |
 
 ---
 
@@ -336,9 +338,67 @@ php database/scripts/seed_operadora_well.php   # roda automaticamente após appl
 
 ---
 
+## 14. Cutover final — projeto antigo × admin novo
+
+Cenário: banco do **projeto antigo** já alinhado ao schema atual (`well_admin`); **admin novo** (código deste repositório) vai para produção (ex.: VPS). Evitar choque entre **MTRs de teste** no ambiente novo e **MTRs reais** vindos do legado/ETL.
+
+### Pontos de conflito (checklist)
+
+| Área | Risco | Mitigação |
+|------|--------|-----------|
+| **`numero_mtr` UNIQUE** | Testes 11917–11921 ocupam faixa que o legado pode reimportar | Purge testes **antes** do ETL ou import do dump legado |
+| **`legacy_manifesto` UNIQUE** | ETL ignora manifesto duplicado; MTR local sem legacy pode bloquear número | Purge só coletas **sem** `legacy_manifesto` (script avisa se tiver) |
+| **`coleta_sequencia.ultimo_mtr`** | Após purge/import, próximo MTR errado | Script de purge reajusta; pós-ETL: `GREATEST(MAX(numero_mtr), sequencia)` |
+| **IDs `clientes` / catálogos** | Preservados no `004` — não misturar dump parcial | Um único caminho: dump completo **ou** ETL a partir de `well_antigo`, não os dois sobrepostos |
+| **Migrations 027–036** | Código novo exige tabelas (suporte, contratos, frota, help) | Rodar scripts `apply_migrations_027_033.php`, `034`, `035`, `036` no banco de cutover |
+| **Multitenancy 021–024** | Obrigatório antes do go-live | `apply_multitenancy_migrations.php` + `seed_operadora_well.php` |
+| **Usuários / senhas** | Seed local ≠ produção | Manter usuários do banco real; não sobrescrever com `002_seed` |
+| **Inter / SINIR / `.env`** | Credenciais só no servidor | VPS: `.env` produção; SINIR só com IP que completa TLS (VPS direto ou relay) |
+| **Evidências Cloudinary** | URLs expiradas no legado | `etl_download_evidencias.php` pós-import (log em `storage/logs/`) |
+| **Flutter / API** | App aponta para URL antiga | Atualizar `apiBaseUrl` após DNS do admin novo |
+
+### Remover MTRs de teste (11917–11921)
+
+No servidor onde está o banco **antes** de importar coletas reais ou fazer merge final:
+
+```bash
+cd ~/admin.well.eco.br   # ou caminho do projeto
+php database/scripts/purge_coletas_mtr_teste.php --dry-run
+php database/scripts/purge_coletas_mtr_teste.php --from=11917 --to=11921
+```
+
+Validação:
+
+```sql
+SELECT numero_mtr, id, legacy_manifesto FROM coletas WHERE numero_mtr BETWEEN 11917 AND 11921;
+SELECT operadora_id, ultimo_mtr FROM coleta_sequencia WHERE operadora_id = 1;
+SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id = 1;
+-- ultimo_mtr deve ser >= max_mtr (idealmente iguais após purge)
+```
+
+### Ordem sugerida — migração final (uma janela)
+
+1. **Backup** completo `well_admin` (+ arquivos `storage/` se já houver evidências locais).
+2. **Purge** MTRs teste (comando acima).
+3. Aplicar migrations pendentes **034–036** (se ainda não).
+4. Se faltarem coletas legado no banco atual: `etl_import_coletas.php` (sem `--purge-local` salvo se souber o que apaga).
+5. Repairs: `repair_legacy_peso`, `backfill_coleta_itens_tipo`, `repair_coletas_data_recebimento`.
+6. **Deploy** código admin novo na VPS; `.env`; `composer install --no-dev`.
+7. Smoke: login, listagem coletas, imprimir MTR legado, **uma** coleta teste com MTR **11922+** (após confirmar sequência).
+8. DNS `admin.well.eco.br` → VPS; desativar painel antigo.
+
+### O que **não** fazer
+
+- Importar dump legado **por cima** de coletas de teste sem purge (colisão `numero_mtr`).
+- Rodar `002_seed.sql` em banco que já tem usuários reais.
+- Habilitar `SINIR_ENABLED=true` antes do teste de rede na VPS.
+
+---
+
 ## Histórico de alterações deste documento
 
 | Data | Alteração |
 |------|-----------|
+| 2026-09-19 | Seção 14 cutover final; script `purge_coletas_mtr_teste.php` (MTR 11917–11921) |
 | 2026-09-16 | Multitenancy: seções 12–13; migrations 021–024; ETL `--operadora-id`; checklist go-live; catálogo SINIR revisado |
 | 2026-09-16 | Criação: inventário completo ETL/backfill; regra `data_recebimento` obrigatória no MTR; script `repair_coletas_data_recebimento.php`; fallback no import |

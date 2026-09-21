@@ -91,6 +91,36 @@
 
   window.getCrudFilterData = coletarFiltrosBarra;
 
+  /** Aplica ?status=…&prioridade=… da URL nos filtros da barra (links do dashboard). */
+  function aplicarFiltrosDaQuery() {
+    var search = window.location.search;
+    if (!search || search.length < 2) {
+      return false;
+    }
+    var params = new URLSearchParams(search);
+    if (!params.toString()) {
+      return false;
+    }
+    var $bar = $('#barra-filtros-lista');
+    if (!$bar.length) {
+      $bar = $('.crud-filters-row').first();
+    }
+    if (!$bar.length) {
+      return false;
+    }
+    var changed = false;
+    params.forEach(function (val, key) {
+      var $el = $bar.find('[name="' + key + '"]');
+      if ($el.length && val !== null && val !== '') {
+        $el.val(val);
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  window.aplicarFiltrosDaQuery = aplicarFiltrosDaQuery;
+
   function setListLoading(loading) {
     var $btn = $('#btn-crud-buscar');
     if (loading) {
@@ -439,6 +469,7 @@
     /* Aguarda {{scripts}} definir `listagem` / overrides de página */
     setTimeout(function () {
       if (shouldHandleCrudList()) {
+        aplicarFiltrosDaQuery();
         listar(null, 1);
       }
     }, 0);

@@ -349,6 +349,9 @@
   $(function () {
     bindCrudEvents();
     if (window.CRUD && window.CRUD.baseUrl && window.CRUD.autoLoad !== false) {
+      if (typeof window.aplicarFiltrosDaQuery === 'function') {
+        window.aplicarFiltrosDaQuery();
+      }
       loadPage(1);
     }
   });

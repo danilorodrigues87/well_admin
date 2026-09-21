@@ -260,4 +260,6 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-16 | Dashboard admin: KPIs visuais + gráficos coletas/faturamento/status (Chart.js `dashboard-charts.js`) |
 | 2026-09-16 | Suporte/termos/ajuda/contratos: migrations `027`–`033`; tickets `/painel/suporte`; ajuda `/painel/ajuda`; termos aceite admin+gerador; `/privacidade`; contratos comerciais operadora↔cliente (`clientes_contratos`, assinatura portal gerador) |
 | 2026-09-16 | UX contratos/ajuda: tickets ocultos do menu; Central de ajuda com artigo por módulo (`034` + `seed_help_modulos.php`); `/painel/contratos` com listagem e criação; botão contrato em Clientes; preview em iframe |
+| 2026-09-19 | Cutover: `purge_coletas_mtr_teste.php` + seção 14 em `docs/MIGRACAO_DADOS.md` (MTR teste vs legado) |
 | 2026-09-15 | Coleta wizard: motorista = select de coletores (bloqueado para função Coletor); Tom Select nos resíduos; modal loading na finalização; SINIR não bloqueia HTTP |
+| 2026-09-21 | Dashboard admin: KPIs e gráficos principais clicáveis (RBAC por módulo); listagens CRUD aplicam filtros via query string (`well-ajax.js`) |

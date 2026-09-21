@@ -929,3 +929,46 @@ body.well-login-page .login-logo {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* Dashboard — KPIs clicáveis */
+.dashboard-kpi-card {
+  cursor: pointer;
+  border-radius: var(--bs-border-radius, 0.375rem);
+}
+
+.dashboard-kpi-card--static {
+  cursor: default;
+}
+
+.dashboard-kpi-card--static .dashboard-kpi-hint {
+  display: none;
+}
+
+.dashboard-kpi-card .card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dashboard-kpi-card:hover .card,
+.dashboard-kpi-card:focus-visible .card {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+}
+
+.dashboard-kpi-card--static .card:hover {
+  transform: none;
+  box-shadow: var(--bs-box-shadow-sm) !important;
+}
+
+.dashboard-kpi-card:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+.dashboard-kpi-hint {
+  margin-top: 0.25rem;
+  opacity: 0.85;
+}
+
+.dashboard-kpi-card:hover .dashboard-kpi-hint {
+  color: var(--bs-primary) !important;
+}
