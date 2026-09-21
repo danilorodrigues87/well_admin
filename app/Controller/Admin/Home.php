@@ -27,7 +27,7 @@ class Home
             'rascunhos' => $kpis['rascunhos'],
             'urgentes' => $kpis['urgentes'],
             'atrasados' => $kpis['atrasados'],
-            'sem_coletor' => $kpis['sem_coletor'],
+            'clientes_em_rotas' => $kpis['clientes_em_rotas'],
             'pend_recebimento' => $kpis['pend_recebimento'],
             'clientes_ativos' => $kpis['clientes_ativos'],
             'chart_coletas_labels' => json_encode($coletasChart['labels'], JSON_UNESCAPED_UNICODE),
@@ -62,7 +62,7 @@ class Home
             ])),
             'atrasados' => self::kpiPath($usuario, 'agendamentos', '/painel/agendamentos'),
             'clientes_ativos' => self::kpiPath($usuario, 'clientes', '/painel/clientes?'.$q(['status' => 'ativo'])),
-            'sem_coletor' => self::kpiPath($usuario, 'rotas', '/painel/rotas'),
+            'clientes_em_rotas' => self::kpiPath($usuario, 'rotas', '/painel/rotas'),
             'pend_recebimento' => self::kpiPath($usuario, 'coletas', '/painel/coletas?'.$q([
                 'status' => 'finalizada',
                 'situacao_recebimento' => 'pendente',

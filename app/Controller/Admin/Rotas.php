@@ -6,7 +6,6 @@ use App\Common\Helpers\CrudHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Rota as EntityRota;
 use App\Model\Entity\RotaAtribuicao as EntityRotaAtribuicao;
-use App\Model\Entity\Usuario as EntityUsuario;
 use App\Utils\View;
 
 class Rotas extends Page
@@ -21,30 +20,6 @@ class Rotas extends Page
             }
             $html .= '<option value="'.$c['id'].'">'.CrudHelper::e($label).'</option>';
         }
-
-        return $html;
-    }
-
-    private static function coletoresOptions(int $selected = 0, bool $emptyLabel = true): string
-    {
-        $html = $emptyLabel ? '<option value="">— Sem coletor —</option>' : '';
-        foreach (EntityUsuario::getColetoresAtivos() as $c) {
-            $sel = $c->id === $selected ? ' selected' : '';
-            $html .= '<option value="'.$c->id.'"'.$sel.'>'.CrudHelper::e($c->nome).'</option>';
-        }
-
-        return $html;
-    }
-
-    private static function coletorSelect(int $atribId, ?int $selected): string
-    {
-        $html = '<select class="form-select form-select-sm coletor-select" data-id="'.$atribId.'">';
-        $html .= '<option value=""'.($selected === null ? ' selected' : '').'>— Sem coletor —</option>';
-        foreach (EntityUsuario::getColetoresAtivos() as $c) {
-            $sel = ($selected === $c->id) ? ' selected' : '';
-            $html .= '<option value="'.$c->id.'"'.$sel.'>'.CrudHelper::e($c->nome).'</option>';
-        }
-        $html .= '</select>';
 
         return $html;
     }
@@ -81,15 +56,12 @@ class Rotas extends Page
         $itens = '';
         foreach ($rows as $r) {
             $stats = EntityRotaAtribuicao::statsByRota($r->id);
-            $badge = $stats['sem_coletor'] > 0
-                ? ' <span class="badge bg-warning text-dark" title="Sem coletor">'.$stats['sem_coletor'].'</span>'
-                : '';
             $itens .= '<tr>
                 <td>'.CrudHelper::e($r->nome).'</td>
                 <td>'.CrudHelper::e($r->descricao).'</td>
-                <td class="text-center">'.$stats['total'].$badge.'</td>
+                <td class="text-center">'.$stats['total'].'</td>
                 <td>
-                    <a href="'.URL.'/painel/rotas/atribuicoes/'.$r->id.'" class="btn btn-sm btn-outline-secondary" title="Clientes e coletores"><i class="fas fa-users"></i></a>
+                    <a href="'.URL.'/painel/rotas/atribuicoes/'.$r->id.'" class="btn btn-sm btn-outline-secondary" title="Clientes da rota"><i class="fas fa-users"></i></a>
                     <button class="btn btn-sm btn-outline-primary" onclick="editar('.$r->id.')"><i class="fas fa-edit"></i></button>
                     '.CrudHelper::btnDesativar($r->id).'
                 </td>
@@ -159,15 +131,13 @@ class Rotas extends Page
             'rota_id' => $rotaId,
             'rota_nome' => CrudHelper::e($rota->nome),
             'stats_total' => $stats['total'],
-            'stats_sem_coletor' => $stats['sem_coletor'],
-            'coletores_options' => self::coletoresOptions(0, false),
             'clientes_options' => self::clientesDisponiveisOptionsHtml($rotaId),
         ]);
         $scripts = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css">'
             .'<link rel="stylesheet" href="'.URL.'/resources/css/tom-select-well.css?v=20260916">'
             .'<script>window.ROTA_ATRIB = { rotaId: '.$rotaId.', baseUrl: "/painel/rotas/atribuicoes/'.$rotaId.'" };</script>'
             .'<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
-            .'<script src="'.URL.'/resources/js/crud-rota-atribuicoes.js?v=20260916g"></script>';
+            .'<script src="'.URL.'/resources/js/crud-rota-atribuicoes.js?v=20260921"></script>';
 
         return self::getPage('Atribuições — '.$rota->nome, $content, 'rotas', $scripts);
     }
@@ -179,13 +149,9 @@ class Rotas extends Page
         $busca = trim((string)($post['busca'] ?? ''));
         $whereExtra = '';
         $params = [];
-        $semColetor = trim((string)($post['sem_coletor'] ?? ''));
-        if ($semColetor === '1') {
-            $whereExtra .= ' AND ra.coletor_id IS NULL';
-        }
         if ($busca !== '') {
-            $whereExtra .= ' AND (c.nome_fantasia LIKE ? OR c.cidade LIKE ? OR u.nome LIKE ?)';
-            $params = array_merge($params, array_fill(0, 3, '%'.$busca.'%'));
+            $whereExtra .= ' AND (c.nome_fantasia LIKE ? OR c.cidade LIKE ?)';
+            $params = array_merge($params, array_fill(0, 2, '%'.$busca.'%'));
         }
 
         $pagination = new Pagination(EntityRotaAtribuicao::countByRota($rotaId, $whereExtra, $params), $page, 20);
@@ -196,12 +162,11 @@ class Rotas extends Page
             $itens .= '<tr>
                 <td>'.CrudHelper::e($a->cliente_nome).'</td>
                 <td>'.CrudHelper::e($a->cliente_cidade).'</td>
-                <td>'.self::coletorSelect($a->id, $a->coletor_id).'</td>
                 <td><button class="btn btn-sm btn-outline-danger" onclick="removerAtrib('.$a->id.')"><i class="fas fa-trash"></i></button></td>
             </tr>';
         }
         if ($itens === '') {
-            $itens = '<tr><td colspan="4" class="text-center text-muted">Nenhum cliente nesta rota.</td></tr>';
+            $itens = '<tr><td colspan="3" class="text-center text-muted">Nenhum cliente nesta rota.</td></tr>';
         }
 
         $stats = EntityRotaAtribuicao::statsByRota($rotaId);
@@ -229,29 +194,14 @@ class Rotas extends Page
             return CrudHelper::jsonError('Cliente já está nesta rota.');
         }
 
-        $coletorId = (int)($post['coletor_id'] ?? 0);
-        EntityRotaAtribuicao::insert($rotaId, $clienteId, $coletorId > 0 ? $coletorId : null);
+        EntityRotaAtribuicao::insert($rotaId, $clienteId, null);
 
         return CrudHelper::jsonOk(['message' => 'Cliente adicionado à rota.']);
     }
 
     public static function updateAtribuicaoColetor($request, int $rotaId): string
     {
-        $post = $request->getPostVars();
-        if ($err = CrudHelper::requireCsrf($post)) {
-            return CrudHelper::jsonError($err);
-        }
-
-        $id = (int)($post['id'] ?? 0);
-        $atrib = EntityRotaAtribuicao::getById($id);
-        if (!$atrib || $atrib->rota_id !== $rotaId) {
-            return CrudHelper::jsonError('Atribuição não encontrada.');
-        }
-
-        $coletorId = (int)($post['coletor_id'] ?? 0);
-        EntityRotaAtribuicao::updateColetor($id, $coletorId > 0 ? $coletorId : null);
-
-        return CrudHelper::jsonOk(['message' => 'Coletor atualizado.']);
+        return CrudHelper::jsonError('Atribuição de coletor por rota foi descontinuada. O coletor escolhe a coleta ao lançar.');
     }
 
     public static function deleteAtribuicao($request, int $rotaId): string
@@ -274,20 +224,7 @@ class Rotas extends Page
 
     public static function bulkColetor($request, int $rotaId): string
     {
-        $post = $request->getPostVars();
-        if ($err = CrudHelper::requireCsrf($post)) {
-            return CrudHelper::jsonError($err);
-        }
-
-        $coletorId = (int)($post['coletor_id'] ?? 0);
-        if ($coletorId <= 0) {
-            return CrudHelper::jsonError('Selecione um coletor.');
-        }
-
-        $onlySem = ($post['only_sem_coletor'] ?? '1') !== '0';
-        $qtd = EntityRotaAtribuicao::setColetorEmLote($rotaId, $coletorId, $onlySem);
-
-        return CrudHelper::jsonOk(['message' => $qtd.' atribuição(ões) atualizada(s).', 'qtd' => $qtd]);
+        return CrudHelper::jsonError('Atribuição de coletor por rota foi descontinuada.');
     }
 
     public static function clientesDisponiveis($request, int $rotaId): string

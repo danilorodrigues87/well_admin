@@ -90,10 +90,11 @@
 - `valor_excedente < 0` no legado → migration `017` marca `gera_credito=1` e usa valor absoluto.
 - `clientes.saldo_residuo` removido (`016`) — saldo vem do plano via `PlanoCobrancaService`.
 
-### RBAC rotas (2026-09-16)
+### RBAC rotas (atualizado 2026-09-21)
 
-- Coletor vê apenas clientes da sua rota (`RotaScopeService`).
-- `rota_atribuicoes.coletor_id` importado como NULL em `004` — **atribuir coletores manualmente** após migração.
+- Rotas cadastrais: apenas **cliente × rota** (`rota_atribuicoes`; `coletor_id` sempre NULL — migration `037`).
+- Coletor vê clientes **em alguma rota** + escolhe coleta em **Lançar Coleta** (`coletas.coletor_id`).
+- `RotaScopeService` não filtra mais por coletor fixo na rota.
 
 ---
 
@@ -108,7 +109,7 @@
 | `planos`, `veiculos`, `lista_rotas`, `tipos_de_residuos` | tabelas homônimas | IDs preservados |
 | `rotas` | `rotas` + `rota_atribuicoes` | Sem `coletor_id` no legado |
 
-**Pendência:** mapear coletores às rotas no painel `/painel/rotas/atribuicoes/{id}`.
+**Pós-migração:** vincular clientes às rotas em `/painel/rotas/atribuicoes/{id}` (sem coletor na rota).
 
 ---
 
@@ -212,7 +213,7 @@ Requer `GOOGLE_MAPS_API_KEY` no `.env`.
 ## 10. Pendências conhecidas
 
 - [ ] Executar `repair_coletas_data_recebimento.php` após import completo de coletas legado
-- [ ] Atribuir coletores às rotas (`rota_atribuicoes.coletor_id` NULL pós-004)
+- [ ] Vincular clientes às rotas (`/painel/rotas/atribuicoes/{id}`); migration `037` zera `coletor_id` legado
 - [x] Revisar tipos SINIR — catálogo 58/58 com mapeamento completo (2026-09-16)
 - [ ] Geocode clientes sem coordenadas (`geocode_clientes.php`)
 - [ ] Coletas finalizadas legado **não editáveis** — ajustes retroativos só via script

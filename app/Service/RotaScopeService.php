@@ -7,32 +7,45 @@ use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
 use PDO;
 
+/**
+ * Escopo operacional por rotas cadastrais (cliente ∈ rota).
+ * Coletor não é mais fixado em rota_atribuicoes — ownership fica em coletas.coletor_id.
+ */
 class RotaScopeService
 {
-    public static function coletorTemRota(int $coletorId): bool
+    public static function operadoraTemClientesEmRotas(): bool
     {
-        if ($coletorId <= 0) {
-            return false;
-        }
         $db = new Database();
 
         return (bool)$db->execute(
-            'SELECT 1 FROM rota_atribuicoes WHERE coletor_id = ? AND operadora_id = ? LIMIT 1',
-            [$coletorId, OperadoraScope::getOperadoraId()]
+            'SELECT 1 FROM rota_atribuicoes WHERE operadora_id = ? LIMIT 1',
+            [OperadoraScope::getOperadoraId()]
         )->fetch();
     }
 
-    public static function clienteNaRotaDoColetor(int $clienteId, int $coletorId): bool
+    public static function clienteEmRota(int $clienteId): bool
     {
-        if ($clienteId <= 0 || $coletorId <= 0) {
+        if ($clienteId <= 0) {
             return false;
         }
         $db = new Database();
 
         return (bool)$db->execute(
-            'SELECT 1 FROM rota_atribuicoes WHERE cliente_id = ? AND coletor_id = ? AND operadora_id = ? LIMIT 1',
-            [$clienteId, $coletorId, OperadoraScope::getOperadoraId()]
+            'SELECT 1 FROM rota_atribuicoes WHERE cliente_id = ? AND operadora_id = ? LIMIT 1',
+            [$clienteId, OperadoraScope::getOperadoraId()]
         )->fetch();
+    }
+
+    /** Compat API/UI: indica se há base de clientes em rotas (não vínculo por coletor). */
+    public static function coletorTemRota(int $coletorId): bool
+    {
+        return self::operadoraTemClientesEmRotas();
+    }
+
+    /** @deprecated Use clienteEmRota() — coletor não é mais filtrado em rota_atribuicoes. */
+    public static function clienteNaRotaDoColetor(int $clienteId, int $coletorId): bool
+    {
+        return self::clienteEmRota($clienteId);
     }
 
     public static function assertClientePermitido(int $clienteId, int $coletorId, bool $isAdmin): void
@@ -40,11 +53,11 @@ class RotaScopeService
         if ($isAdmin) {
             return;
         }
-        if (!self::coletorTemRota($coletorId)) {
-            throw new \InvalidArgumentException('Você não possui clientes atribuídos em nenhuma rota.');
+        if (!self::operadoraTemClientesEmRotas()) {
+            throw new \InvalidArgumentException('Nenhum cliente vinculado às rotas operacionais. Cadastre rotas e clientes.');
         }
-        if (!self::clienteNaRotaDoColetor($clienteId, $coletorId)) {
-            throw new \InvalidArgumentException('Cliente não pertence à sua rota.');
+        if (!self::clienteEmRota($clienteId)) {
+            throw new \InvalidArgumentException('Cliente não está vinculado a nenhuma rota.');
         }
     }
 
@@ -60,11 +73,10 @@ class RotaScopeService
             : date('Y-m-d');
         $opId = OperadoraScope::getOperadoraId();
         $join = '';
-        /** Ordem dos placeholders = ordem no SQL (JOIN antes do WHERE). */
         $params = [];
 
         if (!$isAdmin) {
-            if (!self::coletorTemRota($coletorId)) {
+            if (!self::operadoraTemClientesEmRotas()) {
                 return [
                     'join' => '',
                     'where' => "c.status = 'ativo' AND c.operadora_id = ? AND 1=0",
@@ -72,8 +84,7 @@ class RotaScopeService
                     'data' => $ref,
                 ];
             }
-            $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ? AND ra.operadora_id = c.operadora_id';
-            $params[] = $coletorId;
+            $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.operadora_id = c.operadora_id';
         }
 
         $where = "c.status = 'ativo' AND c.operadora_id = ?";
@@ -115,30 +126,23 @@ class RotaScopeService
         return $items;
     }
 
-    /** Filtro SQL extra para listagens de coletas (não-admin). */
+    /** Filtro SQL extra para listagens de coletas (não-admin): só coletas do próprio coletor. */
     public static function coletasWhereForColetor(int $coletorId): array
     {
-        if (!self::coletorTemRota($coletorId)) {
-            return [' AND c.coletor_id = ?', [$coletorId]];
-        }
-
-        return [
-            ' AND c.coletor_id = ? AND c.cliente_id IN (
-                SELECT ra.cliente_id FROM rota_atribuicoes ra
-                WHERE ra.coletor_id = ? AND ra.operadora_id = c.operadora_id
-            )',
-            [$coletorId, $coletorId],
-        ];
+        return [' AND c.coletor_id = ?', [$coletorId]];
     }
 
-    /** Contagem de clientes urgentes/atrasados scoped à rota do coletor. */
+    /** Contagem de clientes urgentes/atrasados (coletor vê o pool das rotas, como gestor). */
     public static function countUrgentesAtrasados(int $coletorId, bool $isAdmin): array
     {
         $hoje = date('Y-m-d');
         $db = new Database();
         $opId = OperadoraScope::getOperadoraId();
 
-        if ($isAdmin) {
+        if ($isAdmin || !self::operadoraTemClientesEmRotas()) {
+            if (!$isAdmin && !self::operadoraTemClientesEmRotas()) {
+                return ['urgentes' => 0, 'atrasados' => 0];
+            }
             $urgentes = (int)$db->execute(
                 "SELECT COUNT(*) AS qtd FROM clientes
                  WHERE status = 'ativo' AND prioridade = 'urgente' AND operadora_id = ?",
@@ -154,23 +158,18 @@ class RotaScopeService
             return ['urgentes' => $urgentes, 'atrasados' => $atrasados];
         }
 
-        if (!self::coletorTemRota($coletorId)) {
-            return ['urgentes' => 0, 'atrasados' => 0];
-        }
-
         $base = "FROM clientes c
-                 INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ?
-                    AND ra.operadora_id = c.operadora_id
+                 INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.operadora_id = c.operadora_id
                  WHERE c.status = 'ativo' AND c.operadora_id = ?";
 
         $urgentes = (int)$db->execute(
             'SELECT COUNT(DISTINCT c.id) AS qtd '.$base." AND c.prioridade = 'urgente'",
-            [$coletorId, $opId]
+            [$opId]
         )->fetch(PDO::FETCH_ASSOC)['qtd'];
 
         $atrasados = (int)$db->execute(
             'SELECT COUNT(DISTINCT c.id) AS qtd '.$base.' AND c.proxima_coleta IS NOT NULL AND c.proxima_coleta <= ?',
-            [$coletorId, $opId, $hoje]
+            [$opId, $hoje]
         )->fetch(PDO::FETCH_ASSOC)['qtd'];
 
         return ['urgentes' => $urgentes, 'atrasados' => $atrasados];

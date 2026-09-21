@@ -23,9 +23,8 @@ class AgendamentoService
         $join = '';
         $params = [];
 
-        if (!$isAdmin && $coletorId > 0 && RotaScopeService::coletorTemRota($coletorId)) {
-            $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ? AND ra.operadora_id = c.operadora_id';
-            $params[] = $coletorId;
+        if (!$isAdmin && $coletorId > 0) {
+            $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.operadora_id = c.operadora_id';
         }
 
         $where = "c.status = 'ativo' AND c.operadora_id = ?";

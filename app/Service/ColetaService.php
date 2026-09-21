@@ -321,14 +321,13 @@ class ColetaService
         $params = $q['params'];
 
         if (!$somentePendentes) {
-            $where = "c.status = 'ativo'";
-            $params = [];
+            $where = "c.status = 'ativo' AND c.operadora_id = ?";
+            $params = [OperadoraScope::getOperadoraId()];
             if (!$isAdmin) {
-                if (!RotaScopeService::coletorTemRota($coletorId)) {
+                if (!RotaScopeService::operadoraTemClientesEmRotas()) {
                     $where .= ' AND 1=0';
                 } else {
-                    $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.coletor_id = ?';
-                    $params[] = $coletorId;
+                    $join = ' INNER JOIN rota_atribuicoes ra ON ra.cliente_id = c.id AND ra.operadora_id = c.operadora_id';
                 }
             }
         }

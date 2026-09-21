@@ -1,4 +1,4 @@
-/** Atribuições rota × cliente × coletor — Tom Select igual ao wizard de coleta */
+/** Atribuições rota × cliente (sem coletor fixo na rota) */
 (function ($) {
   'use strict';
 
@@ -31,7 +31,6 @@
   function updateStats(stats) {
     if (!stats) return;
     $('#stat-total').text(stats.total || 0);
-    $('#stat-sem-coletor').text(stats.sem_coletor || 0);
   }
 
   function swalErr(msg) {
@@ -163,47 +162,6 @@
     }
   };
 
-  window.aplicarColetorLote = function () {
-    var coletorId = $('#bulk-coletor').val();
-    if (!coletorId) {
-      swalErr('Selecione um coletor.');
-      return;
-    }
-    var exec = function () {
-      $.post(apiUrl(), {
-        acao: 'bulk_coletor',
-        coletor_id: coletorId,
-        only_sem_coletor: '1',
-        _csrf: getCsrf()
-      }, function (resp) {
-        resp = typeof resp === 'object' ? resp : JSON.parse(resp);
-        if (!resp.success) {
-          swalErr(resp.message || 'Erro');
-          return;
-        }
-        if (typeof Swal !== 'undefined') {
-          Swal.fire({ title: 'Pronto!', text: resp.message, icon: 'success' });
-        }
-        loadPage(1);
-      }, 'json');
-    };
-
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: 'Atribuir coletor em lote?',
-        text: 'Todos os clientes sem coletor nesta rota receberão o coletor selecionado.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Confirmar',
-        cancelButtonText: 'Cancelar'
-      }).then(function (r) {
-        if (r.isConfirmed) exec();
-      });
-    } else if (confirm('Atribuir coletor em lote?')) {
-      exec();
-    }
-  };
-
   window.adicionarCliente = function () {
     var clienteId = clienteTomSelect ? clienteTomSelect.getValue() : ($('#add-cliente_id').val() || '');
     if (!clienteId) {
@@ -213,7 +171,6 @@
     $.post(apiUrl(), {
       acao: 'salvar_atribuicao',
       cliente_id: clienteId,
-      coletor_id: $('#add-coletor_id').val() || '',
       _csrf: getCsrf()
     }, function (resp) {
       resp = typeof resp === 'object' ? resp : JSON.parse(resp);
@@ -225,7 +182,6 @@
         clienteTomSelect.removeOption(clienteId);
         clienteTomSelect.clear(true);
       }
-      $('#add-coletor_id').val('');
       var modalEl = document.getElementById('addClienteModal');
       if (modalEl) {
         bootstrap.Modal.getOrCreateInstance(modalEl).hide();
@@ -238,29 +194,9 @@
     initTomSelectCliente();
     loadPage(1);
 
-    $(document).on('change', '#barra-filtros-lista select[name]', function () {
-      loadPage(1);
-    });
-
     $(document).on('input', '#barra-filtros-lista input[name="busca"]', function () {
       clearTimeout(_buscaTimer);
       _buscaTimer = setTimeout(function () { loadPage(1); }, 350);
-    });
-
-    $(document).on('change', '.coletor-select', function () {
-      var $sel = $(this);
-      $.post(apiUrl(), {
-        acao: 'update_atribuicao_coletor',
-        id: $sel.data('id'),
-        coletor_id: $sel.val() || '',
-        _csrf: getCsrf()
-      }, function (resp) {
-        resp = typeof resp === 'object' ? resp : JSON.parse(resp);
-        if (!resp.success) {
-          swalErr(resp.message || 'Erro ao salvar coletor.');
-        }
-        loadPage(1);
-      }, 'json');
     });
 
     document.getElementById('addClienteModal')?.addEventListener('shown.bs.modal', function () {
@@ -274,7 +210,6 @@
       if (clienteTomSelect) {
         clienteTomSelect.clear(true);
       }
-      $('#add-coletor_id').val('');
     });
   });
 })(jQuery);

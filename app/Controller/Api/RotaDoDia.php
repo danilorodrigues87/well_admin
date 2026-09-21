@@ -31,7 +31,7 @@ class RotaDoDia extends BaseApi
                 'data' => $data,
                 'total' => count($paradas),
                 'rota_id' => $rotaId ?? 0,
-                'sem_rota' => !$isAdminScope && $coletorId > 0 && !RotaScopeService::coletorTemRota($coletorId),
+                'sem_rota' => !RotaScopeService::operadoraTemClientesEmRotas(),
             ]);
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiRotaDoDia::paradas');

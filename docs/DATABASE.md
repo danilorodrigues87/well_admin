@@ -37,7 +37,7 @@ mysql -u root well_admin < database/migrations/002_seed.sql
 | `veiculos` | Frota |
 | `rotas` | Rotas de coleta |
 | `clientes` | Clientes (endereço inline; geolocalização em `018_clientes_geolocalizacao.sql`) |
-| `rota_atribuicoes` | Cliente ↔ rota ↔ coletor (uso na Etapa 3) |
+| `rota_atribuicoes` | Cliente ↔ rota (`coletor_id` legado, sempre NULL — coletor em `coletas.coletor_id`) |
 | `rota_dia_ordem` | Ordem das paradas do dia por coletor (`019_rota_dia_ordem.sql`) |
 
 ## Migrations adicionais

@@ -83,7 +83,7 @@ Coletor vê KPIs e gráfico filtrados por `coletor_id`; admin/gestor vê totais 
 
 Clientes ativos ordenados por prioridade e `proxima_coleta`. Cada item inclui `plano_nome` e `saldo_plano` (soma do saldo incluso em `plano_itens` — substitui o antigo `saldo_residuo` por cliente).
 
-Coletor com rota atribuída: lista apenas paradas pendentes da sua rota (urgente ou `proxima_coleta` vencida/hoje).
+Coletor: vê clientes **vinculados a alguma rota** (mesmo pool cadastral; coletor não é fixado em `rota_atribuicoes`). Ordenação por prioridade e `proxima_coleta`.
 
 ### Rota do dia
 
@@ -94,7 +94,9 @@ Coletor com rota atribuída: lista apenas paradas pendentes da sua rota (urgente
 | POST | `/rota-do-dia/salvar-ordem` | `rota_dia` | Persistir ordem manual (`ordem[]`: `cliente_id`, `ordem`; query/body: `data`, `coletor_id`) |
 | POST | `/rota-do-dia/parada-status` | `rota_dia` | Status da parada (`cliente_id`, `status`: `pendente` \| `coletado` \| `pulado`; query/body: `data`, `coletor_id`) |
 
-Resposta `GET paradas`: `paradas`, `coletor_id`, `data`, `total`, `rota_id`, `sem_rota`.
+Resposta `GET paradas`: `paradas`, `coletor_id`, `data`, `total`, `rota_id`, `sem_rota` (`true` se a operadora não tem clientes em rotas cadastrais).
+
+Coletor **não** é definido na rota: `coletor_id` na query identifica quem opera (ordem/status do dia); paradas vêm do cadastro rota×cliente + filtros urgentes/vencidos. Nova coleta: `POST /coletas` / fluxo rascunho grava `coletas.coletor_id`.
 
 Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`.
 

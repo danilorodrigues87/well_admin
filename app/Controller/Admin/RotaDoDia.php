@@ -86,7 +86,7 @@ class RotaDoDia extends Page
             'data' => $data,
             'total' => count($paradas),
             'rota_id' => $rotaId ?? 0,
-            'sem_rota' => !$isAdmin && $coletorId > 0 && !\App\Service\RotaScopeService::coletorTemRota($coletorId),
+            'sem_rota' => !\App\Service\RotaScopeService::operadoraTemClientesEmRotas(),
         ]);
     }
 

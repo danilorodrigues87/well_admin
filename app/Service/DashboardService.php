@@ -38,8 +38,8 @@ class DashboardService
             [$hoje, $opId]
         )->fetch(\PDO::FETCH_ASSOC)['qtd'];
 
-        $semColetor = (int)$db->execute(
-            'SELECT COUNT(*) AS qtd FROM rota_atribuicoes WHERE coletor_id IS NULL AND operadora_id = ?',
+        $clientesEmRotas = (int)$db->execute(
+            'SELECT COUNT(DISTINCT cliente_id) AS qtd FROM rota_atribuicoes WHERE operadora_id = ?',
             [$opId]
         )->fetch(\PDO::FETCH_ASSOC)['qtd'];
 
@@ -58,7 +58,7 @@ class DashboardService
             'rascunhos' => $rascunhos,
             'urgentes' => $urgentes,
             'atrasados' => $atrasados,
-            'sem_coletor' => $semColetor,
+            'clientes_em_rotas' => $clientesEmRotas,
             'pend_recebimento' => $pendRecebimento,
             'clientes_ativos' => $clientesAtivos,
         ];
