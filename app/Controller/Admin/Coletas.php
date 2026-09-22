@@ -9,6 +9,7 @@ use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
+use App\Service\ColetaCdfService;
 use App\Service\ColetaService;
 use App\Service\RotaScopeService;
 use App\Service\Sinir\ColetaSinirPrecheckService;
@@ -16,6 +17,7 @@ use App\Service\Sinir\SinirService;
 use App\Session\User\Login as SessionUser;
 use App\Model\Entity\SinirEnvio as EntitySinirEnvio;
 use App\Common\SinirConfig;
+use App\Http\Response;
 use App\Utils\View;
 
 class Coletas extends Page
@@ -31,7 +33,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20260922"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20260922c"></script>'
         );
     }
 
@@ -193,10 +195,36 @@ class Coletas extends Page
             $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-secondary" onclick="sinirConsultar('.$c->id.')"><i class="fas fa-search me-1"></i> Consultar SINIR</button>'
                 .' <button type="button" class="btn btn-sm btn-outline-danger" onclick="sinirCancelar('.$c->id.')"><i class="fas fa-ban me-1"></i> Cancelar no SINIR</button>';
         }
+        if (ColetaMtrHelper::podeRegistrarRecebimentoSinir($c)) {
+            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-success" onclick="sinirReceber('.$c->id.')"><i class="fas fa-warehouse me-1"></i> Receber no SINIR</button>';
+        }
+        if ($sinirJaEnviado && SinirConfig::isEnabled() && !ColetaCdfService::temCdf($c)) {
+            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-info" onclick="sinirBaixarPdf('.$c->id.')"><i class="fas fa-file-pdf me-1"></i> Baixar PDF MTR</button>';
+        }
+        if (ColetaMtrHelper::podeEmitirCdfSinir($c)) {
+            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-primary" onclick="sinirEmitirCdf('.$c->id.')"><i class="fas fa-certificate me-1"></i> Emitir CDF SINIR</button>';
+        }
+        if (!empty($c->sinir_cdf_codigo) && SinirConfig::isEnabled()) {
+            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-info" onclick="sinirBaixarCdf('.$c->id.')"><i class="fas fa-download me-1"></i> Baixar PDF CDF</button>';
+        }
+        $cdfAdminHtml = '';
+        if (ColetaCdfService::temCdf($c)) {
+            $rotulo = CrudHelper::e(ColetaCdfService::rotuloTipo($c->cdf_tipo, $c->sinir_cdf_codigo));
+            $cdfAdminHtml = '<p class="small mb-1"><strong>Tipo:</strong> '.$rotulo.'</p>'
+                .'<a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/coletas/cdf/'.$c->id.'" target="_blank"><i class="fas fa-file-pdf me-1"></i> Abrir PDF</a>';
+        } else {
+            $cdfAdminHtml = '<span class="text-muted small">Sem PDF — receba no SINIR, emita CDF ou envie manualmente.</span>';
+        }
 
         $html = View::render('admin/modules/coletas/detalhe', [
             'mtr_print_btn' => $mtrPrintBtn,
             'sinir_reenviar_btn' => $sinirReenviarBtn,
+            'cdf_admin_html' => $cdfAdminHtml,
+            'cdf_upload_form' => SinirConfig::isEnabled() && $c->status === 'finalizada'
+                ? '<form id="form-cdf-upload-'.$c->id.'" class="d-flex flex-wrap gap-2 align-items-center mt-2" onsubmit="return sinirCdfUpload(event, '.$c->id.')">'
+                    .'<input type="file" name="cdf_file" accept="application/pdf" class="form-control form-control-sm" style="max-width:220px" required/>'
+                    .'<button type="submit" class="btn btn-sm btn-secondary">Enviar PDF manual</button></form>'
+                : '',
             'sinir_html' => $sinirHtml,
             'numero_relatorio' => ColetaMtrHelper::numeroRelatorioExibicao($c)
                 ? '#'.ColetaMtrHelper::numeroRelatorioExibicao($c)
@@ -299,6 +327,139 @@ class Coletas extends Page
         return CrudHelper::jsonOk(['message' => $result['message']]);
     }
 
+    public static function sinirReceber($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+        $responsavel = trim((string)($post['responsavel'] ?? ''));
+        $cargo = trim((string)($post['cargo'] ?? ''));
+
+        $result = SinirService::receberColeta(
+            $id,
+            true,
+            $responsavel !== '' ? $responsavel : null,
+            $cargo !== '' ? $cargo : null
+        );
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk(['message' => $result['message'], 'details' => $result['details'] ?? []]);
+    }
+
+    public static function sinirEmitirCdf($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+        $responsavel = trim((string)($post['responsavel'] ?? ''));
+
+        $result = SinirService::emitirCdfColeta($id, $responsavel !== '' ? $responsavel : null);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk(['message' => $result['message'], 'details' => $result['details'] ?? []]);
+    }
+
+    public static function sinirBaixarCdf($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        $result = SinirService::baixarPdfCdf($id);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk(['message' => $result['message']]);
+    }
+
+    public static function sinirBaixarPdf($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        $result = SinirService::baixarPdfManifesto($id);
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk(['message' => $result['message']]);
+    }
+
+    public static function sinirCdfUpload($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        $file = $_FILES['cdf_file'] ?? null;
+        if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return CrudHelper::jsonError('Selecione um arquivo PDF.');
+        }
+
+        $result = ColetaCdfService::gravarUpload($id, (string)$file['tmp_name'], (string)($file['type'] ?? ''));
+        if (!$result['ok']) {
+            return CrudHelper::jsonError($result['message']);
+        }
+
+        return CrudHelper::jsonOk(['message' => $result['message']]);
+    }
+
+    public static function cdfDownload($request, int $id): string|Response
+    {
+        try {
+            ColetaService::detalhar($id);
+        } catch (\InvalidArgumentException) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+
+        $c = EntityColeta::getById($id);
+        if (!$c) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+        $path = ColetaCdfService::absolutePath($c);
+        if ($path === null) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+
+        $bytes = file_get_contents($path);
+        if ($bytes === false) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+
+        return new Response(200, $bytes, 'application/pdf');
+    }
+
     public static function sinirConsultar($request): string
     {
         $post = $request->getPostVars();
@@ -338,6 +499,14 @@ class Coletas extends Page
         $enviado = $c->sinir_enviado_em
             ? date('d/m/Y H:i', strtotime($c->sinir_enviado_em))
             : '—';
+        $recebidoSinir = $c->sinir_recebido_em
+            ? date('d/m/Y H:i', strtotime($c->sinir_recebido_em))
+            : '—';
+        $cdfInfo = ColetaCdfService::temCdf($c)
+            ? ColetaCdfService::rotuloTipo($c->cdf_tipo, $c->sinir_cdf_codigo)
+                .($c->cdf_obtido_em ? ' · '.date('d/m/Y H:i', strtotime($c->cdf_obtido_em)) : '')
+            : 'Não';
+        $cdfCod = $c->sinir_cdf_codigo ? CrudHelper::e($c->sinir_cdf_codigo) : '—';
 
         $historico = '';
         foreach (EntitySinirEnvio::listByColeta($c->id, 3) as $envio) {
@@ -346,6 +515,7 @@ class Coletas extends Page
                 'erro' => 'danger',
                 'cancelado' => 'secondary',
                 'consulta' => 'info',
+                'recebido' => 'success',
                 default => 'secondary',
             };
             $historico .= '<li><span class="badge bg-'.$histBadge.'">T'.$envio->tentativa.' · '.$envio->status.'</span>';
@@ -363,7 +533,10 @@ class Coletas extends Page
             <p class="mb-1"><strong>Status:</strong> '.$badge.'</p>
             <p class="mb-1"><strong>MTR SINIR:</strong> '.$man.'</p>
             <p class="mb-1"><strong>Cód. barras:</strong> '.$bar.'</p>
-            <p class="mb-2"><strong>Enviado em:</strong> '.$enviado.'</p>
+            <p class="mb-1"><strong>Enviado em:</strong> '.$enviado.'</p>
+            <p class="mb-1"><strong>Recebido SINIR:</strong> '.$recebidoSinir.'</p>
+            <p class="mb-1"><strong>CDF SINIR nº:</strong> '.$cdfCod.'</p>
+            <p class="mb-2"><strong>PDF portal:</strong> '.CrudHelper::e($cdfInfo).'</p>
             <p class="mb-1"><strong>Últimas tentativas:</strong></p>
             '.$histHtml;
     }

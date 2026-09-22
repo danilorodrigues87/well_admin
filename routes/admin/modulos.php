@@ -69,3 +69,33 @@ $obRouter->post('/painel/relatorios/export', [
         Admin\Relatorios::exportCsv($request);
     },
 ]);
+
+$obRouter->get('/painel/dmr', [
+    'middlewares' => ['required-admin-login', 'required-module:dmr'],
+    function ($request) {
+        return new Response(200, Admin\Dmr::index($request));
+    },
+]);
+
+$obRouter->get('/painel/dmr/export', [
+    'middlewares' => ['required-admin-login', 'required-module:dmr'],
+    function ($request) {
+        Admin\Dmr::exportCsv($request);
+    },
+]);
+
+$obRouter->post('/painel/dmr', [
+    'middlewares' => ['required-admin-login', 'required-module:dmr'],
+    function ($request) {
+        $acao = $request->getPostVars()['acao'] ?? 'listar';
+        $content = match ($acao) {
+            'listar' => Admin\Dmr::list($request),
+            'gerar' => Admin\Dmr::gerar($request),
+            'fechar' => Admin\Dmr::fechar($request),
+            'detalhe' => Admin\Dmr::detalhe($request),
+            default => json_encode(['success' => false, 'message' => 'Ação inválida']),
+        };
+
+        return new Response(200, $content, 'application/json');
+    },
+]);

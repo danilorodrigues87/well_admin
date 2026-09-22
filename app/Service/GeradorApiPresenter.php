@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Common\Helpers\ColetaMtrHelper;
+use App\Service\ColetaCdfService;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
@@ -55,6 +56,14 @@ class GeradorApiPresenter
         $base['coleta']['mtr_url'] = ColetaMtrHelper::temMtr($c)
             ? URL.'/gerador/coletas/'.$c->id.'/mtr'
             : null;
+        $base['coleta']['cdf_disponivel'] = ColetaCdfService::temCdf($c);
+        $base['coleta']['cdf_url'] = ColetaCdfService::temCdf($c)
+            ? URL.'/gerador/coletas/'.$c->id.'/cdf'
+            : null;
+        $base['coleta']['cdf_rotulo'] = ColetaCdfService::temCdf($c)
+            ? ColetaCdfService::rotuloTipo($c->cdf_tipo, $c->sinir_cdf_codigo)
+            : null;
+        $base['coleta']['numero_relatorio'] = ColetaMtrHelper::numeroRelatorioExibicao($c);
 
         foreach ($base['evidencias'] as $i => $ev) {
             $base['evidencias'][$i]['url'] = URL.'/api/v1/gerador/coletas/'.$c->id.'/evidencias/'.$ev['ordem'];

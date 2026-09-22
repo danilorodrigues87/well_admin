@@ -112,6 +112,39 @@ class ColetaMtrHelper
         return $sem !== '—' ? mb_strtoupper($sem, 'UTF-8') : 'SEM NÚMERO MTR';
     }
 
+    public static function podeEmitirCdfSinir(Coleta $c): bool
+    {
+        if ($c->status !== 'finalizada' || !SinirConfig::isEnabled()) {
+            return false;
+        }
+        if (($c->sinir_status ?? '') !== 'enviado') {
+            return false;
+        }
+        if (empty($c->sinir_recebido_em)) {
+            return false;
+        }
+        if (!empty($c->sinir_cdf_codigo)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function podeRegistrarRecebimentoSinir(Coleta $c): bool
+    {
+        if ($c->status !== 'finalizada' || !SinirConfig::isEnabled()) {
+            return false;
+        }
+        if (($c->sinir_status ?? '') !== 'enviado') {
+            return false;
+        }
+        if (!empty($c->sinir_recebido_em)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static function rotuloSemMtr(Coleta $c): string
     {
         if ($c->status === 'rascunho') {

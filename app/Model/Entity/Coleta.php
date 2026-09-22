@@ -36,6 +36,11 @@ class Coleta
     public ?string $sinir_codigo_barras = null;
     public ?string $sinir_status = null;
     public ?string $sinir_enviado_em = null;
+    public ?string $sinir_recebido_em = null;
+    public ?string $cdf_path = null;
+    public ?string $cdf_obtido_em = null;
+    public ?string $sinir_cdf_codigo = null;
+    public ?string $cdf_tipo = null;
 
     public static function count(string $where = '1=1', array $params = []): int
     {
@@ -140,6 +145,11 @@ class Coleta
         $c->sinir_codigo_barras = isset($row['sinir_codigo_barras']) ? (string)$row['sinir_codigo_barras'] : null;
         $c->sinir_status = isset($row['sinir_status']) ? (string)$row['sinir_status'] : null;
         $c->sinir_enviado_em = $row['sinir_enviado_em'] ?? null;
+        $c->sinir_recebido_em = $row['sinir_recebido_em'] ?? null;
+        $c->cdf_path = isset($row['cdf_path']) ? (string)$row['cdf_path'] : null;
+        $c->cdf_obtido_em = $row['cdf_obtido_em'] ?? null;
+        $c->sinir_cdf_codigo = isset($row['sinir_cdf_codigo']) ? (string)$row['sinir_cdf_codigo'] : null;
+        $c->cdf_tipo = isset($row['cdf_tipo']) ? (string)$row['cdf_tipo'] : null;
 
         return $c;
     }

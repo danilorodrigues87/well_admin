@@ -83,6 +83,14 @@ $obRouter->get('/painel/coletas/mtr/{id}', [
     },
 ]);
 
+$obRouter->get('/painel/coletas/cdf/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request, int $id) {
+        $out = Coletas::cdfDownload($request, $id);
+        return $out instanceof Response ? $out : new Response(200, $out);
+    },
+]);
+
 // ── Listagem coletas ──
 $coletaCrud = [
     ['path' => '/painel/coletas', 'ctrl' => Coletas::class, 'module' => 'coletas'],
@@ -112,6 +120,11 @@ foreach ($coletaCrud as $route) {
                 'sinir_reenviar' => $ctrl === Coletas::class ? Coletas::sinirReenviar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_cancelar' => $ctrl === Coletas::class ? Coletas::sinirCancelar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_consultar' => $ctrl === Coletas::class ? Coletas::sinirConsultar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_receber' => $ctrl === Coletas::class ? Coletas::sinirReceber($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_baixar_pdf' => $ctrl === Coletas::class ? Coletas::sinirBaixarPdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_cdf_upload' => $ctrl === Coletas::class ? Coletas::sinirCdfUpload($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_emitir_cdf' => $ctrl === Coletas::class ? Coletas::sinirEmitirCdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'sinir_baixar_cdf' => $ctrl === Coletas::class ? Coletas::sinirBaixarCdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'agendar_rota' => $ctrl === Agendamentos::class ? Agendamentos::agendarRota($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'list_solicitacoes' => $ctrl === Agendamentos::class ? Agendamentos::listSolicitacoes($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),

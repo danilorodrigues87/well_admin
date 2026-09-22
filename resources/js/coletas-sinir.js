@@ -122,6 +122,146 @@
     });
   };
 
+  window.sinirReceber = function (id) {
+    var run = function (resp, cargo) {
+      $.post(postUrl(), {
+        acao: 'sinir_receber',
+        id: id,
+        responsavel: resp || '',
+        cargo: cargo || '',
+        _csrf: csrf()
+      }, function (d) {
+        d = parseResp(d);
+        if (d.success) {
+          afterOk(id, d.message);
+        } else {
+          afterErr(d.message);
+        }
+      }, 'json').fail(function () {
+        afterErr('Falha de rede.');
+      });
+    };
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Receber MTR no SINIR (destinador)',
+        html: '<p class="small text-muted text-start mb-2">Confirma o recebimento no portal nacional usando os dados da coleta (data de recebimento, itens e responsável).</p>',
+        input: 'text',
+        inputLabel: 'Responsável no destinador (opcional)',
+        inputPlaceholder: 'Nome do balanceiro / responsável',
+        showCancelButton: true,
+        confirmButtonText: 'Registrar recebimento',
+        preConfirm: function (value) {
+          return { responsavel: value ? String(value).trim() : '' };
+        }
+      }).then(function (r) {
+        if (r.isConfirmed) {
+          Swal.fire({ title: 'Enviando…', allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
+          run(r.value && r.value.responsavel ? r.value.responsavel : '', '');
+        }
+      });
+    } else if (confirm('Registrar recebimento no SINIR?')) {
+      run('', '');
+    }
+  };
+
+  window.sinirEmitirCdf = function (id) {
+    var run = function (resp) {
+      $.post(postUrl(), {
+        acao: 'sinir_emitir_cdf',
+        id: id,
+        responsavel: resp || '',
+        _csrf: csrf()
+      }, function (d) {
+        d = parseResp(d);
+        if (d.success) {
+          afterOk(id, d.message);
+        } else {
+          afterErr(d.message);
+        }
+      }, 'json').fail(function () {
+        afterErr('Falha de rede.');
+      });
+    };
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Emitir CDF no SINIR',
+        text: 'Emite o certificado de destinação para este MTR (destinador). Requer recebimento já registrado.',
+        input: 'text',
+        inputLabel: 'Responsável técnico (opcional)',
+        showCancelButton: true,
+        confirmButtonText: 'Emitir CDF'
+      }).then(function (r) {
+        if (r.isConfirmed) {
+          Swal.fire({ title: 'Processando…', allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
+          run(r.value ? String(r.value).trim() : '');
+        }
+      });
+    } else if (confirm('Emitir CDF no SINIR?')) {
+      run('');
+    }
+  };
+
+  window.sinirBaixarCdf = function (id) {
+    $.post(postUrl(), { acao: 'sinir_baixar_cdf', id: id, _csrf: csrf() }, function (d) {
+      d = parseResp(d);
+      if (d.success) {
+        afterOk(id, d.message);
+      } else {
+        afterErr(d.message);
+      }
+    }, 'json').fail(function () {
+      afterErr('Falha de rede.');
+    });
+  };
+
+  window.sinirBaixarPdf = function (id) {
+    $.post(postUrl(), { acao: 'sinir_baixar_pdf', id: id, _csrf: csrf() }, function (d) {
+      d = parseResp(d);
+      if (d.success) {
+        afterOk(id, d.message);
+      } else {
+        afterErr(d.message);
+      }
+    }, 'json').fail(function () {
+      afterErr('Falha de rede.');
+    });
+  };
+
+  window.sinirCdfUpload = function (ev, id) {
+    ev.preventDefault();
+    var form = ev.target;
+    var input = form.querySelector('input[type="file"]');
+    if (!input || !input.files || !input.files[0]) {
+      afterErr('Selecione um PDF.');
+      return false;
+    }
+    var fd = new FormData();
+    fd.append('acao', 'sinir_cdf_upload');
+    fd.append('id', String(id));
+    fd.append('_csrf', csrf());
+    fd.append('cdf_file', input.files[0]);
+    $.ajax({
+      url: postUrl(),
+      type: 'POST',
+      data: fd,
+      processData: false,
+      contentType: false,
+      dataType: 'json'
+    }).done(function (d) {
+      d = parseResp(d);
+      if (d.success) {
+        afterOk(id, d.message);
+      } else {
+        afterErr(d.message);
+      }
+    }).fail(function () {
+      afterErr('Falha ao enviar PDF.');
+    });
+    return false;
+  };
+
   window.sinirCancelar = function (id) {
     var run = function (justificativa) {
       $.post(postUrl(), {

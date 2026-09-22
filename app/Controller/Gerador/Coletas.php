@@ -7,7 +7,9 @@ use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\FormatHelper;
 use App\Http\Response;
+use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
+use App\Service\ColetaCdfService;
 use App\Service\ColetaService;
 use App\Service\GeradorPortalService;
 use App\Utils\View;
@@ -83,6 +85,12 @@ class Coletas extends Page
         $mtrLink = !empty($coleta['mtr_disponivel'])
             ? '<a class="btn btn-primary" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/mtr"><i class="fas fa-print me-1"></i> Imprimir MTR</a>'
             : '<span class="text-muted small">MTR disponível após registro no SINIR.</span>';
+        $cdfRotulo = !empty($coleta['cdf_rotulo']) ? (string)$coleta['cdf_rotulo'] : 'Documento PDF';
+        $cdfLink = !empty($coleta['cdf_disponivel'])
+            ? ' <a class="btn btn-outline-success" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/cdf"><i class="fas fa-file-pdf me-1"></i> '
+                .CrudHelper::e($cdfRotulo).'</a>'
+            : '';
+        $mtrLink .= $cdfLink;
 
         $evidenciasHtml = '';
         foreach ($detalhe['evidencias'] ?? [] as $ev) {
@@ -157,6 +165,27 @@ class Coletas extends Page
         }
 
         return new Response(200, file_get_contents($path), (string)$match->mime);
+    }
+
+    public static function cdf($request, int $id): Response|string
+    {
+        if (!GeradorScope::pertenceColeta($id)) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+        $c = EntityColeta::getById($id);
+        if (!$c) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+        $path = ColetaCdfService::absolutePath($c);
+        if ($path === null) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+        $bytes = file_get_contents($path);
+        if ($bytes === false) {
+            return View::render('erros/404', ['URL' => URL]);
+        }
+
+        return new Response(200, $bytes, 'application/pdf');
     }
 
     public static function mtr($request, int $id): string

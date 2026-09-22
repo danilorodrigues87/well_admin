@@ -1,0 +1,84 @@
+<h1 class="mt-2">DMR — Geradores</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">DMR</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-file-alt me-1"></i> Declaração de movimentação (apoio operacional)</div>
+    <div class="card-body">
+        <p class="text-muted small">Consolida coletas finalizadas por cliente e competência (mês). Use o CSV para conferência antes de lançar a DMR no portal SINIR.</p>
+        <form id="crud-form">{{csrf_field}}</form>
+        <div id="barra-filtros-lista" class="row g-2 align-items-end mb-3">
+            <div class="col-md-4">
+                <label class="form-label small mb-0">Gerador (cliente)</label>
+                <select name="cliente_id" class="form-select" required>{{clientes_options}}</select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-0">Competência</label>
+                <input type="month" name="competencia" class="form-control" value="{{competencia_default}}"/>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100" onclick="dmrGerar()"><i class="fas fa-sync me-1"></i> Gerar / atualizar</button>
+            </div>
+        </div>
+        <table class="table table-hover table-sm">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Competência</th>
+                    <th>Status</th>
+                    <th class="text-end">Coletas</th>
+                    <th class="text-end">Kg</th>
+                    <th class="text-end">Com MTR</th>
+                    <th class="text-end">Com PDF/CDF</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="crud-tbody"></tbody>
+        </table>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="detalheModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhe DMR</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detalhe-body"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function dmrGerar() {
+  var fd = new FormData(document.getElementById('crud-form'));
+  fd.set('acao', 'gerar');
+  fd.set('cliente_id', document.querySelector('[name=cliente_id]').value);
+  fd.set('competencia', document.querySelector('[name=competencia]').value);
+  $.ajax({ url: window.CRUD.baseUrl, method: 'POST', data: fd, processData: false, contentType: false, dataType: 'json' })
+    .done(function (d) {
+      if (d.success) { if (typeof Swal !== 'undefined') Swal.fire('DMR', d.message, 'success'); listar(null, 1); }
+      else { if (typeof Swal !== 'undefined') Swal.fire('Erro', d.message, 'error'); }
+    });
+}
+function dmrDetalhe(id) {
+  $.post(window.CRUD.baseUrl, { acao: 'detalhe', id: id, _csrf: document.querySelector('#crud-form input[name=_csrf]').value }, function (d) {
+    d = typeof d === 'object' ? d : JSON.parse(d);
+    if (d.success && d.html) {
+      document.getElementById('detalhe-body').innerHTML = d.html;
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('detalheModal')).show();
+    }
+  }, 'json');
+}
+function dmrFechar(id) {
+  $.post(window.CRUD.baseUrl, { acao: 'fechar', id: id, _csrf: document.querySelector('#crud-form input[name=_csrf]').value }, function (d) {
+    d = typeof d === 'object' ? d : JSON.parse(d);
+    if (d.success) { dmrDetalhe(id); listar(null, 1); }
+    else if (typeof Swal !== 'undefined') Swal.fire('Erro', d.message, 'error');
+  }, 'json');
+}
+</script>

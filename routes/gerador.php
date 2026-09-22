@@ -96,6 +96,14 @@ $obRouter->get('/gerador/coletas/{id}/mtr', [
     },
 ]);
 
+$obRouter->get('/gerador/coletas/{id}/cdf', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id) {
+        $out = Gerador\Coletas::cdf($request, $id);
+        return $out instanceof Response ? $out : new Response(200, $out);
+    },
+]);
+
 $obRouter->get('/gerador/coletas/{id}', [
     'middlewares' => $geradorAuth,
     function ($request, int $id) {

@@ -149,6 +149,10 @@ app/Service/Sinir/
   SinirGateway.php                  — HTTP cURL para admin.sinir.gov.br
   SinirPayloadBuilder.php           — manifestoJSONDtos → salvarManifestoLote
   SinirManifestoService.php         — envio, parse resposta, sinir_envios
+  SinirRecebimentoService.php       — receberManifestoLote + PDF MTR (CDF light)
+  SinirCdfService.php               — emiteCDF + buscaPdfCdf (CDF oficial)
+  ColetaCdfService.php              — storage PDF portal gerador
+  DmrService.php                    — agregação DMR por competência (`/painel/dmr`)
   SinirCatalogService.php           — listas SINIR + sugestão mapeamento tipos_residuos
   SinirService.php                  — badge, smoke test, reenvio
 app/Model/Entity/SinirEnvio.php     — histórico de tentativas
@@ -279,3 +283,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-22 | Impressão relatório/MTR em qualquer fase (rascunho ou finalizada): `ColetaMtrHelper::podeImprimirRelatorio`; wizard + listagem Coletas |
 | 2026-09-22 | Coletas Fase 1: `transportadoras`/`destinadores` (SINIR unidade + token por transportadora); `numero_relatorio` vs MTR; wizard 4 etapas; finalizar só relatório; **Gerar MTR** sob demanda (`042`); `SinirCredentialsResolver` |
 | 2026-09-22 | Coletas Fase 2: tratamento na etapa destinador; `clientes.exige_mtr` (`045`); precheck SINIR + modal checklist; filtros MTR na listagem; coletor → `transportadora_id` em usuários |
+| 2026-09-22 | Coletas Fase 3: `receberManifestoLote` + `sinir_recebido_em`; PDF MTR SINIR / upload manual (`046`, `ColetaCdfService`); download `/gerador/coletas/{id}/cdf` |
+| 2026-09-22 | Coletas Fase 4: CDF oficial `emiteCDF` + `buscaPdfCdf` (`047`, `SinirCdfService`); DMR apoio por competência (`048`, `/painel/dmr`) |

@@ -116,9 +116,11 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Listar estados físicos | GET | `/retornaListaEstadoFisico` |
 | Listar acondicionamentos | GET | `/retornaListaAcondicionamento` |
 | Emitir MTR | POST | `/salvarManifestoLote` |
-| PDF MTR | POST | `/buscaPdfManifestoPorCodigoBarras/{cod}` |
+| PDF MTR | POST | `/buscaPdfManifestoPorCodigoBarras/{cod}` — cache em `storage/coletas/{id}/` (`ColetaCdfService`, portal gerador) |
 | Cancelar | POST | `/cancelarManifesto` |
-| Receber (destinador) | POST | `/receberManifestoLote` |
+| Receber (destinador) | POST | `/receberManifestoLote` — painel Coletas → **Receber no SINIR** (`SinirRecebimentoService`) |
+| Emitir CDF | POST | `/emiteCDF` — **Emitir CDF SINIR** (`SinirCdfService`) após recebimento |
+| PDF CDF | POST | `/buscaPdfCdf/{codigo}` — cache em `storage/coletas/{id}/` |
 
 Header em todas (exceto troca inicial): `Authorization: Bearer {token_acesso}`
 

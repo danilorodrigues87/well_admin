@@ -143,6 +143,114 @@ class SinirPayloadBuilder
         return ['ok' => true, 'payload' => $payload, 'errors' => []];
     }
 
+    /**
+     * Payload POST /receberManifestoLote (manifestoRecebimentoJSONs).
+     *
+     * @return array{ok:bool,payload:?array,errors:string[]}
+     */
+    public function buildRecebimentoLote(int $coletaId, ?string $responsavel = null, ?string $cargo = null): array
+    {
+        $coleta = EntityColeta::getById($coletaId);
+        if (!$coleta || $coleta->status !== 'finalizada') {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Coleta não encontrada ou não finalizada.']];
+        }
+        if (($coleta->sinir_status ?? '') !== 'enviado') {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Somente MTRs registrados no SINIR podem ser recebidos.']];
+        }
+
+        $manifestoCodigo = trim((string)($coleta->sinir_man_numero ?? ''));
+        if ($manifestoCodigo === '' && $coleta->numero_mtr) {
+            $manifestoCodigo = (string)(int)$coleta->numero_mtr;
+        }
+        if ($manifestoCodigo === '') {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Código do manifesto SINIR ausente.']];
+        }
+
+        $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
+        if (!$snapshot) {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Snapshot da coleta ausente.']];
+        }
+
+        $geradorCnpj = preg_replace('/\D/', '', (string)$snapshot->gerador_cnpj);
+        $transportadorCnpj = preg_replace('/\D/', '', (string)$snapshot->transportador_cnpj);
+        if ($geradorCnpj === '' || $transportadorCnpj === '') {
+            return ['ok' => false, 'payload' => null, 'errors' => ['CNPJ gerador/transportador ausente no snapshot.']];
+        }
+
+        $dataReceb = $coleta->data_recebimento
+            ? date('Ymd', strtotime($coleta->data_recebimento))
+            : date('Ymd');
+        $dataTransporte = $coleta->data_coleta
+            ? date('Ymd', strtotime($coleta->data_coleta))
+            : $dataReceb;
+
+        $resp = trim((string)($responsavel ?? ''));
+        if ($resp === '') {
+            $destinador = $coleta->destinador_id
+                ? EntityDestinador::getById((int)$coleta->destinador_id)
+                : EntityDestinador::getPadrao();
+            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? 'Responsável'));
+        }
+        $cargoFinal = trim((string)($cargo ?? '')) !== '' ? trim((string)$cargo) : 'Responsável';
+
+        $itens = EntityColetaItem::getByColetaId($coletaId);
+        if ($itens === []) {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Coleta sem itens de resíduo.']];
+        }
+
+        $errors = [];
+        $itemRecebimento = [];
+        $seq = 1;
+        foreach ($itens as $item) {
+            $tipo = $item->tipo_residuo_id ? EntityTipoResiduo::getById($item->tipo_residuo_id) : null;
+            if (!$tipo || !$this->tipoTemCodigosSinir($tipo)) {
+                $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem mapeamento SINIR.';
+                continue;
+            }
+            $codIbama = preg_replace('/\D/', '', (string)($item->cod_ibama ?: $tipo->cod_ibama));
+            if ($codIbama === '') {
+                $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem código IBAMA.';
+                continue;
+            }
+            $itemRecebimento[] = [
+                'codigoSequencial' => $seq,
+                'justificativa' => null,
+                'codigoInterno' => null,
+                'qtdRecebida' => (float)$item->quantidade,
+                'residuo' => $codIbama,
+                'codigoTecnologia' => (int)$tipo->tra_codigo,
+                'codigoTipoEstado' => (int)$tipo->tie_codigo,
+            ];
+            ++$seq;
+        }
+        if ($errors !== []) {
+            return ['ok' => false, 'payload' => null, 'errors' => $errors];
+        }
+
+        $motorista = mb_substr(trim((string)$snapshot->motorista_nome), 0, 100);
+        $placa = mb_substr(trim((string)$snapshot->veiculo_placa), 0, 10);
+
+        $payload = [
+            'manifestoRecebimentoJSONs' => [
+                [
+                    'manifestoCodigo' => $manifestoCodigo,
+                    'cnpGerador' => $geradorCnpj,
+                    'cnpTransportador' => $transportadorCnpj,
+                    'recebimentoMtrResponsavel' => mb_substr($resp, 0, 150),
+                    'recebimentoMtrCargo' => mb_substr($cargoFinal, 0, 100),
+                    'recebimentoMtrData' => $dataReceb,
+                    'recebimentoMtrObs' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 255),
+                    'nomeMotorista' => $motorista !== '' ? $motorista : 'Motorista',
+                    'placaVeiculo' => $placa !== '' ? $placa : 'S/PLACA',
+                    'transporteMtrData' => $dataTransporte,
+                    'itemManifestoRecebimentoJSONs' => $itemRecebimento,
+                ],
+            ],
+        ];
+
+        return ['ok' => true, 'payload' => $payload, 'errors' => []];
+    }
+
     /** @return array{0:int,1:int} */
     private function densidadeFromUnidade(string $unidade): array
     {

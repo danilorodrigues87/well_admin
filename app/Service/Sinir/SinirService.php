@@ -83,6 +83,30 @@ class SinirService
         return (new SinirManifestoService())->consultarColeta($coletaId);
     }
 
+    /** @return array{ok:bool,message:string,details?:array<string,mixed>} */
+    public static function receberColeta(int $coletaId, bool $baixarPdf = true, ?string $responsavel = null, ?string $cargo = null): array
+    {
+        return (new SinirRecebimentoService())->receberColeta($coletaId, $baixarPdf, $responsavel, $cargo);
+    }
+
+    /** @return array{ok:bool,message:string} */
+    public static function baixarPdfManifesto(int $coletaId): array
+    {
+        return (new SinirRecebimentoService())->baixarPdfManifesto($coletaId);
+    }
+
+    /** @return array{ok:bool,message:string,details?:array<string,mixed>} */
+    public static function emitirCdfColeta(int $coletaId, ?string $responsavel = null): array
+    {
+        return (new SinirCdfService())->emitirCdfColeta($coletaId, $responsavel);
+    }
+
+    /** @return array{ok:bool,message:string} */
+    public static function baixarPdfCdf(int $coletaId): array
+    {
+        return (new SinirCdfService())->baixarPdfCdf($coletaId);
+    }
+
     /**
      * Smoke test: valida POST /token (Fase A).
      *

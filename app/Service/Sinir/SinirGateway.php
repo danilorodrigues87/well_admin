@@ -25,6 +25,36 @@ class SinirGateway
         return $this->request('GET', $path, [], $bearerToken);
     }
 
+    /**
+     * POST que pode retornar PDF binário (ex.: buscaPdfManifestoPorCodigoBarras).
+     *
+     * @return array{ok:bool,status:int,pdf:?string,body:?array,raw:string,error:?string}
+     */
+    public function postForPdf(string $path, ?string $bearerToken = null): array
+    {
+        $result = $this->request('POST', $path, [], $bearerToken);
+        $raw = $result['raw'];
+        if ($raw !== '' && str_starts_with($raw, '%PDF')) {
+            return [
+                'ok' => $result['status'] >= 200 && $result['status'] < 300,
+                'status' => $result['status'],
+                'pdf' => $raw,
+                'body' => null,
+                'raw' => $raw,
+                'error' => null,
+            ];
+        }
+
+        return [
+            'ok' => $result['ok'],
+            'status' => $result['status'],
+            'pdf' => null,
+            'body' => $result['body'],
+            'raw' => $raw,
+            'error' => $result['error'] ?? ($result['body']['mensagem'] ?? null),
+        ];
+    }
+
     /** @return array{ok:bool,status:int,body:?array,raw:string,error:?string,curl_errno?:int,primary_ip?:string} */
     private function request(string $method, string $path, array $body, ?string $bearerToken): array
     {
