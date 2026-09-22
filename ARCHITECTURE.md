@@ -278,3 +278,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-21 | P0 e-mail gerador: `GeradorNotificacaoService` (agendamento aprovado/recusado, MTR SINIR); `docs/MAIL_VPS.md`; `mail_smoke_test.php` |
 | 2026-09-22 | Impressão relatório/MTR em qualquer fase (rascunho ou finalizada): `ColetaMtrHelper::podeImprimirRelatorio`; wizard + listagem Coletas |
 | 2026-09-22 | Coletas Fase 1: `transportadoras`/`destinadores` (SINIR unidade + token por transportadora); `numero_relatorio` vs MTR; wizard 4 etapas; finalizar só relatório; **Gerar MTR** sob demanda (`042`); `SinirCredentialsResolver` |
+| 2026-09-22 | Coletas Fase 2: tratamento na etapa destinador; `clientes.exige_mtr` (`045`); precheck SINIR + modal checklist; filtros MTR na listagem; coletor → `transportadora_id` em usuários |

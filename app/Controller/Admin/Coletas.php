@@ -11,6 +11,7 @@ use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Service\ColetaService;
 use App\Service\RotaScopeService;
+use App\Service\Sinir\ColetaSinirPrecheckService;
 use App\Service\Sinir\SinirService;
 use App\Session\User\Login as SessionUser;
 use App\Model\Entity\SinirEnvio as EntitySinirEnvio;
@@ -30,7 +31,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20260921"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20260922"></script>'
         );
     }
 
@@ -75,6 +76,15 @@ class Coletas extends Page
             $params[] = $recebimento;
         }
 
+        $filtroMtr = trim((string)($post['filtro_mtr'] ?? ''));
+        if ($filtroMtr === 'com_mtr') {
+            $where .= " AND (c.sinir_status = 'enviado' OR (c.legacy_manifesto IS NOT NULL AND c.numero_mtr IS NOT NULL))";
+        } elseif ($filtroMtr === 'sem_mtr') {
+            $where .= " AND c.status = 'finalizada' AND (c.sinir_status IS NULL OR c.sinir_status NOT IN ('enviado'))";
+        } elseif ($filtroMtr === 'mtr_pendente') {
+            $where .= " AND c.status = 'finalizada' AND cl.exige_mtr = 1 AND (c.sinir_status IS NULL OR c.sinir_status IN ('pendente','erro'))";
+        }
+
         $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
         if (empty($usuario['is_admin'])) {
             $userId = (int)($usuario['id'] ?? 0);
@@ -106,7 +116,9 @@ class Coletas extends Page
             $itens .= '<tr>
                 <td>'.$relCol.'</td>
                 <td>'.$mtr.'</td>
-                <td>'.CrudHelper::e($c->cliente_nome).'</td>
+                <td>'.CrudHelper::e($c->cliente_nome)
+                .($c->cliente_exige_mtr && $c->status === 'finalizada' && !ColetaMtrHelper::temMtr($c)
+                    ? ' <span class="badge bg-warning text-dark">MTR pendente</span>' : '').'</td>
                 <td>'.$data.'</td>
                 <td>'.CrudHelper::e($c->coletor_nome).'</td>
                 <td><span class="badge bg-'.$badge.'">'.CrudHelper::e($c->status).'</span></td>
@@ -211,6 +223,26 @@ class Coletas extends Page
         return CrudHelper::jsonOk(['html' => $html]);
     }
 
+    public static function sinirPrecheck($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        if ($id <= 0) {
+            return CrudHelper::jsonError('Coleta inválida.');
+        }
+
+        $precheck = (new ColetaSinirPrecheckService())->forColeta($id);
+
+        return CrudHelper::jsonOk([
+            'ok' => $precheck['ok'],
+            'checks' => $precheck['checks'],
+            'errors' => $precheck['errors'],
+        ]);
+    }
+
     public static function sinirReenviar($request): string
     {
         $post = $request->getPostVars();
@@ -227,7 +259,12 @@ class Coletas extends Page
             return CrudHelper::jsonError('Integração SINIR desabilitada no .env.');
         }
 
-        $result = SinirService::enviarColeta($id, true);
+        $precheck = (new ColetaSinirPrecheckService())->forColeta($id);
+        if (!$precheck['ok']) {
+            return CrudHelper::jsonError(implode(' ', $precheck['errors']));
+        }
+
+        $result = ColetaService::gerarMtrSinir($id, true);
         if (!empty($result['skipped'])) {
             return CrudHelper::jsonOk(['message' => $result['message']]);
         }

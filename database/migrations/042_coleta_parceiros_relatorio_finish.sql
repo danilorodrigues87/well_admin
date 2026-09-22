@@ -1,0 +1,2 @@
+-- Obsoleto: use 044_coleta_parceiros_relatorio_keys_only.sql
+-- (colunas em coletas já criadas pela 042; finish antigo gerava #1060 duplicado).

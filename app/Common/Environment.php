@@ -30,6 +30,10 @@ class Environment
             if ($key === '') {
                 continue;
             }
+            // Variáveis já injetadas (Docker / Easypanel Environment) têm prioridade sobre o arquivo .env
+            if (self::envAlreadySet($key)) {
+                continue;
+            }
             $len = strlen($value);
             if ($len >= 2) {
                 $q = $value[0];
@@ -58,5 +62,17 @@ class Environment
             return $_SERVER[$key];
         }
         return $default;
+    }
+
+    private static function envAlreadySet(string $key): bool
+    {
+        if (getenv($key) !== false) {
+            return true;
+        }
+        if (isset($_SERVER[$key]) && (string)$_SERVER[$key] !== '') {
+            return true;
+        }
+
+        return array_key_exists($key, $_ENV) && (string)$_ENV[$key] !== '';
     }
 }

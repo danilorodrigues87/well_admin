@@ -39,34 +39,74 @@
     }
   }
 
+  function checklistHtml(checks) {
+    var html = '<ul class="list-unstyled mb-0 text-start">';
+    (checks || []).forEach(function (c) {
+      var icon = c.ok
+        ? '<i class="fas fa-check-circle text-success me-2"></i>'
+        : '<i class="fas fa-times-circle text-danger me-2"></i>';
+      html += '<li class="mb-2">' + icon + '<strong>' + (c.label || '') + '</strong><br><small class="text-muted ms-4">'
+        + (c.detail || '') + '</small></li>';
+    });
+    html += '</ul>';
+    return html;
+  }
+
+  function doEnviarSinir(id) {
+    $.post(postUrl(), { acao: 'sinir_reenviar', id: id, _csrf: csrf() }, function (d) {
+      d = parseResp(d);
+      if (d.success) {
+        afterOk(id, d.message);
+      } else {
+        afterErr(d.message);
+      }
+    }, 'json').fail(function () {
+      afterErr('Falha de rede.');
+    });
+  }
+
   window.sinirReenviar = function (id) {
-    var doPost = function () {
-      $.post(postUrl(), { acao: 'sinir_reenviar', id: id, _csrf: csrf() }, function (d) {
-        d = parseResp(d);
-        if (d.success) {
-          afterOk(id, d.message);
-        } else {
-          afterErr(d.message);
-        }
-      }, 'json').fail(function () {
-        afterErr('Falha de rede.');
-      });
-    };
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: 'Registrar no SINIR?',
-        text: 'Será enviado (ou reenviado) o manifesto nacional para esta coleta.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Continuar'
-      }).then(function (r) {
-        if (r.isConfirmed) {
-          doPost();
-        }
-      });
-    } else if (confirm('Registrar no SINIR?')) {
-      doPost();
-    }
+    $.post(postUrl(), { acao: 'sinir_precheck', id: id, _csrf: csrf() }, function (d) {
+      d = parseResp(d);
+      if (!d.success) {
+        afterErr(d.message || 'Não foi possível validar.');
+        return;
+      }
+
+      var checks = d.checks || [];
+      var canSend = !!d.ok;
+      var html = checklistHtml(checks);
+      if (!canSend && d.errors && d.errors.length) {
+        html += '<p class="small text-danger mt-2 mb-0">' + d.errors.join(' ') + '</p>';
+      }
+
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Gerar MTR no SINIR',
+          html: html,
+          icon: canSend ? 'question' : 'warning',
+          showCancelButton: true,
+          confirmButtonText: canSend ? 'Confirmar e emitir' : 'Fechar',
+          showConfirmButton: canSend,
+          cancelButtonText: 'Cancelar'
+        }).then(function (r) {
+          if (canSend && r.isConfirmed) {
+            Swal.fire({
+              title: 'Enviando…',
+              allowOutsideClick: false,
+              didOpen: function () { Swal.showLoading(); }
+            });
+            doEnviarSinir(id);
+          }
+        });
+      } else if (canSend && confirm('Gerar MTR no SINIR?')) {
+        doEnviarSinir(id);
+      } else if (!canSend) {
+        alert(d.errors ? d.errors.join('\n') : 'Corrija os itens pendentes.');
+      }
+    }, 'json').fail(function () {
+      afterErr('Falha ao validar pré-requisitos.');
+    });
   };
 
   window.sinirConsultar = function (id) {

@@ -16,6 +16,7 @@ class Cliente
     public string $razao_social = '';
     public string $cnpj = '';
     public ?int $sinir_cod_unidade = null;
+    public int $exige_mtr = 0;
     public string $email = '';
     public string $telefone = '';
     public ?int $plano_id = null;
@@ -137,6 +138,7 @@ class Cliente
         $c->sinir_cod_unidade = isset($row['sinir_cod_unidade']) && $row['sinir_cod_unidade'] !== null
             ? (int)$row['sinir_cod_unidade']
             : null;
+        $c->exige_mtr = (int)($row['exige_mtr'] ?? 0);
         $c->email = (string)($row['email'] ?? '');
         $c->telefone = (string)($row['telefone'] ?? '');
         $c->plano_id = isset($row['plano_id']) ? (int)$row['plano_id'] : null;

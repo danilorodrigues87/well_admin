@@ -108,6 +108,7 @@ foreach ($coletaCrud as $route) {
             $content = match ($acao) {
                 'listar' => $ctrl::list($request),
                 'get' => $ctrl::get($request),
+                'sinir_precheck' => $ctrl === Coletas::class ? Coletas::sinirPrecheck($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_reenviar' => $ctrl === Coletas::class ? Coletas::sinirReenviar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_cancelar' => $ctrl === Coletas::class ? Coletas::sinirCancelar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_consultar' => $ctrl === Coletas::class ? Coletas::sinirConsultar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),

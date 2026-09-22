@@ -149,7 +149,6 @@ class ColetaService
         $updateColeta = [
             'transportadora_id' => $transportadora->id,
             'veiculo_id' => $veiculo ? $veiculoId : null,
-            'tratamento' => trim((string)($dados['tratamento'] ?? '')),
         ];
         if ($coletorId > 0 && ColetorSelectHelper::isColetorAtivo($coletorId)) {
             $updateColeta['coletor_id'] = $coletorId;
@@ -177,6 +176,7 @@ class ColetaService
 
         EntityColeta::update($coletaId, [
             'destinador_id' => $destinador->id,
+            'tratamento' => trim((string)($dados['tratamento'] ?? '')),
             'situacao_recebimento' => ($dados['situacao_recebimento'] ?? '') === 'recebido' ? 'recebido' : 'pendente',
             'data_recebimento' => ($dados['data_recebimento'] ?? '') ?: null,
         ]);

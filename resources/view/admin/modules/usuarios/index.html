@@ -50,6 +50,11 @@
                         <label class="form-label">Função</label>
                         <select class="form-select" name="funcao_id" id="crud-funcao_id" required>{{funcoes_options}}</select>
                     </div>
+                    <div class="mb-3" id="crud-transportadora-wrap">
+                        <label class="form-label">Transportadora (coletor)</label>
+                        <select class="form-select" name="transportadora_id" id="crud-transportadora_id">{{transportadoras_options}}</select>
+                        <small class="text-muted">Filtra coletores no wizard de coleta.</small>
+                    </div>
                     <div class="mb-3" id="crud-senha-wrap">
                         <label class="form-label">Senha</label>
                         <input type="password" class="form-control" name="senha" id="crud-senha" minlength="8" />

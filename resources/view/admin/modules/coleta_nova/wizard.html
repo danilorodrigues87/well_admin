@@ -25,8 +25,7 @@
                         <select class="form-select" name="motorista_coletor_id" id="motorista_coletor_id" {{motorista_locked}} required>{{motorista_options}}</select>
                         {{motorista_hidden}}
                     </div>
-                    <div class="col-md-4 mb-2"><label>Veículo</label><select class="form-select" name="veiculo_id" id="veiculo_id">{{veiculos_options}}</select></div>
-                    <div class="col-md-4 mb-2"><label>Tratamento</label><select class="form-select" name="tratamento" id="tratamento"><option value="">—</option>{{tratamentos_options}}</select></div>
+                    <div class="col-md-6 mb-2"><label>Veículo</label><select class="form-select" name="veiculo_id" id="veiculo_id">{{veiculos_options}}</select></div>
                 </div>
                 <button type="button" class="btn btn-primary mt-2" onclick="salvarTransporte()">Salvar e continuar</button>
             </form>
@@ -85,7 +84,8 @@
             <form id="form-destinador">
                 <div class="row">
                     <div class="col-md-6 mb-2"><label>Destinador final</label><select class="form-select" name="destinador_id" id="destinador_id" required>{{destinadores_options}}</select></div>
-                    <div class="col-md-6 mb-2"><label>Obs. destinador</label><input class="form-control" name="observacao_destinador" value="{{observacao_destinador}}"/></div>
+                    <div class="col-md-6 mb-2"><label>Tratamento / destinação</label><select class="form-select" name="tratamento" id="tratamento"><option value="">—</option>{{tratamentos_options}}</select></div>
+                    <div class="col-md-12 mb-2"><label>Obs. destinador</label><input class="form-control" name="observacao_destinador" value="{{observacao_destinador}}"/></div>
                     <div class="col-md-4 mb-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="situacao_recebimento" value="recebido" id="situacao_recebimento" {{situacao_recebido}}/><label class="form-check-label" for="situacao_recebimento">Recebido no destinador</label></div></div>
                     <div class="col-md-4 mb-2">
                         <label>Data de encerramento</label>

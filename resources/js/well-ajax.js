@@ -244,10 +244,16 @@
       $('#crud-id').val(data.id || 0);
       Object.keys(data).forEach(function (k) {
         var el = document.getElementById('crud-' + k);
-        if (el) {
+        if (!el) {
+          return;
+        }
+        if (el.type === 'checkbox') {
+          el.checked = !!data[k] && String(data[k]) !== '0' && data[k] !== false;
+        } else {
           el.value = data[k] !== null && data[k] !== undefined ? data[k] : '';
         }
       });
+      $('#crud-funcao_id').trigger('change');
       if (data.nome_fantasia && $('#crud-nome-label').length) {
         $('#crud-nome-label').text(data.nome_fantasia);
       }
@@ -474,7 +480,19 @@
     listar(null, 1);
   });
 
+  function toggleTransportadoraWrap() {
+    var $wrap = $('#crud-transportadora-wrap');
+    if (!$wrap.length) {
+      return;
+    }
+    var label = ($('#crud-funcao_id option:selected').text() || '').toLowerCase();
+    $wrap.toggle(label.indexOf('coletor') >= 0);
+  }
+
+  $(document).on('change', '#crud-funcao_id', toggleTransportadoraWrap);
+
   $(function () {
+    toggleTransportadoraWrap();
     /* Aguarda {{scripts}} definir `listagem` / overrides de página */
     setTimeout(function () {
       if (shouldHandleCrudList()) {

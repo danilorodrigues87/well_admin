@@ -30,6 +30,7 @@ class Coleta
     public ?string $data_recebimento = null;
     public ?string $tratamento = null;
     public string $cliente_nome = '';
+    public int $cliente_exige_mtr = 0;
     public string $coletor_nome = '';
     public ?string $sinir_man_numero = null;
     public ?string $sinir_codigo_barras = null;
@@ -41,7 +42,9 @@ class Coleta
         [$where, $params] = self::tenantWhere($where, $params, 'c.operadora_id');
         $db = new Database();
         $stmt = $db->execute(
-            'SELECT COUNT(*) AS qtd FROM coletas c WHERE '.$where,
+            'SELECT COUNT(*) AS qtd FROM coletas c
+             INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
+             WHERE '.$where,
             $params
         );
 
@@ -54,7 +57,7 @@ class Coleta
         [$where, $params] = self::tenantWhere($where, $params, 'c.operadora_id');
         $db = new Database();
         $stmt = $db->execute(
-            'SELECT c.*, cl.nome_fantasia AS cliente_nome, u.nome AS coletor_nome
+            'SELECT c.*, cl.nome_fantasia AS cliente_nome, cl.exige_mtr AS cliente_exige_mtr, u.nome AS coletor_nome
              FROM coletas c
              INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
              LEFT JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
@@ -73,7 +76,7 @@ class Coleta
     {
         $db = new Database();
         $stmt = $db->execute(
-            'SELECT c.*, cl.nome_fantasia AS cliente_nome, u.nome AS coletor_nome
+            'SELECT c.*, cl.nome_fantasia AS cliente_nome, cl.exige_mtr AS cliente_exige_mtr, u.nome AS coletor_nome
              FROM coletas c
              INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
              LEFT JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
@@ -131,6 +134,7 @@ class Coleta
         $c->data_recebimento = $row['data_recebimento'] ?? null;
         $c->tratamento = $row['tratamento'] ?? null;
         $c->cliente_nome = (string)($row['cliente_nome'] ?? '');
+        $c->cliente_exige_mtr = (int)($row['cliente_exige_mtr'] ?? 0);
         $c->coletor_nome = (string)($row['coletor_nome'] ?? '');
         $c->sinir_man_numero = isset($row['sinir_man_numero']) ? (string)$row['sinir_man_numero'] : null;
         $c->sinir_codigo_barras = isset($row['sinir_codigo_barras']) ? (string)$row['sinir_codigo_barras'] : null;

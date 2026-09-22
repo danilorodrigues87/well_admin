@@ -8,6 +8,17 @@ use App\Http\Middleware\Queue as MiddlewareQueue;
 
 Environment::load(__DIR__.'/../');
 
+if (php_sapi_name() !== 'cli' && \App\Common\MaintenanceMode::isActive()) {
+    http_response_code(503);
+    header('Content-Type: text/html; charset=utf-8');
+    header('Retry-After: 300');
+    echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        .'<title>Manutenção</title></head><body style="font-family:sans-serif;max-width:32rem;margin:4rem auto;padding:0 1rem;">'
+        .'<h1>Manutenção</h1><p>O sistema está temporariamente indisponível. Tente novamente em alguns minutos.</p>'
+        .'</body></html>';
+    exit;
+}
+
 $detectRequestUrl = function () {
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');

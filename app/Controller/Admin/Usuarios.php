@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Common\Helpers\CrudHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Funcao as EntityFuncao;
+use App\Model\Entity\Transportadora as EntityTransportadora;
 use App\Model\Entity\Usuario as EntityUsuario;
 use App\Utils\View;
 
@@ -21,6 +22,7 @@ class Usuarios extends Page
         $content = View::render('admin/modules/usuarios/index', [
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
             'funcoes_options' => $options,
+            'transportadoras_options' => self::transportadorasOptionsHtml(0),
             'titulo_pagina' => 'Usuários',
         ]);
         return self::getPage('Usuários', $content, 'usuarios', self::crudScripts('/painel/usuarios'));
@@ -92,8 +94,20 @@ class Usuarios extends Page
             'nome' => $u->nome,
             'email' => $u->email,
             'funcao_id' => $u->funcao_id,
+            'transportadora_id' => $u->transportadora_id ?? '',
             'ativo' => $u->ativo,
         ]);
+    }
+
+    public static function transportadorasOptionsHtml(int $selectedId = 0): string
+    {
+        $html = '<option value="">— Nenhuma —</option>';
+        foreach (EntityTransportadora::listAtivas() as $t) {
+            $sel = $t->id === $selectedId ? ' selected' : '';
+            $html .= '<option value="'.$t->id.'"'.$sel.'>'.CrudHelper::e($t->nome).'</option>';
+        }
+
+        return $html;
     }
 
     public static function save($request): string
@@ -119,8 +133,20 @@ class Usuarios extends Page
             return CrudHelper::jsonError('E-mail já cadastrado.');
         }
 
+        $transportadoraId = (int)($post['transportadora_id'] ?? 0);
+        $funcao = EntityFuncao::getById($funcaoId);
+        $transportadoraFk = ($funcao && $funcao->slug === 'coletor' && $transportadoraId > 0)
+            ? $transportadoraId
+            : null;
+
         if ($id > 0) {
-            $data = ['nome' => $nome, 'email' => $email, 'funcao_id' => $funcaoId, 'ativo' => $ativo];
+            $data = [
+                'nome' => $nome,
+                'email' => $email,
+                'funcao_id' => $funcaoId,
+                'ativo' => $ativo,
+                'transportadora_id' => $transportadoraFk,
+            ];
             if ($senha !== '') {
                 if (strlen($senha) < 8) {
                     return CrudHelper::jsonError('Senha deve ter no mínimo 8 caracteres.');
@@ -138,6 +164,7 @@ class Usuarios extends Page
                 'senha' => password_hash($senha, PASSWORD_DEFAULT),
                 'funcao_id' => $funcaoId,
                 'operadora_id' => \App\Common\OperadoraScope::getOperadoraId(),
+                'transportadora_id' => $transportadoraFk,
                 'ativo' => $ativo,
             ]);
         }

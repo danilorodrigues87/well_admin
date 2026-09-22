@@ -18,6 +18,7 @@ class Funcionarios extends Usuarios
         $content = View::render('admin/modules/usuarios/index', [
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
             'funcoes_options' => $options,
+            'transportadoras_options' => Usuarios::transportadorasOptionsHtml(0),
             'titulo_pagina' => 'Funcionários',
         ]);
         return Page::getPage('Funcionários', $content, 'funcionarios', Page::crudScripts('/painel/funcionarios'));
