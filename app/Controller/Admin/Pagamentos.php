@@ -49,6 +49,22 @@ class Pagamentos extends Page
         $competenciaDefault = date('Y-m', strtotime('first day of last month'));
         $vencimentoDefault = date('Y-m-d', strtotime('+10 days'));
         $interOk = InterConfig::isConfigured();
+        $interErrors = InterConfig::configurationErrors();
+        $interAlert = '';
+        if (!$interOk) {
+            $items = '';
+            foreach ($interErrors as $err) {
+                $items .= '<li>'.CrudHelper::e($err).'</li>';
+            }
+            if ($items === '') {
+                $items = '<li>Verifique INTER_ENABLED, credenciais e certificados.</li>';
+            }
+            $interAlert = '<div class="alert alert-warning mb-0"><strong>Integração Inter incompleta.</strong>'
+                .'<ul class="mb-2 small">'.$items.'</ul>'
+                .'<p class="small text-muted mb-0">Certificados esperados: <code>storage/inter/certificado.crt</code> e '
+                .'<code>storage/inter/chave.key</code> (no volume montado em <code>/app/code/storage</code> no Easypanel). '
+                .'Console: <code>php database/scripts/inter_diagnose.php</code></p></div>';
+        }
 
         $content = View::render('admin/modules/pagamentos/index', array_merge([
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
@@ -56,9 +72,7 @@ class Pagamentos extends Page
             'competencia_default' => $competenciaDefault,
             'vencimento_default' => $vencimentoDefault,
             'inter_configured' => $interOk ? '1' : '0',
-            'inter_alert' => $interOk
-                ? ''
-                : '<div class="alert alert-warning">Integração Inter incompleta. Configure .env e certificados antes de emitir boletos.</div>',
+            'inter_alert' => $interAlert,
             'resumo_multa_mora' => CobrancaConfig::resumoMultaMora(),
         ], $cfg));
 

@@ -13,6 +13,46 @@ storage/inter/chave.key
 
 O cache do token OAuth fica em `storage/inter/oauth-token.json` (gerado automaticamente).
 
+**Nomes exatos (obrigatório):** renomeie os arquivos baixados do Internet Banking para `certificado.crt` e `chave.key`. Outros nomes (ex.: `Inter_API_Certificado.crt`) **não** são lidos, a menos que você defina `INTER_CERT_PATH` e `INTER_KEY_PATH` no `.env`.
+
+### Easypanel / Docker (VPS)
+
+No Easypanel, monte um **Bind Mount** do host para o container:
+
+| Host (exemplo) | Container |
+|----------------|-----------|
+| `/etc/easypanel/projects/.../well/storage` | `/app/code/storage` |
+
+(O caminho exato do host aparece na tela **Montagens** do serviço.)
+
+Dentro desse volume no **host** (via SFTP/FileZilla), a estrutura deve ser:
+
+```
+storage/
+  inter/
+    certificado.crt
+    chave.key
+  coletas/
+    {id}/
+      evidencia.jpg
+```
+
+**Erro comum:** enviar arquivos para a pasta do Git/deploy que é recriada a cada build, em vez do volume bindado em `storage/`. O PHP só enxerga o que está em `/app/code/storage/...` dentro do container.
+
+**Diagnóstico no console do serviço (Easypanel → Terminal):**
+
+```bash
+php database/scripts/inter_diagnose.php
+```
+
+Ou smoke completo:
+
+```bash
+php database/scripts/inter_smoke_token.php
+```
+
+Confirme também `INTER_ENABLED=true` nas variáveis de ambiente do serviço (Easypanel) **e** redeploy após alterar env.
+
 ## Configuração `.env`
 
 Abra o `.env` na raiz do projeto e adicione:

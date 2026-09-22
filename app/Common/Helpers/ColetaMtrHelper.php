@@ -109,7 +109,7 @@ class ColetaMtrHelper
 
         $sem = self::rotuloSemMtr($c);
 
-        return $sem !== '—' ? mb_strtoupper($sem, 'UTF-8') : 'SEM NÚMERO MTR';
+        return $sem !== '—' ? mb_strtoupper($sem, 'UTF-8') : 'SEM Nº REGISTRO';
     }
 
     public static function podeEmitirCdfSinir(Coleta $c): bool

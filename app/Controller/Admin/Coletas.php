@@ -128,7 +128,7 @@ class Coletas extends Page
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="detalhar('.$c->id.')" title="Detalhe"><i class="fas fa-eye"></i></button>
                     '.(ColetaMtrHelper::podeImprimirRelatorio($c)
-                        ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir relatório / MTR"><i class="fas fa-print"></i></a>'
+                        ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir relatório"><i class="fas fa-print"></i></a>'
                         : '').'
                     '.(ColetaMtrHelper::podeGerarMtr($c)
                         ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Gerar MTR no SINIR"><i class="fas fa-file-contract"></i></button>'
@@ -174,7 +174,7 @@ class Coletas extends Page
         }
 
         $mtrPrintBtn = ColetaMtrHelper::podeImprimirRelatorio($c)
-            ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir relatório / MTR</a>'
+            ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir relatório</a>'
             : '';
 
         $sinirHtml = self::renderSinirDetalhe($c);
@@ -573,7 +573,7 @@ class Coletas extends Page
             : '';
 
         $statusImpressao = $c->status === 'rascunho'
-            ? '<p class="mtr-rascunho-aviso no-print"><strong>Rascunho</strong> — documento sem validade de MTR até finalização e registro no SINIR.</p>'
+            ? '<p class="mtr-rascunho-aviso no-print"><strong>Rascunho</strong> — documento provisório até concluir o relatório e, se aplicável, registro no SINIR.</p>'
             : '';
 
         return View::render('admin/modules/coletas/mtr_print', [
