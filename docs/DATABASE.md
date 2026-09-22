@@ -58,8 +58,10 @@ Correções em **dados já existentes** (sem mudar schema): preferir `database/s
 
 | Tabela | Descrição |
 |--------|-----------|
-| `coleta_sequencia` | Sequencial do número MTR |
-| `coletas` | Cabeçalho (status: rascunho/finalizada/cancelada) |
+| `coleta_sequencia` | Sequencial (`ultimo_relatorio` + legado `ultimo_mtr`) |
+| `coletas` | Cabeçalho; `numero_relatorio` (Well) vs `numero_mtr` / `sinir_man_numero` (MTR); FK `transportadora_id`, `destinador_id` |
+| `transportadoras` | Cadastro transportador (CNPJ, unidade SINIR, token API opcional) — migration `042` |
+| `destinadores` | Cadastro destinador (CNPJ, unidade SINIR) — migration `042` |
 | `coleta_snapshot` | Dados imutáveis gerador/transportador/destinador |
 | `coleta_itens` | Resíduos coletados (FK tipo_residuo_id) |
 | `coleta_evidencias` | Fotos em `storage/coletas/{id}/` |

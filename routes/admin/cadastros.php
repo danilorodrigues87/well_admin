@@ -9,6 +9,8 @@ $crudRoutes = [
     ['path' => '/painel/funcoes', 'ctrl' => Admin\Funcoes::class, 'module' => 'funcoes'],
     ['path' => '/painel/clientes', 'ctrl' => Admin\Clientes::class, 'module' => 'clientes'],
     ['path' => '/painel/veiculos', 'ctrl' => Admin\Veiculos::class, 'module' => 'veiculos'],
+    ['path' => '/painel/transportadoras', 'ctrl' => Admin\Transportadoras::class, 'module' => 'transportadoras'],
+    ['path' => '/painel/destinadores', 'ctrl' => Admin\Destinadores::class, 'module' => 'destinadores'],
     ['path' => '/painel/planos', 'ctrl' => Admin\Planos::class, 'module' => 'planos'],
     ['path' => '/painel/residuo-classes', 'ctrl' => Admin\ResiduoClasses::class, 'module' => 'residuo_classes'],
     ['path' => '/painel/residuo-grupos', 'ctrl' => Admin\ResiduoGrupos::class, 'module' => 'residuo_grupos'],

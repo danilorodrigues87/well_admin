@@ -276,3 +276,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-21 | **Cutover em produção:** migração projeto antigo → admin novo concluída; doc operação pós-cutover em `MIGRACAO_DADOS.md` §15 |
 | 2026-09-21 | P0 SINIR: cancelar/consultar manifesto no painel Coletas; `sinir_status=cancelado` (`041`); `well-url.js` + `coletas-sinir.js` |
 | 2026-09-21 | P0 e-mail gerador: `GeradorNotificacaoService` (agendamento aprovado/recusado, MTR SINIR); `docs/MAIL_VPS.md`; `mail_smoke_test.php` |
+| 2026-09-22 | Impressão relatório/MTR em qualquer fase (rascunho ou finalizada): `ColetaMtrHelper::podeImprimirRelatorio`; wizard + listagem Coletas |
+| 2026-09-22 | Coletas Fase 1: `transportadoras`/`destinadores` (SINIR unidade + token por transportadora); `numero_relatorio` vs MTR; wizard 4 etapas; finalizar só relatório; **Gerar MTR** sob demanda (`042`); `SinirCredentialsResolver` |

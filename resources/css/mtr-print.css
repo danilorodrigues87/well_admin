@@ -5,6 +5,16 @@ body.mtr-print-page {
   padding: 1rem;
 }
 
+.mtr-rascunho-aviso {
+  max-width: 800px;
+  margin: 0 auto 1rem;
+  padding: 0.75rem 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
 .mtr-toolbar {
   max-width: 800px;
   margin: 0 auto 1rem;

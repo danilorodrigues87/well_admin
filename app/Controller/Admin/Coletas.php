@@ -56,8 +56,10 @@ class Coletas extends Page
         }
         if ($busca !== '') {
             if (ctype_digit($busca)) {
-                $where .= ' AND c.numero_mtr = ?';
-                $params[] = (int)$busca;
+                $n = (int)$busca;
+                $where .= ' AND (c.numero_relatorio = ? OR c.numero_mtr = ?)';
+                $params[] = $n;
+                $params[] = $n;
             } else {
                 $where .= ' AND c.cliente_id IN (SELECT id FROM clientes WHERE nome_fantasia LIKE ? OR cnpj LIKE ?)';
                 $params[] = '%'.$busca.'%';
@@ -86,6 +88,10 @@ class Coletas extends Page
 
         $itens = '';
         foreach ($rows as $c) {
+            $numRel = ColetaMtrHelper::numeroRelatorioExibicao($c);
+            $relCol = $numRel !== null
+                ? '#'.CrudHelper::e($numRel)
+                : '<span class="text-muted">—</span>';
             $numExib = ColetaMtrHelper::numeroExibicao($c);
             $mtr = $numExib !== null
                 ? '#'.CrudHelper::e($numExib)
@@ -98,6 +104,7 @@ class Coletas extends Page
             $data = $c->data_coleta ? date('d/m/Y', strtotime($c->data_coleta)) : '—';
             $sinirBadge = SinirService::renderStatusBadge($c->sinir_status, $c->status);
             $itens .= '<tr>
+                <td>'.$relCol.'</td>
                 <td>'.$mtr.'</td>
                 <td>'.CrudHelper::e($c->cliente_nome).'</td>
                 <td>'.$data.'</td>
@@ -106,11 +113,11 @@ class Coletas extends Page
                 <td>'.$sinirBadge.'</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="detalhar('.$c->id.')" title="Detalhe"><i class="fas fa-eye"></i></button>
-                    '.(ColetaMtrHelper::temMtr($c)
-                        ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir MTR"><i class="fas fa-print"></i></a>'
+                    '.(ColetaMtrHelper::podeImprimirRelatorio($c)
+                        ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir relatório / MTR"><i class="fas fa-print"></i></a>'
                         : '').'
-                    '.($c->status === 'finalizada' && SinirConfig::isEnabled() && !ColetaMtrHelper::temMtr($c)
-                        ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Registrar MTR no SINIR"><i class="fas fa-cloud-upload-alt"></i></button>'
+                    '.(ColetaMtrHelper::podeGerarMtr($c)
+                        ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Gerar MTR no SINIR"><i class="fas fa-file-contract"></i></button>'
                         : '').'
                     '.($c->status === 'finalizada' && SinirConfig::isEnabled() && ($c->sinir_status ?? '') === 'enviado'
                         ? '<button class="btn btn-sm btn-outline-secondary" onclick="sinirConsultar('.$c->id.')" title="Consultar SINIR"><i class="fas fa-search"></i></button>'
@@ -120,7 +127,7 @@ class Coletas extends Page
             </tr>';
         }
         if ($itens === '') {
-            $itens = '<tr><td colspan="7" class="text-center text-muted">Nenhuma coleta encontrada.</td></tr>';
+            $itens = '<tr><td colspan="8" class="text-center text-muted">Nenhuma coleta encontrada.</td></tr>';
         }
 
         return self::jsonLista(['success' => true, 'itens' => $itens, 'pagination' => Pagination::renderNav($pagination)]);
@@ -152,24 +159,20 @@ class Coletas extends Page
             $evidHtml .= '<div class="col-md-4"><a href="'.$url.'" target="_blank"><img src="'.$url.'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"/></a></div>';
         }
 
-        $mtrPrintUrl = ColetaMtrHelper::temMtr($c)
-            ? URL.'/painel/coletas/mtr/'.$c->id
-            : '';
-
-        $mtrPrintBtn = $mtrPrintUrl !== ''
-            ? '<a href="'.$mtrPrintUrl.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir MTR</a>'
+        $mtrPrintBtn = ColetaMtrHelper::podeImprimirRelatorio($c)
+            ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir relatório / MTR</a>'
             : '';
 
         $sinirHtml = self::renderSinirDetalhe($c);
         $sinirReenviarBtn = '';
         $sinirJaEnviado = ($c->sinir_status ?? '') === 'enviado';
         $stSinir = $c->sinir_status ?? '';
-        $sinirPodeRegistrar = in_array($stSinir, ['erro', 'pendente', 'cancelado', ''], true) || $stSinir === null;
-        if ($c->status === 'finalizada' && SinirConfig::isEnabled() && !$sinirJaEnviado && $sinirPodeRegistrar) {
+        if (ColetaMtrHelper::podeGerarMtr($c)) {
             $label = match ($c->sinir_status ?? '') {
-                'erro' => 'Tentar novamente no SINIR',
+                'erro' => 'Tentar novamente — Gerar MTR',
                 'cancelado' => 'Emitir novo MTR no SINIR',
-                default => 'Registrar MTR no SINIR',
+                'pendente' => 'Continuar envio — Gerar MTR',
+                default => 'Gerar MTR no SINIR',
             };
             $sinirReenviarBtn = '<button type="button" class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')"><i class="fas fa-sync me-1"></i> '
                 .CrudHelper::e($label).'</button>';
@@ -183,6 +186,9 @@ class Coletas extends Page
             'mtr_print_btn' => $mtrPrintBtn,
             'sinir_reenviar_btn' => $sinirReenviarBtn,
             'sinir_html' => $sinirHtml,
+            'numero_relatorio' => ColetaMtrHelper::numeroRelatorioExibicao($c)
+                ? '#'.ColetaMtrHelper::numeroRelatorioExibicao($c)
+                : '—',
             'numero_mtr' => ColetaMtrHelper::numeroExibicao($c)
                 ? '#'.ColetaMtrHelper::numeroExibicao($c)
                 : ColetaMtrHelper::rotuloSemMtr($c),
@@ -335,7 +341,7 @@ class Coletas extends Page
 
         $c = $det['coleta'];
         $s = $det['snapshot'];
-        if (!ColetaMtrHelper::temMtr($c)) {
+        if (!ColetaMtrHelper::podeImprimirRelatorio($c)) {
             return View::render('erros/405', ['URL' => URL]);
         }
 
@@ -356,28 +362,33 @@ class Coletas extends Page
             ? '<script>window.addEventListener("load", function () { window.print(); });</script>'
             : '';
 
+        $statusImpressao = $c->status === 'rascunho'
+            ? '<p class="mtr-rascunho-aviso no-print"><strong>Rascunho</strong> — documento sem validade de MTR até finalização e registro no SINIR.</p>'
+            : '';
+
         return View::render('admin/modules/coletas/mtr_print', [
             'URL' => URL,
-            'numero_mtr' => (string)(ColetaMtrHelper::numeroExibicao($c) ?? ''),
-            'gerador_nome' => CrudHelper::e(mb_strtoupper((string)($s->gerador_nome_fantasia ?? ''), 'UTF-8')),
-            'gerador_cnpj' => CrudHelper::e($s->gerador_cnpj ?? ''),
-            'gerador_plano' => CrudHelper::e(mb_strtoupper((string)($s->gerador_plano ?? ''), 'UTF-8')),
-            'gerador_endereco' => CrudHelper::e(mb_strtoupper((string)($s->gerador_endereco ?? ''), 'UTF-8')),
-            'gerador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s->gerador_responsavel ?? ''), 'UTF-8')),
+            'status_impressao_aviso' => $statusImpressao,
+            'numero_mtr' => CrudHelper::e(ColetaMtrHelper::rotuloImpressao($c)),
+            'gerador_nome' => CrudHelper::e(mb_strtoupper((string)($s?->gerador_nome_fantasia ?? $c->cliente_nome ?? ''), 'UTF-8')),
+            'gerador_cnpj' => CrudHelper::e($s?->gerador_cnpj ?? ''),
+            'gerador_plano' => CrudHelper::e(mb_strtoupper((string)($s?->gerador_plano ?? ''), 'UTF-8')),
+            'gerador_endereco' => CrudHelper::e(mb_strtoupper((string)($s?->gerador_endereco ?? ''), 'UTF-8')),
+            'gerador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s?->gerador_responsavel ?? ''), 'UTF-8')),
             'doc_referencia' => $c->doc_referencia ? date('d/m/Y', strtotime($c->doc_referencia)) : '—',
             'data_coleta' => $c->data_coleta ? date('d/m/Y', strtotime($c->data_coleta)) : '—',
             'hora' => $c->hora ? substr((string)$c->hora, 0, 5) : '',
             'relatorio' => nl2br(CrudHelper::e($c->relatorio ?? '')),
-            'transportador_nome' => CrudHelper::e(mb_strtoupper((string)($s->transportador_nome ?? ''), 'UTF-8')),
-            'transportador_cnpj' => CrudHelper::e($s->transportador_cnpj ?? ''),
-            'motorista_nome' => CrudHelper::e(mb_strtoupper((string)($s->motorista_nome ?? ''), 'UTF-8')),
-            'veiculo_descricao' => CrudHelper::e(mb_strtoupper((string)($s->veiculo_descricao ?? ''), 'UTF-8')),
-            'veiculo_placa' => CrudHelper::e(mb_strtoupper((string)($s->veiculo_placa ?? ''), 'UTF-8')),
-            'destinador_nome' => CrudHelper::e(mb_strtoupper((string)($s->destinador_nome ?? ''), 'UTF-8')),
-            'destinador_cnpj' => CrudHelper::e($s->destinador_cnpj ?? ''),
-            'destinador_endereco' => CrudHelper::e(mb_strtoupper((string)($s->destinador_endereco ?? ''), 'UTF-8')),
-            'destinador_telefone' => CrudHelper::e($s->destinador_telefone ?? ''),
-            'destinador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s->destinador_responsavel ?? ''), 'UTF-8')),
+            'transportador_nome' => CrudHelper::e(mb_strtoupper((string)($s?->transportador_nome ?? ''), 'UTF-8')),
+            'transportador_cnpj' => CrudHelper::e($s?->transportador_cnpj ?? ''),
+            'motorista_nome' => CrudHelper::e(mb_strtoupper((string)($s?->motorista_nome ?? ''), 'UTF-8')),
+            'veiculo_descricao' => CrudHelper::e(mb_strtoupper((string)($s?->veiculo_descricao ?? ''), 'UTF-8')),
+            'veiculo_placa' => CrudHelper::e(mb_strtoupper((string)($s?->veiculo_placa ?? ''), 'UTF-8')),
+            'destinador_nome' => CrudHelper::e(mb_strtoupper((string)($s?->destinador_nome ?? ''), 'UTF-8')),
+            'destinador_cnpj' => CrudHelper::e($s?->destinador_cnpj ?? ''),
+            'destinador_endereco' => CrudHelper::e(mb_strtoupper((string)($s?->destinador_endereco ?? ''), 'UTF-8')),
+            'destinador_telefone' => CrudHelper::e($s?->destinador_telefone ?? ''),
+            'destinador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s?->destinador_responsavel ?? ''), 'UTF-8')),
             'data_recebimento' => $c->data_recebimento ? date('d/m/Y', strtotime($c->data_recebimento)) : '—',
             'situacao_recebimento' => $c->situacao_recebimento === 'recebido' ? 'RECEBIDO' : 'NÃO RECEBIDO',
             'tratamento' => CrudHelper::e(mb_strtoupper((string)($c->tratamento ?? ''), 'UTF-8')),

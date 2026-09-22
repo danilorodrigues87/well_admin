@@ -3,6 +3,8 @@
 
   var tipoResiduoTomSelect = null;
   var rascunhoConferido = !!(window.COLETA_WIZARD && window.COLETA_WIZARD.rascunhoConferido);
+  var assinaturaCtx = null;
+  var assinaturaDrawing = false;
 
   function baseUrl() {
     if (typeof wellAppUrl === 'function') {
@@ -13,7 +15,10 @@
   }
 
   function csrf() {
-    return document.querySelector('#crud-form input[name="_csrf"]')?.value || '';
+    return document.querySelector('#crud-form input[name="_csrf"]')?.value
+      || document.querySelector('#form-finalizar input[name="_csrf"]')?.value
+      || document.querySelector('input[name="_csrf"]')?.value
+      || '';
   }
 
   function parseJsonResp(resp) {
@@ -77,7 +82,7 @@
     if (evidenciasHtml) {
       $('#evidencias-preview').html(evidenciasHtml);
     }
-    $('#btn-gerar-mtr').prop('disabled', false);
+    $('#btn-concluir-relatorio').prop('disabled', false);
   }
 
   function tipoResiduoValor() {
@@ -111,10 +116,111 @@
     });
   }
 
+  function initAssinaturaCanvas() {
+    var canvas = document.getElementById('assinatura-canvas');
+    if (!canvas) {
+      return;
+    }
+    assinaturaCtx = canvas.getContext('2d');
+    assinaturaCtx.strokeStyle = '#111';
+    assinaturaCtx.lineWidth = 2;
+    assinaturaCtx.lineCap = 'round';
+
+    function pos(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function start(e) {
+      assinaturaDrawing = true;
+      var p = pos(e);
+      assinaturaCtx.beginPath();
+      assinaturaCtx.moveTo(p.x, p.y);
+      e.preventDefault();
+    }
+
+    function move(e) {
+      if (!assinaturaDrawing) return;
+      var p = pos(e);
+      assinaturaCtx.lineTo(p.x, p.y);
+      assinaturaCtx.stroke();
+      e.preventDefault();
+    }
+
+    function end() {
+      assinaturaDrawing = false;
+    }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', end);
+    canvas.addEventListener('mouseleave', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end);
+  }
+
+  window.limparAssinatura = function () {
+    var canvas = document.getElementById('assinatura-canvas');
+    if (canvas && assinaturaCtx) {
+      assinaturaCtx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  window.salvarAssinatura = function () {
+    var canvas = document.getElementById('assinatura-canvas');
+    if (!canvas) return;
+    var dataUrl = canvas.toDataURL('image/png');
+    swalLoading('Salvando assinatura…');
+    $.post(baseUrl(), {
+      acao: 'salvar_assinatura',
+      assinatura_data_url: dataUrl,
+      _csrf: csrf()
+    }, function (r) {
+      r = parseJsonResp(r);
+      if (typeof Swal !== 'undefined') Swal.close();
+      if (r.success) {
+        if (r.preview_html) {
+          $('#assinatura-preview-wrap').html(r.preview_html);
+        }
+        swalOk(r.message || 'Assinatura salva.');
+      } else {
+        swalErr(r.message);
+      }
+    }, 'json').fail(function () {
+      if (typeof Swal !== 'undefined') Swal.close();
+      swalErr('Erro ao salvar assinatura.');
+    });
+  };
+
+  function reloadColetores() {
+    var transportadoraId = $('#transportadora_id').val();
+    var selected = $('#motorista_coletor_id').val();
+    if ($('#motorista_coletor_id').prop('disabled')) {
+      return;
+    }
+    $.post(baseUrl(), {
+      acao: 'coletores_transportadora',
+      transportadora_id: transportadoraId,
+      selected_id: selected,
+      _csrf: csrf()
+    }, function (r) {
+      r = parseJsonResp(r);
+      if (r.success && r.options_html) {
+        $('#motorista_coletor_id').html(r.options_html);
+      }
+    }, 'json');
+  }
+
   window.salvarTransporte = function () {
-    swalLoading('Salvando transporte…', 'Aguarde um instante.');
+    swalLoading('Salvando…', 'Aguarde um instante.');
     var data = $('#form-transporte').serializeArray();
-    data.push({ name: 'acao', value: 'salvar_transporte' });
+    data.push({ name: 'acao', value: 'salvar_etapa_transporte' });
     data.push({ name: '_csrf', value: csrf() });
     $.post(baseUrl(), data, function (r) {
       r = parseJsonResp(r);
@@ -126,7 +232,26 @@
       }
     }, 'json').fail(function () {
       if (typeof Swal !== 'undefined') Swal.close();
-      swalErr('Erro ao salvar transporte.');
+      swalErr('Erro ao salvar transportadora.');
+    });
+  };
+
+  window.salvarDestinador = function () {
+    swalLoading('Salvando destinador…');
+    var data = $('#form-destinador').serializeArray();
+    data.push({ name: 'acao', value: 'salvar_etapa_destinador' });
+    data.push({ name: '_csrf', value: csrf() });
+    $.post(baseUrl(), data, function (r) {
+      r = parseJsonResp(r);
+      if (typeof Swal !== 'undefined') Swal.close();
+      if (r.success) {
+        swalOk(r.message || 'Destinador salvo.');
+      } else {
+        swalErr(r.message);
+      }
+    }, 'json').fail(function () {
+      if (typeof Swal !== 'undefined') Swal.close();
+      swalErr('Erro ao salvar destinador.');
     });
   };
 
@@ -172,8 +297,8 @@
 
   window.salvarRascunhoFinal = function () {
     swalLoading(
-      'Salvando rascunho…',
-      'Enviando fotos e relatório.<br><small class="text-muted">Aguarde — pode demorar com fotos grandes.</small>'
+      'Salvando relatório…',
+      'Enviando fotos e texto.<br><small class="text-muted">Aguarde — pode demorar com fotos grandes.</small>'
     );
 
     var fd = new FormData(document.getElementById('form-finalizar'));
@@ -193,16 +318,16 @@
       if (typeof Swal !== 'undefined') Swal.close();
       if (r.success) {
         setRascunhoConferido(r.resumo_html, r.evidencias_html);
-        swalOk(r.message || 'Rascunho salvo!');
+        swalOk(r.message || 'Relatório salvo!');
         document.getElementById('form-finalizar').querySelectorAll('input[type="file"]').forEach(function (inp) {
           inp.value = '';
         });
       } else {
-        swalErr(r.message || 'Não foi possível salvar o rascunho.');
+        swalErr(r.message || 'Não foi possível salvar.');
       }
     }).fail(function (xhr) {
       if (typeof Swal !== 'undefined') Swal.close();
-      var msg = 'Erro ao salvar rascunho.';
+      var msg = 'Erro ao salvar relatório.';
       if (xhr.responseJSON && xhr.responseJSON.message) {
         msg = xhr.responseJSON.message;
       } else if (xhr.status === 0 || xhr.statusText === 'timeout') {
@@ -212,21 +337,22 @@
     });
   };
 
-  window.gerarMtr = function () {
+  window.concluirRelatorio = function () {
     if (!rascunhoConferido) {
-      swalErr('Salve o rascunho antes de finalizar a coleta.');
+      swalErr('Salve o relatório na etapa 3 antes de concluir.');
+      bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#tab-relatorio"]')).show();
       return;
     }
 
-    var dataReceb = document.querySelector('#form-transporte input[name="data_recebimento"]')?.value || '';
+    var dataReceb = document.querySelector('#form-destinador input[name="data_recebimento"]')?.value || '';
     if (!dataReceb) {
-      swalErr('Informe a data de recebimento na aba Transporte e clique em "Salvar e continuar" antes de finalizar.');
-      bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#tab-transporte"]')).show();
+      swalErr('Informe a data de encerramento na etapa 4 e clique em "Salvar destinador".');
+      bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="#tab-destinador"]')).show();
       return;
     }
 
     var executar = function () {
-      swalLoading('Finalizando…', 'Registrando coleta e enviando ao SINIR quando habilitado.');
+      swalLoading('Concluindo relatório…', 'Gerando número de relatório interno.');
 
       $.ajax({
         url: baseUrl(),
@@ -241,39 +367,40 @@
         r = parseJsonResp(r);
         if (typeof Swal !== 'undefined') Swal.close();
         if (r.success) {
-          swalOk(r.message || 'Coleta finalizada!', function () {
+          swalOk(r.message || 'Relatório concluído!', function () {
             window.location = r.redirect || ((typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + '/painel/coletas');
           });
         } else {
-          swalErr(r.message || 'Não foi possível finalizar a coleta.');
+          swalErr(r.message || 'Não foi possível concluir.');
         }
       }).fail(function (xhr) {
         if (typeof Swal !== 'undefined') Swal.close();
-        var msg = 'Erro ao finalizar coleta.';
+        var msg = 'Erro ao concluir relatório.';
         if (xhr.responseJSON && xhr.responseJSON.message) {
           msg = xhr.responseJSON.message;
-        } else if (xhr.status === 0 || xhr.statusText === 'timeout') {
-          msg = 'Tempo esgotado. Verifique em Coletas se a coleta foi finalizada antes de tentar de novo.';
         }
         swalErr(msg);
       });
     };
 
-    if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: 'Finalizar coleta?',
-        text: 'Os dados serão fechados. O número MTR aparecerá após registro no SINIR.',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sim, finalizar',
-        cancelButtonText: 'Voltar'
-      }).then(function (r) {
-        if (r.isConfirmed) executar();
-      });
-    } else if (confirm('Finalizar coleta?')) {
-      executar();
-    }
+    salvarDestinadorSilent(executar);
   };
+
+  function salvarDestinadorSilent(then) {
+    var data = $('#form-destinador').serializeArray();
+    data.push({ name: 'acao', value: 'salvar_etapa_destinador' });
+    data.push({ name: '_csrf', value: csrf() });
+    $.post(baseUrl(), data, function (r) {
+      r = parseJsonResp(r);
+      if (r.success && then) {
+        then();
+      } else if (!r.success) {
+        swalErr(r.message || 'Salve o destinador antes de concluir.');
+      }
+    }, 'json').fail(function () {
+      swalErr('Erro ao salvar destinador.');
+    });
+  }
 
   window.cancelarColeta = function () {
     var executar = function () {
@@ -306,6 +433,8 @@
 
   $(function () {
     initTomSelectResiduos();
+    initAssinaturaCanvas();
+    $('#transportadora_id').on('change', reloadColetores);
     document.querySelector('[data-bs-target="#tab-residuos"]')?.addEventListener('shown.bs.tab', function () {
       if (tipoResiduoTomSelect) {
         tipoResiduoTomSelect.focus();

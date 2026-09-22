@@ -34,10 +34,6 @@ class SinirManifestoService
             return ['ok' => false, 'skipped' => true, 'message' => 'Integração SINIR desabilitada (SINIR_ENABLED=false).'];
         }
 
-        if (!SinirConfig::isConfigured()) {
-            return ['ok' => false, 'message' => 'SINIR não configurado no .env (token, unidade, CNPJ).'];
-        }
-
         $coleta = EntityColeta::getById($coletaId);
         if (!$coleta || $coleta->status !== 'finalizada') {
             return ['ok' => false, 'message' => 'Somente coletas finalizadas podem ser enviadas ao SINIR.'];
@@ -59,7 +55,17 @@ class SinirManifestoService
         }
 
         $payload = $built['payload'];
-        $tokenResult = $this->auth->obtainAccessToken();
+        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        if (!$credentials['ok']) {
+            $msg = implode(' ', $credentials['errors']);
+            $this->registrarFalha($coletaId, $payload, null, $msg);
+
+            return ['ok' => false, 'message' => $msg];
+        }
+
+        EntityColeta::update($coletaId, ['sinir_status' => 'pendente']);
+
+        $tokenResult = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
         if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
             $msg = 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha desconhecida');
             $this->registrarFalha($coletaId, $payload, $tokenResult, $msg);

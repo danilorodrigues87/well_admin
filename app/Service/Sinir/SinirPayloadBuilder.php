@@ -2,8 +2,10 @@
 
 namespace App\Service\Sinir;
 
-use App\Common\SinirConfig;
 use App\Model\Entity\Cliente as EntityCliente;
+use App\Model\Entity\Destinador as EntityDestinador;
+use App\Model\Entity\Transportadora as EntityTransportadora;
+use App\Service\Sinir\SinirCredentialsResolver;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
@@ -90,9 +92,26 @@ class SinirPayloadBuilder
             return ['ok' => false, 'payload' => null, 'errors' => $errors];
         }
 
+        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        if (!$credentials['ok']) {
+            return ['ok' => false, 'payload' => null, 'errors' => $credentials['errors']];
+        }
+
+        $transportadora = $coleta->transportadora_id
+            ? EntityTransportadora::getById((int)$coleta->transportadora_id)
+            : EntityTransportadora::getPadrao();
+        $destinadorEnt = $coleta->destinador_id
+            ? EntityDestinador::getById((int)$coleta->destinador_id)
+            : EntityDestinador::getPadrao();
+        if (!$transportadora || !$destinadorEnt) {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Transportadora ou destinador não cadastrado na coleta.']];
+        }
+
         $dataExpedicao = $coleta->data_coleta
             ? date('Ymd', strtotime($coleta->data_coleta))
             : date('Ymd');
+
+        $refInterna = $coleta->numero_relatorio ?: $coleta->numero_mtr ?: $coleta->id;
 
         $payload = [
             'manifestoJSONDtos' => [
@@ -100,12 +119,12 @@ class SinirPayloadBuilder
                     'cnpGerador' => $geradorCnpj,
                     'codUnidadeGerador' => (string)$geradorUnidade,
                     'cnpTransportador' => $transportadorCnpj,
-                    'codUnidadeTransportador' => (string)SinirConfig::unidade(),
+                    'codUnidadeTransportador' => (string)$credentials['transportador_unidade'],
                     'cnpDestinador' => $destinadorCnpj,
-                    'codUnidadeDestinador' => (string)SinirConfig::destinadorUnidade(),
+                    'codUnidadeDestinador' => (string)$credentials['destinador_unidade'],
                     'cnpArmazenador' => null,
                     'codUnidadeArmazenador' => null,
-                    'seuCodigoReferencia' => (string)($coleta->numero_mtr ?: $coleta->id),
+                    'seuCodigoReferencia' => (string)$refInterna,
                     'manifObservacao' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
                     'manifGeradorNomeResponsavel' => mb_substr(
                         trim((string)($snapshot->gerador_responsavel ?: $snapshot->gerador_nome_fantasia)),

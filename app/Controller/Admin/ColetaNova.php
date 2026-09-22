@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Common\ColetaDefaults;
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\CsrfHelper;
@@ -11,7 +12,9 @@ use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
+use App\Model\Entity\Destinador as EntityDestinador;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
+use App\Model\Entity\Transportadora as EntityTransportadora;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 use App\Service\ColetaService;
 use App\Session\User\Login as SessionUser;
@@ -64,7 +67,12 @@ class ColetaNova extends Page
         if ($motoristaLocked) {
             $motoristaColetorId = (int)($usuario['id'] ?? 0);
         }
-        $motoristaOptions = ColetorSelectHelper::optionsHtml($motoristaColetorId, !$motoristaLocked);
+        $transportadoraId = (int)($coleta->transportadora_id ?? 0);
+        if ($transportadoraId <= 0) {
+            $padrao = EntityTransportadora::getPadrao();
+            $transportadoraId = $padrao ? $padrao->id : 0;
+        }
+        $motoristaOptions = ColetorSelectHelper::optionsHtml($motoristaColetorId, !$motoristaLocked, $transportadoraId > 0 ? $transportadoraId : null);
 
         $tratamentosOptions = '';
         foreach (ColetaDefaults::tratamentos() as $tr) {
@@ -76,25 +84,27 @@ class ColetaNova extends Page
         $evidencias = EntityColetaEvidencia::getByColetaId($coletaId);
         $rascunhoConferido = ColetaService::rascunhoFinalConferido($coletaId);
 
+        $btnImprimir = ColetaMtrHelper::podeImprimirRelatorio($coleta)
+            ? '<a class="btn btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$coletaId.'" target="_blank" rel="noopener">'
+                .'<i class="fas fa-print me-1"></i> Imprimir relatório / MTR</a>'
+            : '';
+
         $content = View::render('admin/modules/coleta_nova/wizard', [
             'csrf_field' => CsrfHelper::field(),
+            'btn_imprimir_relatorio' => $btnImprimir,
             'coleta_id' => $coletaId,
             'cliente_nome' => CrudHelper::e($snapshot->gerador_nome_fantasia ?? $coleta->cliente_nome),
             'gerador_endereco' => CrudHelper::e($snapshot->gerador_endereco ?? ''),
-            'transportador_nome' => CrudHelper::e($snapshot->transportador_nome ?? ''),
-            'transportador_cnpj' => CrudHelper::e($snapshot->transportador_cnpj ?? ''),
+            'transportadoras_options' => self::transportadorasOptionsHtml((int)($coleta->transportadora_id ?? 0)),
+            'destinadores_options' => self::destinadoresOptionsHtml((int)($coleta->destinador_id ?? 0)),
             'motorista_coletor_id' => $motoristaColetorId,
             'motorista_options' => $motoristaOptions,
             'motorista_locked' => $motoristaLocked ? 'disabled' : '',
             'motorista_hidden' => $motoristaLocked
                 ? '<input type="hidden" name="motorista_coletor_id" value="'.$motoristaColetorId.'"/>'
                 : '',
-            'destinador_nome' => CrudHelper::e($snapshot->destinador_nome ?? ''),
-            'destinador_cnpj' => CrudHelper::e($snapshot->destinador_cnpj ?? ''),
-            'destinador_endereco' => CrudHelper::e($snapshot->destinador_endereco ?? ''),
-            'destinador_telefone' => CrudHelper::e($snapshot->destinador_telefone ?? ''),
-            'destinador_responsavel' => CrudHelper::e($snapshot->destinador_responsavel ?? ''),
             'observacao_destinador' => CrudHelper::e($snapshot->observacao_destinador ?? ''),
+            'assinatura_preview' => self::renderAssinaturaPreview($coleta),
             'relatorio' => CrudHelper::e($coleta->relatorio ?? ''),
             'veiculos_options' => $veiculosOptions,
             'tipos_options' => $tiposOptions,
@@ -118,7 +128,7 @@ class ColetaNova extends Page
             . self::crudScripts('/painel/coleta/nova/'.$coletaId, false)
             . '<script>window.COLETA_WIZARD = { rascunhoConferido: '.($rascunhoConferido ? 'true' : 'false').' };</script>'
             . '<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
-            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20260916i"></script>';
+            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20260922"></script>';
 
         return self::getPage('Coleta #'.$coletaId, $content, 'coleta_nova', $scripts);
     }
@@ -156,7 +166,10 @@ class ColetaNova extends Page
             return match ($acao) {
                 'listar_clientes' => self::acaoListarClientes($post, $usuario),
                 'iniciar' => self::acaoIniciar($post, $usuario),
-                'salvar_transporte' => self::acaoSalvarTransporte($coletaId, $post, $usuario),
+                'salvar_transporte', 'salvar_etapa_transporte' => self::acaoSalvarTransporte($coletaId, $post, $usuario),
+                'salvar_destinador', 'salvar_etapa_destinador' => self::acaoSalvarDestinador($coletaId, $post, $usuario),
+                'salvar_assinatura' => self::acaoSalvarAssinatura($coletaId, $post, $usuario),
+                'coletores_transportadora' => self::acaoColetoresTransportadora($post),
                 'adicionar_item' => self::acaoAdicionarItem($coletaId, $post, $usuario),
                 'remover_item' => self::acaoRemoverItem($coletaId, $post, $usuario),
                 'listar_itens' => self::acaoListarItens($coletaId, $usuario),
@@ -266,10 +279,80 @@ class ColetaNova extends Page
     private static function acaoSalvarTransporte(?int $coletaId, array $post, array $usuario): string
     {
         self::assertColetaAccess($coletaId, $usuario);
+        $motoristaId = (int)($post['motorista_coletor_id'] ?? 0);
+        if (ColetorSelectHelper::isColetorSession($usuario)) {
+            $motoristaId = (int)($usuario['id'] ?? 0);
+        }
         $post['motorista_nome'] = self::resolveMotoristaPost($post, $usuario);
-        ColetaService::salvarTransporte($coletaId, $post);
+        $post['coletor_id'] = $motoristaId;
+        ColetaService::salvarEtapaTransporte($coletaId, $post);
 
-        return CrudHelper::jsonOk(['message' => 'Dados salvos.']);
+        return CrudHelper::jsonOk(['message' => 'Transportadora e coletor salvos.']);
+    }
+
+    private static function acaoSalvarDestinador(?int $coletaId, array $post, array $usuario): string
+    {
+        self::assertColetaAccess($coletaId, $usuario);
+        ColetaService::salvarEtapaDestinador($coletaId, $post);
+
+        return CrudHelper::jsonOk(['message' => 'Destinador salvo.']);
+    }
+
+    private static function acaoSalvarAssinatura(?int $coletaId, array $post, array $usuario): string
+    {
+        self::assertColetaAccess($coletaId, $usuario);
+        $dataUrl = (string)($post['assinatura_data_url'] ?? '');
+        ColetaService::salvarAssinaturaCliente($coletaId, $dataUrl);
+        $coleta = EntityColeta::getById($coletaId);
+
+        return CrudHelper::jsonOk([
+            'message' => 'Assinatura salva.',
+            'preview_html' => $coleta ? self::renderAssinaturaPreview($coleta) : '',
+        ]);
+    }
+
+    private static function acaoColetoresTransportadora(array $post): string
+    {
+        $transportadoraId = (int)($post['transportadora_id'] ?? 0);
+        $selected = (int)($post['selected_id'] ?? 0);
+        $html = ColetorSelectHelper::optionsHtml($selected, true, $transportadoraId > 0 ? $transportadoraId : null);
+
+        return CrudHelper::jsonOk(['options_html' => $html]);
+    }
+
+    private static function transportadorasOptionsHtml(int $selectedId): string
+    {
+        $html = '';
+        foreach (EntityTransportadora::listAtivas() as $t) {
+            $sel = $t->id === $selectedId ? ' selected' : '';
+            $html .= '<option value="'.$t->id.'"'.$sel.'>'.CrudHelper::e($t->nome).'</option>';
+        }
+
+        return $html !== '' ? $html : '<option value="">— Cadastre transportadoras —</option>';
+    }
+
+    private static function destinadoresOptionsHtml(int $selectedId): string
+    {
+        $html = '';
+        foreach (EntityDestinador::listAtivos() as $d) {
+            $sel = $d->id === $selectedId ? ' selected' : '';
+            $html .= '<option value="'.$d->id.'"'.$sel.'>'.CrudHelper::e($d->nome).'</option>';
+        }
+
+        return $html !== '' ? $html : '<option value="">— Cadastre destinadores —</option>';
+    }
+
+    private static function renderAssinaturaPreview(EntityColeta $coleta): string
+    {
+        if (!$coleta->assinatura_cliente_path) {
+            return '';
+        }
+        $parts = explode('/', ltrim($coleta->assinatura_cliente_path, '/'));
+        $arquivo = end($parts);
+        $url = URL.'/storage/coletas/'.$coleta->id.'/'.rawurlencode($arquivo);
+
+        return '<p class="small text-success mt-2 mb-0">Assinatura registrada:</p>'
+            .'<img src="'.CrudHelper::e($url).'" alt="Assinatura" class="img-fluid border mt-1" style="max-width:320px"/>';
     }
 
     private static function acaoAdicionarItem(?int $coletaId, array $post, array $usuario): string
@@ -326,27 +409,15 @@ class ColetaNova extends Page
         $files = self::collectEvidenciaFilesList();
 
         $result = ColetaService::finalizar($coletaId, $files);
-        $numeroMtr = $result['numero_mtr'];
-        $sinir = $result['sinir'];
-
-        if (\App\Common\SinirConfig::isEnabled()) {
-            if ($numeroMtr) {
-                $msg = 'Coleta finalizada e MTR nº '.$numeroMtr.' registrado no SINIR.';
-            } elseif ($sinir && !empty($sinir['ok'])) {
-                $msg = 'Coleta finalizada. MTR registrado no SINIR.';
-            } elseif ($sinir && !empty($sinir['skipped'])) {
-                $msg = 'Coleta finalizada. '.$sinir['message'];
-            } else {
-                $msg = 'Coleta finalizada, mas o MTR ainda não foi registrado no SINIR. '
-                    .($sinir['message'] ?? 'Use "Registrar MTR no SINIR" em Coletas.');
-            }
-        } else {
-            $msg = 'Coleta finalizada! Documento nº '.($numeroMtr ?? '—').'.';
-        }
+        $numeroRel = $result['numero_relatorio'];
+        $msg = 'Relatório nº '.$numeroRel.' concluído. '
+            .(\App\Common\SinirConfig::isEnabled()
+                ? 'Use "Gerar MTR" em Coletas quando for registrar no SINIR.'
+                : 'Impressão disponível em Coletas.');
 
         return CrudHelper::jsonOk([
             'message' => $msg,
-            'numero_mtr' => $numeroMtr,
+            'numero_relatorio' => $numeroRel,
             'redirect' => URL.'/painel/coletas',
         ]);
     }

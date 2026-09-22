@@ -1,13 +1,17 @@
-<h1 class="mt-2">Coleta — {{cliente_nome}}</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2 mb-0">
+    <h1 class="mt-0 mb-0">Coleta — {{cliente_nome}}</h1>
+    {{btn_imprimir_relatorio}}
+</div>
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item"><a href="{{URL}}/painel/coleta/nova">Clientes</a></li>
     <li class="breadcrumb-item active">Registrar coleta</li>
 </ol>
 
 <ul class="nav nav-tabs mb-3" id="coletaTabs">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-transporte">1. Transporte</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-residuos">2. Resíduos</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-finalizar">3. Conferir e finalizar</button></li>
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-transporte">1. Transportadora</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-residuos">2. Coleta</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-relatorio">3. Relatório</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-destinador">4. Destinador</button></li>
 </ul>
 
 <div class="tab-content">
@@ -16,27 +20,13 @@
             <p class="small text-muted mb-3"><strong>Gerador:</strong> {{cliente_nome}} — {{gerador_endereco}}</p>
             <form id="form-transporte">
                 <div class="row">
-                    <div class="col-md-4 mb-2"><label>Veículo</label><select class="form-select" name="veiculo_id" id="veiculo_id">{{veiculos_options}}</select></div>
-                    <div class="col-md-4 mb-2"><label>Motorista (coletor)</label>
+                    <div class="col-md-6 mb-2"><label>Transportadora</label><select class="form-select" name="transportadora_id" id="transportadora_id" required>{{transportadoras_options}}</select></div>
+                    <div class="col-md-6 mb-2"><label>Coletor (motorista)</label>
                         <select class="form-select" name="motorista_coletor_id" id="motorista_coletor_id" {{motorista_locked}} required>{{motorista_options}}</select>
                         {{motorista_hidden}}
                     </div>
+                    <div class="col-md-4 mb-2"><label>Veículo</label><select class="form-select" name="veiculo_id" id="veiculo_id">{{veiculos_options}}</select></div>
                     <div class="col-md-4 mb-2"><label>Tratamento</label><select class="form-select" name="tratamento" id="tratamento"><option value="">—</option>{{tratamentos_options}}</select></div>
-                    <div class="col-md-6 mb-2"><label>Transportador</label><input class="form-control" name="transportador_nome" value="{{transportador_nome}}"/></div>
-                    <div class="col-md-6 mb-2"><label>CNPJ transportador</label><input class="form-control" name="transportador_cnpj" value="{{transportador_cnpj}}"/></div>
-                    <div class="col-12"><hr><strong>Destinador final</strong></div>
-                    <div class="col-md-6 mb-2"><label>Nome</label><input class="form-control" name="destinador_nome" value="{{destinador_nome}}"/></div>
-                    <div class="col-md-6 mb-2"><label>CNPJ</label><input class="form-control" name="destinador_cnpj" value="{{destinador_cnpj}}"/></div>
-                    <div class="col-md-8 mb-2"><label>Endereço</label><input class="form-control" name="destinador_endereco" value="{{destinador_endereco}}"/></div>
-                    <div class="col-md-4 mb-2"><label>Telefone</label><input class="form-control" name="destinador_telefone" value="{{destinador_telefone}}"/></div>
-                    <div class="col-md-6 mb-2"><label>Responsável</label><input class="form-control" name="destinador_responsavel" value="{{destinador_responsavel}}"/></div>
-                    <div class="col-md-6 mb-2"><label>Obs. destinador</label><input class="form-control" name="observacao_destinador" value="{{observacao_destinador}}"/></div>
-                    <div class="col-md-4 mb-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="situacao_recebimento" value="recebido" id="situacao_recebimento" {{situacao_recebido}}/><label class="form-check-label" for="situacao_recebimento">Recebido no destinador</label></div></div>
-                    <div class="col-md-4 mb-2">
-                        <label>Data recebimento</label>
-                        <input type="date" class="form-control" name="data_recebimento" id="data_recebimento" value="{{data_recebimento}}"/>
-                        <small class="text-muted">Obrigatória para finalizar. Rascunho pode ficar sem data.</small>
-                    </div>
                 </div>
                 <button type="button" class="btn btn-primary mt-2" onclick="salvarTransporte()">Salvar e continuar</button>
             </form>
@@ -54,17 +44,21 @@
             </form>
             <table class="table table-sm"><thead><tr><th>Resíduo</th><th>Classe</th><th>Grupo</th><th>Qtd</th><th></th></tr></thead>
             <tbody id="itens-tbody">{{itens_html}}</tbody></table>
+            <hr>
+            <label class="form-label">Assinatura do cliente (opcional)</label>
+            <div class="border rounded bg-white mb-2" style="max-width:480px;">
+                <canvas id="assinatura-canvas" width="460" height="140" style="width:100%;touch-action:none;"></canvas>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="limparAssinatura()">Limpar assinatura</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="salvarAssinatura()">Salvar assinatura</button>
+            <div id="assinatura-preview-wrap">{{assinatura_preview}}</div>
         </div></div>
     </div>
 
-    <div class="tab-pane fade" id="tab-finalizar">
+    <div class="tab-pane fade" id="tab-relatorio">
         <div class="card mb-3"><div class="card-body">
-            <p class="text-muted small mb-3">
-                <strong>Passo 1:</strong> salve o rascunho (relatório e/ou fotos).
-                <strong>Passo 2:</strong> finalize a coleta — o <strong>número MTR</strong> só é gerado após registro no SINIR.
-            </p>
             <form id="form-finalizar" enctype="multipart/form-data">
-                <div class="mb-3"><label>Relatório / observações</label><textarea class="form-control" name="relatorio" id="relatorio" rows="3">{{relatorio}}</textarea></div>
+                <div class="mb-3"><label>Relatório / observações</label><textarea class="form-control" name="relatorio" id="relatorio" rows="4">{{relatorio}}</textarea></div>
                 <div class="mb-3"><label>Evidências (até 3 fotos JPG/PNG — máx. 5 MB cada)</label>
                     <div class="row g-2">
                         <div class="col-md-4"><input type="file" class="form-control" name="evidencia_1" accept="image/jpeg,image/png,image/webp"/></div>
@@ -73,21 +67,39 @@
                     </div>
                 </div>
                 <button type="button" class="btn btn-primary btn-lg" id="btn-salvar-rascunho" onclick="salvarRascunhoFinal()">
-                    <i class="fas fa-save"></i> Salvar rascunho
+                    <i class="fas fa-save"></i> Salvar relatório
                 </button>
             </form>
-
             <div id="rascunho-resumo-wrap" class="mt-4 {{rascunho_resumo_class}}">
                 <div class="alert alert-success">
-                    <strong>Rascunho salvo — confira antes de finalizar</strong>
+                    <strong>Relatório salvo — confira antes de concluir (etapa 4)</strong>
                     <div id="resumo-rascunho" class="mt-2">{{resumo_rascunho_html}}</div>
                 </div>
                 <div id="evidencias-preview" class="mb-3">{{evidencias_html}}</div>
-                <button type="button" class="btn btn-success btn-lg" id="btn-gerar-mtr" onclick="gerarMtr()" {{btn_gerar_disabled}}>
-                    <i class="fas fa-check"></i> Finalizar coleta
-                </button>
             </div>
+        </div></div>
+    </div>
 
+    <div class="tab-pane fade" id="tab-destinador">
+        <div class="card mb-3"><div class="card-body">
+            <form id="form-destinador">
+                <div class="row">
+                    <div class="col-md-6 mb-2"><label>Destinador final</label><select class="form-select" name="destinador_id" id="destinador_id" required>{{destinadores_options}}</select></div>
+                    <div class="col-md-6 mb-2"><label>Obs. destinador</label><input class="form-control" name="observacao_destinador" value="{{observacao_destinador}}"/></div>
+                    <div class="col-md-4 mb-2"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="situacao_recebimento" value="recebido" id="situacao_recebimento" {{situacao_recebido}}/><label class="form-check-label" for="situacao_recebimento">Recebido no destinador</label></div></div>
+                    <div class="col-md-4 mb-2">
+                        <label>Data de encerramento</label>
+                        <input type="date" class="form-control" name="data_recebimento" id="data_recebimento" value="{{data_recebimento}}" required/>
+                        <small class="text-muted">Obrigatória para concluir o relatório.</small>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-primary mt-2" onclick="salvarDestinador()">Salvar destinador</button>
+            </form>
+            <hr>
+            <p class="text-muted small">Após salvar destinador e relatório (etapa 3), conclua o registro. O MTR SINIR é gerado depois em <strong>Coletas</strong>.</p>
+            <button type="button" class="btn btn-success btn-lg" id="btn-concluir-relatorio" onclick="concluirRelatorio()" {{btn_gerar_disabled}}>
+                <i class="fas fa-check"></i> Concluir relatório
+            </button>
             <button type="button" class="btn btn-outline-danger ms-2 mt-3" onclick="cancelarColeta()">Cancelar rascunho</button>
         </div></div>
     </div>

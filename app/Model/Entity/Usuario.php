@@ -16,6 +16,7 @@ class Usuario
     public string $email = '';
     public string $senha = '';
     public int $funcao_id = 0;
+    public ?int $transportadora_id = null;
     public int $operadora_id = 1;
     public string $ativo = 's';
     public string $funcao_nome = '';
@@ -109,9 +110,16 @@ class Usuario
     }
 
     /** @return self[] */
-    public static function getColetoresAtivos(): array
+    public static function getColetoresAtivos(?int $transportadoraId = null): array
     {
-        return self::list("f.slug = 'coletor' AND u.ativo = 's'", [], '500'); // tenant via trait
+        $where = "f.slug = 'coletor' AND u.ativo = 's'";
+        $params = [];
+        if ($transportadoraId !== null && $transportadoraId > 0) {
+            $where .= ' AND (u.transportadora_id = ? OR u.transportadora_id IS NULL)';
+            $params[] = $transportadoraId;
+        }
+
+        return self::list($where, $params, '500');
     }
 
     private static function fromArray(array $row): self
@@ -122,6 +130,8 @@ class Usuario
         $u->email = (string)$row['email'];
         $u->senha = (string)($row['senha'] ?? '');
         $u->funcao_id = (int)$row['funcao_id'];
+        $u->transportadora_id = isset($row['transportadora_id']) && $row['transportadora_id'] !== null
+            ? (int)$row['transportadora_id'] : null;
         $u->operadora_id = (int)($row['operadora_id'] ?? 1);
         $u->ativo = (string)$row['ativo'];
         $u->funcao_nome = (string)($row['funcao_nome'] ?? '');

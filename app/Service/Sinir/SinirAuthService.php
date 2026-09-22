@@ -8,8 +8,8 @@ class SinirAuthService
 {
     private SinirGateway $gateway;
 
-    /** @var array<string,mixed>|null cache em memória por request */
-    private static ?array $cachedToken = null;
+    /** @var array<string, array{token:string,expires_at:int}> cache por hash do token de integração */
+    private static array $cachedTokens = [];
 
     public function __construct(?SinirGateway $gateway = null)
     {
@@ -26,32 +26,35 @@ class SinirAuthService
      *
      * @return array{ok:bool,token:?string,expires_in:?int,error:?string,raw_status:int}
      */
-    public function obtainAccessToken(bool $forceRefresh = false): array
+    public function obtainAccessToken(bool $forceRefresh = false, ?string $integrationTokenOverride = null): array
     {
-        if (!$this->isConfigured()) {
-            return [
-                'ok' => false,
-                'token' => null,
-                'expires_in' => null,
-                'error' => 'SINIR não configurado (.env: token, unidade, CNPJ)',
-                'raw_status' => 0,
-            ];
+        $integrationToken = trim((string)($integrationTokenOverride ?? ''));
+        if ($integrationToken === '') {
+            if (!$this->isConfigured()) {
+                return [
+                    'ok' => false,
+                    'token' => null,
+                    'expires_in' => null,
+                    'error' => 'SINIR não configurado (.env: token, unidade, CNPJ)',
+                    'raw_status' => 0,
+                ];
+            }
+            $integrationToken = SinirConfig::integrationToken();
         }
 
-        if (!$forceRefresh && self::$cachedToken !== null) {
-            $expiresAt = (int)(self::$cachedToken['expires_at'] ?? 0);
+        $cacheKey = substr(hash('sha256', $integrationToken), 0, 16);
+        if (!$forceRefresh && isset(self::$cachedTokens[$cacheKey])) {
+            $expiresAt = (int)(self::$cachedTokens[$cacheKey]['expires_at'] ?? 0);
             if ($expiresAt > time() + 60) {
                 return [
                     'ok' => true,
-                    'token' => (string)self::$cachedToken['token'],
+                    'token' => (string)self::$cachedTokens[$cacheKey]['token'],
                     'expires_in' => $expiresAt - time(),
                     'error' => null,
                     'raw_status' => 200,
                 ];
             }
         }
-
-        $integrationToken = SinirConfig::integrationToken();
         $response = $this->gateway->post('token', [], $integrationToken);
 
         if (!$response['ok']) {
@@ -84,7 +87,7 @@ class SinirAuthService
         }
 
         $expiresIn = (int)($body['expires_in'] ?? $body['expiresIn'] ?? 3600);
-        self::$cachedToken = [
+        self::$cachedTokens[$cacheKey] = [
             'token' => $accessToken,
             'expires_at' => time() + max(60, $expiresIn),
         ];
@@ -101,7 +104,7 @@ class SinirAuthService
     /** Limpa cache (útil em testes CLI). */
     public static function clearCache(): void
     {
-        self::$cachedToken = null;
+        self::$cachedTokens = [];
     }
 
     /** @param array<string,mixed> $body */

@@ -12,31 +12,39 @@ use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
+use App\Model\Entity\Destinador as EntityDestinador;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
+use App\Model\Entity\Transportadora as EntityTransportadora;
 use App\Model\Entity\Usuario as EntityUsuario;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 use PDO;
 
 class ColetaService
 {
-    public static function proximoNumeroMtr(Database $db, ?int $operadoraId = null): int
+    public static function proximoNumeroRelatorio(Database $db, ?int $operadoraId = null): int
     {
         $operadoraId = $operadoraId ?? OperadoraScope::getOperadoraId();
         $db->execute(
-            'INSERT INTO coleta_sequencia (operadora_id, ultimo_mtr) VALUES (?, 0)
+            'INSERT INTO coleta_sequencia (operadora_id, ultimo_mtr, ultimo_relatorio) VALUES (?, 0, 0)
              ON DUPLICATE KEY UPDATE operadora_id = operadora_id',
             [$operadoraId]
         );
         $db->execute(
-            'UPDATE coleta_sequencia SET ultimo_mtr = ultimo_mtr + 1 WHERE operadora_id = ?',
+            'UPDATE coleta_sequencia SET ultimo_relatorio = ultimo_relatorio + 1 WHERE operadora_id = ?',
             [$operadoraId]
         );
         $row = $db->execute(
-            'SELECT ultimo_mtr FROM coleta_sequencia WHERE operadora_id = ?',
+            'SELECT ultimo_relatorio FROM coleta_sequencia WHERE operadora_id = ?',
             [$operadoraId]
         )->fetch(PDO::FETCH_ASSOC);
 
-        return (int)($row['ultimo_mtr'] ?? 1);
+        return (int)($row['ultimo_relatorio'] ?? 1);
+    }
+
+    /** @deprecated Use proximoNumeroRelatorio — mantido para scripts legados */
+    public static function proximoNumeroMtr(Database $db, ?int $operadoraId = null): int
+    {
+        return self::proximoNumeroRelatorio($db, $operadoraId);
     }
 
     public static function iniciarRascunho(int $clienteId, int $coletorId, bool $isAdmin = false): int
@@ -55,8 +63,11 @@ class ColetaService
             $cliente->uf,
         ])));
 
-        $transporte = ColetaDefaults::transportador();
-        $destino = ColetaDefaults::destinador();
+        $transportadora = EntityTransportadora::getPadrao();
+        $destinador = EntityDestinador::getPadrao();
+        if (!$transportadora || !$destinador) {
+            throw new \InvalidArgumentException('Cadastre transportadora e destinador padrão antes de lançar coletas.');
+        }
         $motoristaNome = ColetorSelectHelper::isColetorAtivo($coletorId)
             ? ColetorSelectHelper::nomeById($coletorId)
             : '';
@@ -66,12 +77,14 @@ class ColetaService
         try {
             $operadoraId = OperadoraScope::getOperadoraId();
             $db->execute(
-                'INSERT INTO coletas (operadora_id, cliente_id, coletor_id, status, doc_referencia, data_coleta, hora)
-                 VALUES (?,?,?,?,?,?,?)',
+                'INSERT INTO coletas (operadora_id, cliente_id, coletor_id, transportadora_id, destinador_id, status, doc_referencia, data_coleta, hora)
+                 VALUES (?,?,?,?,?,?,?,?,?)',
                 [
                     $operadoraId,
                     $clienteId,
                     $coletorId,
+                    $transportadora->id,
+                    $destinador->id,
                     'rascunho',
                     $cliente->proxima_coleta ?? date('Y-m-d'),
                     date('Y-m-d'),
@@ -96,14 +109,14 @@ class ColetaService
                     $endereco,
                     $cliente->responsavel,
                     $cliente->plano_nome,
-                    $transporte['nome'],
-                    $transporte['cnpj'],
+                    $transportadora->nome,
+                    $transportadora->cnpj,
                     $motoristaNome,
-                    $destino['nome'],
-                    $destino['cnpj'],
-                    $destino['endereco'],
-                    $destino['telefone'],
-                    $destino['responsavel'],
+                    $destinador->nome,
+                    $destinador->cnpj,
+                    $destinador->endereco,
+                    $destinador->telefone,
+                    $destinador->responsavel,
                 ]
             );
 
@@ -115,38 +128,99 @@ class ColetaService
         }
     }
 
-    public static function salvarTransporte(int $coletaId, array $dados): void
+    public static function salvarEtapaTransporte(int $coletaId, array $dados): void
     {
         self::assertRascunho($coletaId);
+
+        $transportadoraId = (int)($dados['transportadora_id'] ?? 0);
+        $transportadora = $transportadoraId > 0 ? EntityTransportadora::getById($transportadoraId) : null;
+        if (!$transportadora || !$transportadora->ativo) {
+            throw new \InvalidArgumentException('Selecione uma transportadora válida.');
+        }
 
         $veiculoId = (int)($dados['veiculo_id'] ?? 0);
         $veiculo = $veiculoId > 0 ? EntityVeiculo::getById($veiculoId) : null;
         $motoristaNome = trim((string)($dados['motorista_nome'] ?? ''));
         if ($motoristaNome === '') {
-            throw new \InvalidArgumentException('Selecione o motorista (coletor).');
+            throw new \InvalidArgumentException('Selecione o coletor (motorista).');
+        }
+
+        $coletorId = (int)($dados['coletor_id'] ?? 0);
+        $updateColeta = [
+            'transportadora_id' => $transportadora->id,
+            'veiculo_id' => $veiculo ? $veiculoId : null,
+            'tratamento' => trim((string)($dados['tratamento'] ?? '')),
+        ];
+        if ($coletorId > 0 && ColetorSelectHelper::isColetorAtivo($coletorId)) {
+            $updateColeta['coletor_id'] = $coletorId;
+        }
+        EntityColeta::update($coletaId, $updateColeta);
+
+        EntityColetaSnapshot::update($coletaId, [
+            'transportador_nome' => $transportadora->nome,
+            'transportador_cnpj' => $transportadora->cnpj,
+            'motorista_nome' => $motoristaNome,
+            'veiculo_descricao' => $veiculo ? trim($veiculo->marca.' '.$veiculo->modelo) : trim((string)($dados['veiculo_descricao'] ?? '')),
+            'veiculo_placa' => $veiculo ? $veiculo->placa : trim((string)($dados['veiculo_placa'] ?? '')),
+        ]);
+    }
+
+    public static function salvarEtapaDestinador(int $coletaId, array $dados): void
+    {
+        self::assertRascunho($coletaId);
+
+        $destinadorId = (int)($dados['destinador_id'] ?? 0);
+        $destinador = $destinadorId > 0 ? EntityDestinador::getById($destinadorId) : null;
+        if (!$destinador || !$destinador->ativo) {
+            throw new \InvalidArgumentException('Selecione um destinador válido.');
         }
 
         EntityColeta::update($coletaId, [
-            'veiculo_id' => $veiculo ? $veiculoId : null,
-            'relatorio' => trim((string)($dados['relatorio'] ?? '')),
-            'tratamento' => trim((string)($dados['tratamento'] ?? '')),
+            'destinador_id' => $destinador->id,
             'situacao_recebimento' => ($dados['situacao_recebimento'] ?? '') === 'recebido' ? 'recebido' : 'pendente',
             'data_recebimento' => ($dados['data_recebimento'] ?? '') ?: null,
         ]);
 
         EntityColetaSnapshot::update($coletaId, [
-            'transportador_nome' => trim((string)($dados['transportador_nome'] ?? '')),
-            'transportador_cnpj' => trim((string)($dados['transportador_cnpj'] ?? '')),
-            'motorista_nome' => $motoristaNome,
-            'veiculo_descricao' => $veiculo ? trim($veiculo->marca.' '.$veiculo->modelo) : trim((string)($dados['veiculo_descricao'] ?? '')),
-            'veiculo_placa' => $veiculo ? $veiculo->placa : trim((string)($dados['veiculo_placa'] ?? '')),
-            'destinador_nome' => trim((string)($dados['destinador_nome'] ?? '')),
-            'destinador_cnpj' => trim((string)($dados['destinador_cnpj'] ?? '')),
-            'destinador_endereco' => trim((string)($dados['destinador_endereco'] ?? '')),
-            'destinador_telefone' => trim((string)($dados['destinador_telefone'] ?? '')),
-            'destinador_responsavel' => trim((string)($dados['destinador_responsavel'] ?? '')),
+            'destinador_nome' => $destinador->nome,
+            'destinador_cnpj' => $destinador->cnpj,
+            'destinador_endereco' => $destinador->endereco,
+            'destinador_telefone' => $destinador->telefone,
+            'destinador_responsavel' => $destinador->responsavel,
             'observacao_destinador' => trim((string)($dados['observacao_destinador'] ?? '')),
         ]);
+    }
+
+    /** @deprecated Use salvarEtapaTransporte + salvarEtapaDestinador */
+    public static function salvarTransporte(int $coletaId, array $dados): void
+    {
+        self::salvarEtapaTransporte($coletaId, $dados);
+        if (!empty($dados['destinador_id']) || !empty($dados['data_recebimento'])) {
+            self::salvarEtapaDestinador($coletaId, $dados);
+        }
+    }
+
+    public static function salvarAssinaturaCliente(int $coletaId, string $dataUrl): void
+    {
+        self::assertRascunho($coletaId);
+        if (!preg_match('#^data:image/(png|jpeg);base64,#i', $dataUrl, $m)) {
+            throw new \InvalidArgumentException('Assinatura inválida.');
+        }
+        $raw = base64_decode(substr($dataUrl, strpos($dataUrl, ',') + 1), true);
+        if ($raw === false || strlen($raw) > 500000) {
+            throw new \InvalidArgumentException('Assinatura inválida ou muito grande.');
+        }
+        $ext = strtolower($m[1]) === 'jpeg' ? 'jpg' : 'png';
+        $dir = dirname(__DIR__, 2).'/storage/coletas/'.$coletaId;
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $rel = 'coletas/'.$coletaId.'/assinatura_cliente.'.$ext;
+        $path = dirname(__DIR__, 2).'/storage/'.$rel;
+        if (file_put_contents($path, $raw) === false) {
+            throw new \RuntimeException('Não foi possível salvar a assinatura.');
+        }
+        EntityColeta::update($coletaId, ['assinatura_cliente_path' => $rel]);
     }
 
     public static function adicionarItem(int $coletaId, int $tipoResiduoId, float $quantidade, string $unidade): int
@@ -233,7 +307,7 @@ class ColetaService
     /**
      * Finaliza a coleta (operacional). Com SINIR ativo, o número MTR só é gravado após registro no SINIR.
      *
-     * @return array{numero_mtr:?int,sinir:array{ok:bool,skipped?:bool,message:string}|null}
+     * @return array{numero_relatorio:int,numero_mtr:?int}
      */
     public static function finalizar(int $coletaId, array $files = []): array
     {
@@ -245,7 +319,7 @@ class ColetaService
             EvidenceStorageService::saveBatchForColeta($coletaId, $files);
         } elseif (!self::rascunhoFinalConferido($coletaId)) {
             throw new \InvalidArgumentException(
-                'Salve o rascunho (relatório e/ou fotos) e confira os dados antes de finalizar.'
+                'Salve o relatório (etapa 3) e confira os dados antes de concluir.'
             );
         }
 
@@ -253,28 +327,18 @@ class ColetaService
         if (!$coleta) {
             throw new \InvalidArgumentException('Coleta não encontrada.');
         }
+        if (!$coleta->transportadora_id || !$coleta->destinador_id) {
+            throw new \InvalidArgumentException('Salve transportadora (etapa 1) e destinador (etapa 4).');
+        }
 
         $db = new Database();
         $db->beginTransaction();
         try {
+            $numeroRelatorio = self::proximoNumeroRelatorio($db);
             $db->execute(
-                'UPDATE coletas SET status = ?, finalized_at = NOW() WHERE id = ?',
-                ['finalizada', $coletaId]
+                'UPDATE coletas SET status = ?, finalized_at = NOW(), numero_relatorio = ?, sinir_status = NULL WHERE id = ?',
+                ['finalizada', $numeroRelatorio, $coletaId]
             );
-
-            $numeroMtr = null;
-            if (!SinirConfig::isEnabled()) {
-                $numeroMtr = self::proximoNumeroMtr($db);
-                $db->execute(
-                    'UPDATE coletas SET numero_mtr = ? WHERE id = ?',
-                    [$numeroMtr, $coletaId]
-                );
-            } else {
-                $db->execute(
-                    'UPDATE coletas SET sinir_status = ? WHERE id = ?',
-                    ['pendente', $coletaId]
-                );
-            }
 
             $dias = ColetaDefaults::diasProximaColeta();
             $db->execute(
@@ -288,19 +352,32 @@ class ColetaService
             throw $e;
         }
 
-        $sinirResult = null;
-        if (SinirConfig::isEnabled()) {
-            $sinirResult = Sinir\SinirService::enviarColeta($coletaId, false);
-            $coletaAtual = EntityColeta::getById($coletaId);
-            if ($coletaAtual && $coletaAtual->numero_mtr) {
-                $numeroMtr = (int)$coletaAtual->numero_mtr;
-            }
+        return [
+            'numero_relatorio' => $numeroRelatorio,
+            'numero_mtr' => null,
+        ];
+    }
+
+    /**
+     * Emite MTR no SINIR (sob demanda, após relatório finalizado).
+     *
+     * @return array{ok:bool,message:string,numero_mtr:?int,details?:array<string,mixed>}
+     */
+    public static function gerarMtrSinir(int $coletaId, bool $force = false): array
+    {
+        $coleta = EntityColeta::getById($coletaId);
+        if (!$coleta || $coleta->status !== 'finalizada') {
+            throw new \InvalidArgumentException('Somente coletas finalizadas podem gerar MTR.');
         }
 
-        return [
-            'numero_mtr' => $numeroMtr,
-            'sinir' => $sinirResult,
-        ];
+        $result = Sinir\SinirService::enviarColeta($coletaId, $force);
+        $numeroMtr = null;
+        $coletaAtual = EntityColeta::getById($coletaId);
+        if ($coletaAtual && $coletaAtual->numero_mtr) {
+            $numeroMtr = (int)$coletaAtual->numero_mtr;
+        }
+
+        return array_merge($result, ['numero_mtr' => $numeroMtr]);
     }
 
     public static function cancelar(int $coletaId): void
@@ -444,7 +521,7 @@ class ColetaService
         $data = trim((string)($coleta->data_recebimento ?? ''));
         if ($data === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
             throw new \InvalidArgumentException(
-                'Informe a data de recebimento no destinador (aba Transporte) e clique em "Salvar e continuar" antes de finalizar.'
+                'Informe a data de encerramento no destinador (etapa 4) e salve antes de concluir o relatório.'
             );
         }
 

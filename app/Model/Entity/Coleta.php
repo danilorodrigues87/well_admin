@@ -13,15 +13,19 @@ class Coleta
     public int $id = 0;
     public int $operadora_id = 1;
     public ?int $numero_mtr = null;
+    public ?int $numero_relatorio = null;
     public ?int $legacy_manifesto = null;
     public int $cliente_id = 0;
     public int $coletor_id = 0;
+    public ?int $transportadora_id = null;
+    public ?int $destinador_id = null;
     public ?int $veiculo_id = null;
     public string $status = 'rascunho';
     public ?string $doc_referencia = null;
     public ?string $data_coleta = null;
     public ?string $hora = null;
     public ?string $relatorio = null;
+    public ?string $assinatura_cliente_path = null;
     public string $situacao_recebimento = 'pendente';
     public ?string $data_recebimento = null;
     public ?string $tratamento = null;
@@ -105,17 +109,24 @@ class Coleta
         $c = new self();
         $c->id = (int)$row['id'];
         $c->operadora_id = (int)($row['operadora_id'] ?? 1);
-        $c->numero_mtr = isset($row['numero_mtr']) ? (int)$row['numero_mtr'] : null;
+        $c->numero_mtr = isset($row['numero_mtr']) && $row['numero_mtr'] !== null ? (int)$row['numero_mtr'] : null;
+        $c->numero_relatorio = isset($row['numero_relatorio']) && $row['numero_relatorio'] !== null
+            ? (int)$row['numero_relatorio'] : null;
         $c->legacy_manifesto = isset($row['legacy_manifesto']) && $row['legacy_manifesto'] !== null
             ? (int)$row['legacy_manifesto'] : null;
         $c->cliente_id = (int)$row['cliente_id'];
         $c->coletor_id = (int)$row['coletor_id'];
+        $c->transportadora_id = isset($row['transportadora_id']) && $row['transportadora_id'] !== null
+            ? (int)$row['transportadora_id'] : null;
+        $c->destinador_id = isset($row['destinador_id']) && $row['destinador_id'] !== null
+            ? (int)$row['destinador_id'] : null;
         $c->veiculo_id = isset($row['veiculo_id']) ? (int)$row['veiculo_id'] : null;
         $c->status = (string)$row['status'];
         $c->doc_referencia = $row['doc_referencia'] ?? null;
         $c->data_coleta = $row['data_coleta'] ?? null;
         $c->hora = $row['hora'] ?? null;
         $c->relatorio = $row['relatorio'] ?? null;
+        $c->assinatura_cliente_path = isset($row['assinatura_cliente_path']) ? (string)$row['assinatura_cliente_path'] : null;
         $c->situacao_recebimento = (string)($row['situacao_recebimento'] ?? 'pendente');
         $c->data_recebimento = $row['data_recebimento'] ?? null;
         $c->tratamento = $row['tratamento'] ?? null;

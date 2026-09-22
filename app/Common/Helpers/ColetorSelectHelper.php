@@ -16,10 +16,10 @@ class ColetorSelectHelper
         return mb_strtolower(trim((string)($usuario['funcao_nome'] ?? ''))) === 'coletor';
     }
 
-    public static function optionsHtml(int $selectedId = 0, bool $emptyOption = false): string
+    public static function optionsHtml(int $selectedId = 0, bool $emptyOption = false, ?int $transportadoraId = null): string
     {
         $html = $emptyOption ? '<option value="">— Selecione —</option>' : '';
-        foreach (EntityUsuario::getColetoresAtivos() as $c) {
+        foreach (EntityUsuario::getColetoresAtivos($transportadoraId) as $c) {
             $sel = $c->id === $selectedId ? ' selected' : '';
             $html .= '<option value="'.$c->id.'"'.$sel.'>'.CrudHelper::e($c->nome).'</option>';
         }
