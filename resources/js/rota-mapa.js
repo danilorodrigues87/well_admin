@@ -16,6 +16,27 @@
   var mapDidInitialFit = false;
   var lastShareAccuracy = Infinity;
   var GEO_HIGH = { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 };
+  var ORIGIN_MARKER_PX = 44;
+
+  function originMarkerIcon() {
+    var url = cfg.markerTruckUrl || '';
+    if (url && window.google && google.maps && google.maps.Size && google.maps.Point) {
+      var s = ORIGIN_MARKER_PX;
+      return {
+        url: url,
+        scaledSize: new google.maps.Size(s, s),
+        anchor: new google.maps.Point(Math.round(s / 2), Math.round(s / 2))
+      };
+    }
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 10,
+      fillColor: '#0d6efd',
+      fillOpacity: 1,
+      strokeWeight: 2,
+      strokeColor: '#fff'
+    };
+  }
 
   function swalError(message, title) {
     var text = message || 'Operação não concluída.';
@@ -179,15 +200,9 @@
       var om = new google.maps.Marker({
         position: origin,
         map: map,
-        title: 'Origem',
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: '#0d6efd',
-          fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: '#fff'
-        }
+        title: 'Sua posição',
+        icon: originMarkerIcon(),
+        zIndex: google.maps.Marker.MAX_ZINDEX + 1
       });
       markers.push(om);
       bounds.extend(origin);
