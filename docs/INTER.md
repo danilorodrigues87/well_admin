@@ -21,7 +21,7 @@ No Easypanel, monte um **Bind Mount** do host para o container:
 
 | Host (exemplo) | Container |
 |----------------|-----------|
-| `/etc/easypanel/projects/.../well/storage` | `/app/code/storage` |
+| `/etc/easypanel/projects/.../well/storage` | `/var/www/html/storage` |
 
 (O caminho exato do host aparece na tela **Montagens** do serviço.)
 
@@ -37,7 +37,7 @@ storage/
       evidencia.jpg
 ```
 
-**Erro comum:** enviar arquivos para a pasta do Git/deploy que é recriada a cada build, em vez do volume bindado em `storage/`. O PHP só enxerga o que está em `/app/code/storage/...` dentro do container.
+**Erro comum:** enviar arquivos para a pasta do Git/deploy que é recriada a cada build, em vez do volume bindado em `storage/`. O PHP só enxerga o que está em `/var/www/html/storage/...` dentro do container (confirme com `inter_diagnose.php`).
 
 **Diagnóstico no console do serviço (Easypanel → Terminal):**
 

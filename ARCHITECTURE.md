@@ -285,3 +285,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-22 | Coletas Fase 2: tratamento na etapa destinador; `clientes.exige_mtr` (`045`); precheck SINIR + modal checklist; filtros MTR na listagem; coletor → `transportadora_id` em usuários |
 | 2026-09-22 | Coletas Fase 3: `receberManifestoLote` + `sinir_recebido_em`; PDF MTR SINIR / upload manual (`046`, `ColetaCdfService`); download `/gerador/coletas/{id}/cdf` |
 | 2026-09-22 | Coletas Fase 4: CDF oficial `emiteCDF` + `buscaPdfCdf` (`047`, `SinirCdfService`); DMR apoio por competência (`048`, `/painel/dmr`) |
+| 2026-09-22 | CRUD Planos: cota de coletas com regra “todo mês” vs “bloco de meses”, resumo em linguagem clara (`crud-planos.js`) |
+| 2026-09-22 | Rota do dia: remove seletor de coletor no painel; gestor usa escopo admin + ordem/status do usuário logado; JSON de erro em `paradas` |

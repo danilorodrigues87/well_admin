@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Common\Helpers\ColetorSelectHelper;
-use App\Model\Entity\Usuario as EntityUsuario;
 
 /** Resolve coletor/data/rota para rota do dia (painel web e API v1). */
 class RotaDoDiaRequestContext
@@ -15,22 +14,18 @@ class RotaDoDiaRequestContext
      */
     public static function resolveColetor(array $usuario, array $params): array
     {
-        $isAdmin = !empty($usuario['is_admin']);
+        $userId = (int)($usuario['id'] ?? 0);
         if (ColetorSelectHelper::isColetorSession($usuario)) {
-            return [(int)($usuario['id'] ?? 0), false];
+            return [$userId, false];
         }
 
-        $coletorId = (int)($params['coletor_id'] ?? 0);
-        if ($coletorId <= 0) {
-            $coletores = EntityUsuario::getColetoresAtivos();
-            $coletorId = $coletores !== [] ? $coletores[0]->id : (int)($usuario['id'] ?? 0);
+        // API / app pode informar coletor_id; painel web usa só a sessão.
+        $requested = (int)($params['coletor_id'] ?? 0);
+        if ($requested > 0 && ColetorSelectHelper::isColetorAtivo($requested)) {
+            return [$requested, false];
         }
 
-        if ($coletorId > 0 && ColetorSelectHelper::isColetorAtivo($coletorId)) {
-            return [$coletorId, false];
-        }
-
-        return [$coletorId, $isAdmin];
+        return [$userId, true];
     }
 
     /** @param array<string,mixed> $params */

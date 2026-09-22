@@ -108,10 +108,103 @@
     syncRowMode($(this).closest('tr'));
   });
 
+  function parseIntSafe(v, fallback) {
+    var n = parseInt(String(v).replace(',', '.'), 10);
+    return isNaN(n) ? fallback : n;
+  }
+
+  function syncFreqUi() {
+    var modo = $('#crud-freq-modo').val();
+    var isPeriodo = modo === 'periodo';
+    $('.crud-freq-mensal-wrap').toggleClass('d-none', isPeriodo);
+    $('.crud-freq-periodo-wrap').toggleClass('d-none', !isPeriodo);
+    updateFreqResumo();
+  }
+
+  function updateFreqResumo() {
+    var modo = $('#crud-freq-modo').val();
+    var $res = $('#crud-freq-resumo');
+    if (!$res.length) return;
+    if (modo === 'periodo') {
+      var meses = parseIntSafe($('#crud-freq-periodo-meses').val(), 0);
+      var qtd = parseIntSafe($('#crud-freq-periodo-qtd').val(), 1);
+      if (meses >= 2 && qtd >= 1) {
+        $res.html('Resumo: o gerador pode solicitar até <strong>' + qtd + '</strong> coleta(s) a cada <strong>' + meses + '</strong> meses.');
+      } else {
+        $res.text('Informe o tamanho do bloco (2 ou mais meses) e quantas coletas cabem nele.');
+      }
+    } else {
+      var porMes = parseIntSafe($('#crud-freq-mensal-qtd').val(), -1);
+      if (porMes === 0) {
+        $res.html('Resumo: <strong>nenhuma</strong> coleta inclusa por mês (só extras, se houver regra comercial).');
+      } else if (porMes > 0) {
+        $res.html('Resumo: o gerador pode solicitar até <strong>' + porMes + '</strong> coleta(s) por mês calendário.');
+      } else {
+        $res.text('Informe quantas coletas entram por mês.');
+      }
+    }
+  }
+
+  /** Preenche os hidden fields que o backend já espera. */
+  function applyFreqToHidden() {
+    var modo = $('#crud-freq-modo').val();
+    if (modo === 'periodo') {
+      $('#crud-coletas_mensais').val('0');
+      $('#crud-coletas_periodo_meses').val(String(parseIntSafe($('#crud-freq-periodo-meses').val(), 3)));
+      $('#crud-coletas_por_periodo').val(String(Math.max(1, parseIntSafe($('#crud-freq-periodo-qtd').val(), 1))));
+    } else {
+      var porMes = parseIntSafe($('#crud-freq-mensal-qtd').val(), 1);
+      $('#crud-coletas_mensais').val(String(Math.max(0, porMes)));
+      $('#crud-coletas_periodo_meses').val('');
+      $('#crud-coletas_por_periodo').val('1');
+    }
+  }
+
+  function loadFreqFromPlano(data) {
+    var periodoMeses = parseInt(data.coletas_periodo_meses, 10) || 0;
+    if (periodoMeses > 1) {
+      $('#crud-freq-modo').val('periodo');
+      $('#crud-freq-periodo-meses').val(String(periodoMeses));
+      $('#crud-freq-periodo-qtd').val(String(data.coletas_por_periodo != null ? data.coletas_por_periodo : 1));
+      $('#crud-freq-mensal-qtd').val('1');
+    } else {
+      $('#crud-freq-modo').val('mensal');
+      var cm = data.coletas_mensais != null ? parseIntSafe(String(data.coletas_mensais).replace(',', '.'), 1) : 1;
+      $('#crud-freq-mensal-qtd').val(String(cm));
+      $('#crud-freq-periodo-meses').val('3');
+      $('#crud-freq-periodo-qtd').val('1');
+    }
+    syncFreqUi();
+    applyFreqToHidden();
+  }
+
+  function validateFreq() {
+    var modo = $('#crud-freq-modo').val();
+    if (modo === 'periodo') {
+      var meses = parseIntSafe($('#crud-freq-periodo-meses').val(), 0);
+      var qtd = parseIntSafe($('#crud-freq-periodo-qtd').val(), 0);
+      if (meses < 2) {
+        return 'No bloco de meses, informe 2 ou mais (ex.: 3 para trimestre).';
+      }
+      if (qtd < 1) {
+        return 'Informe quantas coletas entram no bloco (mínimo 1).';
+      }
+    } else {
+      var porMes = parseIntSafe($('#crud-freq-mensal-qtd').val(), -1);
+      if (porMes < 0 || $('#crud-freq-mensal-qtd').val().trim() === '') {
+        return 'Informe quantas coletas por mês (use 0 se nenhuma estiver inclusa).';
+      }
+    }
+    return null;
+  }
+
+  $(document).on('change', '#crud-freq-modo', syncFreqUi);
+  $(document).on('input', '#crud-freq-mensal-qtd, #crud-freq-periodo-meses, #crud-freq-periodo-qtd', updateFreqResumo);
+
   window.novoRegistro = function () {
     $('#crud-id').val(0);
-    $('#crud-nome, #crud-descricao, #crud-valor_mensal, #crud-coletas_mensais, #crud-coletas_periodo_meses').val('');
-    $('#crud-coletas_por_periodo').val('1');
+    $('#crud-nome, #crud-descricao, #crud-valor_mensal').val('');
+    loadFreqFromPlano({ coletas_mensais: 1, coletas_periodo_meses: null, coletas_por_periodo: 1 });
     $('#crud-tipo').val('');
     $('#crud-ativo').val('1');
     $('#plano-itens-body').empty();
@@ -141,9 +234,7 @@
       $('#crud-nome').val(data.nome || '');
       $('#crud-descricao').val(data.descricao || '');
       $('#crud-valor_mensal').val(data.valor_mensal != null ? String(data.valor_mensal).replace('.', ',') : '');
-      $('#crud-coletas_mensais').val(data.coletas_mensais != null ? String(data.coletas_mensais).replace('.', ',') : '');
-      $('#crud-coletas_periodo_meses').val(data.coletas_periodo_meses != null && data.coletas_periodo_meses !== '' ? String(data.coletas_periodo_meses) : '');
-      $('#crud-coletas_por_periodo').val(data.coletas_por_periodo != null ? String(data.coletas_por_periodo) : '1');
+      loadFreqFromPlano(data);
       $('#crud-tipo').val(data.tipo || '');
       $('#crud-ativo').val(String(data.ativo != null ? data.ativo : 1));
       $('#plano-itens-body').empty();
@@ -158,6 +249,12 @@
 
   window.salvarPlano = function () {
     var csrf = document.querySelector('#crud-form input[name="_csrf"]')?.value || '';
+    var freqErr = validateFreq();
+    if (freqErr) {
+      if (typeof Swal !== 'undefined') Swal.fire('Atenção', freqErr, 'warning');
+      return;
+    }
+    applyFreqToHidden();
     var itens;
     try {
       itens = collectItens();

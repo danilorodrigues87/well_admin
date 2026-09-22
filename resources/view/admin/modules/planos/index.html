@@ -19,9 +19,37 @@
             <div class="col-md-6"><label>Nome *</label><input class="form-control" name="nome" id="crud-nome" required/></div>
             <div class="col-md-3"><label>Valor mensal (R$) *</label><input class="form-control" name="valor_mensal" id="crud-valor_mensal" inputmode="decimal" placeholder="0,00"/></div>
             <div class="col-md-3"><label>Tipo</label><select class="form-select" name="tipo" id="crud-tipo"><option value="">—</option><option value="Plano padrão">Plano padrão</option><option value="Plano personalizado">Plano personalizado</option></select></div>
-            <div class="col-md-2"><label>Coletas/mês</label><input class="form-control" name="coletas_mensais" id="crud-coletas_mensais" inputmode="decimal" placeholder="1" title="Cota mensal quando não usa período customizado"/></div>
-            <div class="col-md-2"><label>Período (meses)</label><input class="form-control" name="coletas_periodo_meses" id="crud-coletas_periodo_meses" inputmode="numeric" placeholder="—" title="Ex.: 3 = trimestre"/></div>
-            <div class="col-md-2"><label>Coletas no período</label><input class="form-control" name="coletas_por_periodo" id="crud-coletas_por_periodo" inputmode="numeric" value="1"/></div>
+            <div class="col-12">
+                <div class="border rounded p-3 bg-light">
+                    <label class="form-label fw-semibold mb-1">Cota de coletas <small class="text-muted fw-normal">(limite para o gerador solicitar coleta)</small></label>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small mb-1">Regra</label>
+                            <select class="form-select" id="crud-freq-modo" aria-describedby="crud-freq-ajuda">
+                                <option value="mensal">Todo mês</option>
+                                <option value="periodo">A cada vários meses (bloco)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 crud-freq-mensal-wrap">
+                            <label class="form-label small mb-1">Coletas por mês</label>
+                            <input class="form-control" id="crud-freq-mensal-qtd" inputmode="numeric" placeholder="1" min="0"/>
+                        </div>
+                        <div class="col-md-2 crud-freq-periodo-wrap d-none">
+                            <label class="form-label small mb-1">Bloco (meses)</label>
+                            <input class="form-control" id="crud-freq-periodo-meses" inputmode="numeric" placeholder="3" min="2"/>
+                        </div>
+                        <div class="col-md-2 crud-freq-periodo-wrap d-none">
+                            <label class="form-label small mb-1">Coletas no bloco</label>
+                            <input class="form-control" id="crud-freq-periodo-qtd" inputmode="numeric" placeholder="1" min="1"/>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-1 mt-2" id="crud-freq-ajuda">Ex.: <strong>1 por mês</strong> ou <strong>1 a cada 3 meses</strong> (trimestre).</p>
+                    <p class="small mb-0" id="crud-freq-resumo"></p>
+                    <input type="hidden" name="coletas_mensais" id="crud-coletas_mensais"/>
+                    <input type="hidden" name="coletas_periodo_meses" id="crud-coletas_periodo_meses"/>
+                    <input type="hidden" name="coletas_por_periodo" id="crud-coletas_por_periodo"/>
+                </div>
+            </div>
             <div class="col-md-6"><label>Descrição interna</label><textarea class="form-control" name="descricao" id="crud-descricao" rows="2" placeholder="Opcional"></textarea></div>
             <div class="col-md-3"><label>Status</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
         </div>

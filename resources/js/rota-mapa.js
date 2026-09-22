@@ -71,13 +71,9 @@
     return el ? el.value : '';
   }
 
-  function coletorId() {
-    var fixo = document.getElementById('rota-coletor-fixo');
-    var sel = document.getElementById('rota-coletor-id');
-    if (document.getElementById('rota-is-coletor').value === '1' && fixo) {
-      return parseInt(fixo.value, 10) || 0;
-    }
-    return sel ? parseInt(sel.value, 10) || 0 : 0;
+  function operadorId() {
+    var el = document.getElementById('rota-usuario-id');
+    return el ? parseInt(el.value, 10) || 0 : 0;
   }
 
   function dataRota() {
@@ -95,7 +91,10 @@
     var body = new FormData();
     body.append('acao', acao);
     body.append('_csrf', csrfToken());
-    body.append('coletor_id', String(coletorId()));
+    var opId = operadorId();
+    if (opId > 0) {
+      body.append('coletor_id', String(opId));
+    }
     body.append('data', dataRota());
     var rid = rotaFiltroId();
     if (rid) body.append('rota_id', rid);
@@ -115,7 +114,15 @@
         body.append(k, v);
       }
     });
-    return fetch(cfg.baseUrl, { method: 'POST', body: body }).then(function (r) { return r.json(); });
+    return fetch(cfg.baseUrl, { method: 'POST', body: body }).then(function (r) {
+      return r.text().then(function (text) {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          throw new Error(text && text.length < 200 ? text : 'Resposta inválida do servidor.');
+        }
+      });
+    });
   }
 
   function loadGoogleMaps(key) {
@@ -230,7 +237,7 @@
       list.classList.add('d-none');
       vazio.classList.remove('d-none');
       if (window._rotaSemRota) {
-        vazio.innerHTML = '<p class="mb-0 px-3">Este coletor não possui clientes atribuídos em nenhuma rota. Use <strong>Cadastros → Rotas → Atribuições</strong>.</p>';
+        vazio.innerHTML = '<p class="mb-0 px-3">Nenhum cliente vinculado às rotas. Use <strong>Cadastros → Rotas → Atribuições</strong>.</p>';
       }
       return;
     }
@@ -557,14 +564,6 @@
       });
     }
 
-    var sel = document.getElementById('rota-coletor-id');
-    if (sel) {
-      sel.addEventListener('change', function () {
-        mapViewportLocked = false;
-        mapDidInitialFit = false;
-        carregarParadas();
-      });
-    }
     var dataEl = document.getElementById('rota-data');
     if (dataEl) {
       dataEl.addEventListener('change', function () {

@@ -62,7 +62,7 @@ class Pagamentos extends Page
             $interAlert = '<div class="alert alert-warning mb-0"><strong>Integração Inter incompleta.</strong>'
                 .'<ul class="mb-2 small">'.$items.'</ul>'
                 .'<p class="small text-muted mb-0">Certificados esperados: <code>storage/inter/certificado.crt</code> e '
-                .'<code>storage/inter/chave.key</code> (no volume montado em <code>/app/code/storage</code> no Easypanel). '
+                .'<code>storage/inter/chave.key</code> (volume bind: host → <code>/var/www/html/storage</code> no container). '
                 .'Console: <code>php database/scripts/inter_diagnose.php</code></p></div>';
         }
 

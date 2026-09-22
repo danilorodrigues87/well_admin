@@ -114,7 +114,7 @@ class RotaScopeService
         $q = self::paradasDoDiaQuery($coletorId, $isAdmin, $dataReferencia, $rotaId);
         $db = new Database();
         $sql = 'SELECT DISTINCT c.*, p.nome AS plano_nome FROM clientes c
-                LEFT JOIN planos p ON p.id = c.plano_id'.$q['join'].'
+                LEFT JOIN planos p ON p.id = c.plano_id AND p.operadora_id = c.operadora_id'.$q['join'].'
                 WHERE '.$q['where'].'
                 ORDER BY c.prioridade DESC, c.proxima_coleta ASC, c.nome_fantasia ASC';
         $stmt = $db->execute($sql, $q['params']);

@@ -167,7 +167,7 @@ HTML,
 <ol>
 <li>No topo da página, escolha a <strong>rota cadastral</strong> e a <strong>próxima coleta</strong>.</li>
 <li>Clique em <strong>Aplicar</strong> — todos os clientes da rota recebem a mesma data.</li>
-<li>Na <strong>Rota do dia</strong>, selecione o coletor, a mesma data e (opcional) filtre pela rota.</li>
+<li>Na <strong>Rota do dia</strong>, use a mesma data e (opcional) filtre pela rota cadastral.</li>
 </ol>
 <h4>Cliente individual</h4>
 <p>Use o ícone de calendário na tabela para ajustar um cliente.</p>

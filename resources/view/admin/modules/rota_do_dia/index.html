@@ -15,7 +15,6 @@
 <div class="card mb-3">
     <div class="card-body">
         <div class="row align-items-end g-2 well-rota-toolbar">
-            {{coletor_select}}
             {{rota_select}}
             <div class="col-md-3 mb-2">
                 <label class="form-label">Data da rota</label>
@@ -63,9 +62,9 @@
                 </div>
                 <ul id="rota-paradas-list" class="list-group list-group-flush rota-sortable d-none"></ul>
                 <div id="rota-paradas-vazio" class="text-center py-4 text-muted d-none px-3">
-                    <p class="mb-2">Nenhuma parada encontrada para esta data e coletor.</p>
+                    <p class="mb-2">Nenhuma parada encontrada para esta data.</p>
                     <p class="small mb-0 text-start">
-                        Verifique: (1) clientes na rota em <strong>Cadastros → Rotas → Atribuições</strong> com o coletor correto;
+                        Verifique: (1) clientes em <strong>Cadastros → Rotas → Atribuições</strong>;
                         (2) em <strong>Agendamentos</strong>, <em>próxima coleta</em> ≤ data selecionada (ou urgente);
                         (3) clientes ativos com endereço/geolocalização para o mapa.
                     </p>
@@ -94,7 +93,7 @@
 </div>
 
 <input type="hidden" id="rota-csrf" value="">
-<input type="hidden" id="rota-coletor-fixo" value="{{coletor_id}}">
+<input type="hidden" id="rota-usuario-id" value="{{usuario_id}}">
 <input type="hidden" id="rota-is-coletor" value="{{is_coletor}}">
 <input type="hidden" id="rota-maps-configured" value="{{maps_configured}}">
 <input type="hidden" id="rota-fallback-lat" value="{{fallback_lat}}">

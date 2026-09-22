@@ -7,7 +7,6 @@ use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\CsrfHelper;
 use App\Common\MapsConfig;
 use App\Model\Entity\Rota as EntityRota;
-use App\Model\Entity\Usuario as EntityUsuario;
 use App\Service\FrotaLocalizacaoService;
 use App\Service\RotaDoDiaRequestContext;
 use App\Service\RotaDoDiaService;
@@ -27,19 +26,10 @@ class RotaDoDia extends Page
     {
         $usuario = self::usuario();
         $isColetor = ColetorSelectHelper::isColetorSession($usuario);
-        $coletorId = (int)($usuario['id'] ?? 0);
+        $usuarioId = (int)($usuario['id'] ?? 0);
 
-        $coletorSelect = '';
         $rotaSelect = '';
         if (!$isColetor) {
-            $coletores = EntityUsuario::getColetoresAtivos();
-            if ($coletorId <= 0 && $coletores !== []) {
-                $coletorId = $coletores[0]->id;
-            }
-            $coletorSelect = '<div class="col-md-3 mb-2">
-                <label class="form-label">Coletor</label>
-                <select id="rota-coletor-id" class="form-select">'.ColetorSelectHelper::optionsHtml($coletorId, true).'</select>
-            </div>';
             $rotasOpts = '<option value="">Todas as rotas</option>';
             foreach (EntityRota::getAllActive() as $r) {
                 $rotasOpts .= '<option value="'.$r->id.'">'.htmlspecialchars($r->nome, ENT_QUOTES, 'UTF-8').'</option>';
@@ -53,9 +43,8 @@ class RotaDoDia extends Page
         $fallback = MapsConfig::originFallback();
         $content = View::render('admin/modules/rota_do_dia/index', [
             'csrf_field' => CsrfHelper::field(),
-            'coletor_select' => $coletorSelect,
             'rota_select' => $rotaSelect,
-            'coletor_id' => $coletorId,
+            'usuario_id' => $usuarioId,
             'is_coletor' => $isColetor ? '1' : '0',
             'maps_configured' => MapsConfig::isConfigured() ? '1' : '0',
             'maps_server_key_alert_class' => MapsConfig::hasDedicatedServerKey() ? 'd-none' : '',
@@ -65,7 +54,7 @@ class RotaDoDia extends Page
             'data_hoje' => date('Y-m-d'),
         ]);
 
-        $scripts = '<script src="'.URL.'/resources/js/rota-mapa.js?v=20260918b"></script>';
+        $scripts = '<script src="'.URL.'/resources/js/rota-mapa.js?v=20260922"></script>';
 
         return self::getPage('Rota do dia', $content, 'rota_dia', $scripts);
     }
@@ -73,21 +62,29 @@ class RotaDoDia extends Page
     public static function paradas($request): string
     {
         $usuario = self::usuario();
-        $params = $request->getQueryParams();
-        [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor($usuario, $params);
-        $data = RotaDoDiaRequestContext::resolveData($params);
-        $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
+        $params = RotaDoDiaRequestContext::mergeQueryAndBody($request);
+        try {
+            [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor($usuario, $params);
+            $data = RotaDoDiaRequestContext::resolveData($params);
+            $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
 
-        $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdmin, $data, $rotaId);
+            $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdmin, $data, $rotaId);
 
-        return CrudHelper::jsonOk([
-            'paradas' => $paradas,
-            'coletor_id' => $coletorId,
-            'data' => $data,
-            'total' => count($paradas),
-            'rota_id' => $rotaId ?? 0,
-            'sem_rota' => !\App\Service\RotaScopeService::operadoraTemClientesEmRotas(),
-        ]);
+            return CrudHelper::jsonOk([
+                'paradas' => $paradas,
+                'coletor_id' => $coletorId,
+                'data' => $data,
+                'total' => count($paradas),
+                'rota_id' => $rotaId ?? 0,
+                'sem_rota' => !\App\Service\RotaScopeService::operadoraTemClientesEmRotas(),
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[RotaDoDia::paradas] '.$e->getMessage());
+
+            return CrudHelper::jsonError(
+                'Não foi possível carregar as paradas. Verifique migrations (035 frota) e cadastro de rotas.'
+            );
+        }
     }
 
     public static function otimizar($request): string
