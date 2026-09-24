@@ -1,80 +1,122 @@
-# E-mail SMTP — VPS e notificações ao gerador
+# E-mail — Brevo (envio) + ImprovMX (entrada)
 
 O admin usa **PHPMailer** ([`app/Service/MailService.php`](../app/Service/MailService.php)) para:
 
-- Boletos (ação manual em Pagamentos)
-- **Notificações automáticas ao gerador** ([`GeradorNotificacaoService`](../app/Service/GeradorNotificacaoService.php)): aprovação/recusa de solicitação de coleta, MTR disponível após registro no SINIR
+- **Boletos** (manual em Pagamentos) — usa SMTP direto; **não** depende de `MAIL_NOTIFICATIONS_ENABLED`
+- **Notificações ao gerador** ([`GeradorNotificacaoService`](../app/Service/GeradorNotificacaoService.php)) — exige SMTP ok **e** `MAIL_NOTIFICATIONS_ENABLED=true`
 
-Enquanto o SMTP não estiver configurado, o sistema **continua funcionando**; os e-mails são ignorados (`MAIL_NOTIFICATIONS_ENABLED` + credenciais completas).
+| Papel | Serviço | DNS |
+|-------|---------|-----|
+| **Saída** (app PHP) | Brevo SMTP `smtp-relay.brevo.com` | SPF + DKIM (CNAME Brevo) + DMARC |
+| **Entrada** (aliases) | ImprovMX | MX `mx1/mx2.improvmx.com` + SPF `include:spf.improvmx.com` |
+
+O **ImprovMX não envia** e-mails da aplicação; só redireciona o que **chega** no domínio. O remetente `MAIL_FROM=noreply@well.eco.br` deve estar **autenticado no Brevo** (domínio verificado).
+
+### Erro no log Brevo (rejeição)
+
+> *Sending has been rejected because the sender you used noreply@well.eco.br is not valid. Validate your sender or authenticate your domain*
+
+O SMTP **conecta**, mas o Brevo **não entrega** enquanto o domínio/remetente não estiver validado. Corrija no painel Brevo (abaixo), não no `.env`.
+
+**Passos no Brevo:**
+
+1. **Senders, Domains & Dedicated IPs** → **Domains** → adicionar **`well.eco.br`** (se ainda não estiver).
+2. Copiar os registros DNS que o Brevo pede (CNAME DKIM `brevo1` / `brevo2`, etc.) e conferir no **Registro.br** — aguardar propagação (até algumas horas).
+3. Clicar **Authenticate domain** / **Verify** até o domínio ficar **Verified** (verde).
+4. **Senders** → adicionar **`noreply@well.eco.br`** (nome ex.: Well S.A.) e concluir verificação se o painel pedir (e-mail de confirmação ou validação automática com domínio autenticado).
+5. Só então repetir: `php database/scripts/mail_smoke_test.php ...`
+
+Enquanto o log mostrar *sender is not valid*, nenhum destinatário (Gmail, etc.) receberá — mesmo com smoke test “OK” no PHP.
 
 ---
 
-## 1. Criar caixa na VPS
+## 1. Brevo — credenciais SMTP (`.env`)
 
-Passos típicos (cPanel, Plesk ou painel do provedor):
+No Brevo: **Settings → SMTP & API → SMTP** (aba SMTP, não API).
 
-1. Criar domínio/subdomínio de e-mail (ex.: `well.eco.br`).
-2. Criar conta **noreply@well.eco.br** (ou `financeiro@…` para boletos).
-3. Anotar **servidor SMTP**, **porta**, **usuário** e **senha**.
-4. Configurar **SPF** e **DKIM** no DNS (reduz spam e rejeição).
-5. Se o app roda em EasyPanel/Docker na mesma VPS, liberar saída SMTP na porta **587** (TLS) ou **465** (SSL).
-
----
-
-## 2. Variáveis no `.env` (produção)
+| Variável | Valor |
+|----------|--------|
+| `MAIL_HOST` | `smtp-relay.brevo.com` |
+| `MAIL_PORT` | `587` |
+| `MAIL_ENCRYPTION` | `tls` |
+| `MAIL_USER` | Login SMTP (formato `xxxx@smtp-brevo.com`) — **não** use o host como usuário |
+| `MAIL_PASS` | **Chave SMTP** gerada no Brevo — **não** use chave de API (`xkeysib-…`) |
+| `MAIL_FROM` | Remetente verificado, ex.: `noreply@well.eco.br` |
+| `MAIL_FROM_NAME` | `Well S.A.` (marca — ver `CompanyConfig`) |
 
 ```env
-URL=https://admin.well.eco.br
-
-MAIL_HOST=mail.well.eco.br
+MAIL_HOST=smtp-relay.brevo.com
 MAIL_PORT=587
 MAIL_ENCRYPTION=tls
-MAIL_USER=noreply@well.eco.br
-MAIL_PASS=********
+MAIL_USER=seu-login@smtp-brevo.com
+MAIL_PASS=xsmtpsib-...   # chave SMTP (não API)
 MAIL_FROM=noreply@well.eco.br
 MAIL_FROM_NAME=Well S.A.
-
-# true = envia notificações ao gerador (quando SMTP ok)
 MAIL_NOTIFICATIONS_ENABLED=true
 ```
 
-| Porta | `MAIL_ENCRYPTION` |
-|-------|-------------------|
-| 587 | `tls` (STARTTLS) |
-| 465 | `ssl` |
+Erro **`Could not authenticate` / 535**: quase sempre `MAIL_PASS` é API key em vez de **SMTP key**, ou login errado. Gere nova chave SMTP se perdeu a senha (só aparece uma vez).
 
-Teste local XAMPP: se STARTTLS falhar, use porta 465 + `ssl`. Em último caso (só dev): `MAIL_SSL_VERIFY=false`.
+Se no Brevo estiver ativo **bloqueio de IP para SMTP**, inclua o IP público da VPS na lista autorizada.
 
 ---
 
-## 3. Smoke test (SSH ou local)
+## 2. DNS (Registro.br) — well.eco.br
 
-```bash
-php database/scripts/mail_smoke_test.php seu-email@exemplo.com
+**Envio (Brevo):**
+
+- CNAME DKIM: `brevo1._domainkey`, `brevo2._domainkey` (conforme painel Brevo)
+- TXT DMARC: `_dmarc.well.eco.br`
+- TXT SPF (recomendado **ImprovMX + Brevo** na mesma linha):
+
+```text
+v=spf1 include:spf.improvmx.com include:spf.brevo.com ~all
 ```
 
-Envia um e-mail de teste. Erros comuns:
+Se o SPF tiver só ImprovMX, e-mails **enviados pelo Brevo** podem falhar SPF no destino (spam/rejeição).
+
+**Entrada (ImprovMX):**
+
+- MX prioridade 10 → `mx1.improvmx.com`
+- MX prioridade 20 → `mx2.improvmx.com`
+
+Aliases no ImprovMX: grafia exata (`noreply@`, não `noreplay@`) só afeta **recebimento** nesse endereço; não bloqueia envio via Brevo.
+
+---
+
+## 3. Diagnóstico e smoke test
+
+Local ou container:
+
+```bash
+php database/scripts/mail_diagnose.php
+php database/scripts/mail_smoke_test.php destino@exemplo.com
+```
+
+`mail_diagnose.php` mostra host/user/from, **tipo** da senha (SMTP vs API), origem da variável (Easypanel vs `.env`) — sem expor a chave inteira.
 
 | Sintoma | Ação |
 |---------|------|
-| `SMTP incompleto` | Preencher `MAIL_HOST`, `MAIL_USER`, `MAIL_FROM` |
-| `Authentication failed` | Usuário/senha ou conta bloqueada no servidor |
-| Timeout | Firewall da VPS bloqueando outbound 587/465 |
-| Entrega na spam | SPF/DKIM, remetente alinhado ao domínio |
+| `SMTP incompleto` | `MAIL_HOST`, `MAIL_USER`, `MAIL_FROM` |
+| `Could not authenticate` | Chave **SMTP** (`xsmtpsib-`), login `@smtp-brevo.com` |
+| `Unauthorized IP` | Liberar IP da VPS no Brevo (SMTP keys) |
+| Timeout | Saída TCP 587/465 da VPS / Docker |
+| Boleto “Falhou” no admin | Hover no badge — grava `inter_cobrancas.email_erro`; conferir e-mail do **cliente** |
+| Smoke **OK** mas inbox vazio | Ver **Logs transacionais** no Brevo (blocked/deferred); domínio autenticado; Gmail spam |
+
+Debug verboso (só diagnóstico): `MAIL_SMTP_DEBUG=2` no ambiente ao rodar o smoke test.
 
 ---
 
-## 4. Destinatários das notificações gerador
+## 4. Boletos vs notificações gerador
 
-Para cada cliente, o sistema envia para (sem duplicar endereço):
+- **Boletos:** [`MailService::enviarBoleto`](../app/Service/MailService.php) — SMTP completo + e-mail em `clientes.email`.
+- **Gerador:** [`MailService::enviarHtml`](../app/Service/MailService.php) — exige `MAIL_NOTIFICATIONS_ENABLED=true` (recomendado também na VPS/Easypanel).
 
-1. E-mail cadastral do **cliente** (`clientes.email`)
-2. E-mail do **usuário portal** (`cliente_usuarios.email`)
-
-Garanta que pelo menos um esteja válido em Clientes → cadastro / cadeado portal.
+Destinatários gerador: `clientes.email` e/ou `cliente_usuarios.email`.
 
 ---
 
-## 5. Boletos
+## 5. Legado (caixa na hospedagem)
 
-O envio de boleto continua **manual** em Pagamentos (botão envelope). Usa o mesmo SMTP; falhas ficam em `inter_cobrancas.email_erro`.
+Se no futuro usar `mail.well.eco.br` em vez de Brevo: porta **465** → `MAIL_ENCRYPTION=ssl`; **587** → `tls`. Ver comentários no `.env.example`.

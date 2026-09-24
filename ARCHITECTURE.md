@@ -287,3 +287,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-22 | Coletas Fase 4: CDF oficial `emiteCDF` + `buscaPdfCdf` (`047`, `SinirCdfService`); DMR apoio por competência (`048`, `/painel/dmr`) |
 | 2026-09-22 | CRUD Planos: cota de coletas com regra “todo mês” vs “bloco de meses”, resumo em linguagem clara (`crud-planos.js`) |
 | 2026-09-22 | Rota do dia: remove seletor de coletor no painel; gestor usa escopo admin + ordem/status do usuário logado; JSON de erro em `paradas` |
+| 2026-09-23 | `docs/MAIL_VPS.md`: Brevo (SMTP key) + ImprovMX (MX/SPF); boletos não dependem de `MAIL_NOTIFICATIONS_ENABLED` |

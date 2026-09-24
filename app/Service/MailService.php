@@ -194,6 +194,14 @@ class MailService
             $mail->Timeout = max(5, (int)Environment::get('MAIL_TIMEOUT', '25'));
             $mail->SMTPKeepAlive = false;
 
+            $debug = (int)Environment::get('MAIL_SMTP_DEBUG', '0');
+            if ($debug > 0) {
+                $mail->SMTPDebug = min(4, $debug);
+                $mail->Debugoutput = static function (string $str, int $level): void {
+                    fwrite(STDERR, '[SMTP '.$level.'] '.$str);
+                };
+            }
+
             if (filter_var(Environment::get('MAIL_SSL_VERIFY', 'true'), FILTER_VALIDATE_BOOLEAN) === false) {
                 $mail->SMTPOptions = [
                     'ssl' => [

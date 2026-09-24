@@ -9,6 +9,7 @@ declare(strict_types=1);
 require dirname(__DIR__, 2).'/includes/app.php';
 
 use App\Common\CompanyConfig;
+use App\Common\Environment;
 use App\Service\MailService;
 
 $to = trim($argv[1] ?? '');
@@ -25,10 +26,21 @@ if (!MailService::isConfigured()) {
 $html = '<p>Teste SMTP Well Admin em '.htmlspecialchars(date('d/m/Y H:i'), ENT_QUOTES, 'UTF-8').'.</p>'
     .'<p>Remetente: '.htmlspecialchars(CompanyConfig::mailFromName(), ENT_QUOTES, 'UTF-8').'</p>';
 
-$result = MailService::enviarTesteSmtp($to, CompanyConfig::shortName().' — teste SMTP', $html);
+$subject = CompanyConfig::shortName().' — teste SMTP';
+$from = trim((string)Environment::get('MAIL_FROM', ''));
+
+$result = MailService::enviarTesteSmtp($to, $subject, $html);
 
 if ($result['ok']) {
-    echo "E-mail enviado para {$to}.\n";
+    echo "SMTP aceitou o envio.\n";
+    echo "  De: {$from} (".CompanyConfig::mailFromName().")\n";
+    echo "  Para: {$to}\n";
+    echo "  Assunto: {$subject}\n";
+    echo "\nSe não chegar em alguns minutos:\n";
+    echo "  1) Brevo → Transactional → Logs (status: delivered, deferred, blocked)\n";
+    echo "  2) Domínio well.eco.br autenticado (DKIM verde) e remetente noreply@ permitido\n";
+    echo "  3) Gmail: Spam, Promoções; teste outro e-mail (Outlook)\n";
+    echo "  4) Debug SMTP: MAIL_SMTP_DEBUG=2 php database/scripts/mail_smoke_test.php ...\n";
     exit(0);
 }
 
