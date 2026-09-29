@@ -9,6 +9,7 @@ use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\CsrfHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Coleta as EntityColeta;
+use App\Model\Entity\Rota as EntityRota;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
@@ -27,10 +28,22 @@ class ColetaNova extends Page
         return SessionUser::getUserLogedData()['usuario'] ?? [];
     }
 
+    private static function rotasOptionsHtml(): string
+    {
+        $html = '<option value="">Todas as rotas</option>';
+        foreach (EntityRota::getAllActive() as $r) {
+            $html .= '<option value="'.$r->id.'">'.CrudHelper::e($r->nome).'</option>';
+        }
+
+        return $html;
+    }
+
     public static function selecionarCliente($request): string
     {
         $content = View::render('admin/modules/coleta_nova/selecionar', [
             'csrf_field' => CsrfHelper::field(),
+            'rotas_options' => self::rotasOptionsHtml(),
+            'data_hoje' => date('Y-m-d'),
         ]);
         $scripts = '<script>window.CRUD = { baseUrl: "/painel/coleta/nova", autoLoad: false };</script>'
             .'<script src="'.URL.'/resources/js/coleta-selecionar.js"></script>';
@@ -193,6 +206,11 @@ class ColetaNova extends Page
         $prioridade = trim((string)($post['prioridade'] ?? ''));
         $escopo = trim((string)($post['escopo'] ?? 'pendentes'));
         $somentePendentes = $escopo !== 'todos';
+        $rotaId = (int)($post['rota_id'] ?? 0);
+        $dataRef = trim((string)($post['data_referencia'] ?? ''));
+        if ($dataRef !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataRef)) {
+            $dataRef = '';
+        }
 
         $result = ColetaService::clientesParaColetaPaginado(
             (int)($usuario['id'] ?? 0),
@@ -201,7 +219,9 @@ class ColetaNova extends Page
             15,
             $busca,
             $prioridade,
-            $somentePendentes
+            $somentePendentes,
+            $rotaId,
+            $dataRef !== '' ? $dataRef : null
         );
 
         $itens = '';

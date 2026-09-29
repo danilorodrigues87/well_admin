@@ -17,8 +17,9 @@
         <div class="row align-items-end g-2 well-rota-toolbar">
             {{rota_select}}
             <div class="col-md-3 mb-2">
-                <label class="form-label">Data da rota</label>
+                <label class="form-label">Dia da operação</label>
                 <input type="date" class="form-control" id="rota-data" value="{{data_hoje}}">
+                <div class="form-text" id="rota-data-legenda">Rotas e paradas conforme agendamento nesta data.</div>
             </div>
             <div class="col-md-5">
                 <div class="btn-group well-btn-stack-mobile" role="group">
@@ -65,7 +66,7 @@
                     <p class="mb-2">Nenhuma parada encontrada para esta data.</p>
                     <p class="small mb-0 text-start">
                         Verifique: (1) clientes em <strong>Cadastros → Rotas → Atribuições</strong>;
-                        (2) em <strong>Agendamentos</strong>, <em>próxima coleta</em> ≤ data selecionada (ou urgente);
+                        (2) em <strong>Agendamentos</strong>, <em>próxima coleta</em> igual à data (ou urgente);
                         (3) clientes ativos com endereço/geolocalização para o mapa.
                     </p>
                 </div>

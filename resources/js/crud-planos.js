@@ -206,6 +206,7 @@
     $('#crud-nome, #crud-descricao, #crud-valor_mensal').val('');
     loadFreqFromPlano({ coletas_mensais: 1, coletas_periodo_meses: null, coletas_por_periodo: 1 });
     $('#crud-tipo').val('');
+    $('#crud-contrato_modelo_tipo').val('GENERICO');
     $('#crud-ativo').val('1');
     $('#plano-itens-body').empty();
     rowSeq = 0;
@@ -236,6 +237,7 @@
       $('#crud-valor_mensal').val(data.valor_mensal != null ? String(data.valor_mensal).replace('.', ',') : '');
       loadFreqFromPlano(data);
       $('#crud-tipo').val(data.tipo || '');
+      $('#crud-contrato_modelo_tipo').val(data.contrato_modelo_tipo || 'GENERICO');
       $('#crud-ativo').val(String(data.ativo != null ? data.ativo : 1));
       $('#plano-itens-body').empty();
       rowSeq = 0;
@@ -277,6 +279,7 @@
       coletas_periodo_meses: $('#crud-coletas_periodo_meses').val(),
       coletas_por_periodo: $('#crud-coletas_por_periodo').val(),
       tipo: $('#crud-tipo').val(),
+      contrato_modelo_tipo: $('#crud-contrato_modelo_tipo').val(),
       ativo: $('#crud-ativo').val(),
       itens_json: JSON.stringify(itens)
     };

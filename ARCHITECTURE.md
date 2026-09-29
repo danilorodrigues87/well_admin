@@ -288,3 +288,8 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-22 | CRUD Planos: cota de coletas com regra “todo mês” vs “bloco de meses”, resumo em linguagem clara (`crud-planos.js`) |
 | 2026-09-22 | Rota do dia: remove seletor de coletor no painel; gestor usa escopo admin + ordem/status do usuário logado; JSON de erro em `paradas` |
 | 2026-09-23 | `docs/MAIL_VPS.md`: Brevo (SMTP key) + ImprovMX (MX/SPF); boletos não dependem de `MAIL_NOTIFICATIONS_ENABLED` |
+| 2026-09-29 | Contratos dinâmicos: migration `049`, `ContractType` + `ContratoModeloCatalog`, `ContratoDocumentFactory` / `ContratoRenderService`, template `resources/view/contratos/document.html`; plano → modelo (8 tipos); qualificação cliente (CPF/RG/cargo); doc `docs/CONTRATOS.md` |
+| 2026-09-29 | Contratos completos DB: migration `050` (`contrato_modelos`, snapshot comercial, rescisão); `ContratoTemplateService` + seeds HTML; cobrança via `comercial_snapshot_json`; cancelar/rescindir no admin |
+| 2026-09-29 | CRUD modelos (`ContratoModelos`), personalização contrato (`/editar`), seed derivado RECICLÁVEIS/RSS/PNEUS a partir de Classe I |
+| 2026-09-29 | Operação coletas: Rota do dia / Lançar coleta por data (proxima_coleta ou urgente); coletor filtra rota; excluir rota/coleta rascunho; PDF relatório (`?print=1`); agendamento só via rota inteira (sem coleta avulsa) |
+| 2026-09-29 | Dashboard admin: KPIs por módulo (coletas hoje, paradas hoje, financeiro competência, gráfico emitido vs recebido); coletor vê escopo próprio em coletas/MTR |

@@ -66,14 +66,16 @@ class AgendamentoService
         bool $isAdmin = true,
         int $rotaId = 0,
         string $prioridade = '',
-        bool $coletorSomentePendentes = false
+        bool $coletorSomentePendentes = false,
+        ?string $dataDia = null
     ): array {
         $db = new Database();
         $page = max(1, $page);
         $perPage = min(50, max(1, $perPage));
 
         if (!$isAdmin && $coletorSomentePendentes && $coletorId > 0) {
-            $q = RotaScopeService::paradasDoDiaQuery($coletorId, false);
+            $ref = ($dataDia !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataDia)) ? $dataDia : date('Y-m-d');
+            $q = RotaScopeService::paradasDoDiaQuery($coletorId, false, $ref, $rotaId > 0 ? $rotaId : null);
             if ($busca !== '') {
                 $q['where'] .= ' AND (c.nome_fantasia LIKE ? OR c.razao_social LIKE ? OR c.cidade LIKE ?)';
                 $like = '%'.trim($busca).'%';
@@ -83,6 +85,10 @@ class AgendamentoService
             }
         } else {
             $q = self::buildListagemQuery($coletorId, $isAdmin, $rotaId, $prioridade, $busca);
+            if ($dataDia !== null && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataDia)) {
+                $q['where'] .= ' AND '.RotaScopeService::sqlClienteAgendadoParaDia('c');
+                $q['params'][] = $dataDia;
+            }
         }
 
         $countSql = 'SELECT COUNT(DISTINCT c.id) AS qtd FROM clientes c'.$q['join'].' WHERE '.$q['where'];

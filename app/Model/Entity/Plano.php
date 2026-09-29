@@ -27,6 +27,7 @@ class Plano
     public ?string $contrato_pagamento_parcelado = null;
     public ?string $contrato_pagamento_vista = null;
     public ?string $contrato_obs_pontualidade = null;
+    public string $contrato_modelo_tipo = 'GENERICO';
 
     /** @return self[] */
     public static function getAllActive(): array
@@ -127,6 +128,8 @@ class Plano
         $p->contrato_pagamento_parcelado = isset($row['contrato_pagamento_parcelado']) ? (string)$row['contrato_pagamento_parcelado'] : null;
         $p->contrato_pagamento_vista = isset($row['contrato_pagamento_vista']) ? (string)$row['contrato_pagamento_vista'] : null;
         $p->contrato_obs_pontualidade = isset($row['contrato_obs_pontualidade']) ? (string)$row['contrato_obs_pontualidade'] : null;
+        $p->contrato_modelo_tipo = isset($row['contrato_modelo_tipo'])
+            ? (string)$row['contrato_modelo_tipo'] : 'GENERICO';
 
         return $p;
     }

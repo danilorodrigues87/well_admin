@@ -185,7 +185,6 @@ Nomes truncados (`1 Sacos de`, `1 Granel de`…): `App\Common\Helpers\ColetaItem
 |--------|-----------|
 | `cliente_usuarios` | Login do gerador — **1 por cliente**. FK `cliente_id` UNIQUE, e-mail unique `(operadora_id, email)` |
 | `coleta_solicitacoes` | Solicitações de data de coleta pelo portal (`038`); status pendente/aprovada/recusada/cancelada; tipo inclusa/extra; `valor_cobranca_extra` na aprovação admin |
-
 Colunas em `planos` (`039_planos_frequencia.sql`): `coletas_periodo_meses`, `coletas_por_periodo` (ex.: 1 coleta a cada 3 meses). Cota mensal continua em `coletas_mensais` quando período não informado.
 
 ```bash
@@ -233,3 +232,22 @@ Aplicar: `php database/scripts/apply_migrations_027_033.php`
 | `clientes.contrato_ativo_id` | FK contrato vigente |
 
 Módulos RBAC: `suporte`, `ajuda`, `termos_de_uso`, `contratos`.
+
+## Contratos dinâmicos (`049_contratos_dinamicos.sql`)
+
+| Alteração | Descrição |
+|-----------|-----------|
+| `planos.contrato_modelo_tipo` | Enum string: `RSS_CLINICA`, `RCC_PADRAO`, … ou `GENERICO` (layout antigo) |
+| `clientes.responsavel_cargo/cpf/rg` | Qualificação do representante no contrato |
+| `clientes_contratos.taxa_adesao`, `indice_reajuste`, `foro_*`, `multa_atraso_descricao`, `aviso_previo_dias`, `flags_json` | Overrides comerciais/jurídicos por contrato |
+
+## Contratos — modelos DB (`050_contrato_modelos.sql`)
+
+| Tabela / coluna | Descrição |
+|-----------------|-----------|
+| `contrato_modelos` | `slug`, `titulo`, `body_html` (placeholders `{{…}}`), `pricing_variant`, multitenancy `operadora_id` |
+| `clientes_contratos.contrato_modelo_id/versao` | Modelo usado na geração |
+| `clientes_contratos.comercial_snapshot_json` | Mensalidade + itens congelados para cobrança e cláusula 4 |
+| `clientes_contratos.variables_json` | Overrides (promoção, frequência, extras) |
+| `clientes_contratos.encerrado_*` | Rescisão/cancelamento admin |
+| `operadora_config.contrato_endereco_sede` | Endereço da contratada no preâmbulo |

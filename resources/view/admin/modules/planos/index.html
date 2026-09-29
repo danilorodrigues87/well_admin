@@ -19,6 +19,8 @@
             <div class="col-md-6"><label>Nome *</label><input class="form-control" name="nome" id="crud-nome" required/></div>
             <div class="col-md-3"><label>Valor mensal (R$) *</label><input class="form-control" name="valor_mensal" id="crud-valor_mensal" inputmode="decimal" placeholder="0,00"/></div>
             <div class="col-md-3"><label>Tipo</label><select class="form-select" name="tipo" id="crud-tipo"><option value="">—</option><option value="Plano padrão">Plano padrão</option><option value="Plano personalizado">Plano personalizado</option></select></div>
+            <div class="col-md-6"><label>Modelo de contrato</label><select class="form-select" name="contrato_modelo_tipo" id="crud-contrato_modelo_tipo">{{contrato_modelo_options}}</select></div>
+            <div class="col-12"><p class="small text-muted mb-0">O modelo define cláusulas legais (RSS, RCC, Classe I, etc.). Use <strong>Genérico</strong> para o layout simples antigo.</p></div>
             <div class="col-12">
                 <div class="border rounded p-3 bg-light">
                     <label class="form-label fw-semibold mb-1">Cota de coletas <small class="text-muted fw-normal">(limite para o gerador solicitar coleta)</small></label>

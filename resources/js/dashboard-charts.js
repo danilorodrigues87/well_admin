@@ -54,6 +54,51 @@
     }
   }
 
+  function renderBarDual(id, labels, values1, values2, label1, label2, asCurrency) {
+    if (typeof Chart === 'undefined') return;
+    destroy(id);
+    var canvas = document.getElementById(id);
+    if (!canvas) return;
+    var c = themeColors();
+    canvas._wellChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: label1 || 'Emitido',
+            data: values1,
+            backgroundColor: c.primarySoft,
+            borderColor: c.primary,
+            borderWidth: 2,
+            borderRadius: 4,
+          },
+          {
+            label: label2 || 'Recebido',
+            data: values2,
+            backgroundColor: c.secondarySoft,
+            borderColor: c.secondary,
+            borderWidth: 2,
+            borderRadius: 4,
+          },
+        ],
+      },
+      options: Object.assign(baseOptions('bar'), {
+        plugins: {
+          legend: { position: 'top', labels: { color: c.text } },
+          tooltip: {
+            callbacks: asCurrency ? {
+              label: function (ctx) {
+                var v = ctx.parsed.y;
+                return ctx.dataset.label + ': R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+              },
+            } : {},
+          },
+        },
+      }),
+    });
+  }
+
   function renderBar(id, labels, values, label, asCurrency) {
     if (typeof Chart === 'undefined') return;
     destroy(id);
@@ -161,7 +206,11 @@
       var values = JSON.parse(el.getAttribute('data-values') || '[]');
       var label = el.getAttribute('data-label') || '';
       var currency = el.getAttribute('data-currency') === '1';
-      if (type === 'bar') renderBar(id, labels, values, label, currency);
+      if (type === 'bar-dual') {
+        var values2 = JSON.parse(el.getAttribute('data-values2') || '[]');
+        var label2 = el.getAttribute('data-label2') || '';
+        renderBarDual(id, labels, values, values2, label, label2, currency);
+      } else if (type === 'bar') renderBar(id, labels, values, label, currency);
       else if (type === 'line') renderLine(id, labels, values, label, currency);
       else if (type === 'doughnut') renderDoughnut(id, labels, values);
     });
@@ -174,6 +223,7 @@
 
   window.WellDashboardCharts = {
     renderBar: renderBar,
+    renderBarDual: renderBarDual,
     renderLine: renderLine,
     renderDoughnut: renderDoughnut,
     refresh: initFromDom,

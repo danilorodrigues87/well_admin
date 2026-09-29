@@ -28,6 +28,9 @@ class Cliente
     public string $cidade = '';
     public string $uf = '';
     public string $responsavel = '';
+    public string $responsavel_cargo = '';
+    public string $responsavel_cpf = '';
+    public string $responsavel_rg = '';
     public string $telefone_resp = '';
     public string $plano_nome = '';
     public ?string $proxima_coleta = null;
@@ -150,6 +153,9 @@ class Cliente
         $c->cidade = (string)($row['cidade'] ?? '');
         $c->uf = (string)($row['uf'] ?? '');
         $c->responsavel = (string)($row['responsavel'] ?? '');
+        $c->responsavel_cargo = (string)($row['responsavel_cargo'] ?? '');
+        $c->responsavel_cpf = (string)($row['responsavel_cpf'] ?? '');
+        $c->responsavel_rg = (string)($row['responsavel_rg'] ?? '');
         $c->telefone_resp = (string)($row['telefone_resp'] ?? '');
         $c->plano_nome = (string)($row['plano_nome'] ?? '');
         $c->proxima_coleta = $row['proxima_coleta'] ?? null;

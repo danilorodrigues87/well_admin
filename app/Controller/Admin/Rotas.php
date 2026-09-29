@@ -63,7 +63,7 @@ class Rotas extends Page
                 <td>
                     <a href="'.URL.'/painel/rotas/atribuicoes/'.$r->id.'" class="btn btn-sm btn-outline-secondary" title="Clientes da rota"><i class="fas fa-users"></i></a>
                     <button class="btn btn-sm btn-outline-primary" onclick="editar('.$r->id.')"><i class="fas fa-edit"></i></button>
-                    '.CrudHelper::btnDesativar($r->id).'
+                    <button class="btn btn-sm btn-outline-danger" onclick="excluir('.$r->id.')" title="Excluir rota"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>';
         }
@@ -116,7 +116,7 @@ class Rotas extends Page
             return CrudHelper::jsonError($err);
         }
         EntityRota::delete((int)($post['id'] ?? 0));
-        return CrudHelper::jsonOk(['message' => 'Rota desativada.']);
+        return CrudHelper::jsonOk(['message' => 'Rota excluída (desativada).']);
     }
 
     public static function atribuicoesIndex($request, int $rotaId): string

@@ -1,0 +1,75 @@
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Personalizar contrato {{numero}}</h1>
+    <p class="text-muted">Valores congelados no snapshot comercial alimentam a cláusula de preço e o faturamento após assinatura.</p>
+    <form method="post" action="{{URL}}/painel/contratos/{{contrato_id}}/editar" class="card shadow p-4">
+        {{csrf_field}}
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Valor mensal (R$)</label>
+                <input type="text" name="valor_mensal" class="form-control" value="{{valor_mensal}}" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Taxa adesão (R$)</label>
+                <input type="text" name="taxa_adesao" class="form-control" value="{{taxa_adesao}}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Índice reajuste</label>
+                <input type="text" name="indice_reajuste" class="form-control" value="{{indice_reajuste}}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Meses vigência</label>
+                <input type="number" name="qtd_meses" class="form-control" value="{{qtd_meses}}" min="1" max="120">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Início</label>
+                <input type="date" name="data_inicio" class="form-control" value="{{data_inicio}}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Dia vencimento</label>
+                <input type="number" name="dia_vencimento" class="form-control" value="{{dia_vencimento}}" min="1" max="28">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Foro (cidade / UF)</label>
+                <div class="input-group">
+                    <input type="text" name="foro_cidade" class="form-control" value="{{foro_cidade}}">
+                    <input type="text" name="foro_uf" class="form-control" maxlength="2" style="max-width:4rem" value="{{foro_uf}}">
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Frequência de coleta (texto livre)</label>
+                <input type="text" name="frequencia_coleta" class="form-control" value="{{frequencia_coleta}}" placeholder="Ex.: mensalmente, 2x por mês…">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Promoção / desconto (HTML opcional)</label>
+                <textarea name="promocao_html" class="form-control font-monospace" rows="3" placeholder="Ex.: Parágrafo único com desconto 9%…">{{promocao_html}}</textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Cláusulas extras (texto)</label>
+                <textarea name="clausulas_extra_html" class="form-control" rows="3">{{clausulas_extra_html}}</textarea>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="atualizar_snapshot" value="1" id="atualizar_snapshot" checked>
+                    <label class="form-check-label" for="atualizar_snapshot">Atualizar snapshot de itens do plano ao salvar (franquia/excedente)</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <strong>Itens no snapshot atual</strong>
+                        {{snapshot_itens}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-primary">Salvar personalização</button>
+            <a href="{{URL}}/painel/contratos/{{contrato_id}}" class="btn btn-outline-secondary">Voltar</a>
+        </div>
+    </form>
+    <form method="post" action="{{URL}}/painel/contratos/{{contrato_id}}/editar" class="mt-3">
+        {{csrf_field}}
+        <input type="hidden" name="recarregar_snapshot" value="1">
+        <button type="submit" class="btn btn-sm btn-outline-primary">Recarregar só itens do plano (mantém valor mensal)</button>
+    </form>
+</div>

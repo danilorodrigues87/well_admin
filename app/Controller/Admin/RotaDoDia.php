@@ -6,8 +6,8 @@ use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\CsrfHelper;
 use App\Common\MapsConfig;
-use App\Model\Entity\Rota as EntityRota;
 use App\Service\FrotaLocalizacaoService;
+use App\Service\RotaScopeService;
 use App\Service\RotaDoDiaRequestContext;
 use App\Service\RotaDoDiaService;
 use App\Service\RotaParadaStatusService;
@@ -28,17 +28,13 @@ class RotaDoDia extends Page
         $isColetor = ColetorSelectHelper::isColetorSession($usuario);
         $usuarioId = (int)($usuario['id'] ?? 0);
 
-        $rotaSelect = '';
-        if (!$isColetor) {
-            $rotasOpts = '<option value="">Todas as rotas</option>';
-            foreach (EntityRota::getAllActive() as $r) {
-                $rotasOpts .= '<option value="'.$r->id.'">'.htmlspecialchars($r->nome, ENT_QUOTES, 'UTF-8').'</option>';
-            }
-            $rotaSelect = '<div class="col-md-3 mb-2">
+        $rotaSelect = '<div class="col-md-3 mb-2">
                 <label class="form-label">Rota cadastral</label>
-                <select id="rota-filtro-id" class="form-select">'.$rotasOpts.'</select>
+                <select id="rota-filtro-id" class="form-select">
+                    <option value="">Selecione uma rota</option>
+                </select>
+                <div class="form-text" id="rota-filtro-ajuda">Carregando rotas do dia…</div>
             </div>';
-        }
 
         $fallback = MapsConfig::originFallback();
         $content = View::render('admin/modules/rota_do_dia/index', [
@@ -54,9 +50,24 @@ class RotaDoDia extends Page
             'data_hoje' => date('Y-m-d'),
         ]);
 
-        $scripts = '<script src="'.URL.'/resources/js/rota-mapa.js?v=20260922b"></script>';
+        $scripts = '<script src="'.URL.'/resources/js/rota-mapa.js?v=20260929c"></script>';
 
         return self::getPage('Rota do dia', $content, 'rota_dia', $scripts);
+    }
+
+    public static function rotasDoDia($request): string
+    {
+        $params = RotaDoDiaRequestContext::mergeQueryAndBody($request);
+        $data = RotaDoDiaRequestContext::resolveData($params);
+        try {
+            $rotas = RotaScopeService::rotasComAgendamentoNaData($data);
+
+            return CrudHelper::jsonOk(['rotas' => $rotas, 'data' => $data]);
+        } catch (\Throwable $e) {
+            error_log('[RotaDoDia::rotasDoDia] '.$e->getMessage());
+
+            return CrudHelper::jsonError('Não foi possível listar rotas do dia.');
+        }
     }
 
     public static function paradas($request): string
@@ -67,6 +78,9 @@ class RotaDoDia extends Page
             [$coletorId, $isAdmin] = RotaDoDiaRequestContext::resolveColetor($usuario, $params);
             $data = RotaDoDiaRequestContext::resolveData($params);
             $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
+            if ($rotaId === null || $rotaId <= 0) {
+                return CrudHelper::jsonError('Selecione uma rota para carregar as paradas.');
+            }
 
             $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdmin, $data, $rotaId);
 

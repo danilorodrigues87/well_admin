@@ -310,6 +310,40 @@
     }
   };
 
+  window.excluirColeta = function (id) {
+    var run = function () {
+      $.post(postUrl(), { acao: 'excluir_coleta', id: id, _csrf: csrf() }, function (d) {
+        d = parseResp(d);
+        if (!d.success) {
+          afterErr(d.message || 'Erro ao excluir.');
+          return;
+        }
+        if (typeof Swal !== 'undefined') {
+          Swal.fire('Excluída', d.message || 'Coleta excluída.', 'success');
+        }
+        if (typeof listar === 'function') {
+          listar(null, 1);
+        }
+      }, 'json').fail(function () {
+        afterErr('Falha ao excluir coleta.');
+      });
+    };
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Excluir rascunho?',
+        text: 'Esta coleta será cancelada e não aparecerá mais na listagem.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Excluir',
+        cancelButtonText: 'Cancelar'
+      }).then(function (r) {
+        if (r.isConfirmed) run();
+      });
+    } else if (confirm('Excluir rascunho?')) {
+      run();
+    }
+  };
+
   window.detalhar = function (id) {
     $.post(postUrl(), { acao: 'get', id: id, _csrf: csrf() }, function (d) {
       d = parseResp(d);

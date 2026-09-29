@@ -129,6 +129,10 @@ class Coletas extends Page
                     <button class="btn btn-sm btn-outline-primary" onclick="detalhar('.$c->id.')" title="Detalhe"><i class="fas fa-eye"></i></button>
                     '.(ColetaMtrHelper::podeImprimirRelatorio($c)
                         ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir relatório"><i class="fas fa-print"></i></a>'
+                          .'<a class="btn btn-sm btn-outline-danger" href="'.URL.'/painel/coletas/mtr/'.$c->id.'?print=1" target="_blank" title="Salvar PDF"><i class="fas fa-file-pdf"></i></a>'
+                        : '').'
+                    '.($c->status === 'rascunho' && ( !empty($usuario['is_admin']) || (int)$c->coletor_id === (int)($usuario['id'] ?? 0) )
+                        ? '<button class="btn btn-sm btn-outline-danger" onclick="excluirColeta('.$c->id.')" title="Excluir rascunho"><i class="fas fa-trash"></i></button>'
                         : '').'
                     '.(ColetaMtrHelper::podeGerarMtr($c)
                         ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Gerar MTR no SINIR"><i class="fas fa-file-contract"></i></button>'
@@ -145,6 +149,30 @@ class Coletas extends Page
         }
 
         return self::jsonLista(['success' => true, 'itens' => $itens, 'pagination' => Pagination::renderNav($pagination)]);
+    }
+
+    public static function excluir($request): string
+    {
+        $post = $request->getPostVars();
+        if ($err = CrudHelper::requireCsrf($post)) {
+            return CrudHelper::jsonError($err);
+        }
+        $id = (int)($post['id'] ?? 0);
+        $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
+        $coleta = EntityColeta::getById($id);
+        if (!$coleta || $coleta->status !== 'rascunho') {
+            return CrudHelper::jsonError('Somente coletas em rascunho podem ser excluídas.');
+        }
+        if (empty($usuario['is_admin']) && (int)$coleta->coletor_id !== (int)($usuario['id'] ?? 0)) {
+            return CrudHelper::jsonError('Sem permissão para excluir esta coleta.');
+        }
+        try {
+            ColetaService::cancelar($id);
+        } catch (\InvalidArgumentException $e) {
+            return CrudHelper::jsonError($e->getMessage());
+        }
+
+        return CrudHelper::jsonOk(['message' => 'Coleta excluída.']);
     }
 
     public static function get($request): string
@@ -174,7 +202,8 @@ class Coletas extends Page
         }
 
         $mtrPrintBtn = ColetaMtrHelper::podeImprimirRelatorio($c)
-            ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir relatório</a>'
+            ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir</a>'
+              .' <a href="'.URL.'/painel/coletas/mtr/'.$c->id.'?print=1" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fas fa-file-pdf me-1"></i> Salvar PDF</a>'
             : '';
 
         $sinirHtml = self::renderSinirDetalhe($c);

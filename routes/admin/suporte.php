@@ -52,24 +52,38 @@ $obRouter->get('/painel/ajuda/{slug}', [
     },
 ]);
 
-$obRouter->get('/painel/config/contrato', [
-    'middlewares' => ['required-admin-login', 'required-module:contratos'],
-    function ($request) {
-        return new Response(200, Admin\ConfigContrato::index($request));
-    },
-]);
-
-$obRouter->post('/painel/config/contrato', [
-    'middlewares' => ['required-admin-login', 'required-module:contratos'],
-    function ($request) {
-        Admin\ConfigContrato::save($request);
-    },
-]);
-
 $obRouter->get('/painel/contratos', [
     'middlewares' => ['required-admin-login', 'required-module:contratos'],
     function ($request) {
         return new Response(200, Admin\ContratosClientes::index($request));
+    },
+]);
+
+$obRouter->get('/painel/contratos/modelos', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request) {
+        return new Response(200, Admin\ContratoModelos::index($request));
+    },
+]);
+
+$obRouter->get('/painel/contratos/modelos/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request, int $id) {
+        return new Response(200, Admin\ContratoModelos::edit($request, $id));
+    },
+]);
+
+$obRouter->post('/painel/contratos/modelos/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request, int $id) {
+        Admin\ContratoModelos::salvar($request, $id);
+    },
+]);
+
+$obRouter->post('/painel/contratos/modelos/reimportar', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request) {
+        Admin\ContratoModelos::reimportarSeed($request);
     },
 ]);
 
@@ -101,10 +115,38 @@ $obRouter->get('/painel/contratos/{id}', [
     },
 ]);
 
+$obRouter->get('/painel/contratos/{id}/editar', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request, int $id) {
+        return new Response(200, Admin\ContratosClientes::editar($request, $id));
+    },
+]);
+
+$obRouter->post('/painel/contratos/{id}/editar', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request, int $id) {
+        Admin\ContratosClientes::salvarEdicao($request, $id);
+    },
+]);
+
 $obRouter->post('/painel/contratos/{id}/enviar', [
     'middlewares' => ['required-admin-login', 'required-module:contratos'],
     function ($request, int $id) {
         Admin\ContratosClientes::enviar($request, $id);
+    },
+]);
+
+$obRouter->post('/painel/contratos/{id}/cancelar', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request, int $id) {
+        Admin\ContratosClientes::cancelar($request, $id);
+    },
+]);
+
+$obRouter->post('/painel/contratos/{id}/rescindir', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request, int $id) {
+        Admin\ContratosClientes::rescindir($request, $id);
     },
 ]);
 

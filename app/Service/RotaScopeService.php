@@ -98,10 +98,71 @@ class RotaScopeService
             $params[] = $rotaId;
         }
 
-        $where .= " AND (c.prioridade = 'urgente' OR c.proxima_coleta IS NULL OR c.proxima_coleta <= ?)";
+        $where .= ' AND '.self::sqlClienteAgendadoParaDia('c');
         $params[] = $ref;
 
         return ['join' => $join, 'where' => $where, 'params' => $params, 'data' => $ref];
+    }
+
+    /** Clientes com coleta prevista na data (urgente ou proxima_coleta na data). */
+    public static function sqlClienteAgendadoParaDia(string $alias = 'c'): string
+    {
+        $paramRef = '?';
+
+        return "(
+            {$alias}.prioridade = 'urgente'
+            OR {$alias}.proxima_coleta = {$paramRef}
+        )";
+    }
+
+    /**
+     * Rotas cadastrais com ao menos um cliente agendado para a data.
+     *
+     * @return list<array{id:int,nome:string,paradas:int}>
+     */
+    public static function rotasComAgendamentoNaData(string $dataReferencia): array
+    {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataReferencia)) {
+            $dataReferencia = date('Y-m-d');
+        }
+        $opId = OperadoraScope::getOperadoraId();
+        $cond = self::sqlClienteAgendadoParaDia('c');
+        $db = new Database();
+        $sql = 'SELECT r.id, r.nome, COUNT(DISTINCT c.id) AS paradas
+                FROM rotas r
+                INNER JOIN rota_atribuicoes ra ON ra.rota_id = r.id AND ra.operadora_id = r.operadora_id
+                INNER JOIN clientes c ON c.id = ra.cliente_id AND c.operadora_id = ra.operadora_id
+                WHERE r.ativo = 1 AND r.operadora_id = ?
+                  AND c.status = \'ativo\'
+                  AND '.$cond.'
+                GROUP BY r.id, r.nome
+                ORDER BY r.nome ASC';
+        $stmt = $db->execute($sql, [$opId, $dataReferencia]);
+        $items = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $items[] = [
+                'id' => (int)$row['id'],
+                'nome' => (string)$row['nome'],
+                'paradas' => (int)$row['paradas'],
+            ];
+        }
+
+        return $items;
+    }
+
+    public static function countParadasAgendadasNaData(
+        string $dataReferencia,
+        int $coletorId = 0,
+        bool $isAdmin = true
+    ): int {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataReferencia)) {
+            $dataReferencia = date('Y-m-d');
+        }
+        $q = self::paradasDoDiaQuery($coletorId, $isAdmin, $dataReferencia, null);
+        $db = new Database();
+        $sql = 'SELECT COUNT(DISTINCT c.id) AS qtd FROM clientes c'.$q['join'].' WHERE '.$q['where'];
+
+        return (int)$db->execute($sql, $q['params'])->fetch(PDO::FETCH_ASSOC)['qtd'];
     }
 
     /** @return list<EntityCliente> */

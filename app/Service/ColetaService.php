@@ -410,9 +410,11 @@ class ColetaService
         bool $isAdmin,
         string $busca = '',
         string $prioridade = '',
-        bool $somentePendentes = true
+        bool $somentePendentes = true,
+        int $rotaId = 0,
+        ?string $dataReferencia = null
     ): array {
-        $q = RotaScopeService::paradasDoDiaQuery($coletorId, $isAdmin);
+        $q = RotaScopeService::paradasDoDiaQuery($coletorId, $isAdmin, $dataReferencia, $rotaId > 0 ? $rotaId : null);
         $join = $q['join'];
         $where = $q['where'];
         $params = $q['params'];
@@ -468,9 +470,11 @@ class ColetaService
         int $perPage,
         string $busca = '',
         string $prioridade = '',
-        bool $somentePendentes = true
+        bool $somentePendentes = true,
+        int $rotaId = 0,
+        ?string $dataReferencia = null
     ): array {
-        $q = self::clientesColetaQuery($coletorId, $isAdmin, $busca, $prioridade, $somentePendentes);
+        $q = self::clientesColetaQuery($coletorId, $isAdmin, $busca, $prioridade, $somentePendentes, $rotaId, $dataReferencia);
         $db = new Database();
         $countSql = 'SELECT COUNT(DISTINCT c.id) AS qtd FROM clientes c'.$q['join'].' WHERE '.$q['where'];
         $total = (int)$db->execute($countSql, $q['params'])->fetch(PDO::FETCH_ASSOC)['qtd'];

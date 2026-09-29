@@ -1,0 +1,36 @@
+<div class="bto">
+  <button class="btn-impress" type="button" onclick="window.print()">Imprimir</button>
+</div>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{titulo}}</title>
+  <link rel="stylesheet" href="{{URL}}/resources/css/contrato.css">
+  <style>
+    .table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.95rem; }
+    .table th, .table td { border: 1px solid #ccc; padding: 0.35rem 0.5rem; }
+    .contrato-extra-pagamento { margin-top: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div id="content">
+    {{logo_html}}
+    <h1 class="h4 text-center">{{titulo}}</h1>
+    {{qualificacao_contratada}}
+    {{qualificacao_contratante}}
+    <p>Por este instrumento particular, as partes acima qualificadas firmam o presente contrato nos termos abaixo:</p>
+    {{clausula_objeto}}
+    {{clausula_legislacao}}
+    {{clausula_execucao}}
+    {{clausula_preco}}
+    {{clausula_pagamento}}
+    {{clausula_vigencia}}
+    {{clausula_obrigacoes}}
+    {{blocos_compliance}}
+    {{clausulas_extra}}
+    {{clausula_foro}}
+    {{data_assinatura}}
+  </div>
+</body>
+</html>

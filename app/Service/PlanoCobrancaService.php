@@ -6,13 +6,15 @@ use App\Common\Helpers\IbamaCodigoHelper;
 use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
+use App\Model\Entity\ClienteContrato;
 use App\Model\Entity\Plano as EntityPlano;
 use App\Model\Entity\PlanoItem as EntityPlanoItem;
+use App\Service\Contrato\ContratoComercialSnapshot;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
 use PDO;
 
 /**
- * Cobrança mensal = valor_mensal do plano + excedentes de resíduo coletados no mês.
+ * Cobrança mensal = valor_mensal do contrato ativo (snapshot) + excedentes; fallback plano.
  */
 class PlanoCobrancaService
 {
@@ -46,7 +48,18 @@ class PlanoCobrancaService
         $origensPorTipo = self::coletasPorTipoDetalhe($clienteId, $inicio, $fim);
         $coletasNoMes = self::countColetasFinalizadas($clienteId, $inicio, $fim);
 
+        $valorFixo = (float)$plano->valor_mensal;
         $planoItens = EntityPlanoItem::getByPlanoId($plano->id);
+
+        $contratoAtivo = self::contratoAtivoParaCobranca($clienteId);
+        if ($contratoAtivo !== null) {
+            $valorFixo = (float)$contratoAtivo->valor_mensal;
+            $snapshot = ContratoComercialSnapshot::decode($contratoAtivo->comercial_snapshot_json);
+            if ($snapshot !== null && !empty($snapshot['itens'])) {
+                $planoItens = ContratoComercialSnapshot::itensAsPlanoItems($snapshot);
+            }
+        }
+
         usort($planoItens, fn (EntityPlanoItem $a, EntityPlanoItem $b) => $a->ordem <=> $b->ordem);
 
         /** @var list<EntityPlanoItem> $creditItems */
@@ -152,8 +165,6 @@ class PlanoCobrancaService
             $detalhes[] = $row;
         }
 
-        $valorFixo = (float)$plano->valor_mensal;
-
         return [
             'valor_fixo' => $valorFixo,
             'valor_residuos' => round($valorResiduos, 2),
@@ -161,6 +172,25 @@ class PlanoCobrancaService
             'itens' => $detalhes,
             'coletas_no_mes' => $coletasNoMes,
         ];
+    }
+
+    private static function contratoAtivoParaCobranca(int $clienteId): ?ClienteContrato
+    {
+        if (!ClienteContrato::tabelaExiste()) {
+            return null;
+        }
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT cc.id FROM clientes c
+             INNER JOIN clientes_contratos cc ON cc.id = c.contrato_ativo_id
+             WHERE c.id = ? AND c.operadora_id = ? AND cc.status = ? LIMIT 1',
+            [$clienteId, OperadoraScope::getOperadoraId(), 'ativo']
+        )->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($row)) {
+            return null;
+        }
+
+        return ClienteContrato::getById((int)$row['id']);
     }
 
     /** @return array<int, list<array{mtr:int,data:string,quantidade:float}>> */

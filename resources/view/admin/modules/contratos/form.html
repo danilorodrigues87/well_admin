@@ -15,7 +15,23 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Duração (meses)</label>
-                <input type="number" name="qtd_meses" class="form-control" value="12" min="1" max="120" required>
+                <input type="number" name="qtd_meses" class="form-control" value="36" min="1" max="120" required>
+                <small class="text-muted">RCC: 12 · demais: 36 (padrão)</small>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Taxa adesão (R$)</label>
+                <input type="text" name="taxa_adesao" class="form-control" placeholder="180,00 ou vazio = padrão do modelo">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Índice reajuste</label>
+                <input type="text" name="indice_reajuste" class="form-control" placeholder="IPCA/IBGE">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Foro (cidade / UF)</label>
+                <div class="input-group">
+                    <input type="text" name="foro_cidade" class="form-control" placeholder="Alta Floresta">
+                    <input type="text" name="foro_uf" class="form-control" placeholder="MT" maxlength="2" style="max-width:4rem">
+                </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Início</label>
@@ -28,6 +44,18 @@
             <div class="col-md-4">
                 <label class="form-label">1ª competência</label>
                 <input type="month" name="primeira_competencia" class="form-control" value="{{primeira_competencia}}" required>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Frequência de coleta (texto no contrato)</label>
+                <input type="text" name="frequencia_coleta" class="form-control" placeholder="Vazio = usar frequência do plano">
+            </div>
+            <div class="col-12">
+                <label class="form-label">Promoção / desconto (HTML opcional)</label>
+                <textarea name="promocao_html" class="form-control font-monospace" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Cláusulas extras</label>
+                <textarea name="clausulas_extra_html" class="form-control" rows="2"></textarea>
             </div>
             <div class="col-12">
                 <div class="form-check">

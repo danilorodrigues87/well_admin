@@ -1,0 +1,43 @@
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Editar modelo <code>{{slug}}</code> <span class="text-muted">v{{versao}}</span></h1>
+    {{alerta}}
+    <form method="post" action="{{URL}}/painel/contratos/modelos/{{id}}" class="card shadow p-4">
+        {{csrf_field}}
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Nome interno</label>
+                <input type="text" name="nome" class="form-control" value="{{nome}}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Variante de preço</label>
+                <select name="pricing_variant" class="form-select">{{pricing_options}}</select>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Título (cabeçalho do contrato)</label>
+                <textarea name="titulo" class="form-control" rows="2" required>{{titulo}}</textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Corpo HTML (cláusulas)</label>
+                <textarea name="body_html" class="form-control font-monospace" rows="22" required>{{body_html}}</textarea>
+            </div>
+            <div class="col-12">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="ativo" value="1" id="ativo"{{ativo_checked}}>
+                    <label class="form-check-label" for="ativo">Modelo ativo (versão usada na geração)</label>
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="nova_versao" value="1" id="nova_versao">
+                    <label class="form-check-label" for="nova_versao">Salvar como <strong>nova versão</strong> (desativa esta linha)</label>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{{URL}}/painel/contratos/modelos" class="btn btn-outline-secondary">Lista</a>
+        </div>
+    </form>
+    <div class="card shadow mt-4">
+        <div class="card-header bg-white">Placeholders disponíveis</div>
+        <div class="card-body">{{placeholders_help}}</div>
+    </div>
+</div>

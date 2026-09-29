@@ -15,8 +15,14 @@ class ClienteContrato
     public int $operadora_id = 1;
     public int $cliente_id = 0;
     public int $plano_id = 0;
+    public ?int $contrato_modelo_id = null;
+    public ?int $contrato_modelo_versao = null;
     public string $numero = '';
     public float $valor_mensal = 0;
+    public ?float $taxa_adesao = null;
+    public string $indice_reajuste = 'IPCA';
+    public string $foro_cidade = 'Alta Floresta';
+    public string $foro_uf = 'MT';
     public int $qtd_meses = 12;
     public string $data_inicio = '';
     public string $data_fim = '';
@@ -24,11 +30,20 @@ class ClienteContrato
     public string $primeira_competencia = '';
     public float $multa_atraso_pct = 2;
     public float $juros_mora_pct_mes = 1;
+    public string $multa_atraso_descricao = '3% ao dia sobre o valor em atraso';
     public float $multa_cancelamento_pct = 10;
+    public ?string $multa_rescisao_texto = null;
     public int $carencia_dias = 5;
+    public int $aviso_previo_dias = 30;
     public string $status = 'rascunho';
     public ?string $html_snapshot = null;
+    public ?string $flags_json = null;
+    public ?string $comercial_snapshot_json = null;
+    public ?string $variables_json = null;
     public ?string $assinado_em = null;
+    public ?string $encerrado_em = null;
+    public ?string $encerrado_motivo = null;
+    public ?int $encerrado_por_usuario_id = null;
     public ?int $assinado_por_cliente_usuario_id = null;
     public int $criado_por_usuario_id = 0;
     public string $cliente_nome = '';
@@ -173,8 +188,17 @@ class ClienteContrato
         $c->operadora_id = (int)$row['operadora_id'];
         $c->cliente_id = (int)$row['cliente_id'];
         $c->plano_id = (int)$row['plano_id'];
+        $c->contrato_modelo_id = isset($row['contrato_modelo_id']) && $row['contrato_modelo_id'] !== null
+            ? (int)$row['contrato_modelo_id'] : null;
+        $c->contrato_modelo_versao = isset($row['contrato_modelo_versao']) && $row['contrato_modelo_versao'] !== null
+            ? (int)$row['contrato_modelo_versao'] : null;
         $c->numero = (string)$row['numero'];
         $c->valor_mensal = (float)$row['valor_mensal'];
+        $c->taxa_adesao = isset($row['taxa_adesao']) && $row['taxa_adesao'] !== null && $row['taxa_adesao'] !== ''
+            ? (float)$row['taxa_adesao'] : null;
+        $c->indice_reajuste = (string)($row['indice_reajuste'] ?? 'IPCA');
+        $c->foro_cidade = (string)($row['foro_cidade'] ?? 'Alta Floresta');
+        $c->foro_uf = (string)($row['foro_uf'] ?? 'MT');
         $c->qtd_meses = (int)$row['qtd_meses'];
         $c->data_inicio = (string)$row['data_inicio'];
         $c->data_fim = (string)$row['data_fim'];
@@ -182,11 +206,27 @@ class ClienteContrato
         $c->primeira_competencia = (string)$row['primeira_competencia'];
         $c->multa_atraso_pct = (float)$row['multa_atraso_pct'];
         $c->juros_mora_pct_mes = (float)$row['juros_mora_pct_mes'];
+        $c->multa_atraso_descricao = (string)($row['multa_atraso_descricao'] ?? '3% ao dia sobre o valor em atraso');
         $c->multa_cancelamento_pct = (float)$row['multa_cancelamento_pct'];
+        $c->multa_rescisao_texto = isset($row['multa_rescisao_texto']) ? (string)$row['multa_rescisao_texto'] : null;
         $c->carencia_dias = (int)$row['carencia_dias'];
+        $c->aviso_previo_dias = (int)($row['aviso_previo_dias'] ?? 30);
         $c->status = (string)$row['status'];
         $c->html_snapshot = isset($row['html_snapshot']) ? (string)$row['html_snapshot'] : null;
+        $c->flags_json = isset($row['flags_json']) && $row['flags_json'] !== null
+            ? (is_string($row['flags_json']) ? $row['flags_json'] : json_encode($row['flags_json'], JSON_UNESCAPED_UNICODE))
+            : null;
+        $c->comercial_snapshot_json = isset($row['comercial_snapshot_json']) && $row['comercial_snapshot_json'] !== null
+            ? (is_string($row['comercial_snapshot_json']) ? $row['comercial_snapshot_json'] : json_encode($row['comercial_snapshot_json'], JSON_UNESCAPED_UNICODE))
+            : null;
+        $c->variables_json = isset($row['variables_json']) && $row['variables_json'] !== null
+            ? (is_string($row['variables_json']) ? $row['variables_json'] : json_encode($row['variables_json'], JSON_UNESCAPED_UNICODE))
+            : null;
         $c->assinado_em = isset($row['assinado_em']) ? (string)$row['assinado_em'] : null;
+        $c->encerrado_em = isset($row['encerrado_em']) ? (string)$row['encerrado_em'] : null;
+        $c->encerrado_motivo = isset($row['encerrado_motivo']) ? (string)$row['encerrado_motivo'] : null;
+        $c->encerrado_por_usuario_id = isset($row['encerrado_por_usuario_id']) && $row['encerrado_por_usuario_id'] !== null
+            ? (int)$row['encerrado_por_usuario_id'] : null;
         $c->assinado_por_cliente_usuario_id = isset($row['assinado_por_cliente_usuario_id']) ? (int)$row['assinado_por_cliente_usuario_id'] : null;
         $c->criado_por_usuario_id = (int)($row['criado_por_usuario_id'] ?? 0);
         $c->cliente_nome = (string)($row['cliente_nome'] ?? '');

@@ -102,6 +102,25 @@
     return el && el.value ? el.value : '';
   }
 
+  function dataRotaLegivel() {
+    var iso = dataRota();
+    if (!iso || iso.length < 10) return '—';
+    var p = iso.split('-');
+    if (p.length !== 3) return iso;
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function atualizarLegendaData() {
+    var leg = document.getElementById('rota-data-legenda');
+    if (leg) {
+      leg.textContent = 'Agendamentos para ' + dataRotaLegivel() + ' (próxima coleta nesta data ou urgente).';
+    }
+    var resumo = document.getElementById('rota-resumo');
+    if (resumo && resumo.dataset && !resumo.dataset.custom) {
+      resumo.textContent = 'Dia: ' + dataRotaLegivel();
+    }
+  }
+
   function rotaFiltroId() {
     var el = document.getElementById('rota-filtro-id');
     if (!el || !el.value) return '';
@@ -357,7 +376,57 @@
     document.getElementById('rota-origin-info').textContent = 'Origem: ' + (label || (lat.toFixed(5) + ', ' + lng.toFixed(5)));
   }
 
+  function setRotaAjuda(text) {
+    var el = document.getElementById('rota-filtro-ajuda');
+    if (el) el.textContent = text || '';
+  }
+
+  function carregarRotasDia(selectFirst) {
+    var sel = document.getElementById('rota-filtro-id');
+    if (!sel) return Promise.resolve();
+    var prev = sel.value;
+    setRotaAjuda('Carregando rotas do dia…');
+    return postJson('rotas_dia', {}).then(function (data) {
+      if (!data.success) throw new Error(data.message || 'Erro ao carregar rotas');
+      var rotas = data.rotas || [];
+      sel.innerHTML = '<option value="">Selecione uma rota</option>';
+      rotas.forEach(function (r) {
+        var opt = document.createElement('option');
+        opt.value = String(r.id);
+        opt.textContent = r.nome + (r.paradas ? ' (' + r.paradas + ' paradas)' : '');
+        sel.appendChild(opt);
+      });
+      if (rotas.length === 0) {
+        setRotaAjuda('Nenhuma rota com clientes agendados em ' + dataRotaLegivel() + '.');
+        atualizarLegendaData();
+        sel.value = '';
+        paradas = [];
+        renderParadas();
+        return;
+      }
+      setRotaAjuda(rotas.length + ' rota(s) em ' + dataRotaLegivel() + '.');
+      atualizarLegendaData();
+      if (selectFirst !== false) {
+        var pick = prev && sel.querySelector('option[value="' + prev + '"]') ? prev : String(rotas[0].id);
+        sel.value = pick;
+      }
+    }).catch(function (err) {
+      setRotaAjuda('Erro ao carregar rotas.');
+      swalError(err.message || 'Erro ao carregar rotas do dia');
+    });
+  }
+
   function carregarParadas() {
+    if (!rotaFiltroId()) {
+      paradas = [];
+      renderParadas();
+      document.getElementById('rota-paradas-loading').classList.add('d-none');
+      document.getElementById('rota-paradas-list').classList.add('d-none');
+      document.getElementById('rota-paradas-vazio').classList.remove('d-none');
+      var vazio = document.getElementById('rota-paradas-vazio');
+      if (vazio) vazio.textContent = 'Selecione uma rota acima para ver as paradas.';
+      return Promise.resolve();
+    }
     document.getElementById('rota-paradas-loading').classList.remove('d-none');
     document.getElementById('rota-paradas-list').classList.add('d-none');
     document.getElementById('rota-paradas-vazio').classList.add('d-none');
@@ -561,7 +630,7 @@
     document.getElementById('btn-rota-recarregar').addEventListener('click', function () {
       mapViewportLocked = false;
       mapDidInitialFit = false;
-      carregarParadas();
+      carregarRotasDia(true).then(function () { return carregarParadas(); });
     });
     var btnGeo = document.getElementById('btn-rota-geocode');
     if (btnGeo) btnGeo.addEventListener('click', atualizarGps);
@@ -584,9 +653,11 @@
       dataEl.addEventListener('change', function () {
         mapViewportLocked = false;
         mapDidInitialFit = false;
-        carregarParadas();
+        atualizarLegendaData();
+        carregarRotasDia(true).then(function () { return carregarParadas(); });
       });
     }
+    atualizarLegendaData();
     var rotaEl = document.getElementById('rota-filtro-id');
     if (rotaEl) {
       rotaEl.addEventListener('change', function () {
@@ -598,7 +669,9 @@
 
     var key = cfg.mapsKey;
     var start = function () {
-      carregarParadas().then(function () {
+      carregarRotasDia(true).then(function () {
+        return carregarParadas();
+      }).then(function () {
         if (key) {
           return loadGoogleMaps(key).then(initMap);
         }

@@ -1,0 +1,25 @@
+<div class="bto">
+  <button class="btn-impress" type="button" onclick="window.print()">Imprimir</button>
+</div>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{{titulo}}</title>
+  <link rel="stylesheet" href="{{URL}}/resources/css/contrato.css">
+  <style>
+    .table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.95rem; }
+    .table th, .table td { border: 1px solid #ccc; padding: 0.35rem 0.5rem; }
+    .contrato-clausula { margin-bottom: 1rem; text-align: justify; }
+    .contrato-clausula h2 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+    .contrato-logo-header { text-align: center; margin: 0 0 1.25rem; }
+    .contrato-logo { max-height: 80px; width: auto; height: auto; }
+  </style>
+</head>
+<body>
+  <div id="content" class="contrato-documento">
+    {{logo_html}}
+    {{body_html}}
+  </div>
+</body>
+</html>

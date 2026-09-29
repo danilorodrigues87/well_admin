@@ -1,0 +1,19 @@
+<div class="modal fade" id="{{modal_id}}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" action="{{action}}" class="modal-content">
+      {{csrf_field}}
+      <div class="modal-header">
+        <h5 class="modal-title">{{titulo}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label" for="motivo-{{modal_id}}">Motivo (opcional)</label>
+        <textarea class="form-control" id="motivo-{{modal_id}}" name="motivo" rows="3" maxlength="500" placeholder="Descreva o motivo…"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Voltar</button>
+        <button type="submit" class="btn {{botao_class}}">{{botao}}</button>
+      </div>
+    </form>
+  </div>
+</div>

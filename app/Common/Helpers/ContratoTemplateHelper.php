@@ -2,8 +2,6 @@
 
 namespace App\Common\Helpers;
 
-use App\Model\Entity\OperadoraConfig;
-
 class ContratoTemplateHelper
 {
     public static function modeloPadrao(): string
@@ -16,17 +14,6 @@ class ContratoTemplateHelper
 
     public static function resolverModelo(?int $operadoraId = null): string
     {
-        $operadoraId = $operadoraId ?? \App\Common\OperadoraScope::getOperadoraId();
-        $prev = \App\Common\OperadoraScope::getOverride();
-        if ($operadoraId !== null && $operadoraId > 0) {
-            \App\Common\OperadoraScope::setOverride($operadoraId);
-        }
-        $custom = OperadoraConfig::get('modelo_contrato_html');
-        \App\Common\OperadoraScope::setOverride($prev);
-        if (is_string($custom) && trim($custom) !== '') {
-            return $custom;
-        }
-
         return self::modeloPadrao();
     }
 

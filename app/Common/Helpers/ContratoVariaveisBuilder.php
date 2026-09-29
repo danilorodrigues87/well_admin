@@ -3,6 +3,7 @@
 namespace App\Common\Helpers;
 
 use App\Common\CompanyConfig;
+use App\Common\Helpers\ContratoBrandingHelper;
 use App\Model\Entity\Cliente;
 use App\Model\Entity\ClienteContrato;
 use App\Model\Entity\Operadora;
@@ -56,6 +57,7 @@ class ContratoVariaveisBuilder
 
         return [
             'URL' => rtrim((string)URL, '/'),
+            'logo_html' => ContratoBrandingHelper::logoHtml($contrato->operadora_id),
             'contratada' => self::blocoContratada($operadora),
             'contratante' => self::blocoContratante($cliente),
             'plano' => self::blocoPlano($contrato, $plano),

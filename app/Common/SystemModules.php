@@ -92,7 +92,6 @@ class SystemModules
             'collapse_id' => 'Layouts-comercial',
             'items' => [
                 ['slug' => 'contratos', 'label' => 'Contratos', 'link' => '/painel/contratos'],
-                ['slug' => 'contratos', 'label' => 'Modelo de contrato', 'link' => '/painel/config/contrato'],
             ],
         ],
         [

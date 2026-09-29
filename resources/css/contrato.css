@@ -18,6 +18,15 @@
     font-family: Georgia, serif;
     line-height: 1.5;
 }
+.contrato-logo-header {
+    text-align: center;
+    margin: 0 0 1.25rem;
+}
+.contrato-logo {
+    max-height: 80px;
+    width: auto;
+    height: auto;
+}
 @media print {
     .bto { display: none; }
 }

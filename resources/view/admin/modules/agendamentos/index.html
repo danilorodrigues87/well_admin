@@ -2,7 +2,7 @@
 <ol class="breadcrumb mb-4"><li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li><li class="breadcrumb-item active">Agendamentos</li></ol>
 
 <ul class="nav nav-tabs mb-3" role="tablist">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-clientes" type="button">Próximas coletas</button></li>
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-clientes" type="button">Agendar</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-solicitacoes" type="button" id="btn-tab-solicitacoes">Solicitações portal{{solicitacoes_pendentes_badge}}</button></li>
 </ul>
 
@@ -12,7 +12,7 @@
 <div class="card mb-4 border-primary">
     <div class="card-header bg-primary text-white"><i class="fas fa-layer-group me-1"></i> Agendar rota inteira</div>
     <div class="card-body">
-        <p class="small text-muted mb-3">Define a <strong>próxima coleta</strong> de todos os clientes vinculados à rota (Cadastros → Rotas → Atribuições). Isso alimenta a <strong>Rota do dia</strong> na data escolhida.</p>
+        <p class="small text-muted mb-3">Define a <strong>próxima coleta</strong> de todos os clientes vinculados à rota (Cadastros → Rotas → Atribuições). Na <strong>Rota do dia</strong>, eles aparecem na data escolhida.</p>
         <form id="form-agendar-rota" class="row g-2 align-items-end">
             {{csrf_field}}
             <div class="col-md-4">
@@ -20,7 +20,7 @@
                 <select name="rota_id" class="form-select" required>{{rotas_options_lote}}</select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Próxima coleta</label>
+                <label class="form-label">Data da coleta</label>
                 <input type="date" name="proxima_coleta" class="form-control" value="{{data_hoje}}" required>
             </div>
             <div class="col-md-3">
@@ -40,29 +40,7 @@
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header"><i class="fas fa-calendar me-1"></i> Próximas coletas por cliente</div>
-    <div class="card-body">
-        <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
-            <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar cliente..."/></div>
-            <div class="col-md-3"><select name="rota_id" class="form-select crud-filter">{{rotas_options}}</select></div>
-            <div class="col-md-2"><select name="prioridade" class="form-select crud-filter"><option value="">Prioridade: todas</option><option value="normal">Normal</option><option value="urgente">Urgente</option></select></div>
-        </div>
-        <table class="table table-striped"><thead><tr><th>Cliente</th><th>Plano</th><th>Cidade</th><th>Próxima coleta</th><th>Saldo plano</th><th>Ações</th></tr></thead>
-        <tbody id="crud-tbody"></tbody></table>
-        <div id="crud-pagination"></div>
-    </div>
-</div>
-<div class="modal fade" id="crudModal"><div class="modal-dialog"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">Agendar coleta</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-    <div class="modal-body"><form id="crud-form">{{csrf_field}}<input type="hidden" name="id" id="crud-id"/>
-        <p id="crud-nome-label" class="fw-bold"></p>
-        <p id="crud-plano-info" class="small text-muted mb-3"></p>
-        <div class="mb-2"><label>Próxima coleta</label><input type="date" class="form-control" name="proxima_coleta" id="crud-proxima_coleta"/></div>
-        <div class="mb-2"><label>Prioridade</label><select class="form-select" name="prioridade" id="crud-prioridade"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></div>
-    </form></div>
-    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
-</div></div></div>
+<form id="crud-form" class="d-none">{{csrf_field}}</form>
 
 </div><!-- tab-clientes -->
 

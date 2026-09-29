@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Common\Contrato\ContractType;
 use App\Common\Helpers\CrudHelper;
 use App\Common\Helpers\IbamaCodigoHelper;
 use App\Common\Helpers\MoneyHelper;
@@ -14,6 +15,19 @@ use App\Utils\View;
 
 class Planos extends Page
 {
+    public static function contratoModeloOptionsHtml(string $selected = ''): string
+    {
+        $selected = ContractType::normalize($selected);
+        $html = '';
+        foreach (ContractType::all() as $type) {
+            $sel = $type === $selected ? ' selected' : '';
+            $html .= '<option value="'.htmlspecialchars($type, ENT_QUOTES, 'UTF-8').'"'.$sel.'>'
+                .htmlspecialchars(ContractType::label($type), ENT_QUOTES, 'UTF-8').'</option>';
+        }
+
+        return $html;
+    }
+
     private static function tiposResiduosOptions(int $selected = 0): string
     {
         $html = '<option value="">— Selecione o resíduo —</option>';
@@ -30,6 +44,7 @@ class Planos extends Page
         $content = View::render('admin/modules/planos/index', [
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
             'tipos_residuos_options' => self::tiposResiduosOptions(),
+            'contrato_modelo_options' => self::contratoModeloOptionsHtml(),
         ]);
         $jsPlanos = dirname(__DIR__, 3).'/resources/js/crud-planos.js';
         $jsVer = is_file($jsPlanos) ? (string)filemtime($jsPlanos) : (string)time();
@@ -96,6 +111,7 @@ class Planos extends Page
             'coletas_por_periodo' => $p->coletas_por_periodo,
             'tipo' => $p->tipo,
             'ativo' => $p->ativo,
+            'contrato_modelo_tipo' => $p->contrato_modelo_tipo ?? ContractType::GENERICO,
             'itens' => PlanoService::serializeItensForForm($p->id),
         ]);
     }
@@ -122,6 +138,7 @@ class Planos extends Page
             'coletas_por_periodo' => max(1, (int)($post['coletas_por_periodo'] ?? 1)),
             'tipo' => trim((string)($post['tipo'] ?? '')),
             'ativo' => CrudHelper::parseAtivo($post, $id <= 0),
+            'contrato_modelo_tipo' => ContractType::normalize((string)($post['contrato_modelo_tipo'] ?? '')),
         ];
         if ($data['nome'] === '') {
             return CrudHelper::jsonError('Nome do plano é obrigatório.');

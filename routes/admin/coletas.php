@@ -20,6 +20,7 @@ $obRouter->post('/painel/rota-do-dia', [
     function ($request) {
         $acao = $request->getPostVars()['acao'] ?? '';
         $content = match ($acao) {
+            'rotas_dia' => RotaDoDia::rotasDoDia($request),
             'paradas' => RotaDoDia::paradas($request),
             'otimizar' => RotaDoDia::otimizar($request),
             'salvar_ordem' => RotaDoDia::salvarOrdem($request),
@@ -125,6 +126,7 @@ foreach ($coletaCrud as $route) {
                 'sinir_cdf_upload' => $ctrl === Coletas::class ? Coletas::sinirCdfUpload($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_emitir_cdf' => $ctrl === Coletas::class ? Coletas::sinirEmitirCdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_baixar_cdf' => $ctrl === Coletas::class ? Coletas::sinirBaixarCdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'excluir_coleta' => $ctrl === Coletas::class ? Coletas::excluir($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'agendar_rota' => $ctrl === Agendamentos::class ? Agendamentos::agendarRota($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'list_solicitacoes' => $ctrl === Agendamentos::class ? Agendamentos::listSolicitacoes($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),

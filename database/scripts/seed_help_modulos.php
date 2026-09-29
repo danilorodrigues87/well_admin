@@ -395,7 +395,7 @@ HTML,
 <p>Menu <strong>Comercial → Contratos</strong> ou ícone de documento na listagem de <strong>Clientes</strong>.</p>
 <h4>Passo a passo — gerar contrato</h4>
 <ol>
-<li>Certifique-se de ter <strong>plano ativo</strong> e <strong>modelo de contrato</strong> (Comercial → Modelo de contrato).</li>
+<li>Certifique-se de ter <strong>plano ativo</strong> com <strong>modelo de contrato</strong> definido (Cadastros → Planos).</li>
 <li>Em Contratos, selecione o cliente e clique em <strong>Criar</strong>, ou use Clientes → ícone de contrato → <strong>Novo contrato</strong>.</li>
 <li>Escolha plano, duração, valor mensal (opcional — padrão vem do plano), vencimento e 1ª competência.</li>
 <li>Salve como <strong>rascunho</strong> e revise a pré-visualização.</li>
@@ -466,7 +466,7 @@ HTML,
 <li>Parâmetros de cobrança (multa, mora)</li>
 <li>Chaves de integração (maps, banco)</li>
 </ul>
-<p>O <strong>modelo HTML do contrato</strong> fica em Comercial → Modelo de contrato.</p>
+<p>O <strong>tipo de contrato</strong> (RSS, RCC, Classe I, etc.) é escolhido em Cadastros → Planos → Modelo de contrato.</p>
 HTML,
     ],
     [

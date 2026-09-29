@@ -47,7 +47,6 @@ class Agendamentos extends Page
             : '';
         $content = View::render('admin/modules/agendamentos/index', [
             'csrf_field' => \App\Common\Helpers\CsrfHelper::field(),
-            'rotas_options' => self::rotasOptionsHtml(true),
             'rotas_options_lote' => self::rotasOptionsHtml(false),
             'data_hoje' => date('Y-m-d'),
             'data_min_solic' => date('Y-m-d', strtotime('+2 days')),
@@ -58,8 +57,8 @@ class Agendamentos extends Page
             'Agendamentos',
             $content,
             'agendamentos',
-            self::crudScripts('/painel/agendamentos')
-                .'<script src="'.URL.'/resources/js/agendamentos.js?v=20260921b"></script>'
+            self::crudScripts('/painel/agendamentos', false)
+                .'<script src="'.URL.'/resources/js/agendamentos.js?v=20260929d"></script>'
                 .'<script src="'.URL.'/resources/js/agendamentos-solicitacoes.js?v=20260921b"></script>'
         );
     }
@@ -71,6 +70,10 @@ class Agendamentos extends Page
         $busca = trim((string)($post['busca'] ?? ''));
         $rotaId = (int)($post['rota_id'] ?? 0);
         $prioridade = trim((string)($post['prioridade'] ?? ''));
+        $dataDia = trim((string)($post['data_dia'] ?? date('Y-m-d')));
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataDia)) {
+            $dataDia = date('Y-m-d');
+        }
 
         [$coletorId, $isAdmin] = self::resolveColetorContext();
 
@@ -82,7 +85,8 @@ class Agendamentos extends Page
             $isAdmin,
             $rotaId,
             $prioridade,
-            false
+            false,
+            $dataDia
         );
 
         $itens = '';
