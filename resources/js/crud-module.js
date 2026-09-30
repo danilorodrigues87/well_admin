@@ -143,6 +143,14 @@
     if ($('#crud-senha-wrap').length) {
       $('#crud-senha-wrap').show();
     }
+    var contratoWrap = document.getElementById('crud-contrato-painel-wrap');
+    if (contratoWrap) {
+      contratoWrap.classList.add('d-none');
+      var contratoPainel = document.getElementById('crud-contrato-painel');
+      if (contratoPainel) {
+        contratoPainel.innerHTML = '';
+      }
+    }
     showModal();
   };
 
@@ -176,6 +184,18 @@
       }
       if ($('#crud-senha-wrap').length) {
         $('#crud-senha-wrap').toggle(!data.id);
+      }
+      var contratoWrap = document.getElementById('crud-contrato-painel-wrap');
+      if (contratoWrap) {
+        if (data.contrato_painel_html) {
+          var contratoPainel = document.getElementById('crud-contrato-painel');
+          if (contratoPainel) {
+            contratoPainel.innerHTML = data.contrato_painel_html;
+          }
+          contratoWrap.classList.remove('d-none');
+        } else {
+          contratoWrap.classList.add('d-none');
+        }
       }
       showModal();
     }).fail(function (xhr) {

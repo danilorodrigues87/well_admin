@@ -1,12 +1,25 @@
 # Contratos comerciais (gerador dinâmico)
 
-## Fluxo
+## Fluxo (operador)
 
-1. Cadastre o **plano** com **Modelo de contrato** (Cadastros → Planos).
-2. Preencha **itens do plano** (franquia / excedente) — entram na cláusula de preço.
-3. Cliente: responsável, CPF, RG e cargo (qualificação do contratante).
-4. Contratos → Novo: plano, vigência, taxa de adesão, foro (opcional).
-5. Imprimir / portal gerador: HTML com cláusulas do modelo.
+1. Cadastre o **plano** com **Modelo de contrato** e **itens do plano** (franquia / excedente / crédito — tarifas de referência).
+2. No **cliente**, preencha responsável, CPF, RG e cargo (qualificação no contrato).
+3. **Novo contrato** (wizard): plano → **marque os resíduos** que aquele gerador usará → **valor mensal negociado** → revisão → enviar assinatura.
+4. Gerador assina no portal; contrato fica **ativo** com HTML e valores congelados.
+
+## Regra comercial × faturamento
+
+| Campo | Origem após assinatura |
+|-------|-------------------------|
+| **Mensalidade** | `clientes_contratos.valor_mensal` (informada no contrato) |
+| **Franquia / excedente / crédito** | `comercial_snapshot_json.itens` — cópia do plano **só dos tipos marcados** na criação |
+| **Cálculo mensal** | `PlanoCobrancaService::calcularMes` + emissão em Pagamentos |
+
+Sem contrato ativo assinado, o faturamento usa o plano vigente do cliente (`plano_itens` ao vivo).
+
+**Pagamentos:** clientes com contrato ativo só entram na competência a partir de `primeira_competencia`. Badge **Só plano** = sem contrato assinado (cobrança pelo plano vigente). Filtro «Base de cobrança» no relatório de faturamento.
+
+**Lacuna:** modelos RCC/obra na cláusula PDF podem diferir do motor kg mensal em `PlanoCobrancaService`.
 
 ## Modelos (`planos.contrato_modelo_tipo`)
 
@@ -26,9 +39,9 @@ Textos jurídicos completos ficam em **`contrato_modelos`** (por `operadora_id`)
 
 Defaults comerciais (taxa adesão, índice): [`ContratoModeloCatalog`](../app/Common/Contrato/ContratoModeloCatalog.php).
 
-## Snapshot comercial
+## Snapshot comercial (`comercial_snapshot_json`)
 
-Na criação do contrato grava-se `comercial_snapshot_json` (mensalidade + itens/franquia/excedente). **Faturamento** (`PlanoCobrancaService`) usa o contrato ativo, não o plano vigente.
+Congela **mensalidade do contrato** + **subconjunto de `plano_itens`** escolhido na UI. Serviço: `ContratoComercialSnapshot::fromPlanoItensSelecionados`. API de itens do plano: `GET /painel/contratos/plano-itens?plano_id=`.
 
 ## Rescisão
 

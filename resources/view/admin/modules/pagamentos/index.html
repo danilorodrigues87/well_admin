@@ -40,7 +40,15 @@
                             <option value="emitida">Emitidas</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <label class="form-label small mb-0">Base de cobrança</label>
+                        <select id="filtro-cobranca-base" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="com_contrato">Com contrato assinado</option>
+                            <option value="sem_contrato">Só plano (sem contrato)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <label class="form-label small mb-0">Buscar cliente</label>
                         <input type="text" id="filtro-busca" class="form-control" placeholder="Nome da empresa"/>
                     </div>
@@ -48,6 +56,7 @@
                         <button type="button" class="btn btn-primary w-100" id="btn-carregar-relatorio"><i class="fas fa-sync me-1"></i> Carregar</button>
                     </div>
                 </div>
+                <p class="text-muted small mb-1">Clientes com contrato assinado só aparecem a partir da <strong>1ª competência</strong> definida no contrato. Badge <span class="badge bg-info">Só plano</span> = sem contrato ativo (valores pelo plano).</p>
                 <p class="text-muted small mb-1" id="relatorio-total"></p>
                 <div id="relatorio-pagination" class="mb-2"></div>
                 <div class="table-responsive">

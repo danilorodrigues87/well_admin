@@ -1,91 +1,149 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Novo contrato</h1>
     <p class="text-muted">Cliente: <strong>{{cliente_nome}}</strong></p>
+    <p class="mb-3"><a href="{{voltar_url}}" class="btn btn-sm btn-outline-secondary">Voltar à listagem</a></p>
     {{alerta}}
-    <form method="post" action="{{URL}}/painel/clientes/{{cliente_id}}/contrato/novo" class="card shadow p-4" id="form_contrato">
-        {{csrf_field}}
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Plano</label>
-                <select name="plano_id" class="form-select" required>{{planos_options}}</select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Valor mensal (R$)</label>
-                <input type="text" name="valor_mensal" class="form-control" placeholder="Do plano">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Duração (meses)</label>
-                <input type="number" name="qtd_meses" class="form-control" value="36" min="1" max="120" required>
-                <small class="text-muted">RCC: 12 · demais: 36 (padrão)</small>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Taxa adesão (R$)</label>
-                <input type="text" name="taxa_adesao" class="form-control" placeholder="180,00 ou vazio = padrão do modelo">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Índice reajuste</label>
-                <input type="text" name="indice_reajuste" class="form-control" placeholder="IPCA/IBGE">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Foro (cidade / UF)</label>
-                <div class="input-group">
-                    <input type="text" name="foro_cidade" class="form-control" placeholder="Alta Floresta">
-                    <input type="text" name="foro_uf" class="form-control" placeholder="MT" maxlength="2" style="max-width:4rem">
+
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="post" action="{{URL}}/painel/clientes/{{cliente_id}}/contrato/novo" class="card shadow p-4" id="form_contrato_novo">
+                {{csrf_field}}
+                <input type="hidden" name="return" value="{{return_path}}">
+
+                <ul class="nav nav-pills mb-4 small">
+                    <li class="nav-item"><span class="nav-link active" data-wizard-step>1. Plano</span></li>
+                    <li class="nav-item"><span class="nav-link text-muted" data-wizard-step>2. Resíduos</span></li>
+                    <li class="nav-item"><span class="nav-link text-muted" data-wizard-step>3. Comercial</span></li>
+                    <li class="nav-item"><span class="nav-link text-muted" data-wizard-step>4. Revisão</span></li>
+                </ul>
+
+                <div data-wizard-panel>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Plano (modelo jurídico + tarifas de referência)</label>
+                            <select name="plano_id" id="plano_id" class="form-select" required>{{planos_options}}</select>
+                        </div>
+                        <div class="col-12">
+                            <p id="plano_modelo_info" class="small text-muted mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-end">
+                        <button type="button" class="btn btn-primary" data-wizard-next>Continuar</button>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Início</label>
-                <input type="date" name="data_inicio" class="form-control" value="{{data_inicio}}" required>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Dia vencimento</label>
-                <input type="number" name="dia_vencimento" class="form-control" value="10" min="1" max="28">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">1ª competência</label>
-                <input type="month" name="primeira_competencia" class="form-control" value="{{primeira_competencia}}" required>
-            </div>
-            <div class="col-12">
-                <label class="form-label">Frequência de coleta (texto no contrato)</label>
-                <input type="text" name="frequencia_coleta" class="form-control" placeholder="Vazio = usar frequência do plano">
-            </div>
-            <div class="col-12">
-                <label class="form-label">Promoção / desconto (HTML opcional)</label>
-                <textarea name="promocao_html" class="form-control font-monospace" rows="2"></textarea>
-            </div>
-            <div class="col-12">
-                <label class="form-label">Cláusulas extras</label>
-                <textarea name="clausulas_extra_html" class="form-control" rows="2"></textarea>
-            </div>
-            <div class="col-12">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="enviar_assinatura" value="1" id="enviar_assinatura">
-                    <label class="form-check-label" for="enviar_assinatura">Enviar para assinatura do gerador após salvar</label>
+
+                <div data-wizard-panel class="d-none">
+                    <div id="itens_plano_host"></div>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-wizard-prev>Voltar</button>
+                        <button type="button" class="btn btn-primary" data-wizard-next>Continuar</button>
+                    </div>
                 </div>
+
+                <div data-wizard-panel class="d-none">
+                    <p class="small text-muted">A <strong>mensalidade</strong> é negociada neste contrato. Franquia e excedente vêm do plano (passo anterior).</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Valor mensal (R$) *</label>
+                            <input type="text" name="valor_mensal" id="valor_mensal" class="form-control" required placeholder="Ex.: 850,00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Duração (meses)</label>
+                            <input type="number" name="qtd_meses" id="qtd_meses" class="form-control" value="36" min="1" max="120" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Taxa adesão (R$)</label>
+                            <input type="text" name="taxa_adesao" class="form-control" placeholder="Vazio = padrão do modelo">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Índice reajuste</label>
+                            <input type="text" name="indice_reajuste" class="form-control" placeholder="IPCA/IBGE">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Foro (cidade / UF)</label>
+                            <div class="input-group">
+                                <input type="text" name="foro_cidade" class="form-control" placeholder="Alta Floresta">
+                                <input type="text" name="foro_uf" class="form-control" placeholder="MT" maxlength="2" style="max-width:4rem">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Início</label>
+                            <input type="date" name="data_inicio" class="form-control" value="{{data_inicio}}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Dia vencimento</label>
+                            <input type="number" name="dia_vencimento" class="form-control" value="10" min="1" max="28">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">1ª competência faturamento</label>
+                            <input type="month" name="primeira_competencia" class="form-control" value="{{primeira_competencia}}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Frequência de coleta (texto no contrato)</label>
+                            <input type="text" name="frequencia_coleta" class="form-control" placeholder="Vazio = usar frequência do plano">
+                        </div>
+                        <details class="col-12">
+                            <summary class="small text-muted">Opcional: promoção e cláusulas extras</summary>
+                            <div class="mt-2">
+                                <textarea name="promocao_html" class="form-control font-monospace mb-2" rows="2"></textarea>
+                                <textarea name="clausulas_extra_html" class="form-control" rows="2"></textarea>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-wizard-prev>Voltar</button>
+                        <button type="button" class="btn btn-primary" data-wizard-next>Revisar</button>
+                    </div>
+                </div>
+
+                <div data-wizard-panel class="d-none">
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <p class="mb-1"><strong>Mensalidade acordada:</strong> <span id="revisao_mensal">—</span></p>
+                            <p class="mb-2"><strong>Resíduos incluídos:</strong></p>
+                            <div id="revisao_itens"></div>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="enviar_assinatura" value="1" id="enviar_assinatura">
+                        <label class="form-check-label" for="enviar_assinatura">Enviar para assinatura do gerador após salvar</label>
+                    </div>
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <button type="button" class="btn btn-outline-secondary" data-wizard-prev>Voltar</button>
+                        <div>
+                            <a href="{{voltar_url}}" class="btn btn-outline-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-success">Salvar contrato</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white"><strong>Qualificação do contratante</strong></div>
+                <div class="card-body">{{checklist_cliente}}</div>
             </div>
         </div>
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Salvar contrato</button>
-            <a href="{{URL}}/painel/clientes/{{cliente_id}}/contratos" class="btn btn-outline-secondary">Cancelar</a>
-        </div>
-    </form>
+    </div>
 </div>
+<script src="{{URL}}/resources/js/contrato-wizard.js?v=20260930b"></script>
 <script>
 (function () {
-    var semPlanos = '{{sem_planos}}' === '1';
-    if (semPlanos) {
-        var btn = document.querySelector('#form_contrato button[type="submit"]');
+    if ('{{sem_planos}}' === '1') {
+        var btn = document.querySelector('#form_contrato_novo button[type="submit"]');
         if (btn) btn.disabled = true;
     }
-    var sel = document.querySelector('select[name="plano_id"]');
-    var valor = document.querySelector('input[name="valor_mensal"]');
-    if (sel && valor) {
-        sel.addEventListener('change', function () {
-            var opt = sel.options[sel.selectedIndex];
-            var v = opt && opt.getAttribute('data-valor');
-            if (v && !valor.value) valor.placeholder = 'Padrão: R$ ' + v.replace('.', ',');
-        });
-        sel.dispatchEvent(new Event('change'));
-    }
+    initContratoWizard({
+        form: '#form_contrato_novo',
+        url: '{{URL}}/painel/contratos/plano-itens',
+        prefillIds: {{prefill_tipo_ids}},
+        planoSelect: '#plano_id',
+        itensHost: '#itens_plano_host',
+        modeloInfo: '#plano_modelo_info',
+        revisaoItens: '#revisao_itens',
+        revisaoMensal: '#revisao_mensal',
+        valorInput: '#valor_mensal',
+        qtdMesesInput: '#qtd_meses'
+    });
 })();
 </script>

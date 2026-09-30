@@ -193,6 +193,7 @@
       competencia: document.getElementById('filtro-competencia').value,
       plano_id: document.getElementById('filtro-plano').value,
       situacao: document.getElementById('filtro-situacao').value,
+      cobranca_base: document.getElementById('filtro-cobranca-base').value,
       busca: document.getElementById('filtro-busca').value
     });
 
@@ -612,7 +613,7 @@
     document.getElementById('btn-carregar-relatorio').addEventListener('click', function () {
       carregarRelatorio(1);
     });
-    ['filtro-competencia', 'filtro-plano', 'filtro-situacao'].forEach(function (id) {
+    ['filtro-competencia', 'filtro-plano', 'filtro-situacao', 'filtro-cobranca-base'].forEach(function (id) {
       document.getElementById(id).addEventListener('change', function () {
         carregarRelatorio(1);
       });

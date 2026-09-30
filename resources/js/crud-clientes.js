@@ -247,5 +247,13 @@
       e.preventDefault();
       abrirPortalUsuarios(btn.getAttribute('data-cliente-id'), btn.getAttribute('data-cliente-nome') || '');
     });
+
+    var params = new URLSearchParams(window.location.search);
+    var editId = parseInt(params.get('editar') || '0', 10);
+    if (editId > 0 && typeof window.editar === 'function') {
+      setTimeout(function () {
+        window.editar(editId);
+      }, 150);
+    }
   });
 })();

@@ -8,6 +8,7 @@ use App\Common\OperadoraScope;
 use App\Model\Db\Database;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Cliente as EntityCliente;
+use App\Model\Entity\ClienteContrato;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use PDO;
 use App\Service\Inter\InterCobrancaService;
@@ -47,6 +48,7 @@ class FaturamentoService
                 'valor_residuos' => $calculo['valor_residuos'],
                 'valor_total' => $calculo['valor_total'],
                 'situacao' => $emitida ? 'emitida' : 'pendente',
+                'tem_contrato_ativo' => !empty($row['tem_contrato_ativo']),
                 'inter_cobranca_id' => $row['inter_cobranca_id'],
                 'inter_status' => $row['inter_status'],
                 'validacao' => InterPayloadBuilder::build(
@@ -76,6 +78,7 @@ class FaturamentoService
         $row = $db->execute(
             'SELECT COUNT(*) AS qtd
              FROM clientes c
+             '.self::faturamentoJoinContrato().'
              LEFT JOIN inter_cobrancas ic ON ic.cliente_id = c.id
                AND ic.competencia = ?
                AND ic.operadora_id = c.operadora_id
@@ -95,8 +98,10 @@ class FaturamentoService
         [$where, $params] = self::faturamentoWhere($competenciaYm, $filtros);
         $db = new Database();
         $stmt = $db->execute(
-            'SELECT c.*, p.nome AS plano_nome, ic.id AS inter_cobranca_id, ic.status AS inter_status
+            'SELECT c.*, p.nome AS plano_nome, ic.id AS inter_cobranca_id, ic.status AS inter_status,
+                    cc_ativo.id AS contrato_ativo_row_id
              FROM clientes c
+             '.self::faturamentoJoinContrato().'
              LEFT JOIN planos p ON p.id = c.plano_id AND p.operadora_id = c.operadora_id
              LEFT JOIN inter_cobrancas ic ON ic.cliente_id = c.id
                AND ic.competencia = ?
@@ -115,14 +120,25 @@ class FaturamentoService
                 'emitida' => !empty($row['inter_cobranca_id']),
                 'inter_cobranca_id' => isset($row['inter_cobranca_id']) ? (int)$row['inter_cobranca_id'] : null,
                 'inter_status' => isset($row['inter_status']) ? (string)$row['inter_status'] : null,
+                'tem_contrato_ativo' => !empty($row['contrato_ativo_row_id']),
             ];
         }
 
         return $items;
     }
 
+    private static function faturamentoJoinContrato(): string
+    {
+        if (!ClienteContrato::tabelaExiste()) {
+            return '';
+        }
+
+        return 'LEFT JOIN clientes_contratos cc_ativo ON cc_ativo.id = c.contrato_ativo_id
+             AND cc_ativo.operadora_id = c.operadora_id AND cc_ativo.status = \'ativo\'';
+    }
+
     /**
-     * @param array{plano_id?:int,situacao?:string,busca?:string} $filtros
+     * @param array{plano_id?:int,situacao?:string,busca?:string,cobranca_base?:string} $filtros
      * @return array{0:string,1:array<int,mixed>}
      */
     private static function faturamentoWhere(string $competenciaYm, array $filtros): array
@@ -150,6 +166,19 @@ class FaturamentoService
             $where .= ' AND ic.id IS NULL';
         } elseif ($situacaoFiltro === 'emitida') {
             $where .= ' AND ic.id IS NOT NULL';
+        }
+
+        if (ClienteContrato::tabelaExiste()) {
+            $where .= ' AND (cc_ativo.id IS NULL OR cc_ativo.primeira_competencia IS NULL'
+                ." OR cc_ativo.primeira_competencia = '' OR cc_ativo.primeira_competencia <= ?)";
+            $params[] = $competenciaYm;
+        }
+
+        $cobrancaBase = trim((string)($filtros['cobranca_base'] ?? ''));
+        if ($cobrancaBase === 'sem_contrato' && ClienteContrato::tabelaExiste()) {
+            $where .= ' AND cc_ativo.id IS NULL';
+        } elseif ($cobrancaBase === 'com_contrato' && ClienteContrato::tabelaExiste()) {
+            $where .= ' AND cc_ativo.id IS NOT NULL';
         }
 
         return [$where, $params];

@@ -395,13 +395,18 @@ HTML,
 <p>Menu <strong>Comercial → Contratos</strong> ou ícone de documento na listagem de <strong>Clientes</strong>.</p>
 <h4>Passo a passo — gerar contrato</h4>
 <ol>
-<li>Certifique-se de ter <strong>plano ativo</strong> com <strong>modelo de contrato</strong> definido (Cadastros → Planos).</li>
-<li>Em Contratos, selecione o cliente e clique em <strong>Criar</strong>, ou use Clientes → ícone de contrato → <strong>Novo contrato</strong>.</li>
-<li>Escolha plano, duração, valor mensal (opcional — padrão vem do plano), vencimento e 1ª competência.</li>
-<li>Salve como <strong>rascunho</strong> e revise a pré-visualização.</li>
-<li>Clique em <strong>Enviar para assinatura</strong> — status passa a <em>Aguardando assinatura</em>.</li>
-<li>O gerador assina em <strong>Portal do Gerador → Contrato</strong>. Após assinar, status fica <strong>Ativo</strong> e o plano do cliente é atualizado.</li>
+<li>Cadastre o <strong>cliente</strong> com responsável, CPF, RG e cargo (qualificação no contrato).</li>
+<li>Em <strong>Planos</strong>: modelo jurídico + itens de resíduo (franquia/excedente de referência).</li>
+<li><strong>Novo contrato</strong> (wizard): (1) plano → (2) marque os resíduos deste gerador → (3) <strong>valor mensal negociado</strong> → (4) revisão.</li>
+<li>Revise a pré-visualização; envie para <strong>assinatura</strong> quando estiver ok.</li>
+<li>O gerador assina no <strong>Portal do Gerador → Contrato</strong>. Contrato <strong>Ativo</strong> congela mensalidade e resíduos para fatura e PDF.</li>
 </ol>
+<h4>Faturamento</h4>
+<ul>
+<li>Com contrato assinado: mensalidade do contrato + excedentes dos resíduos marcados (snapshot).</li>
+<li>Sem contrato assinado: Pagamentos usa o plano vigente do cliente (badge <em>Só plano</em>).</li>
+<li>A 1ª competência do contrato define a partir de qual mês o cliente entra na lista de faturamento.</li>
+</ul>
 <h4>Status</h4>
 <ul>
 <li><strong>Rascunho:</strong> editável, ainda não visível para assinatura.</li>

@@ -59,6 +59,13 @@ $obRouter->get('/painel/contratos', [
     },
 ]);
 
+$obRouter->get('/painel/contratos/plano-itens', [
+    'middlewares' => ['required-admin-login', 'required-module:contratos'],
+    function ($request) {
+        return new Response(200, Admin\ContratosClientes::planoItensJson($request), 'application/json; charset=utf-8');
+    },
+]);
+
 $obRouter->get('/painel/contratos/modelos', [
     'middlewares' => ['required-admin-login', 'required-module:contratos'],
     function ($request) {

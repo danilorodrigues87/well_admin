@@ -1,17 +1,64 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">{{numero}}</h1>
+    {{alerta}}
     <p class="text-muted">{{cliente_nome}} · Status: <strong>{{status_label}}</strong></p>
     <div class="mb-3">{{acoes}}
         <a href="{{preview_url}}" target="_blank" class="btn btn-outline-primary ms-2">
             <i class="fas fa-print me-1"></i> Abrir em nova aba
         </a>
-        <a href="{{URL}}/painel/clientes/{{cliente_id}}/contratos" class="btn btn-outline-secondary ms-2">Voltar</a>
+        <a href="{{voltar_url}}" class="btn btn-outline-secondary ms-2">Voltar à listagem</a>
     </div>
-    <div class="card shadow">
-        <div class="card-header bg-white">Pré-visualização do contrato</div>
-        <div class="card-body p-0">
-            <iframe src="{{preview_url}}" title="Contrato {{numero}}" class="w-100 border-0" style="min-height: 720px;"></iframe>
+    <div class="row">
+        {{painel_lateral}}
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-white">Pré-visualização do contrato</div>
+                <div class="card-body p-0">
+                    <iframe src="{{preview_url}}" title="Contrato {{numero}}" class="w-100 border-0" style="min-height: 720px;"></iframe>
+                </div>
+            </div>
         </div>
     </div>
     {{modais}}
 </div>
+<script>
+(function () {
+    function limparModalBootstrap() {
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.querySelectorAll('.modal-backdrop').forEach(function (el) { el.remove(); });
+    }
+    document.querySelectorAll('.modal').forEach(function (modal) {
+        modal.addEventListener('hidden.bs.modal', limparModalBootstrap);
+    });
+    window.addEventListener('pageshow', limparModalBootstrap);
+})();
+</script>
+<script>
+(function () {
+    var btn = document.getElementById('btn_simular_fatura');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+        var out = document.getElementById('simular_fatura_out');
+        fetch(btn.getAttribute('data-url'), { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.success || !data.calculo) {
+                    out.textContent = 'Não foi possível simular.';
+                    out.classList.remove('d-none');
+                    return;
+                }
+                var c = data.calculo;
+                out.textContent = 'Fixo: R$ ' + c.valor_fixo.toFixed(2)
+                    + ' | Excedentes: R$ ' + c.valor_residuos.toFixed(2)
+                    + ' | Total: R$ ' + c.valor_total.toFixed(2);
+                out.classList.remove('d-none');
+            })
+            .catch(function () {
+                out.textContent = 'Erro ao simular fatura.';
+                out.classList.remove('d-none');
+            });
+    });
+})();
+</script>

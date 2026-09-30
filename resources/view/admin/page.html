@@ -81,5 +81,17 @@
     <script src="{{URL}}/resources/js/panel-theme.js"></script>
     <script src="{{URL}}/resources/js/panel-mobile.js?v=20260918a"></script>
     <script src="{{URL}}/resources/js/pwa-install.js?v=20260917"></script>
+    <script>
+    (function () {
+        function limparEstadoModalBootstrap() {
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+            document.querySelectorAll('.modal-backdrop').forEach(function (el) { el.remove(); });
+        }
+        document.addEventListener('hidden.bs.modal', limparEstadoModalBootstrap);
+        window.addEventListener('pageshow', limparEstadoModalBootstrap);
+    })();
+    </script>
 </body>
 </html>

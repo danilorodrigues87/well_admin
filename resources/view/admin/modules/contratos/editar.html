@@ -1,11 +1,17 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Personalizar contrato {{numero}}</h1>
-    <p class="text-muted">Valores congelados no snapshot comercial alimentam a cláusula de preço e o faturamento após assinatura.</p>
-    <form method="post" action="{{URL}}/painel/contratos/{{contrato_id}}/editar" class="card shadow p-4">
+    {{alerta}}
+    <p class="text-muted">Mensalidade negociada neste contrato. Franquia e excedente vêm do plano, apenas para os resíduos marcados abaixo.</p>
+    <form method="post" action="{{URL}}/painel/contratos/{{contrato_id}}/editar" class="card shadow p-4" id="form_contrato_editar">
         {{csrf_field}}
+        <input type="hidden" name="return" value="{{return_path}}">
         <div class="row g-3">
+            <div class="col-12">
+                <h2 class="h6">Resíduos deste gerador</h2>
+                <div id="itens_plano_editar"></div>
+            </div>
             <div class="col-md-3">
-                <label class="form-label">Valor mensal (R$)</label>
+                <label class="form-label">Valor mensal (R$) *</label>
                 <input type="text" name="valor_mensal" class="form-control" value="{{valor_mensal}}" required>
             </div>
             <div class="col-md-3">
@@ -41,7 +47,7 @@
             </div>
             <div class="col-12">
                 <label class="form-label">Promoção / desconto (HTML opcional)</label>
-                <textarea name="promocao_html" class="form-control font-monospace" rows="3" placeholder="Ex.: Parágrafo único com desconto 9%…">{{promocao_html}}</textarea>
+                <textarea name="promocao_html" class="form-control font-monospace" rows="3">{{promocao_html}}</textarea>
             </div>
             <div class="col-12">
                 <label class="form-label">Cláusulas extras (texto)</label>
@@ -50,13 +56,13 @@
             <div class="col-12">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="atualizar_snapshot" value="1" id="atualizar_snapshot" checked>
-                    <label class="form-check-label" for="atualizar_snapshot">Atualizar snapshot de itens do plano ao salvar (franquia/excedente)</label>
+                    <label class="form-check-label" for="atualizar_snapshot">Atualizar tarifas do plano nos resíduos marcados ao salvar</label>
                 </div>
             </div>
             <div class="col-12">
                 <div class="card bg-light">
                     <div class="card-body">
-                        <strong>Itens no snapshot atual</strong>
+                        <strong>Resumo atual (valores acordados)</strong>
                         {{snapshot_itens}}
                     </div>
                 </div>
@@ -64,12 +70,23 @@
         </div>
         <div class="mt-4 d-flex flex-wrap gap-2">
             <button type="submit" class="btn btn-primary">Salvar personalização</button>
-            <a href="{{URL}}/painel/contratos/{{contrato_id}}" class="btn btn-outline-secondary">Voltar</a>
+            <a href="{{voltar_url}}" class="btn btn-outline-secondary">Voltar</a>
         </div>
     </form>
     <form method="post" action="{{URL}}/painel/contratos/{{contrato_id}}/editar" class="mt-3">
         {{csrf_field}}
+        <input type="hidden" name="return" value="{{return_path}}">
         <input type="hidden" name="recarregar_snapshot" value="1">
-        <button type="submit" class="btn btn-sm btn-outline-primary">Recarregar só itens do plano (mantém valor mensal)</button>
+        <button type="submit" class="btn btn-sm btn-outline-primary">Recarregar tarifas do plano (mantém resíduos selecionados)</button>
     </form>
 </div>
+<script src="{{URL}}/resources/js/contrato-wizard.js"></script>
+<script>
+initContratoItensEditor({
+    url: '{{URL}}/painel/contratos/plano-itens',
+    planoId: {{plano_id}},
+    prefillRaw: {{prefill_tipo_ids}},
+    itensHost: '#itens_plano_editar',
+    form: '#form_contrato_editar'
+});
+</script>

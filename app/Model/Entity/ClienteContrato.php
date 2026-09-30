@@ -4,6 +4,7 @@ namespace App\Model\Entity;
 
 use App\Common\OperadoraScope;
 use App\Model\Db\Database;
+use App\Service\Contrato\ContratoComercialSnapshot;
 use App\Model\Entity\Concerns\TenantScoped;
 use PDO;
 
@@ -78,6 +79,52 @@ class ClienteContrato
         return is_array($row);
     }
 
+    public static function getAtivoPorCliente(int $clienteId): ?self
+    {
+        if ($clienteId <= 0 || !self::tabelaExiste()) {
+            return null;
+        }
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT cc.*, c.nome_fantasia AS cliente_nome, p.nome AS plano_nome
+             FROM clientes c
+             INNER JOIN clientes_contratos cc ON cc.id = c.contrato_ativo_id
+             WHERE c.id = ? AND c.operadora_id = ? AND cc.status = ? LIMIT 1',
+            [$clienteId, OperadoraScope::getOperadoraId(), 'ativo']
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? self::fromArray($row) : null;
+    }
+
+    public static function getUltimoRascunho(int $clienteId): ?self
+    {
+        if ($clienteId <= 0) {
+            return null;
+        }
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT cc.*, c.nome_fantasia AS cliente_nome, p.nome AS plano_nome
+             FROM clientes_contratos cc
+             INNER JOIN clientes c ON c.id = cc.cliente_id
+             LEFT JOIN planos p ON p.id = cc.plano_id
+             WHERE cc.cliente_id = ? AND cc.operadora_id = ? AND cc.status = ?
+             ORDER BY cc.id DESC LIMIT 1',
+            [$clienteId, OperadoraScope::getOperadoraId(), 'rascunho']
+        )->fetch(PDO::FETCH_ASSOC);
+
+        return is_array($row) ? self::fromArray($row) : null;
+    }
+
+    /** @return array{ativo:?self,pendente:?self,rascunho:?self} */
+    public static function situacaoCliente(int $clienteId): array
+    {
+        return [
+            'ativo' => self::getAtivoPorCliente($clienteId),
+            'pendente' => self::getPendenteAssinatura($clienteId),
+            'rascunho' => self::getUltimoRascunho($clienteId),
+        ];
+    }
+
     public static function getPendenteAssinatura(int $clienteId): ?self
     {
         if ($clienteId <= 0) {
@@ -95,6 +142,32 @@ class ClienteContrato
         )->fetch(PDO::FETCH_ASSOC);
 
         return is_array($row) ? self::fromArray($row) : null;
+    }
+
+    /** Tipos do último contrato do cliente (para pré-seleção na criação). @return list<int> */
+    public static function ultimoSnapshotTipoResiduoIds(int $clienteId): array
+    {
+        if ($clienteId <= 0 || !self::tabelaExiste()) {
+            return [];
+        }
+        $db = new Database();
+        $row = $db->execute(
+            'SELECT comercial_snapshot_json FROM clientes_contratos
+             WHERE cliente_id = ? AND operadora_id = ?
+             ORDER BY id DESC LIMIT 1',
+            [$clienteId, OperadoraScope::getOperadoraId()]
+        )->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($row)) {
+            return [];
+        }
+        $json = $row['comercial_snapshot_json'] ?? null;
+        if (!is_string($json) || trim($json) === '') {
+            return [];
+        }
+
+        return ContratoComercialSnapshot::tipoResiduoIdsFromSnapshot(
+            ContratoComercialSnapshot::decode($json)
+        );
     }
 
     public static function getById(int $id): ?self
@@ -134,13 +207,18 @@ class ClienteContrato
     }
 
     /** @return self[] */
-    public static function listAll(?int $clienteId = null, int $limit = 200): array
+    public static function listAll(?int $clienteId = null, ?string $status = null, int $limit = 200): array
     {
         $where = 'cc.operadora_id = ?';
         $params = self::tenantIdParams();
         if ($clienteId !== null && $clienteId > 0) {
             $where .= ' AND cc.cliente_id = ?';
             $params[] = $clienteId;
+        }
+        $status = trim((string)$status);
+        if ($status !== '') {
+            $where .= ' AND cc.status = ?';
+            $params[] = $status;
         }
 
         $db = new Database();

@@ -5,8 +5,10 @@ namespace App\Controller\Admin;
 use App\Common\Helpers\CrudHelper;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Cliente as EntityCliente;
+use App\Model\Entity\ClienteContrato;
 use App\Model\Entity\ClienteUsuario;
 use App\Model\Entity\Plano as EntityPlano;
+use App\Common\Helpers\FormatHelper;
 use App\Service\GoogleMapsService;
 use App\Utils\View;
 
@@ -31,7 +33,7 @@ class Clientes extends Page
             'planos_options_modal' => self::planosOptions(false),
         ]);
         $scripts = self::crudScripts('/painel/clientes')
-            .'<script src="'.URL.'/resources/js/crud-clientes.js?v=20260916h"></script>';
+            .'<script src="'.URL.'/resources/js/crud-clientes.js?v=20260930a"></script>';
 
         return self::getPage('Clientes', $content, 'clientes', $scripts);
     }
@@ -134,7 +136,45 @@ class Clientes extends Page
             'latitude' => $c->latitude,
             'longitude' => $c->longitude,
             'geocode_status' => $c->geocode_status,
+            'contrato_painel_html' => self::contratoPainelHtml($c->id),
         ]);
+    }
+
+    public static function contratoPainelHtml(int $clienteId): string
+    {
+        if ($clienteId <= 0 || !ClienteContrato::tabelaExiste()) {
+            return '';
+        }
+
+        $sit = ClienteContrato::situacaoCliente($clienteId);
+        $html = '<div class="border rounded p-3 bg-light">';
+        $html .= '<strong class="d-block mb-2"><i class="fas fa-file-signature me-1"></i> Contrato comercial</strong>';
+
+        if ($sit['ativo'] !== null) {
+            $c = $sit['ativo'];
+            $html .= '<p class="small mb-2"><span class="badge bg-success">Ativo</span> '
+                .htmlspecialchars($c->numero, ENT_QUOTES, 'UTF-8')
+                .' · '.FormatHelper::money($c->valor_mensal).'/mês</p>';
+            $html .= '<a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/contratos/'.$c->id.'">Ver contrato</a>';
+        } elseif ($sit['pendente'] !== null) {
+            $c = $sit['pendente'];
+            $html .= '<p class="small mb-2"><span class="badge bg-warning text-dark">Aguardando assinatura</span> '
+                .htmlspecialchars($c->numero, ENT_QUOTES, 'UTF-8').'</p>';
+            $html .= '<a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/contratos/'.$c->id.'">Abrir</a>';
+        } elseif ($sit['rascunho'] !== null) {
+            $c = $sit['rascunho'];
+            $html .= '<p class="small mb-2"><span class="badge bg-secondary">Rascunho</span> '
+                .htmlspecialchars($c->numero, ENT_QUOTES, 'UTF-8').'</p>';
+            $html .= '<a class="btn btn-sm btn-primary" href="'.URL.'/painel/contratos/'.$c->id.'">Continuar rascunho</a>';
+        } else {
+            $html .= '<p class="small text-muted mb-2">Nenhum contrato em andamento.</p>';
+            $html .= '<a class="btn btn-sm btn-primary" href="'.URL.'/painel/clientes/'.$clienteId.'/contrato/novo">Novo contrato</a>';
+        }
+
+        $html .= ' <a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/clientes/'.$clienteId.'/contratos">Histórico</a>';
+        $html .= '</div>';
+
+        return $html;
     }
 
     public static function save($request): string

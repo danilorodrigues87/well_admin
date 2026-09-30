@@ -1,17 +1,20 @@
-<div class="container-fluid px-4">
+<div class="container-fluid px-4" id="contratos_index_page">
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 mb-3 gap-2">
         <div>
             <h1 class="mb-1">Contratos comerciais</h1>
-            <p class="text-muted mb-0">Gere contratos vinculados a planos e envie para assinatura do gerador no portal.</p>
+            <p class="text-muted mb-0">Plano + resíduos do gerador + mensalidade negociada → assinatura no portal.</p>
         </div>
         <a href="{{URL}}/painel/contratos/modelos" class="btn btn-outline-secondary">
-            <i class="fas fa-file-code me-1"></i> Modelos jurídicos
+            <i class="fas fa-file-code me-1"></i> Textos padrão (jurídico)
         </a>
     </div>
+
+    {{status_tabs}}
 
     <div class="card shadow mb-4">
         <div class="card-body">
             <form method="get" action="{{URL}}/painel/contratos" class="row g-3 align-items-end">
+                <input type="hidden" name="status" value="{{status_hidden}}">
                 <div class="col-md-8">
                     <label class="form-label">Filtrar por cliente</label>
                     <select name="cliente_id" class="form-select" onchange="this.form.submit()">
@@ -32,11 +35,6 @@
         </div>
     </div>
 
-    <div class="alert alert-info">
-        <strong>Como funciona:</strong> defina o <em>modelo de contrato</em> em Cadastros → Planos, escolha o cliente, crie o contrato, revise e clique em
-        <em>Enviar para assinatura</em>. O gerador assina em <strong>Portal do Gerador → Contrato</strong>.
-    </div>
-
     <div class="card shadow">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
@@ -45,9 +43,11 @@
                         <th>Número</th>
                         <th>Cliente</th>
                         <th>Plano</th>
+                        <th>Modelo</th>
                         <th>Valor/mês</th>
                         <th>Vigência</th>
                         <th>Status</th>
+                        <th>Assinatura pendente</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -58,6 +58,26 @@
 </div>
 <script>
 (function () {
+    var root = document.getElementById('contratos_index_page');
+    if (root) {
+        var storageKey = 'well_contratos_list_q';
+        var q = window.location.search.replace(/^\?/, '');
+        if (q) {
+            try { sessionStorage.setItem(storageKey, q); } catch (e) {}
+        } else {
+            var fromContrato = /\/painel\/contratos\/\d+/.test(document.referrer || '')
+                || /\/contrato\/novo/.test(document.referrer || '');
+            if (fromContrato) {
+                try {
+                    var saved = sessionStorage.getItem(storageKey);
+                    if (saved) {
+                        window.location.replace(window.location.pathname + '?' + saved);
+                        return;
+                    }
+                } catch (e2) {}
+            }
+        }
+    }
     var btn = document.getElementById('btn_novo_contrato');
     var sel = document.getElementById('cliente_novo_contrato');
     if (!btn || !sel) return;
@@ -67,7 +87,8 @@
             alert('Selecione um cliente para criar o contrato.');
             return;
         }
-        window.location.href = '{{URL}}/painel/clientes/' + id + '/contrato/novo';
+        var rq = '{{return_query}}';
+        window.location.href = '{{URL}}/painel/clientes/' + id + '/contrato/novo' + (rq ? '?' + rq : '');
     });
 })();
 </script>

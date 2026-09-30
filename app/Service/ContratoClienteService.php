@@ -86,7 +86,13 @@ class ContratoClienteService
         $valorMensal = (float)$insert['valor_mensal'];
         $slug = ContractType::normalize($plano->contrato_modelo_tipo ?? ContractType::GENERICO);
         $modelo = $slug !== ContractType::GENERICO ? ContratoModelo::resolveAtivo(OperadoraScope::getOperadoraId(), $slug) : null;
-        $snapshot = ContratoComercialSnapshot::fromPlano($planoId, $valorMensal, $taxaAdesao);
+        $tipoIds = self::parseTipoResiduoIds($dados['itens_tipo_residuo_id'] ?? null);
+        if ($tipoIds === [] && !empty($dados['exigir_itens_selecionados'])) {
+            return 0;
+        }
+        $snapshot = $tipoIds !== []
+            ? ContratoComercialSnapshot::fromPlanoItensSelecionados($planoId, $tipoIds, $valorMensal, $taxaAdesao)
+            : ContratoComercialSnapshot::fromPlano($planoId, $valorMensal, $taxaAdesao);
 
         $insertExtended['comercial_snapshot_json'] = ContratoComercialSnapshot::encode($snapshot);
         if ($modelo !== null) {
@@ -306,14 +312,48 @@ class ContratoClienteService
             $update['dia_vencimento'] = (int)$dados['dia_vencimento'];
         }
 
-        if (isset($update['valor_mensal']) || !empty($dados['atualizar_snapshot'])) {
+        $tipoIdsPost = array_key_exists('itens_tipo_residuo_id', $dados)
+            ? self::parseTipoResiduoIds($dados['itens_tipo_residuo_id'])
+            : null;
+
+        if ($tipoIdsPost !== null || isset($update['valor_mensal']) || !empty($dados['atualizar_snapshot'])) {
             $plano = Plano::getById($contrato->plano_id);
             if ($plano) {
                 $valor = (float)($update['valor_mensal'] ?? $contrato->valor_mensal);
                 $taxa = array_key_exists('taxa_adesao', $update)
                     ? (float)$update['taxa_adesao']
                     : $contrato->taxa_adesao;
-                $snap = ContratoComercialSnapshot::fromPlano($contrato->plano_id, $valor, $taxa);
+                if ($tipoIdsPost !== null) {
+                    if ($tipoIdsPost === [] && !empty($dados['exigir_itens_selecionados'])) {
+                        return false;
+                    }
+                    $snap = $tipoIdsPost !== []
+                        ? ContratoComercialSnapshot::fromPlanoItensSelecionados(
+                            $contrato->plano_id,
+                            $tipoIdsPost,
+                            $valor,
+                            $taxa
+                        )
+                        : ContratoComercialSnapshot::fromPlano($contrato->plano_id, $valor, $taxa);
+                } elseif (!empty($dados['atualizar_snapshot'])) {
+                    $existing = ContratoComercialSnapshot::decode($contrato->comercial_snapshot_json);
+                    $ids = ContratoComercialSnapshot::tipoResiduoIdsFromSnapshot($existing);
+                    $snap = $ids !== []
+                        ? ContratoComercialSnapshot::fromPlanoItensSelecionados(
+                            $contrato->plano_id,
+                            $ids,
+                            $valor,
+                            $taxa
+                        )
+                        : ContratoComercialSnapshot::fromPlano($contrato->plano_id, $valor, $taxa);
+                } else {
+                    $existing = ContratoComercialSnapshot::decode($contrato->comercial_snapshot_json) ?? [];
+                    $existing['valor_mensal'] = round($valor, 2);
+                    if ($taxa !== null) {
+                        $existing['taxa_adesao'] = round($taxa, 2);
+                    }
+                    $snap = $existing;
+                }
                 $update['comercial_snapshot_json'] = ContratoComercialSnapshot::encode($snap);
             }
         }
@@ -338,15 +378,40 @@ class ContratoClienteService
         if (!$contrato || !in_array($contrato->status, ['rascunho', 'aguardando_assinatura'], true)) {
             return false;
         }
-        $snap = ContratoComercialSnapshot::fromPlano(
-            $contrato->plano_id,
-            $contrato->valor_mensal,
-            $contrato->taxa_adesao
-        );
+        $existing = ContratoComercialSnapshot::decode($contrato->comercial_snapshot_json);
+        if ($existing !== null) {
+            $snap = ContratoComercialSnapshot::refreshItensTarifasFromPlano($existing);
+        } else {
+            $snap = ContratoComercialSnapshot::fromPlano(
+                $contrato->plano_id,
+                $contrato->valor_mensal,
+                $contrato->taxa_adesao
+            );
+        }
         ClienteContrato::update($contratoId, [
             'comercial_snapshot_json' => ContratoComercialSnapshot::encode($snap),
         ]);
 
         return true;
+    }
+
+    /** @param mixed $raw @return list<int> */
+    public static function parseTipoResiduoIds(mixed $raw): array
+    {
+        if ($raw === null) {
+            return [];
+        }
+        if (!is_array($raw)) {
+            $raw = [$raw];
+        }
+        $ids = [];
+        foreach ($raw as $v) {
+            $id = (int)$v;
+            if ($id > 0) {
+                $ids[$id] = $id;
+            }
+        }
+
+        return array_values($ids);
     }
 }

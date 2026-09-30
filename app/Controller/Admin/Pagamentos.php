@@ -77,7 +77,7 @@ class Pagamentos extends Page
         ], $cfg));
 
         $scripts = self::crudScripts('/painel/pagamentos', false)
-            .'<script src="'.URL.'/resources/js/pagamentos.js?v=20260916f"></script>';
+            .'<script src="'.URL.'/resources/js/pagamentos.js?v=20260930c"></script>';
 
         return self::getPage('Pagamentos', $content, 'pagamentos', $scripts);
     }
@@ -94,6 +94,7 @@ class Pagamentos extends Page
             'plano_id' => (int)($post['plano_id'] ?? 0),
             'situacao' => trim((string)($post['situacao'] ?? '')),
             'busca' => trim((string)($post['busca'] ?? '')),
+            'cobranca_base' => trim((string)($post['cobranca_base'] ?? '')),
         ];
 
         $page = max(1, (int)($post['page'] ?? 1));
@@ -109,10 +110,13 @@ class Pagamentos extends Page
             $aviso = $row['validacao']
                 ? '<span class="badge bg-danger ms-1" title="'.CrudHelper::e((string)$row['validacao']).'">!</span>'
                 : '';
+            $badgeContrato = empty($row['tem_contrato_ativo'])
+                ? ' <span class="badge bg-info" title="Mensalidade e itens vêm do plano vigente (sem contrato assinado)">Só plano</span>'
+                : '';
 
             $itens .= '<tr data-cliente-id="'.(int)$row['cliente_id'].'">
                 <td><input type="checkbox" class="form-check-input chk-cliente" value="'.(int)$row['cliente_id'].'" '.$checked.' '.$disabled.'/></td>
-                <td>'.CrudHelper::e((string)$row['cliente_nome']).$aviso.'</td>
+                <td>'.CrudHelper::e((string)$row['cliente_nome']).$badgeContrato.$aviso.'</td>
                 <td>'.CrudHelper::e((string)$row['plano_nome']).'</td>
                 <td class="text-end">R$ '.number_format((float)$row['valor_fixo'], 2, ',', '.').'</td>
                 <td class="text-end">R$ '.number_format((float)$row['valor_residuos'], 2, ',', '.').'</td>
