@@ -75,6 +75,12 @@ Todas usam variável `baseUrl` → mapear para **App State `apiBaseUrl`** em cad
 
 Contratos completos: [API.md](API.md)
 
+### Dashboard — layout manual (FF Design)
+
+**Não** depender de MCP para árvore de widgets do Dashboard. Você cola/refaz a tela no editor; o backend já expõe `GET /dashboard/resumo`.
+
+Guia passo a passo (só API + JSON paths): **[FLUTTERFLOW_DASHBOARD_BASICO.md](FLUTTERFLOW_DASHBOARD_BASICO.md)**.
+
 ---
 
 ## Sprint 2.1 — Telas Login + Splash + Home ✅ (via MCP)
@@ -89,7 +95,7 @@ Contratos completos: [API.md](API.md)
 | **ClientesColetaPage** | ListView API clientes + filtros + iniciar coleta → wizard |
 | **ColetaWizardPage** | Mínima: carrega detalhe da coleta (cliente + status) |
 | **ColetasListPage** | Stub: título (ligar API + filtros — Sprint 2.2) |
-| **Dashboard** | **WellAdmin Dashboard Resumo** (schema v2: `cards`, `atalhos`, `atividades`) |
+| **Dashboard** | Layout FF Design (manual); API **WellAdmin Dashboard Resumo** — ver [FLUTTERFLOW_DASHBOARD_BASICO.md](FLUTTERFLOW_DASHBOARD_BASICO.md) |
 | **AgendamentosPage** | Stub (ligar **WellAdmin Agendamentos**) |
 | **PerfilPage** | Stub (ligar **WellAdmin Perfil** + senha) |
 
@@ -236,13 +242,15 @@ API Calls já existem no projeto (**25**). O MCP **não** liga páginas nem List
 
 ### Dashboard — KPIs, gráficos e atividade
 
-1. **WellAdmin Dashboard Resumo** no load (pull-to-refresh opcional).
-2. **ListView / GridView de KPIs** (preferível): iterar `$.data.cards[]` → `label`, `value`, `hint`, `accent`, `module`.
-   - Fallback legado: campos em `$.data.kpis` (`coletas_hoje`, `coletas_mes`, `paradas_hoje`, `urgentes`, `atrasados`, …).
-3. **Atalhos rápidos:** `$.data.atalhos[]` — exibir chip se `userModulesCsv` contém `slug` (ou confiar na lista já filtrada pela API).
-4. **BarChart:** `$.data.graficos.coletas_por_mes.labels` / `.values`.
-5. **Donut (gestor, opcional):** `$.data.graficos.coletas_por_status` se existir.
-6. **Atividade recente:** `$.data.atividades[]` → navegar para `CollectionDetail` com `ref_id` quando `tipo == coleta`.
+1. **WellAdmin Dashboard Resumo** no `ON_INIT_STATE`: `actdash001` (API) → **`actdash002` único** (Update **Page** State — o painel de erros do FF pode chamar “App State” genericamente).
+2. **JSON Paths no endpoint** `WellAdmin Dashboard Resumo` (`kpiColetasHoje`, `kpiRascunhos`, `kpiUrgentes`, `kpiParadas`) — mesmo padrão do login; no Action Flow use **JSON Body** + path ou o picker do endpoint.
+3. **Page State KPIs:** tipo **Integer** (`dsh001`–`dsh004`); nos cards, `numberFormat` `#` só na **leitura** do parâmetro `value`.
+4. **KpiCard na página:** **~47% largura** + **`UNEXPANDED`** (não `Expanded` na `Row` — o FF reverte e pode crashar layout).
+4. **BarChart:** no projeto atual usa **placeholder** (Jan–Jun / zeros) para não quebrar com listas vazias; ligar à API via Custom Function ou após garantir listas default de 6 itens em `chartLabels` / `chartValues`.
+5. **ListView / GridView de KPIs** (evolução): iterar `$.data.cards[]` → `label`, `value`, `hint`, `accent`, `module`.
+6. **Atalhos rápidos:** `$.data.atalhos[]` — exibir chip se `userModulesCsv` contém `slug` (ou confiar na lista já filtrada pela API).
+7. **Donut (gestor, opcional):** `$.data.graficos.coletas_por_status` se existir.
+8. **Atividade recente:** `$.data.atividades[]` → navegar para `CollectionDetail` com `ref_id` quando `tipo == coleta`.
 
 ### Salvar ordem da rota (gestor)
 

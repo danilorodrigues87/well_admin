@@ -293,6 +293,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-30 | Contratos UX: wizard (plano → resíduos marcados → mensalidade → revisão); snapshot filtrado `ContratoComercialSnapshot::fromPlanoItensSelecionados`; listagem por status; painel cobrança/simulação na tela do contrato |
 | 2026-09-30 | Contratos/faturamento: `primeira_competencia` no faturamento; badge e filtro «Só plano» em Pagamentos; bloco contrato no modal Clientes; `ContratoPreRequisitosService`; help `mod-contratos` atualizado |
 | 2026-09-30 | API app: `GET /dashboard/resumo` estendido (`DashboardAppPresenter`) — KPIs alinhados ao admin Operação, `cards`, `atalhos`, `atividades`, gráfico `coletas_por_status` |
+| 2026-09-30 | App FF: Dashboard layout deixado ao FF Design (manual); doc `docs/FLUTTERFLOW_DASHBOARD_BASICO.md`; limpeza dumps MCP em `storage/ff-yaml/` |
 | 2026-09-29 | CRUD modelos (`ContratoModelos`), personalização contrato (`/editar`), seed derivado RECICLÁVEIS/RSS/PNEUS a partir de Classe I |
 | 2026-09-29 | Operação coletas: Rota do dia / Lançar coleta por data (proxima_coleta ou urgente); coletor filtra rota; excluir rota/coleta rascunho; PDF relatório (`?print=1`); agendamento só via rota inteira (sem coleta avulsa) |
 | 2026-09-29 | Dashboard admin: KPIs por módulo (coletas hoje, paradas hoje, financeiro competência, gráfico emitido vs recebido); coletor vê escopo próprio em coletas/MTR |

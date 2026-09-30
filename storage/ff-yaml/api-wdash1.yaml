@@ -1,0 +1,77 @@
+identifier:
+  name: WellAdmin Dashboard Resumo
+  key: wdash1
+url: "[baseUrl]/dashboard/resumo"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+jsonPathDefinitions:
+  - identifier:
+      name: kpiColetasHoje
+      key: dkpi01
+    jsonPath:
+      jsonPath: $.data.kpis.coletas_hoje
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+  - identifier:
+      name: kpiRascunhos
+      key: dkpi02
+    jsonPath:
+      jsonPath: $.data.kpis.rascunhos
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+  - identifier:
+      name: kpiUrgentes
+      key: dkpi03
+    jsonPath:
+      jsonPath: $.data.kpis.urgentes
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+  - identifier:
+      name: kpiParadas
+      key: dkpi04
+    jsonPath:
+      jsonPath: $.data.kpis.paradas_hoje
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001

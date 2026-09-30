@@ -19,7 +19,7 @@
 |---|-----------|-------------|------------|--------|
 | 1 | SplashPage | Scaffold_splsh01 | Não | Gate token → Login ou app |
 | 2 | LoginPage | Scaffold_7zli0let | Não | Auth (parcialmente ligado) |
-| 3 | Dashboard | Scaffold_fs0lmdne | BottomNav | Início / KPIs / atalhos |
+| 3 | Dashboard | (FF Design — ID muda ao recriar) | Conforme design | KPIs via `GET /dashboard/resumo` — [FLUTTERFLOW_DASHBOARD_BASICO.md](FLUTTERFLOW_DASHBOARD_BASICO.md) |
 | 4 | CollectionsList | Scaffold_2lf7puaq | BottomNav2 + FAB | Lista coletas/MTR |
 | 5 | CollectionDetail | Scaffold_ukmzuhl4 | BottomNav3 | Detalhe coleta |
 | 6 | NewCollectionClientSelection | Scaffold_y00hrwko | Não | Escolher cliente |
@@ -43,7 +43,7 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 |-----------|-------------------|-------------|---------------|------------------|
 | **SplashPage** | — | App State `authToken` | — | Navigate Login / Dashboard |
 | **LoginPage** | (login exige ≥1 módulo app) | `POST /auth/login` | WellAdmin Login | Gravar token, userId, userName; **faltam** isAdmin, funcaoNome, userModulesCsv, operadora |
-| **Dashboard** | `dashboard` | `GET /dashboard/resumo` | Dashboard Resumo | KPIs via `cards[]` + `kpis`; BarChart `coletas_por_mes`; donut `coletas_por_status`; `atalhos[]`; `atividades[]` |
+| **Dashboard** | `dashboard` | `GET /dashboard/resumo` | Dashboard Resumo | MVP: 4 KPIs em `kpis.*`; depois `cards[]`, gráficos, `atalhos[]`, `atividades[]` (doc básico) |
 | **Dashboard** (chip Nova Coleta) | `coleta_nova` | — | — | → NewCollectionClientSelection |
 | **Dashboard** (chip Minhas Coletas) | `coletas` | — | — | → CollectionsList |
 | **Dashboard** (chip Agendamentos) | `agendamentos` | `GET /agendamentos` | Agendamentos | **Falta página** AgendamentosList |
