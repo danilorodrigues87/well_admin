@@ -89,6 +89,7 @@ class ClienteContrato
             'SELECT cc.*, c.nome_fantasia AS cliente_nome, p.nome AS plano_nome
              FROM clientes c
              INNER JOIN clientes_contratos cc ON cc.id = c.contrato_ativo_id
+             LEFT JOIN planos p ON p.id = cc.plano_id
              WHERE c.id = ? AND c.operadora_id = ? AND cc.status = ? LIMIT 1',
             [$clienteId, OperadoraScope::getOperadoraId(), 'ativo']
         )->fetch(PDO::FETCH_ASSOC);
