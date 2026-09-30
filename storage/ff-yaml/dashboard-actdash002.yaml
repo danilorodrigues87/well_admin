@@ -1,0 +1,197 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: kpiColetasHoje
+        key: dsh001
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.coletas_hoje
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiRascunhos
+        key: dsh002
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.rascunhos
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiUrgentes
+        key: dsh003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.urgentes
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiParadas
+        key: dsh004
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.paradas_hoje
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: chartLabels
+        key: dsh020
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.graficos.coletas_por_mes.labels
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: chartValues
+        key: dsh021
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.graficos.coletas_por_mes.values
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: actTitle
+        key: dsh030
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.atividades[0].titulo
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: actTime
+        key: dsh031
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.atividades[0].data_hora
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: actStatus
+        key: dsh032
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.atividades[0].tipo
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actdash002

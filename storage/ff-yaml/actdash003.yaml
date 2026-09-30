@@ -1,0 +1,74 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: kpiRascunhos
+        key: dsh002
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.rascunhos
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiUrgentes
+        key: dsh003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.urgentes
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiParadas
+        key: dsh004
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.paradas_hoje
+            - numberFormat:
+                formatType: CUSTOM
+                customFormat: "#"
+          nodeKeyRef:
+            key: Scaffold_aza1jrkh
+          actionComponentKeyRef: {}
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actdash003

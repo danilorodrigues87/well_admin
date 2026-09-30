@@ -55,9 +55,21 @@ Matriz **página → API → RBAC** e inventário `components/*_comp`: [FLUTTERF
 
 **App State** (persistido): inclui `operadoraId`, `operadoraNome`, `rotaData`, `shareGpsEnabled`.
 
-**Dashboard Resumo** — usar resposta bruta ou JSON Path: `$.data.kpis.*`, `$.data.graficos.coletas_por_mes.labels` / `.values`.
+**Dashboard Resumo** (schema v2 — após deploy do PHP em produção):
 
-Todas usam variável `baseUrl` → mapear para **App State `apiBaseUrl`** em cada chamada.
+| Uso no FF | JSON Path (resposta `success: true`) |
+|-----------|--------------------------------------|
+| Versão | `$.data.meta.schema_version` (= 2) |
+| KPIs legado | `$.data.kpis.coletas_hoje`, `coletas_mes`, `rascunhos`, `paradas_hoje`, `urgentes`, `atrasados`, … |
+| Grid de cards | Lista `$.data.cards` → `label`, `value`, `hint`, `accent`, `key`, `module` |
+| Atalhos (chips) | Lista `$.data.atalhos` → `slug`, `label`, `target` |
+| Gráfico barras | `$.data.graficos.coletas_por_mes.labels` / `.values` |
+| Gráfico rosca | `$.data.graficos.coletas_por_status.labels` / `.values` (se existir) |
+| Atividade recente | Lista `$.data.atividades` → `titulo`, `subtitulo`, `data_hora`, `ref_id`, `tipo` |
+
+Header: `Authorization: Bearer [authToken]`. URL produção: `https://admin.well.eco.br/api/v1/dashboard/resumo` (Test API do FF **só funciona** após o backend novo estar no VPS — não use `localhost` no celular).
+
+Todas usam variável `baseUrl` → mapear para **App State `apiBaseUrl`** em cada chamada (default produção).
 
 **Coletas Listar** inclui query `busca` além de `status`, `page`, `per_page`.
 
@@ -77,7 +89,7 @@ Contratos completos: [API.md](API.md)
 | **ClientesColetaPage** | ListView API clientes + filtros + iniciar coleta → wizard |
 | **ColetaWizardPage** | Mínima: carrega detalhe da coleta (cliente + status) |
 | **ColetasListPage** | Stub: título (ligar API + filtros — Sprint 2.2) |
-| **DashboardPage** | Stub (ligar **WellAdmin Dashboard Resumo**) |
+| **Dashboard** | **WellAdmin Dashboard Resumo** (schema v2: `cards`, `atalhos`, `atividades`) |
 | **AgendamentosPage** | Stub (ligar **WellAdmin Agendamentos**) |
 | **PerfilPage** | Stub (ligar **WellAdmin Perfil** + senha) |
 
@@ -222,11 +234,15 @@ API Calls já existem no projeto (**25**). O MCP **não** liga páginas nem List
 1. **WellAdmin Frota Posicoes** (`minutos` = 120).
 2. Markers no Google Map: iterar `$.data.items` (ver [API.md](API.md) estrutura).
 
-### Dashboard — gráfico
+### Dashboard — KPIs, gráficos e atividade
 
-1. **WellAdmin Dashboard Resumo** no load.
-2. Chart **BarChart**: eixo X ← `$.data.graficos.coletas_por_mes.labels`, valores ← `.values`.
-3. KPI cards ← `$.data.kpis` (`coletas_mes`, `paradas_hoje`, …).
+1. **WellAdmin Dashboard Resumo** no load (pull-to-refresh opcional).
+2. **ListView / GridView de KPIs** (preferível): iterar `$.data.cards[]` → `label`, `value`, `hint`, `accent`, `module`.
+   - Fallback legado: campos em `$.data.kpis` (`coletas_hoje`, `coletas_mes`, `paradas_hoje`, `urgentes`, `atrasados`, …).
+3. **Atalhos rápidos:** `$.data.atalhos[]` — exibir chip se `userModulesCsv` contém `slug` (ou confiar na lista já filtrada pela API).
+4. **BarChart:** `$.data.graficos.coletas_por_mes.labels` / `.values`.
+5. **Donut (gestor, opcional):** `$.data.graficos.coletas_por_status` se existir.
+6. **Atividade recente:** `$.data.atividades[]` → navegar para `CollectionDetail` com `ref_id` quando `tipo == coleta`.
 
 ### Salvar ordem da rota (gestor)
 

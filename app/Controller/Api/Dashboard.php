@@ -4,20 +4,17 @@ namespace App\Controller\Api;
 
 use App\Common\Helpers\ApiHelper;
 use App\Http\ApiContext;
-use App\Service\DashboardService;
+use App\Service\DashboardAppPresenter;
 
 class Dashboard extends BaseApi
 {
     public static function resumo($request): \App\Http\Response
     {
-        $userId = ApiContext::userId();
-        $isAdmin = ApiContext::isAdmin();
+        $user = ApiContext::user();
+        if ($user === null) {
+            return ApiHelper::fail('unauthorized', 'Não autenticado.', 401);
+        }
 
-        return ApiHelper::ok([
-            'kpis' => DashboardService::kpisColetor($userId, $isAdmin),
-            'graficos' => [
-                'coletas_por_mes' => DashboardService::coletasPorMesColetor($userId, $isAdmin, 6),
-            ],
-        ]);
+        return ApiHelper::ok(DashboardAppPresenter::resumo($user));
     }
 }

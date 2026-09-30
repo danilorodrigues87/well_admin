@@ -43,12 +43,12 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 |-----------|-------------------|-------------|---------------|------------------|
 | **SplashPage** | — | App State `authToken` | — | Navigate Login / Dashboard |
 | **LoginPage** | (login exige ≥1 módulo app) | `POST /auth/login` | WellAdmin Login | Gravar token, userId, userName; **faltam** isAdmin, funcaoNome, userModulesCsv, operadora |
-| **Dashboard** | `dashboard` | `GET /dashboard/resumo` | Dashboard Resumo | KPIs; gráfico BarChart precisa **PLAN** `graficos.coletas_por_mes`; atalhos RBAC |
+| **Dashboard** | `dashboard` | `GET /dashboard/resumo` | Dashboard Resumo | KPIs via `cards[]` + `kpis`; BarChart `coletas_por_mes`; donut `coletas_por_status`; `atalhos[]`; `atividades[]` |
 | **Dashboard** (chip Nova Coleta) | `coleta_nova` | — | — | → NewCollectionClientSelection |
 | **Dashboard** (chip Minhas Coletas) | `coletas` | — | — | → CollectionsList |
 | **Dashboard** (chip Agendamentos) | `agendamentos` | `GET /agendamentos` | Agendamentos | **Falta página** AgendamentosList |
 | **Dashboard** (chip Ver Rota) | `rota_dia` | — | — | → RouteOfTheDay |
-| **Dashboard** (ActivityItem) | `dashboard` / `rota_dia` | resumo ou paradas | — | Dados mock — ligar API |
+| **Dashboard** (ActivityItem) | `dashboard` / `coletas` | `GET /dashboard/resumo` → `atividades[]` | Dashboard Resumo | ListView `ref_id` → CollectionDetail |
 | **CollectionsList** | `coletas` | `GET /coletas` | Coletas Listar | Filtros status, busca, paginação |
 | **CollectionsList** (FAB) | `coleta_nova` | — | — | → NewCollectionClientSelection |
 | **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
@@ -150,7 +150,7 @@ Auth, Dashboard, Agendamentos, Clientes Coleta, Coletas CRUD + wizard, Catálogo
 | `GET /rota-do-dia/paradas?data&coletor_id&rota_id` | rota_dia |
 | `POST /rota-do-dia/parada-status` | rota_dia |
 | `GET /catalogos/coletores` | rota_dia |
-| `GET /dashboard/resumo` + `graficos.coletas_por_mes`, KPI `paradas_hoje` | dashboard |
+| `GET /dashboard/resumo` — `cards`, `atalhos`, `atividades`, `coletas_por_status` | dashboard |
 | Login `user.operadora_id`, `operadora_nome` | auth |
 
 Multitenant **já funciona** na API via JWT `operadora_id` + `OperadoraScope` — falta expor no JSON do login para o app.

@@ -260,13 +260,28 @@ class DashboardService
     /** @return array{labels:list<string>,values:list<int>} */
     public static function coletasPorStatus(): array
     {
+        return self::coletasPorStatusColetor(0, true);
+    }
+
+    /** @return array{labels:list<string>,values:list<int>} */
+    public static function coletasPorStatusColetor(int $userId, bool $isAdmin): array
+    {
         $db = new Database();
         $opId = OperadoraScope::getOperadoraId();
-        $stmt = $db->execute(
-            "SELECT status, COUNT(*) AS qtd FROM coletas WHERE operadora_id = ?
-             AND status != 'cancelada' GROUP BY status ORDER BY qtd DESC",
-            [$opId]
-        );
+        if ($isAdmin || $userId <= 0) {
+            $stmt = $db->execute(
+                "SELECT status, COUNT(*) AS qtd FROM coletas WHERE operadora_id = ?
+                 AND status != 'cancelada' GROUP BY status ORDER BY qtd DESC",
+                [$opId]
+            );
+        } else {
+            $stmt = $db->execute(
+                "SELECT status, COUNT(*) AS qtd FROM coletas
+                 WHERE operadora_id = ? AND coletor_id = ? AND status != 'cancelada'
+                 GROUP BY status ORDER BY qtd DESC",
+                [$opId, $userId]
+            );
+        }
 
         $labels = [];
         $values = [];

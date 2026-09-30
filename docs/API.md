@@ -55,27 +55,57 @@ Requer ao menos um módulo operacional do app.
 
 `GET /dashboard/resumo` — módulo `dashboard`
 
-Resposta:
+Resposta (`data`):
+
 ```json
 {
+  "meta": { "schema_version": 2, "hoje": "2026-09-30" },
   "kpis": {
+    "hoje": "2026-09-30",
+    "coletas_hoje": 3,
     "coletas_mes": 12,
     "rascunhos": 2,
+    "paradas_hoje": 8,
     "urgentes": 3,
     "atrasados": 5,
-    "paradas_hoje": 8,
-    "hoje": "2026-09-18"
+    "clientes_ativos": 120,
+    "solicitacoes_pendentes": 1,
+    "mtr_sinir_pendente": 4,
+    "rotas_com_coleta_hoje": 2
   },
   "graficos": {
-    "coletas_por_mes": {
-      "labels": ["Abr/26", "Mai/26"],
-      "values": [10, 12]
+    "coletas_por_mes": { "labels": ["Abr/26", "Mai/26"], "values": [10, 12] },
+    "coletas_por_status": { "labels": ["Finalizada", "Rascunho"], "values": [40, 2] }
+  },
+  "cards": [
+    {
+      "key": "coletas_hoje",
+      "module": "coletas",
+      "label": "Coletas finalizadas hoje",
+      "hint": "Ver coletas de hoje",
+      "value": 3,
+      "accent": "primary"
     }
-  }
+  ],
+  "atalhos": [
+    { "slug": "coleta_nova", "label": "Nova coleta", "target": "NewCollectionClientSelection" }
+  ],
+  "atividades": [
+    {
+      "tipo": "coleta",
+      "titulo": "Cliente Exemplo",
+      "subtitulo": "Coleta finalizada",
+      "data_hora": "2026-09-29 14:30:00",
+      "ref_id": 99
+    }
+  ]
 }
 ```
 
-Coletor vê KPIs e gráfico filtrados por `coletor_id`; admin/gestor vê totais da operadora.
+- **KPIs** alinhados ao dashboard web (seção Operação), sem financeiro.
+- **`cards` / `atalhos`:** filtrados pelos módulos do usuário (`modulos` no JWT recarregado no auth).
+- **`graficos.coletas_por_status`:** omitido se o usuário não tem módulo `coletas`.
+- Coletor (função Coletor): KPIs, gráficos e atividades filtrados por `coletor_id`; admin/gestor vê totais da operadora.
 
 ### Agendamentos
 
