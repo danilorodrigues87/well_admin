@@ -4,13 +4,7 @@
             <h1 class="mb-1">Modelos jurídicos de contrato</h1>
             <p class="text-muted mb-0">Textos HTML por operadora. Planos referenciam o <code>slug</code> (tipo de modelo).</p>
         </div>
-        <div>
-            <a href="{{URL}}/painel/contratos" class="btn btn-outline-secondary">Voltar aos contratos</a>
-            <form method="post" action="{{URL}}/painel/contratos/modelos/reimportar" class="d-inline">
-                {{csrf_reimport}}
-                <button type="submit" class="btn btn-outline-primary" onclick="return confirm('Reimportar do seed sobrescreve títulos e corpos dos slugs existentes. Continuar?');">Reimportar seed</button>
-            </form>
-        </div>
+        <a href="{{URL}}/painel/contratos" class="btn btn-outline-secondary">Voltar aos contratos</a>
     </div>
 
     <div class="row">
@@ -25,6 +19,14 @@
             </div>
         </div>
         <div class="col-lg-4">
+            <div class="card shadow mb-3">
+                <div class="card-header bg-white">Instalação / seed</div>
+                <div class="card-body small text-muted">
+                    <p class="mb-2">Para criar ou atualizar os textos padrão a partir do repositório, rode no servidor (SSH ou terminal do XAMPP):</p>
+                    <p class="mb-0"><code class="user-select-all">php database/scripts/seed_contrato_modelos.php</code></p>
+                    <p class="mb-0 mt-2">Migration inicial: <code>php database/scripts/apply_migration_050.php</code></p>
+                </div>
+            </div>
             <div class="card shadow">
                 <div class="card-header bg-white">Placeholders</div>
                 <div class="card-body">{{placeholders_help}}</div>

@@ -62,7 +62,7 @@ Contratos já assinados (`html_snapshot`) mantêm o HTML antigo até novo contra
 ## Personalização
 
 - **Por contrato:** `/painel/contratos/{id}/editar` — valor mensal, frequência, promo HTML, extras, snapshot de itens.
-- **Modelos jurídicos (admin):** `/painel/contratos/modelos` — editar `body_html`, nova versão, reimportar seed.
+- **Modelos jurídicos (admin):** `/painel/contratos/modelos` — editar `body_html` e nova versão; seed inicial/atualização via `php database/scripts/seed_contrato_modelos.php` (ver card na própria tela).
 
 ## Código
 

@@ -50,7 +50,6 @@ class ContratoModelos extends Page
         $content = View::render('admin/modules/contratos/modelos/index', [
             'rows' => $rows,
             'placeholders_help' => self::placeholdersHelpHtml(),
-            'csrf_reimport' => CsrfHelper::field(),
         ]);
 
         return self::getPage('Modelos jurídicos', $content, 'contratos');
@@ -147,22 +146,6 @@ class ContratoModelos extends Page
             'ativo' => $ativo,
         ]);
         header('Location: '.URL.'/painel/contratos/modelos/'.$id.'?ok=1');
-        exit;
-    }
-
-    public static function reimportarSeed($request): void
-    {
-        self::requireAdmin();
-        $post = $request->getPostVars();
-        if (!CsrfHelper::validate($post['_csrf'] ?? null)) {
-            header('Location: '.URL.'/painel/contratos/modelos');
-            exit;
-        }
-        $script = dirname(__DIR__, 3).'/database/scripts/seed_contrato_modelos.php';
-        if (is_file($script)) {
-            include $script;
-        }
-        header('Location: '.URL.'/painel/contratos/modelos?reimport=1');
         exit;
     }
 

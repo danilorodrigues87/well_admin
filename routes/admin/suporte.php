@@ -87,13 +87,6 @@ $obRouter->post('/painel/contratos/modelos/{id}', [
     },
 ]);
 
-$obRouter->post('/painel/contratos/modelos/reimportar', [
-    'middlewares' => ['required-admin-login', 'required-module:contratos'],
-    function ($request) {
-        Admin\ContratoModelos::reimportarSeed($request);
-    },
-]);
-
 $obRouter->get('/painel/clientes/{id}/contratos', [
     'middlewares' => ['required-admin-login', 'required-module:contratos'],
     function ($request, int $id) {
