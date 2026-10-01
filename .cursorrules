@@ -17,4 +17,5 @@ Regras rápidas:
 - Não criar commits Git sem pedido explícito do usuário
 - Scripts temporários (_test_*.php): apagar ao terminar
 - Após feature relevante: atualizar ARCHITECTURE.md
+- App FlutterFlow via MCP: ler docs/FLUTTERFLOW_MCP_GUIA.md antes (custom function NUNCA pelo MCP)
 - Comunicação em português

@@ -35,6 +35,12 @@ alwaysApply: true
 - Migrations incrementais em `database/migrations/NNN_descricao.sql`.
 - Engine InnoDB, charset utf8mb4.
 
+## App FlutterFlow (well-coletas-by2777)
+- Ler `docs/FLUTTERFLOW_MCP_GUIA.md` **antes** de editar o app pelo MCP.
+- **Nunca** gravar custom function pelo MCP: a chave real é `custom-functions/id-<key>/function-code` (sem `.dart`) e o MCP corrompe o corpo Dart. Usar `POST /v2/updateProjectByYaml` da API oficial.
+- `update_project_yaml` responde `success` mesmo sem gravar — confirmar com `sync_project(force: true)` + releitura.
+- Formatação para a UI vem pronta do PHP (`ColetaApiPresenter`), não de interpolação no FlutterFlow.
+
 ## O que NÃO fazer
 - Copiar módulos do painel-cti escolar (matrículas, EAD, CRM escola).
 - Criar Painel Plataforma ou CRUD de operadoras antes da necessidade real (Fase 10).

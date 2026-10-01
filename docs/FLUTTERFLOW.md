@@ -4,6 +4,8 @@ Projeto: **well-coletas-by2777** (`Well Coletas`)
 
 Matriz **página → API → RBAC** e inventário `components/*_comp`: [FLUTTERFLOW_APP_MATRIX.md](FLUTTERFLOW_APP_MATRIX.md).
 
+Guia de edição pelo MCP, armadilhas e API oficial: [FLUTTERFLOW_MCP_GUIA.md](FLUTTERFLOW_MCP_GUIA.md).
+
 ## Já configurado via API/MCP
 
 ### App State (persistido)
@@ -392,3 +394,10 @@ Catálogos: **Veiculos**, **Tipos Residuos**, **Tratamentos** nas dropdowns.
 ## Usuário de teste
 
 Use um funcionário com função **Coletor** cadastrado em `/painel/funcionarios` (não precisa ser admin).
+
+## Trabalhar pelo MCP
+
+Armadilhas conhecidas, formato dos arquivos, uso da API oficial e fluxo de
+trabalho: [FLUTTERFLOW_MCP_GUIA.md](FLUTTERFLOW_MCP_GUIA.md). **Leia antes de
+editar o app pelo MCP** — em especial a seção de Custom Functions, que não podem
+ser gravadas pelo MCP sem corromper o código.

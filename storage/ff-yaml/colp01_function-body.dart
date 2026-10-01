@@ -1,4 +1,3 @@
-
   if (apiJson == null) {
     return [];
   }
@@ -40,9 +39,8 @@
         statusLabel = status;
     }
     final mtr = m['numero_mtr'];
-    final displayMtr = (mtr != null && mtr.toString().isNotEmpty)
-        ? '#${mtr.toString()}'
-        : '-';
+    final displayMtr =
+        (mtr != null && mtr.toString().isNotEmpty) ? '#${mtr.toString()}' : '-';
     final dc = m['data_coleta']?.toString() ?? '';
     final hr = m['hora']?.toString() ?? '';
     var dataHora = '';

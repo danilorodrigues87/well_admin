@@ -299,3 +299,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-29 | Dashboard admin: KPIs por módulo (coletas hoje, paradas hoje, financeiro competência, gráfico emitido vs recebido); coletor vê escopo próprio em coletas/MTR |
 | 2026-10-01 | App FF: página **CollectionsList** (`Scaffold_dwij8cyv`) ligada a `GET /coletas` (busca, filtros status, paginação 15); doc `docs/FLUTTERFLOW_COLLECTIONS_LIST.md` |
 | 2026-10-01 | App FF: CardCom4 navega diretamente para **CollectionDetail** com `coletaId`; detalhe ligado a `GET /coletas/{id}`. API passa a fornecer `resumo` pronto para UI e `itens[].quantidade_label` |
+| 2026-10-01 | Custom functions do app FF recuperadas via API oficial (`/v2/updateProjectByYaml`) após corrupção pelo MCP; novo guia `docs/FLUTTERFLOW_MCP_GUIA.md` com armadilhas, formato dos arquivos e fluxo de trabalho |
