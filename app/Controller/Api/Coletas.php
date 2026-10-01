@@ -33,15 +33,26 @@ class Coletas extends BaseApi
             $params[] = $status;
         }
         if ($busca !== '') {
-            $where .= ' AND c.cliente_id IN (
+            $operadoraId = OperadoraScope::getOperadoraId();
+            $like = '%'.$busca.'%';
+            $clienteMatch = 'c.cliente_id IN (
                 SELECT id FROM clientes
                 WHERE operadora_id = ? AND (nome_fantasia LIKE ? OR razao_social LIKE ? OR cidade LIKE ?)
             )';
-            $params[] = OperadoraScope::getOperadoraId();
-            $like = '%'.$busca.'%';
-            $params[] = $like;
-            $params[] = $like;
-            $params[] = $like;
+            if (preg_match('/^\d+$/', $busca) === 1) {
+                $where .= ' AND ('.$clienteMatch.' OR c.numero_mtr = ?)';
+                $params[] = $operadoraId;
+                $params[] = $like;
+                $params[] = $like;
+                $params[] = $like;
+                $params[] = (int) $busca;
+            } else {
+                $where .= ' AND '.$clienteMatch;
+                $params[] = $operadoraId;
+                $params[] = $like;
+                $params[] = $like;
+                $params[] = $like;
+            }
         }
 
         $total = EntityColeta::count($where, $params);

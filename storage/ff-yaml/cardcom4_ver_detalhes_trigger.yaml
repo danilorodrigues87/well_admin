@@ -1,0 +1,14 @@
+rootAction:
+  key: cddtap1
+  action:
+    key: actcddbs0
+  followUpAction:
+    key: cddtap2
+    action:
+      key: actcddapp1
+    followUpAction:
+      key: cddtap3
+      action:
+        key: actcddnav1
+trigger:
+  triggerType: ON_TAP

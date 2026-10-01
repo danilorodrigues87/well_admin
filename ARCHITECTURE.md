@@ -297,3 +297,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-09-29 | CRUD modelos (`ContratoModelos`), personalização contrato (`/editar`), seed derivado RECICLÁVEIS/RSS/PNEUS a partir de Classe I |
 | 2026-09-29 | Operação coletas: Rota do dia / Lançar coleta por data (proxima_coleta ou urgente); coletor filtra rota; excluir rota/coleta rascunho; PDF relatório (`?print=1`); agendamento só via rota inteira (sem coleta avulsa) |
 | 2026-09-29 | Dashboard admin: KPIs por módulo (coletas hoje, paradas hoje, financeiro competência, gráfico emitido vs recebido); coletor vê escopo próprio em coletas/MTR |
+| 2026-10-01 | App FF: página **CollectionsList** (`Scaffold_dwij8cyv`) ligada a `GET /coletas` (busca, filtros status, paginação 15); doc `docs/FLUTTERFLOW_COLLECTIONS_LIST.md` |
+| 2026-10-01 | App FF: CardCom4 navega diretamente para **CollectionDetail** com `coletaId`; detalhe ligado a `GET /coletas/{id}`. API passa a fornecer `resumo` pronto para UI e `itens[].quantidade_label` |

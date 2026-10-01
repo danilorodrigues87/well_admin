@@ -1,0 +1,41 @@
+key: Text_ph9zimt2
+type: Text
+props:
+  text:
+    themeStyle: TITLE_LARGE
+    selectable: false
+    textValue:
+      variable:
+        source: FUNCTION_CALL
+        functionCall:
+          stringInterpolation: {}
+          values:
+            - variable:
+                source: LOCAL_STATE
+                baseVariable:
+                  localState:
+                    fieldIdentifier:
+                      name: dataColeta
+                      key: cdd003
+                    stateVariableType: WIDGET_CLASS_STATE
+                nodeKeyRef:
+                  key: Scaffold_bfclgcqo
+            - inputValue:
+                serializedValue: " "
+            - variable:
+                source: LOCAL_STATE
+                baseVariable:
+                  localState:
+                    fieldIdentifier:
+                      name: horaColeta
+                      key: cdd004
+                    stateVariableType: WIDGET_CLASS_STATE
+                nodeKeyRef:
+                  key: Scaffold_bfclgcqo
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    fontWeightValue:
+      inputValue: w700
+name: Text
+valueKey: {}

@@ -1,0 +1,23 @@
+navigate:
+  allowBack: true
+  passedParameters:
+    parameterPasses:
+      cldtid1:
+        paramIdentifier:
+          name: coletaId
+          key: cldtid1
+        variable:
+          source: WIDGET_CLASS_PARAMETER
+          baseVariable:
+            widgetClass:
+              paramIdentifier:
+                name: id
+                key: p8pw99
+          nodeKeyRef:
+            key: Container_r51yjnte
+    widgetClassNodeKeyRef:
+      key: Scaffold_bfclgcqo
+  isNavigateBack: false
+  pageNodeKeyRef:
+    key: Scaffold_bfclgcqo
+key: actcddnav1

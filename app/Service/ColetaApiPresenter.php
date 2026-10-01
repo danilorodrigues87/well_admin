@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Common\ColetaDefaults;
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
@@ -113,6 +114,7 @@ class ColetaApiPresenter
             'cod_ibama' => $i->cod_ibama,
             'quantidade' => $i->quantidade,
             'unidade' => $i->unidade,
+            'quantidade_label' => self::quantityLabel((float)$i->quantidade, (string)$i->unidade),
         ];
     }
 
@@ -146,14 +148,39 @@ class ColetaApiPresenter
     {
         $c = $detalhe['coleta'];
         $s = $detalhe['snapshot'];
+        $itens = array_map(fn ($i) => self::item($i), $detalhe['itens']);
+        $totalKg = 0.0;
+        foreach ($detalhe['itens'] as $item) {
+            if (mb_strtolower(trim((string)$item->unidade), 'UTF-8') === 'kg') {
+                $totalKg += (float)$item->quantidade;
+            }
+        }
+        $numeroRelatorio = ColetaMtrHelper::numeroRelatorioExibicao($c);
+        $numeroMtr = ColetaMtrHelper::numeroExibicao($c);
+        $statusLabel = match ($c->status) {
+            'rascunho' => 'Rascunho',
+            'finalizada' => 'Finalizada',
+            'cancelada' => 'Cancelada',
+            default => ucfirst($c->status),
+        };
+        $recebimentoLabel = $c->situacao_recebimento === 'recebido'
+            ? 'Recebido'.($c->data_recebimento ? ' em '.self::dateBr($c->data_recebimento) : '')
+            : 'Pendente';
+        $veiculoLabel = trim(implode(' — ', array_filter([
+            trim((string)($s?->veiculo_descricao ?? '')),
+            trim((string)($s?->veiculo_placa ?? '')),
+        ])));
+        $titulo = $numeroRelatorio !== null ? 'Relatório #'.$numeroRelatorio : 'Coleta #'.$c->id;
 
         return [
             'coleta' => [
                 'id' => $c->id,
                 'numero_mtr' => $c->numero_mtr,
+                'numero_relatorio' => $c->numero_relatorio,
                 'cliente_id' => $c->cliente_id,
                 'cliente_nome' => $c->cliente_nome,
                 'coletor_id' => $c->coletor_id,
+                'coletor_nome' => $c->coletor_nome,
                 'veiculo_id' => $c->veiculo_id,
                 'status' => $c->status,
                 'doc_referencia' => $c->doc_referencia,
@@ -163,9 +190,13 @@ class ColetaApiPresenter
                 'tratamento' => $c->tratamento,
                 'situacao_recebimento' => $c->situacao_recebimento,
                 'data_recebimento' => $c->data_recebimento,
+                'sinir_status' => $c->sinir_status,
+                'sinir_man_numero' => $c->sinir_man_numero,
             ],
             'snapshot' => $s ? [
                 'gerador_nome_fantasia' => $s->gerador_nome_fantasia,
+                'gerador_razao_social' => $s->gerador_razao_social,
+                'gerador_cnpj' => $s->gerador_cnpj,
                 'gerador_endereco' => $s->gerador_endereco,
                 'gerador_responsavel' => $s->gerador_responsavel,
                 'gerador_plano' => $s->gerador_plano,
@@ -181,9 +212,48 @@ class ColetaApiPresenter
                 'destinador_responsavel' => $s->destinador_responsavel,
                 'observacao_destinador' => $s->observacao_destinador,
             ] : null,
-            'itens' => array_map(fn ($i) => self::item($i), $detalhe['itens']),
+            'itens' => $itens,
             'evidencias' => array_map(fn ($e) => self::evidencia($e, $c->id), $detalhe['evidencias']),
             'tratamentos' => ColetaDefaults::tratamentos(),
+            'resumo' => [
+                'titulo' => implode(' • ', array_filter([$titulo, $c->cliente_nome, $statusLabel])),
+                'cliente' => $c->cliente_nome,
+                'status_label' => $statusLabel,
+                'numero_relatorio_label' => $numeroRelatorio !== null ? '#'.$numeroRelatorio : '—',
+                'numero_mtr_label' => $numeroMtr !== null ? '#'.$numeroMtr : ColetaMtrHelper::rotuloSemMtr($c),
+                'data_hora_label' => trim(implode(' ', array_filter([
+                    self::dateBr($c->data_coleta),
+                    $c->hora ? substr((string)$c->hora, 0, 5) : '',
+                ]))),
+                'peso_total_kg' => $totalKg,
+                'peso_total_label' => self::quantityLabel($totalKg, 'kg'),
+                'transportador_label' => trim((string)($s?->transportador_nome ?? '')),
+                'veiculo_label' => $veiculoLabel !== '' ? $veiculoLabel : 'Não informado',
+                'motorista_label' => trim((string)($s?->motorista_nome ?? '')) ?: 'Não informado',
+                'destinador_label' => trim((string)($s?->destinador_nome ?? '')) ?: 'Não informado',
+                'recebimento_label' => $recebimentoLabel,
+                'tratamento_label' => trim((string)($c->tratamento ?? '')) ?: 'Não informado',
+                'relatorio_label' => trim((string)($c->relatorio ?? '')) ?: 'Sem observações.',
+                'itens_count' => count($itens),
+                'evidencias_count' => count($detalhe['evidencias']),
+                'pode_imprimir' => ColetaMtrHelper::podeImprimirRelatorio($c),
+                'pode_gerar_mtr' => ColetaMtrHelper::podeGerarMtr($c),
+            ],
         ];
+    }
+
+    private static function dateBr(?string $date): string
+    {
+        if ($date === null || trim($date) === '') {
+            return '';
+        }
+        $timestamp = strtotime($date);
+
+        return $timestamp !== false ? date('d/m/Y', $timestamp) : $date;
+    }
+
+    private static function quantityLabel(float $quantity, string $unit): string
+    {
+        return number_format($quantity, 3, ',', '.').' '.mb_strtoupper($unit, 'UTF-8');
     }
 }

@@ -1,0 +1,22 @@
+key: Text_eetl0wbe
+type: Text
+props:
+  text:
+    themeStyle: HEADLINE_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: pageTitle
+              key: cdd002
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_bfclgcqo
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text
+valueKey: {}

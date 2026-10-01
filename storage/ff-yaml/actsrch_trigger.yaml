@@ -1,0 +1,18 @@
+rootAction:
+  key: srch01
+  action:
+    key: actsrchp1
+  followUpAction:
+    key: srch02
+    action:
+      key: actsrchwait
+    followUpAction:
+      key: srch03
+      action:
+        key: actsrchapi
+      followUpAction:
+        key: srch04
+        action:
+          key: actsrchprs
+trigger:
+  triggerType: ON_TEXTFIELD_CHANGE

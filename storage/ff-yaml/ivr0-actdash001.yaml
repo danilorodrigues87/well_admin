@@ -1,0 +1,34 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Dashboard Resumo
+      key: wdash1
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+outputVariableName: dashboardResult
+key: actdash001

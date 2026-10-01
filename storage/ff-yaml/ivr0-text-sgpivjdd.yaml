@@ -1,0 +1,35 @@
+key: Text_sgpivjdd
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: act1Title
+              key: dsh130
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_ivr0nad4
+        uiBuilderValue:
+          serializedValue: Hospital Santa Maria
+      mostRecentInputValue: Hospital Santa Maria
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+      mostRecentInputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.47
+    maxLinesValue:
+      inputValue: 1
+    fontWeightValue:
+      inputValue: w600
+    overflowReplacement: ELLIPSIS
+name: Text

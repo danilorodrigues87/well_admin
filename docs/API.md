@@ -192,6 +192,23 @@ Body trocar senha:
 
 Query `busca` em listagem: filtra por nome/cidade do cliente.
 
+### Detalhe da coleta — resposta
+
+`GET /coletas/{id}` mantém os blocos operacionais `coleta`, `snapshot`, `itens`,
+`evidencias` e `tratamentos`. Para consumo direto no app, também retorna:
+
+- `itens[].quantidade_label`: quantidade formatada com três casas e unidade
+  (ex.: `12,500 KG`);
+- `resumo.titulo`, `cliente`, `status_label`, `data_hora_label`;
+- `resumo.peso_total_kg` e `peso_total_label`;
+- `resumo.numero_relatorio_label` e `numero_mtr_label`;
+- `resumo.transportador_label`, `veiculo_label`, `motorista_label`,
+  `destinador_label`, `recebimento_label` e `tratamento_label`;
+- `resumo.relatorio_label`, `itens_count`, `evidencias_count`,
+  `pode_imprimir` e `pode_gerar_mtr`.
+
+O peso total soma somente itens cuja unidade seja `kg`.
+
 ### Finalizar — requisitos
 
 - Rascunho com ao menos 1 resíduo e motorista salvos (PATCH transporte).

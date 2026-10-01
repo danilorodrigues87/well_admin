@@ -1,0 +1,171 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: pageTitle
+        key: cdd002
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.coleta.cliente_nome
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: dataColeta
+        key: cdd003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.coleta.data_coleta
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: horaColeta
+        key: cdd004
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.coleta.hora
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: veiculoLinha
+        key: cdd006
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.snapshot.veiculo_descricao
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: motoristaNome
+        key: cdd007
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.snapshot.motorista_nome
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: destinadorNome
+        key: cdd008
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.snapshot.destinador_nome
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: recebimento
+        key: cdd009
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.coleta.data_recebimento
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: relatorio
+        key: cdd010
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.coleta.relatorio
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: isLoading
+        key: cdd001
+      setValue:
+        inputValue:
+          serializedValue: "false"
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actcdd002

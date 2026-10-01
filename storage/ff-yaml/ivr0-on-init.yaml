@@ -1,0 +1,10 @@
+rootAction:
+  key: dashroot1
+  action:
+    key: actdash001
+  followUpAction:
+    key: dashroot2
+    action:
+      key: actdash002
+trigger:
+  triggerType: ON_INIT_STATE

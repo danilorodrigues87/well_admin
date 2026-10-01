@@ -1,0 +1,74 @@
+bottomSheet:
+  passedParameters:
+    parameterPasses:
+      local_card_com4_97b7a2deparam_title:
+        paramIdentifier:
+          name: title
+          key: local_card_com4_97b7a2deparam_title
+        variable:
+          source: GENERATOR_VARIABLE
+          baseVariable:
+            generatorVariable: {}
+          operations:
+            - accessDataStructField:
+                fieldIdentifier:
+                  name: cliente_nome
+                  key: clf03
+          nodeKeyRef:
+            key: ListView_qsfh7n67
+      local_card_com4_97b7a2deparam_subtitle:
+        paramIdentifier:
+          name: subtitle
+          key: local_card_com4_97b7a2deparam_subtitle
+        variable:
+          source: GENERATOR_VARIABLE
+          baseVariable:
+            generatorVariable: {}
+          operations:
+            - accessDataStructField:
+                fieldIdentifier:
+                  name: data_hora
+                  key: clf05
+          nodeKeyRef:
+            key: ListView_qsfh7n67
+      local_card_com4_97b7a2deparam_status:
+        paramIdentifier:
+          name: status
+          key: local_card_com4_97b7a2deparam_status
+        variable:
+          source: GENERATOR_VARIABLE
+          baseVariable:
+            generatorVariable: {}
+          operations:
+            - accessDataStructField:
+                fieldIdentifier:
+                  name: status_label
+                  key: clf04
+          nodeKeyRef:
+            key: ListView_qsfh7n67
+      p8pw99:
+        paramIdentifier:
+          name: id
+          key: p8pw99
+        variable:
+          source: GENERATOR_VARIABLE
+          baseVariable:
+            generatorVariable: {}
+          operations:
+            - accessDataStructField:
+                fieldIdentifier:
+                  name: id
+                  key: clf01
+          nodeKeyRef:
+            key: ListView_qsfh7n67
+    widgetClassNodeKeyRef:
+      key: Container_r51yjnte
+  isDismiss: true
+  backgroundColor:
+    inputValue:
+      color:
+        value: "0"
+  barrierColor: {}
+  componentClassNodeKeyRef:
+    key: Container_r51yjnte
+key: 1ekcqcmg

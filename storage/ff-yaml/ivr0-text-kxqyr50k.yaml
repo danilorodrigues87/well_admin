@@ -1,0 +1,36 @@
+key: Text_kxqyr50k
+type: Text
+props:
+  text:
+    themeStyle: TITLE_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        defaultValue:
+          serializedValue: Coletor
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: userName
+              key: ast002
+            stateVariableType: APP_STATE
+        nodeKeyRef:
+          key: Scaffold_ivr0nad4
+        uiBuilderValue:
+          serializedValue: Olá, Coletor
+      mostRecentInputValue: Olá, Coletor
+    colorValue:
+      inputValue:
+        value: "4294967295"
+        darkModeColor:
+          value: "4294967295"
+      mostRecentInputValue:
+        value: "4294967295"
+        darkModeColor:
+          value: "4294967295"
+    heightValue:
+      inputValue: 1.35
+    fontWeightValue:
+      inputValue: w700
+name: Text

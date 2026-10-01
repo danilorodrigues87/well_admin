@@ -20,8 +20,8 @@
 | 1 | SplashPage | Scaffold_splsh01 | Não | Gate token → Login ou app |
 | 2 | LoginPage | Scaffold_7zli0let | Não | Auth (parcialmente ligado) |
 | 3 | Dashboard | (FF Design — ID muda ao recriar) | Conforme design | KPIs via `GET /dashboard/resumo` — [FLUTTERFLOW_DASHBOARD_BASICO.md](FLUTTERFLOW_DASHBOARD_BASICO.md) |
-| 4 | CollectionsList | Scaffold_2lf7puaq | BottomNav2 + FAB | Lista coletas/MTR |
-| 5 | CollectionDetail | Scaffold_ukmzuhl4 | BottomNav3 | Detalhe coleta |
+| 4 | CollectionsList | Scaffold_dwij8cyv | Bottom nav inline + FAB | Lista coletas — [FLUTTERFLOW_COLLECTIONS_LIST.md](FLUTTERFLOW_COLLECTIONS_LIST.md) |
+| 5 | CollectionDetail | Scaffold_bfclgcqo | Inline | Detalhe operacional da coleta |
 | 6 | NewCollectionClientSelection | Scaffold_y00hrwko | Não | Escolher cliente |
 | 7 | CollectionWizardStep12 | Scaffold_cfjqs6at | Não | Wizard transporte + resíduos |
 | 8 | CollectionWizardFinalize | Scaffold_5bfhuarf | Não | Wizard finalizar + evidências |
@@ -51,7 +51,7 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 | **Dashboard** (ActivityItem) | `dashboard` / `coletas` | `GET /dashboard/resumo` → `atividades[]` | Dashboard Resumo | ListView `ref_id` → CollectionDetail |
 | **CollectionsList** | `coletas` | `GET /coletas` | Coletas Listar | Filtros status, busca, paginação |
 | **CollectionsList** (FAB) | `coleta_nova` | — | — | → NewCollectionClientSelection |
-| **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
+| **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | CardCom4 passa `coletaId`; `On Init` carrega `resumo` e até 3 resíduos. Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
 | **CollectionDetail** (continuar) | `coleta_nova` | — | — | → Wizard se rascunho |
 | **NewCollectionClientSelection** | `coleta_nova` | `GET /clientes/coleta` | Clientes Coleta | escopo pendentes/todos; tap → `POST /coletas` |
 | **NewCollectionClientSelection** | `coleta_nova` | `POST /coletas` | Coleta Criar | → activeColetaId → Wizard |

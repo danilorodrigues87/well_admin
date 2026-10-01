@@ -1,0 +1,78 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Coletas Listar
+      key: wcol01
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+      - variableIdentifier:
+          name: page
+          key: pg0001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: pageCurrent
+                key: cl003
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+      - variableIdentifier:
+          name: per_page
+          key: pp0001
+        inputValue:
+          serializedValue: "15"
+      - variableIdentifier:
+          name: status
+          key: st0001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: filterStatus
+                key: cl002
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+      - variableIdentifier:
+          name: busca
+          key: bsc001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: busca
+                key: cl001
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+outputVariableName: coletasResultChipCanc
+key: actcol001

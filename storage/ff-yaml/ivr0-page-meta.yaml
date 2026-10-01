@@ -1,0 +1,98 @@
+name: Dashboard
+node:
+  key: Scaffold_ivr0nad4
+classModel:
+  stateFields:
+    - parameter:
+        identifier:
+          name: kpiColetasHoje
+          key: dsh101
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: kpiRascunhos
+          key: dsh102
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: kpiUrgentes
+          key: dsh103
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: kpiParadas
+          key: dsh104
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: chartLabels
+          key: dsh120
+        dataType:
+          listType:
+            scalarType: String
+      serializedDefaultValue: []
+    - parameter:
+        identifier:
+          name: chartValues
+          key: dsh121
+        dataType:
+          listType:
+            scalarType: Double
+      serializedDefaultValue: []
+    - parameter:
+        identifier:
+          name: act1Title
+          key: dsh130
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: act1Detail
+          key: dsh131
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: act1Chip
+          key: dsh132
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""

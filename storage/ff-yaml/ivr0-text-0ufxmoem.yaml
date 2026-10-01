@@ -1,0 +1,33 @@
+key: Text_0ufxmoem
+type: Text
+props:
+  text:
+    themeStyle: BODY_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: act1Detail
+              key: dsh131
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_ivr0nad4
+        uiBuilderValue:
+          serializedValue: 08:30 - MTR #8821
+      mostRecentInputValue: 08:30 - MTR #8821
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.33
+    maxLinesValue:
+      inputValue: 1
+    overflowReplacement: ELLIPSIS
+name: Text

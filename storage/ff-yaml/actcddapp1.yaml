@@ -1,0 +1,18 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: activeColetaId
+        key: ast005
+      setValue:
+        variable:
+          source: WIDGET_CLASS_PARAMETER
+          baseVariable:
+            widgetClass:
+              paramIdentifier:
+                name: id
+                key: p8pw99
+          nodeKeyRef:
+            key: Container_r51yjnte
+  updateType: WIDGET
+  stateVariableType: APP_STATE
+key: actcddapp1

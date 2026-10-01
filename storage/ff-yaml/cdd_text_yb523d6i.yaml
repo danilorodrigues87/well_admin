@@ -1,0 +1,22 @@
+key: Text_yb523d6i
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: relatorio
+              key: cdd010
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_bfclgcqo
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text
+valueKey: {}

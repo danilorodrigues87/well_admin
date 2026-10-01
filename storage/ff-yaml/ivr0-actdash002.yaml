@@ -1,0 +1,185 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: kpiColetasHoje
+        key: dsh101
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.coletas_hoje
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiRascunhos
+        key: dsh102
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.rascunhos
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiUrgentes
+        key: dsh103
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.urgentes
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: kpiParadas
+        key: dsh104
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.kpis.paradas_hoje
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: chartLabels
+        key: dsh120
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.graficos.coletas_por_mes.labels
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: chartValues
+        key: dsh121
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.graficos.coletas_por_mes.values
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: act1Title
+        key: dsh130
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.atividades[0].titulo
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: act1Detail
+        key: dsh131
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.atividades[0].data_hora
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: act1Chip
+        key: dsh132
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: dashboardResult
+              actionKeyRef:
+                key: actdash001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.atividades[0].subtitulo
+          nodeKeyRef:
+            key: Scaffold_ivr0nad4
+          actionComponentKeyRef: {}
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actdash002
