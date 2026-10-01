@@ -77,6 +77,13 @@ $obRouter->post('/painel/coleta/nova/{id}', [
 ]);
 
 // ── Impressão MTR ──
+$obRouter->get('/painel/coletas/mtr/{id}/pdf', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request, int $id) {
+        return Coletas::mtrPdf($request, $id);
+    },
+]);
+
 $obRouter->get('/painel/coletas/mtr/{id}', [
     'middlewares' => ['required-admin-login', 'required-module:coletas'],
     function ($request, int $id) {

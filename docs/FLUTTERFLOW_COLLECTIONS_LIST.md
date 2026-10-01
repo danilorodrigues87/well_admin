@@ -97,11 +97,17 @@ Caminho típico no seletor de variável: **Widget State / Generator** → item d
    o contexto que contém o parâmetro.
 8. **CollectionDetail** `On Init`: **WellAdmin Coleta Detalhe** recebe o route
    param `coletaId` e preenche os Page States com `$.data.resumo.*`,
-   `$.data.coleta.cliente_nome` e os três primeiros elementos de
-   `$.data.itens[]`. A tela mostra relatório/coleta, cliente, status, data/hora,
-   peso total, veículo, motorista, destinador, recebimento, resíduos e relatório.
-   Cards de resíduos sem conteúdo ficam ocultos. **Imprimir / PDF / MTR:** ainda
-   sem ação (próxima etapa).
+   `$.data.coleta.cliente_nome` e a lista `residuos` via Custom Function
+   `parseColetaDetailItemsFromApi` (`$.data.itens[]`). A tela mostra um ListView
+   com todos os resíduos; nomes longos são truncados (`nome_label`) e o texto
+   do card usa Expanded para não estourar o badge de quantidade.
+   **Imprimir / PDF / MTR:**
+   - **Gerar PDF** (`Container_6ms03coe`): API Call **WellAdmin Coleta PDF**
+     (`GET /coletas/{id}/pdf`). No editor FF, configure a resposta como **File** e
+     acrescente a ação **Download File** após a call (o MCP grava a call; o
+     download binário costuma precisar desse passo no UI). Deploy PHP com Dompdf
+     obrigatório.
+   - **Imprimir / Gerar MTR:** ainda sem ação (próxima etapa).
 
 ## Teste
 

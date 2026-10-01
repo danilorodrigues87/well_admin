@@ -99,7 +99,9 @@ class ColetaNova extends Page
 
         $btnImprimir = ColetaMtrHelper::podeImprimirRelatorio($coleta)
             ? '<a class="btn btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$coletaId.'" target="_blank" rel="noopener">'
-                .'<i class="fas fa-print me-1"></i> Imprimir relatório</a>'
+                .'<i class="fas fa-print me-1"></i> Imprimir</a>'
+              .' <a class="btn btn-outline-danger" href="'.URL.'/painel/coletas/mtr/'.$coletaId.'/pdf" rel="noopener">'
+                .'<i class="fas fa-file-pdf me-1"></i> Baixar PDF</a>'
             : '';
 
         $content = View::render('admin/modules/coleta_nova/wizard', [

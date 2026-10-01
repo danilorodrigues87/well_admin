@@ -201,56 +201,37 @@ class Coletas extends Page
         }
 
         $c = $det['coleta'];
-        $s = $det['snapshot'];
         if (!ColetaMtrHelper::temMtr($c)) {
             return View::render('erros/405', ['URL' => URL]);
         }
 
-        $itensHtml = '';
-        $totalKg = 0.0;
-        foreach ($det['itens'] as $i) {
-            $qtd = number_format($i->quantidade, 3, ',', '.').' '.strtoupper($i->unidade);
-            $itensHtml .= '<tr><td>'.CrudHelper::e($i->nome).'</td><td style="text-align:right;">'.CrudHelper::e($qtd).'</td></tr>';
-            if ($i->unidade === 'kg') {
-                $totalKg += (float)$i->quantidade;
-            }
-        }
-        if ($itensHtml === '') {
-            $itensHtml = '<tr><td colspan="2" class="text-muted">Sem itens registrados.</td></tr>';
+        return \App\Service\ColetaRelatorioPdfService::renderHtml($det, [
+            'auto_print' => ($request->getQueryParams()['print'] ?? '') === '1',
+            'rotulo' => (string)(ColetaMtrHelper::numeroExibicao($c) ?? ''),
+            'status_aviso' => false,
+            'pdf_download_url' => URL.'/gerador/coletas/'.$id.'/pdf',
+        ]);
+    }
+
+    public static function mtrPdf($request, int $id): Response
+    {
+        if (!GeradorPortalService::coletaDetalhe($id)) {
+            $request->getRouter()->redirect('/gerador/coletas');
         }
 
-        $autoPrint = ($request->getQueryParams()['print'] ?? '') === '1'
-            ? '<script>window.addEventListener("load", function () { window.print(); });</script>'
-            : '';
+        try {
+            $det = ColetaService::detalhar($id);
+        } catch (\InvalidArgumentException) {
+            return new Response(404, View::render('erros/404', ['URL' => URL]));
+        }
 
-        return View::render('admin/modules/coletas/mtr_print', [
-            'URL' => URL,
-            'numero_mtr' => (string)(ColetaMtrHelper::numeroExibicao($c) ?? ''),
-            'gerador_nome' => CrudHelper::e(mb_strtoupper((string)($s->gerador_nome_fantasia ?? ''), 'UTF-8')),
-            'gerador_cnpj' => CrudHelper::e($s->gerador_cnpj ?? ''),
-            'gerador_plano' => CrudHelper::e(mb_strtoupper((string)($s->gerador_plano ?? ''), 'UTF-8')),
-            'gerador_endereco' => CrudHelper::e(mb_strtoupper((string)($s->gerador_endereco ?? ''), 'UTF-8')),
-            'gerador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s->gerador_responsavel ?? ''), 'UTF-8')),
-            'doc_referencia' => $c->doc_referencia ? date('d/m/Y', strtotime($c->doc_referencia)) : '—',
-            'data_coleta' => $c->data_coleta ? date('d/m/Y', strtotime($c->data_coleta)) : '—',
-            'hora' => $c->hora ? substr((string)$c->hora, 0, 5) : '',
-            'relatorio' => nl2br(CrudHelper::e($c->relatorio ?? '')),
-            'transportador_nome' => CrudHelper::e(mb_strtoupper((string)($s->transportador_nome ?? ''), 'UTF-8')),
-            'transportador_cnpj' => CrudHelper::e($s->transportador_cnpj ?? ''),
-            'motorista_nome' => CrudHelper::e(mb_strtoupper((string)($s->motorista_nome ?? ''), 'UTF-8')),
-            'veiculo_descricao' => CrudHelper::e(mb_strtoupper((string)($s->veiculo_descricao ?? ''), 'UTF-8')),
-            'veiculo_placa' => CrudHelper::e(mb_strtoupper((string)($s->veiculo_placa ?? ''), 'UTF-8')),
-            'destinador_nome' => CrudHelper::e(mb_strtoupper((string)($s->destinador_nome ?? ''), 'UTF-8')),
-            'destinador_cnpj' => CrudHelper::e($s->destinador_cnpj ?? ''),
-            'destinador_endereco' => CrudHelper::e(mb_strtoupper((string)($s->destinador_endereco ?? ''), 'UTF-8')),
-            'destinador_telefone' => CrudHelper::e($s->destinador_telefone ?? ''),
-            'destinador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s->destinador_responsavel ?? ''), 'UTF-8')),
-            'data_recebimento' => $c->data_recebimento ? date('d/m/Y', strtotime($c->data_recebimento)) : '—',
-            'situacao_recebimento' => $c->situacao_recebimento === 'recebido' ? 'RECEBIDO' : 'NÃO RECEBIDO',
-            'tratamento' => CrudHelper::e(mb_strtoupper((string)($c->tratamento ?? ''), 'UTF-8')),
-            'itens_html' => $itensHtml,
-            'total_peso' => number_format($totalKg, 3, ',', '.').' KG',
-            'auto_print_script' => $autoPrint,
+        if (!ColetaMtrHelper::temMtr($det['coleta'])) {
+            return new Response(405, View::render('erros/405', ['URL' => URL]));
+        }
+
+        return \App\Service\ColetaRelatorioPdfService::pdfResponse($det, [
+            'rotulo' => (string)(ColetaMtrHelper::numeroExibicao($det['coleta']) ?? ''),
+            'status_aviso' => false,
         ]);
     }
 

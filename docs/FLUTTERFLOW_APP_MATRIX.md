@@ -51,7 +51,8 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 | **Dashboard** (ActivityItem) | `dashboard` / `coletas` | `GET /dashboard/resumo` → `atividades[]` | Dashboard Resumo | ListView `ref_id` → CollectionDetail |
 | **CollectionsList** | `coletas` | `GET /coletas` | Coletas Listar | Filtros status, busca, paginação |
 | **CollectionsList** (FAB) | `coleta_nova` | — | — | → NewCollectionClientSelection |
-| **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | CardCom4 passa `coletaId`; `On Init` carrega `resumo` e até 3 resíduos. Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
+| **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | CardCom4 passa `coletaId`; `On Init` preenche `resumo` e `residuos` (ListView). Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
+| **CardCom4 Gerar PDF** | `coletas` | `GET /coletas/{id}/pdf` | Coleta PDF | Dompdf no servidor; botão nativo + API Call `wcpdf1` (completar Download File no FF) |
 | **CollectionDetail** (continuar) | `coleta_nova` | — | — | → Wizard se rascunho |
 | **NewCollectionClientSelection** | `coleta_nova` | `GET /clientes/coleta` | Clientes Coleta | escopo pendentes/todos; tap → `POST /coletas` |
 | **NewCollectionClientSelection** | `coleta_nova` | `POST /coletas` | Coleta Criar | → activeColetaId → Wizard |

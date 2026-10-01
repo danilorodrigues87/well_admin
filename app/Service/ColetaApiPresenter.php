@@ -109,6 +109,7 @@ class ColetaApiPresenter
             'id' => $i->id,
             'tipo_residuo_id' => $i->tipo_residuo_id,
             'nome' => $i->nome,
+            'nome_label' => self::ellipsis((string)$i->nome, 48),
             'classe_nome' => $i->classe_nome,
             'grupo_codigo' => $i->grupo_codigo,
             'cod_ibama' => $i->cod_ibama,
@@ -254,6 +255,20 @@ class ColetaApiPresenter
 
     private static function quantityLabel(float $quantity, string $unit): string
     {
-        return number_format($quantity, 3, ',', '.').' '.mb_strtoupper($unit, 'UTF-8');
+        $formatted = fmod($quantity, 1.0) === 0.0
+            ? number_format($quantity, 0, ',', '.')
+            : number_format($quantity, 3, ',', '.');
+
+        return $formatted.' '.mb_strtoupper($unit, 'UTF-8');
+    }
+
+    private static function ellipsis(string $text, int $maxChars): string
+    {
+        $trimmed = trim($text);
+        if ($trimmed === '' || mb_strlen($trimmed, 'UTF-8') <= $maxChars) {
+            return $trimmed;
+        }
+
+        return rtrim(mb_substr($trimmed, 0, $maxChars - 1, 'UTF-8')).'…';
     }
 }

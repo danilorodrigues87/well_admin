@@ -189,6 +189,7 @@ Body trocar senha:
 | POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais). **Requer `data_recebimento` preenchida** (PATCH transporte antes). |
 | POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar rascunho |
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
+| GET | `/coletas/{id}/pdf` | `coletas` | PDF do relatório (Dompdf, mesmo layout do painel) |
 
 Query `busca` em listagem: filtra por nome/cidade do cliente.
 
@@ -197,8 +198,10 @@ Query `busca` em listagem: filtra por nome/cidade do cliente.
 `GET /coletas/{id}` mantém os blocos operacionais `coleta`, `snapshot`, `itens`,
 `evidencias` e `tratamentos`. Para consumo direto no app, também retorna:
 
-- `itens[].quantidade_label`: quantidade formatada com três casas e unidade
-  (ex.: `12,500 KG`);
+- `itens[].quantidade_label`: quantidade formatada (inteiro sem casas, senão
+  três) e unidade em maiúsculas (ex.: `12,500 KG` ou `6 KG`);
+- `itens[].nome_label`: nome truncado em 48 caracteres para cards do app;
+  `itens[].nome` permanece completo;
 - `resumo.titulo`, `cliente`, `status_label`, `data_hora_label`;
 - `resumo.peso_total_kg` e `peso_total_label`;
 - `resumo.numero_relatorio_label` e `numero_mtr_label`;
@@ -208,6 +211,14 @@ Query `busca` em listagem: filtra por nome/cidade do cliente.
   `pode_imprimir` e `pode_gerar_mtr`.
 
 O peso total soma somente itens cuja unidade seja `kg`.
+
+### PDF do relatório
+
+`GET /coletas/{id}/pdf` devolve `application/pdf` (attachment) gerado com
+**Dompdf** a partir do mesmo template HTML do painel
+(`/painel/coletas/mtr/{id}`). Requer módulo `coletas` e
+`ColetaMtrHelper::podeImprimirRelatorio` (não cancelada). No app, use a API Call
+**WellAdmin Coleta PDF** + ação **Download File** (ou Custom Action com JWT).
 
 ### Finalizar — requisitos
 

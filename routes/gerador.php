@@ -96,6 +96,13 @@ $obRouter->get('/gerador/coletas/{id}/mtr', [
     },
 ]);
 
+$obRouter->get('/gerador/coletas/{id}/pdf', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id) {
+        return Gerador\Coletas::mtrPdf($request, $id);
+    },
+]);
+
 $obRouter->get('/gerador/coletas/{id}/cdf', [
     'middlewares' => $geradorAuth,
     function ($request, int $id) {

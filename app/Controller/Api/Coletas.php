@@ -264,4 +264,23 @@ class Coletas extends BaseApi
 
         return new \App\Http\Response(200, file_get_contents($path), $mime);
     }
+
+    public static function pdf($request, int $id): \App\Http\Response
+    {
+        try {
+            $detalhe = ColetaService::detalhar($id);
+            if ($err = self::assertColetaAccess($detalhe['coleta'])) {
+                return $err;
+            }
+            if (!\App\Common\Helpers\ColetaMtrHelper::podeImprimirRelatorio($detalhe['coleta'])) {
+                return ApiHelper::fail('forbidden', 'Relatório indisponível para esta coleta.', 403);
+            }
+
+            return \App\Service\ColetaRelatorioPdfService::pdfResponse($detalhe);
+        } catch (\InvalidArgumentException $e) {
+            return ApiHelper::fail('not_found', $e->getMessage(), 404);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiColetas::pdf');
+        }
+    }
 }

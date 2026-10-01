@@ -10,7 +10,7 @@ com o arquivo grande, trava o editor a ponto de não aceitar edição nem exclus
 | Função | Key | Uso real | Estado |
 |--------|-----|----------|--------|
 | `parseColetaItemsFromApi` | `colp01` | **Sim** — 8 actions em CollectionsList | Corrigida |
-| `parseColetaDetailItemsFromApi` | `cddp01` | Não — órfã | Corrigida; pode ser excluída pela UI |
+| `parseColetaDetailItemsFromApi` | `cddp01` | **Sim** — CollectionDetail `On Init` (`actcdd002`) | Corrigida; retorna `List<ColetaResiduoItem>` |
 | `zzzDeleteMeColp99Stub` | `colp99` | Não — duplicata criada por engano | Excluir quando o editor permitir |
 
 ## Causa raiz

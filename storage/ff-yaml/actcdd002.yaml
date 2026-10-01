@@ -16,7 +16,47 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
+                jsonPath: $.data.resumo.titulo
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: clienteNome
+        key: cdd011
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
                 jsonPath: $.data.coleta.cliente_nome
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: statusLabel
+        key: cdd012
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaDetalheResult
+              actionKeyRef:
+                key: actcdd001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.resumo.status_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
@@ -36,13 +76,13 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.coleta.data_coleta
+                jsonPath: $.data.resumo.data_hora_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
     - fieldIdentifier:
-        name: horaColeta
-        key: cdd004
+        name: pesoTotalLabel
+        key: cdd013
       setValue:
         variable:
           source: ACTION_OUTPUTS
@@ -56,7 +96,7 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.coleta.hora
+                jsonPath: $.data.resumo.peso_total_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
@@ -76,7 +116,7 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.snapshot.veiculo_descricao
+                jsonPath: $.data.resumo.veiculo_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
@@ -96,7 +136,7 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.snapshot.motorista_nome
+                jsonPath: $.data.resumo.motorista_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
@@ -116,7 +156,7 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.snapshot.destinador_nome
+                jsonPath: $.data.resumo.destinador_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
@@ -136,7 +176,7 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.coleta.data_recebimento
+                jsonPath: $.data.resumo.recebimento_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
@@ -156,10 +196,37 @@ localStateUpdate:
             - apiResponseField:
                 responseField: JSON_BODY
             - jsonPathOperation:
-                jsonPath: $.data.coleta.relatorio
+                jsonPath: $.data.resumo.relatorio_label
           nodeKeyRef:
             key: Scaffold_bfclgcqo
           actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: residuos
+        key: cdd016
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: coletaDetalheResult
+                      actionKeyRef:
+                        key: actcdd001
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Scaffold_bfclgcqo
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseColetaDetailItemsFromApi
+              key: cddp01
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
     - fieldIdentifier:
         name: isLoading
         key: cdd001

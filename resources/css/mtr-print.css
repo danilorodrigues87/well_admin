@@ -45,6 +45,12 @@ body.mtr-print-page {
   border-color: #6c757d;
 }
 
+.mtr-toolbar .btn-outline-danger {
+  background: #fff;
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
 .mtr-table {
   border-collapse: collapse;
   width: 100%;

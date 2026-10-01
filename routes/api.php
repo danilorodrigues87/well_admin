@@ -173,6 +173,13 @@ $obRouter->get('/api/v1/coletas/{id}/evidencias/{ordem}', [
     },
 ]);
 
+$obRouter->get('/api/v1/coletas/{id}/pdf', [
+    'middlewares' => $mod('coletas'),
+    function ($request, int $id) {
+        return Coletas::pdf($request, $id);
+    },
+]);
+
 $obRouter->get('/api/v1/rota-do-dia/paradas', [
     'middlewares' => $mod('rota_dia'),
     function ($request) {

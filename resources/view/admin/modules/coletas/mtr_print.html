@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Relatório {{numero_mtr}} — Well S.A.</title>
     <link rel="icon" href="{{URL}}/resources/assets/imgs/favicon.png" type="image/png" />
-    <link href="{{URL}}/resources/css/mtr-print.css" rel="stylesheet" />
+    {{css_link_or_inline}}
 </head>
 <body class="mtr-print-page">
     <div class="mtr-toolbar no-print">
-        <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir / Salvar PDF</button>
-        <span class="small text-muted ms-2">No diálogo de impressão, escolha &quot;Salvar como PDF&quot;.</span>
+        <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir</button>
+        {{pdf_download_btn}}
         <button type="button" class="btn btn-outline-secondary" onclick="window.close()">Fechar</button>
     </div>
     {{status_impressao_aviso}}
@@ -24,7 +24,7 @@
         <tr><td colspan="15" style="border:none;height:6px;"></td></tr>
         <tr class="mtr-section"><td colspan="10">COLETOR</td><td colspan="1" style="border:none;"></td><td colspan="4">Nº REGISTRO</td></tr>
         <tr>
-            <td colspan="2" style="text-align:center;border-bottom:none;"><img src="{{URL}}/resources/assets/imgs/logo.png" alt="Well" class="mtr-logo" /></td>
+            <td colspan="2" style="text-align:center;border-bottom:none;"><img src="{{logo_src}}" alt="Well" class="mtr-logo" /></td>
             <td colspan="8" class="mtr-title" style="border-bottom:none;">{{transportador_nome}}</td>
             <td colspan="1" style="border:none;"></td>
             <td colspan="4" class="mtr-title" style="text-align:center;">{{numero_mtr}}</td>

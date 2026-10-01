@@ -36,6 +36,7 @@ Guia de edição pelo MCP, armadilhas e API oficial: [FLUTTERFLOW_MCP_GUIA.md](F
 | **WellAdmin Coletas Listar** | GET | `[baseUrl]/coletas?...` |
 | **WellAdmin Coleta Iniciar** | POST | `[baseUrl]/coletas` → `coletaId` |
 | **WellAdmin Coleta Detalhe** | GET | `[baseUrl]/coletas/[coletaId]` |
+| **WellAdmin Coleta PDF** | GET | `[baseUrl]/coletas/[coletaId]/pdf` → `application/pdf` |
 | **WellAdmin Coleta Transporte** | PATCH | `[baseUrl]/coletas/[coletaId]/transporte` |
 | **WellAdmin Coleta Add Item** | POST | `[baseUrl]/coletas/[coletaId]/itens` |
 | **WellAdmin Coleta Remove Item** | DELETE | `[baseUrl]/coletas/[coletaId]/itens/[itemId]` |
@@ -97,7 +98,7 @@ Guia passo a passo (só API + JSON paths): **[FLUTTERFLOW_DASHBOARD_BASICO.md](F
 | **ClientesColetaPage** | ListView API clientes + filtros + iniciar coleta → wizard |
 | **ColetaWizardPage** | Mínima: carrega detalhe da coleta (cliente + status) |
 | **CollectionsList** | `GET /coletas` — busca, filtros status, paginação — [FLUTTERFLOW_COLLECTIONS_LIST.md](FLUTTERFLOW_COLLECTIONS_LIST.md) |
-| **CollectionDetail** | `GET /coletas/{id}` — resumo operacional e até três resíduos; recebe `coletaId` do CardCom4 |
+| **CollectionDetail** | `GET /coletas/{id}` — resumo operacional e ListView de todos os resíduos; recebe `coletaId` do CardCom4 |
 | **Dashboard** | Layout FF Design (manual); API **WellAdmin Dashboard Resumo** — ver [FLUTTERFLOW_DASHBOARD_BASICO.md](FLUTTERFLOW_DASHBOARD_BASICO.md) |
 | **AgendamentosPage** | Stub (ligar **WellAdmin Agendamentos**) |
 | **PerfilPage** | Stub (ligar **WellAdmin Perfil** + senha) |

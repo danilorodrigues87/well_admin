@@ -209,11 +209,12 @@ UI — `resumo.titulo`, `status_label`, `peso_total_label`,
 `itens[].quantidade_label` — e o widget faz binding direto. Ver
 `app/Service/ColetaApiPresenter.php` e [API.md](API.md).
 
-**Evitar Data Structs + custom function para listas.** A tela
-`CollectionDetail` usa três cards fixos com Page States escalares e visibilidade
-condicional `EXISTS_AND_NON_EMPTY`, em vez de lista dinâmica. Foi o que destravou
-a tela depois de a abordagem com Data Struct deixar um `generatorVariable`
-apontando para estado inexistente, o que tornava a página ilegível.
+**Listas dinâmicas usam Data Struct + custom function, com o código Dart gravado
+pela API oficial** (`custom-functions/id-<key>/function-code`, sem `.dart`). A
+`CollectionDetail` lista resíduos num ListView ligado a `residuos`
+(`List<ColetaResiduoItem>`), preenchido por `parseColetaDetailItemsFromApi`.
+Cards fixos (item1/item2/item3) estouravam o layout e omitiam o 4º resíduo;
+JSON nulo virava o texto `"null"`.
 
 **Navegação a partir de bottom sheet:** não feche a sheet antes de navegar. O
 dismiss descarta o contexto que carrega os parâmetros do componente. O botão
