@@ -127,6 +127,8 @@ Coletor: vê clientes **vinculados a alguma rota** (mesmo pool cadastral; coleto
 
 Resposta `GET paradas`: `paradas`, `coletor_id`, `data`, `total`, `rota_id`, `sem_rota` (`true` se a operadora não tem clientes em rotas cadastrais).
 
+Sem `rota_id` (>0): API devolve lista vazia (`total: 0`) e `message` pedindo seleção — mesmo comportamento do painel web (não mistura paradas de todas as rotas).
+
 Coletor **não** é definido na rota: `coletor_id` na query identifica quem opera (ordem/status do dia); paradas vêm do cadastro rota×cliente + filtros urgentes/vencidos. Nova coleta: `POST /coletas` / fluxo rascunho grava `coletas.coletor_id`.
 
 Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`.

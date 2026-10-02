@@ -22,6 +22,19 @@ class RotaDoDia extends BaseApi
         $data = RotaDoDiaRequestContext::resolveData($params);
         $rotaId = RotaDoDiaRequestContext::resolveRotaId($params);
 
+        // Alinha com o painel web: sem rota selecionada não lista paradas misturadas.
+        if ($rotaId === null || $rotaId <= 0) {
+            return ApiHelper::ok([
+                'paradas' => [],
+                'coletor_id' => $coletorId,
+                'data' => $data,
+                'total' => 0,
+                'rota_id' => 0,
+                'sem_rota' => !RotaScopeService::operadoraTemClientesEmRotas(),
+                'message' => 'Selecione uma rota para carregar as paradas.',
+            ]);
+        }
+
         try {
             $paradas = RotaDoDiaService::listarParadas($coletorId, $isAdminScope, $data, $rotaId);
 
@@ -30,7 +43,7 @@ class RotaDoDia extends BaseApi
                 'coletor_id' => $coletorId,
                 'data' => $data,
                 'total' => count($paradas),
-                'rota_id' => $rotaId ?? 0,
+                'rota_id' => $rotaId,
                 'sem_rota' => !RotaScopeService::operadoraTemClientesEmRotas(),
             ]);
         } catch (\Throwable $e) {

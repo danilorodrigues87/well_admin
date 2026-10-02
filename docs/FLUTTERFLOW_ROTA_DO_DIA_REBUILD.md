@@ -1,47 +1,51 @@
 # RouteOfTheDay — estado atual (`Scaffold_74bj9gpe`)
 
-Tela recriada. Wiring via MCP em 2026-10-02.
+Alinhado ao painel web (`rota-mapa.js`): selecionar rota → carregar paradas → markers a partir de lat/lng.
 
-## Já ligado
+## Já ligado (MCP) — 2026-10-02
 
 | Item | Detalhe |
 |------|---------|
-| Page State | `rotaDataIso`, `rotaId`, `totalParadas`, `paradaItems` |
-| Custom Function | `parseRotaParadasFromApi` (`rtpp01`) → `List<RotaParadaItem>` |
-| **On Page Load** | hoje → `rotaData` → API Paradas → `paradaItems` + `totalParadas` |
-| **Date picker** (ícone calendário) | Date + setFormField `d/M/y` + `rotaDataIso` `yyyy-MM-dd` + Paradas |
-| **Otimizar** | lê DropDown → API Otimizar → Paradas → lista |
-| **ListView** | `generatorVariable` = `paradaItems`; textos ordem/nome/endereço/status |
-| Contador | `N paradas` dinâmico |
-| GPS Switch | `shareGpsEnabled` + Request Location |
-| Bottom nav | Início / Coletas / Rotas |
-| Navegações externas | Dashboard + CollectionsList → `Scaffold_74bj9gpe` |
+| Page State | `rotaDataIso`, `rotaId`, `totalParadas`, `paradaItems`, `rotaNomes`, `rotaIds`, **`mapPoints`** (`List<LatLng>`) |
+| Custom Functions | `parseRotaParadasFromApi`, `parseRotaNomesFromApi`, `parseRotaIdsFromApi`, `firstRotaIdFromApi`, `paradaItemsToLatLngs`, `buildRotaDirUrl` |
+| On Page Load | hoje → rotas → **1ª rota** (`firstRotaIdFromApi`) → paradas → `paradaItems` + `mapPoints` |
+| Date picker | ISO + reload rotas/paradas + mapPoints |
+| **Seleção de rota** | **Lista horizontal de chips** (`ListView_rotarow1`) — tap no chip → `rotaId` + API paradas + lista/mapPoints (substitui DropDown; MCP não grava `ON_SELECTED`) |
+| Refresh | `IconButton_rotapl1` recarrega paradas da `rotaId` atual |
+| Otimizar | GPS → API → reload lista/mapPoints |
+| Lista | Generate from `paradaItems` |
+| Status ✓ / block | API `parada-status` → reload |
+| Google Maps keys | android / ios / web |
+| Centro do mapa | Cascavel (−24.9555, −53.4552), `markerType: LAT_LNG` |
 
-## Manual no editor (confirmar / completar)
+## Manual no editor (marcadores — MCP não expõe o bind)
 
-1. **ListView** — se Issues acusar *Value Key* / *Generator variable*:  
-   Generate Children from Variable → Page State **`paradaItems`**.  
-   Bindings dos textos já apontam para `paradaItem` (GENERATOR_VARIABLE).
+O widget nativo GoogleMap **não aceita** no YAML o campo de lista de markers (`placesValue`, `markerLatLngs`, etc. → `Unknown field name`). O Page State **`mapPoints` já é preenchido** em todo reload — falta ligar no UI:
 
-2. **Otimizar — GPS origem**  
-   Em `origin_lat` / `origin_lng`: **Current Device Location** (Latitude / Longitude).  
-   Sem isso a API responde 422. O MCP não grava LatLng.
+1. Seleciona **Google Map** → Properties → **Num Markers: Multiple** → **Marker Type: LatLng**
+2. **Markers LatLng** → From Variable → Page State **`mapPoints`**
 
-3. **DropDown de rotas dinâmico**  
-   Options from Variable ← `WellAdmin Rota Rotas` → `$.data.rotas[]`  
-   Label `nome`, value `id`. Opção estática `0` = Todas já existe.
+Sem isso o mapa fica só com tiles (sem pinos).
 
-4. **Botões da parada** (mapa / coletado / pulado)  
-   - Maps: Launch URL ← `paradaItem.maps_url`  
-   - Status: API `WellAdmin Rota Parada Status` (`coletado` / `pulado`) → reload Paradas
+### Traçar rota (polyline / Directions)
 
-5. **Header** — Text do nome ← App State `userName` (se ainda estático)
+| Ação | Como |
+|------|------|
+| Abrir rota completa no Google Maps | Launch URL → Custom Function **`buildRotaDirUrl`**(`paradaItems`) |
+| Navegar 1 parada | Icon `directions` → `paradaItem.maps_url` |
 
-6. **Não** colocar 2× Expanded na mesma Row dos filtros.
+(O MCP só aceita `launchUrl.url` literal — bind dinâmico no editor.)
 
-## APIs usadas
+## API
 
-- `GET /rota-do-dia/paradas`
-- `POST /rota-do-dia/otimizar` (falta origin no editor)
-- `GET /rota-do-dia/rotas` (opções do dropdown — manual)
-- `POST /rota-do-dia/parada-status` (manual nos botões)
+- `GET /rota-do-dia/paradas` **exige** `rota_id` > 0 (igual ao web). Sem rota → `paradas: []`.
+- `GET /rota-do-dia/rotas`
+- `POST /rota-do-dia/otimizar`
+- `POST /rota-do-dia/parada-status`
+
+## Como testar
+
+1. Hot restart no Test Mode / app.
+2. Abrir Rota do Dia → chips das rotas do dia devem aparecer; a 1ª já carrega paradas.
+3. Tocar outro chip → lista de clientes deve trocar na hora.
+4. Após bind manual de `mapPoints` no Google Map → pinos nas paradas com lat/lng.
