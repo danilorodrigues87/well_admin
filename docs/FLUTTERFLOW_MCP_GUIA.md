@@ -33,6 +33,11 @@ MCP regrava o arquivo *renderizado* (metadados + campo `code:`) dentro do própr
 `code:`. Cada tentativa aninha mais um nível de YAML escapado, em crescimento
 exponencial.
 
+**O mesmo vale para Custom Actions:** a chave real é
+`custom-actions/id-<key>/action-code` (sem `.dart`). Em 2026-10-02 o
+`openRotaDirections` foi corrompido ao gravar via
+`.../action-code.dart` — o `canLaunchUrl` voltou a bloquear a abertura do Maps.
+
 Sintomas: o FlutterFlow acusa *"Code has errors or is improperly formatted"*, e
 com o arquivo grande o editor trava — não aceita edição **nem exclusão** da
 função. Em 2026-10-01 a `parseColetaDetailItemsFromApi` chegou a 23 KB de YAML

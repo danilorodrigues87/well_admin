@@ -142,6 +142,11 @@ class RotaDoDiaService
 
         $result['origin'] = ['lat' => $originLat, 'lng' => $originLng];
         $result['sem_coordenadas'] = count($semCoords);
+        $result['maps_dir_url'] = GoogleMapsService::buildMultiStopDirectionsUrl(
+            $originLat,
+            $originLng,
+            $result['paradas']
+        );
 
         return $result;
     }
@@ -236,21 +241,26 @@ class RotaDoDiaService
         $lat = $c->latitude;
         $lng = $c->longitude;
 
-        $geoOk = $lat !== null && $lng !== null;
+        $latF = $lat !== null && $lat !== '' ? (float)$lat : null;
+        $lngF = $lng !== null && $lng !== '' ? (float)$lng : null;
+        if ($latF === 0.0 && $lngF === 0.0) {
+            $latF = null;
+            $lngF = null;
+        }
 
         return [
-            'cliente_id' => $c->id,
+            'cliente_id' => (int)$c->id,
             'nome_fantasia' => $c->nome_fantasia,
             'endereco' => EntityCliente::enderecoCompleto($c),
             'cidade' => $c->cidade,
             'uf' => $c->uf,
             'prioridade' => $c->prioridade,
             'proxima_coleta' => $c->proxima_coleta,
-            'latitude' => $lat,
-            'longitude' => $lng,
-            'geocode_status' => $geoOk ? 'ok' : $c->geocode_status,
-            'maps_url' => ($lat !== null && $lng !== null)
-                ? GoogleMapsService::buildNavigationUrl((float)$lat, (float)$lng)
+            'latitude' => $latF,
+            'longitude' => $lngF,
+            'geocode_status' => ($latF !== null && $lngF !== null) ? 'ok' : $c->geocode_status,
+            'maps_url' => ($latF !== null && $lngF !== null)
+                ? GoogleMapsService::buildNavigationUrl($latF, $lngF)
                 : null,
         ];
     }

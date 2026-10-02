@@ -131,7 +131,7 @@ Sem `rota_id` (>0): API devolve lista vazia (`total: 0`) e `message` pedindo sel
 
 Coletor **não** é definido na rota: `coletor_id` na query identifica quem opera (ordem/status do dia); paradas vêm do cadastro rota×cliente + filtros urgentes/vencidos. Nova coleta: `POST /coletas` / fluxo rascunho grava `coletas.coletor_id`.
 
-Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`.
+Resposta `otimizar`: `paradas`, `polyline` (encoded), `distancia_metros`, `duracao_segundos`, `origin`, `maps_dir_url` (URL Google Maps Directions multi-parada).
 
 Paradas incluem `status_parada`, `maps_url`, coordenadas quando disponíveis.
 

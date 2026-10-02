@@ -355,6 +355,41 @@ class GoogleMapsService
     }
 
     /**
+     * URL multi-parada para Google Maps Directions (app / Test Mode).
+     *
+     * @param list<array<string,mixed>> $paradas
+     */
+    public static function buildMultiStopDirectionsUrl(float $originLat, float $originLng, array $paradas): string
+    {
+        $pts = [];
+        foreach ($paradas as $p) {
+            $lat = isset($p['latitude']) ? (float)$p['latitude'] : (isset($p['lat']) ? (float)$p['lat'] : 0.0);
+            $lng = isset($p['longitude']) ? (float)$p['longitude'] : (isset($p['lng']) ? (float)$p['lng'] : 0.0);
+            if ($lat === 0.0 && $lng === 0.0) {
+                continue;
+            }
+            $pts[] = $lat.','.$lng;
+        }
+        if ($pts === []) {
+            return '';
+        }
+        if (count($pts) === 1) {
+            return 'https://www.google.com/maps/dir/?api=1&origin='
+                .rawurlencode($originLat.','.$originLng)
+                .'&destination='.rawurlencode($pts[0])
+                .'&travelmode=driving';
+        }
+        $dest = array_pop($pts);
+        $waypoints = implode('|', $pts);
+
+        return 'https://www.google.com/maps/dir/?api=1&origin='
+            .rawurlencode($originLat.','.$originLng)
+            .'&destination='.rawurlencode($dest)
+            .'&waypoints='.rawurlencode($waypoints)
+            .'&travelmode=driving';
+    }
+
+    /**
      * @param array<string,mixed>|null $body
      * @param list<string> $headers
      * @return array{ok:bool,status:int,body:?array,raw:string,error:?string}

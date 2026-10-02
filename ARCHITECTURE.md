@@ -304,3 +304,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-01 | Relatório PDF via **Dompdf** (`ColetaRelatorioPdfService`): painel Baixar PDF (`/painel/coletas/mtr/{id}/pdf`), gerador e API `GET /coletas/{id}/pdf` — mesmo layout do HTML de impressão |
 | 2026-10-02 | Cancelar coleta (painel + API + app CardCom4): `ColetaService::cancelar` para rascunho/finalizada; cancela MTR SINIR se `enviado`; filtro Canceladas na listagem; botão no detalhe/lista |
 | 2026-10-02 | App RouteOfTheDay: chips horizontais para trocar rota (como select do web); API `GET /rota-do-dia/paradas` exige `rota_id` (lista vazia sem seleção); `mapPoints` preenchido — bind de markers no GoogleMap só no editor FF |
+| 2026-10-02 | Rota do dia app: Otimizar abre Google Maps (`maps_dir_url` + `openRotaDirections` sem `canLaunchUrl`); coords float na API; parser de paradas aceita lat/lng string |

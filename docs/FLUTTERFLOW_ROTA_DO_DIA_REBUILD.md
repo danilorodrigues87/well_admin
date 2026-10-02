@@ -1,51 +1,43 @@
 # RouteOfTheDay — estado atual (`Scaffold_74bj9gpe`)
 
-Alinhado ao painel web (`rota-mapa.js`): selecionar rota → carregar paradas → markers a partir de lat/lng.
+## Marcadores + traçar rota (obrigatório no editor)
 
-## Já ligado (MCP) — 2026-10-02
+O MCP **não grava** o bind de markers do GoogleMap nativo (`placesValue` / `markerLatLngs` → rejeitados). O Page State **`mapPoints`** já é preenchido em todo reload.
 
-| Item | Detalhe |
-|------|---------|
-| Page State | `rotaDataIso`, `rotaId`, `totalParadas`, `paradaItems`, `rotaNomes`, `rotaIds`, **`mapPoints`** (`List<LatLng>`) |
-| Custom Functions | `parseRotaParadasFromApi`, `parseRotaNomesFromApi`, `parseRotaIdsFromApi`, `firstRotaIdFromApi`, `paradaItemsToLatLngs`, `buildRotaDirUrl` |
-| On Page Load | hoje → rotas → **1ª rota** (`firstRotaIdFromApi`) → paradas → `paradaItems` + `mapPoints` |
-| Date picker | ISO + reload rotas/paradas + mapPoints |
-| **Seleção de rota** | **Lista horizontal de chips** (`ListView_rotarow1`) — tap no chip → `rotaId` + API paradas + lista/mapPoints (substitui DropDown; MCP não grava `ON_SELECTED`) |
-| Refresh | `IconButton_rotapl1` recarrega paradas da `rotaId` atual |
-| Otimizar | GPS → API → reload lista/mapPoints |
-| Lista | Generate from `paradaItems` |
-| Status ✓ / block | API `parada-status` → reload |
-| Google Maps keys | android / ios / web |
-| Centro do mapa | Cascavel (−24.9555, −53.4552), `markerType: LAT_LNG` |
+### 1) Ligar pinos (2 cliques)
 
-## Manual no editor (marcadores — MCP não expõe o bind)
+1. Seleciona **Google Map** (`Map Google Map`)
+2. Properties → **Num Markers: Multiple** → **Marker Type: LatLng**
+3. **Markers LatLng** → From Variable → Page State **`mapPoints`**
 
-O widget nativo GoogleMap **não aceita** no YAML o campo de lista de markers (`placesValue`, `markerLatLngs`, etc. → `Unknown field name`). O Page State **`mapPoints` já é preenchido** em todo reload — falta ligar no UI:
+Sem isso o mapa fica só com tiles (Cascavel).
 
-1. Seleciona **Google Map** → Properties → **Num Markers: Multiple** → **Marker Type: LatLng**
-2. **Markers LatLng** → From Variable → Page State **`mapPoints`**
+`allowInteraction` está **false** de propósito: no Test Mode web o mapa rouba todos os cliques. No app mobile você pode religar depois.
 
-Sem isso o mapa fica só com tiles (sem pinos).
+### 2) Traçar rota (já ligado)
 
-### Traçar rota (polyline / Directions)
+| Botão | Ação |
+|-------|------|
+| Ícone **directions** (verde, sobre o mapa) | Custom Action `openRotaDirections` + `buildRotaDirUrl(paradaItems)` → abre Google Maps com a sequência de paradas |
+| Ícone **directions** na linha da parada | Abre `maps_url` daquela parada |
+| **Otimizar** | GPS (fallback Cascavel) → API → atualiza lista/`mapPoints` → snackbar → **abre Google Maps** com `maps_dir_url` (ou `buildRotaDirUrl`) |
+| Ícone **directions** (verde) | Abre Google Maps com a sequência atual de paradas |
 
-| Ação | Como |
-|------|------|
-| Abrir rota completa no Google Maps | Launch URL → Custom Function **`buildRotaDirUrl`**(`paradaItems`) |
-| Navegar 1 parada | Icon `directions` → `paradaItem.maps_url` |
+> O widget Google Map nativo do FlutterFlow **não desenha polyline**. A “rota”
+> operacional é o trajeto no Google Maps (igual ao botão navegar do painel web).
+> Após Otimizar, o app deve abrir o Maps automaticamente.
 
-(O MCP só aceita `launchUrl.url` literal — bind dinâmico no editor.)
+Polyline desenhada **dentro** do widget GoogleMap do FF não existe sem Custom Widget — o equivalente operacional é abrir no Google Maps (como “navegar” no painel web).
+
+## Fluxo alinhado ao painel web
+
+1. On Load / data → rotas → 1ª rota → paradas → `paradaItems` + `mapPoints`
+2. DropDown rota + botão verde refresh → troca clientes
+3. Otimizar (GPS) → nova ordem
+4. Directions → Google Maps com waypoints
 
 ## API
 
-- `GET /rota-do-dia/paradas` **exige** `rota_id` > 0 (igual ao web). Sem rota → `paradas: []`.
-- `GET /rota-do-dia/rotas`
+- `GET /rota-do-dia/paradas` exige `rota_id` > 0
 - `POST /rota-do-dia/otimizar`
 - `POST /rota-do-dia/parada-status`
-
-## Como testar
-
-1. Hot restart no Test Mode / app.
-2. Abrir Rota do Dia → chips das rotas do dia devem aparecer; a 1ª já carrega paradas.
-3. Tocar outro chip → lista de clientes deve trocar na hora.
-4. Após bind manual de `mapPoints` no Google Map → pinos nas paradas com lat/lng.
