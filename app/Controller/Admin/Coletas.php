@@ -33,7 +33,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20260922c"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261002a"></script>'
         );
     }
 
@@ -47,7 +47,7 @@ class Coletas extends Page
         $dataInicio = trim((string)($post['data_inicio'] ?? ''));
         $dataFim = trim((string)($post['data_fim'] ?? ''));
 
-        $where = "c.status != 'cancelada'";
+        $where = '1=1';
         $params = [];
         if ($dataInicio !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataInicio)) {
             $where .= ' AND c.data_coleta >= ?';
@@ -69,9 +69,11 @@ class Coletas extends Page
                 $params[] = '%'.$busca.'%';
             }
         }
-        if (in_array($status, ['rascunho', 'finalizada'], true)) {
+        if (in_array($status, ['rascunho', 'finalizada', 'cancelada'], true)) {
             $where .= ' AND c.status = ?';
             $params[] = $status;
+        } else {
+            $where .= " AND c.status != 'cancelada'";
         }
         if (in_array($recebimento, ['pendente', 'recebido'], true)) {
             $where .= ' AND c.situacao_recebimento = ?';
@@ -111,10 +113,13 @@ class Coletas extends Page
             $badge = match ($c->status) {
                 'finalizada' => 'success',
                 'rascunho' => 'warning',
+                'cancelada' => 'danger',
                 default => 'secondary',
             };
             $data = $c->data_coleta ? date('d/m/Y', strtotime($c->data_coleta)) : '—';
             $sinirBadge = SinirService::renderStatusBadge($c->sinir_status, $c->status);
+            $podeCancelar = ColetaMtrHelper::podeCancelar($c)
+                && (!empty($usuario['is_admin']) || (int)$c->coletor_id === (int)($usuario['id'] ?? 0));
             $itens .= '<tr>
                 <td>'.$relCol.'</td>
                 <td>'.$mtr.'</td>
@@ -131,8 +136,8 @@ class Coletas extends Page
                         ? '<a class="btn btn-sm btn-outline-secondary" href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" title="Imprimir relatório"><i class="fas fa-print"></i></a>'
                           .'<a class="btn btn-sm btn-outline-danger" href="'.URL.'/painel/coletas/mtr/'.$c->id.'/pdf" title="Baixar PDF"><i class="fas fa-file-pdf"></i></a>'
                         : '').'
-                    '.($c->status === 'rascunho' && ( !empty($usuario['is_admin']) || (int)$c->coletor_id === (int)($usuario['id'] ?? 0) )
-                        ? '<button class="btn btn-sm btn-outline-danger" onclick="excluirColeta('.$c->id.')" title="Excluir rascunho"><i class="fas fa-trash"></i></button>'
+                    '.($podeCancelar
+                        ? '<button class="btn btn-sm btn-outline-danger" onclick="cancelarColeta('.$c->id.', '.($c->status === 'finalizada' && ColetaMtrHelper::precisaCancelarMtrSinir($c) ? 'true' : 'false').')" title="Cancelar coleta"><i class="fas fa-ban"></i></button>'
                         : '').'
                     '.(ColetaMtrHelper::podeGerarMtr($c)
                         ? '<button class="btn btn-sm btn-outline-warning" onclick="sinirReenviar('.$c->id.')" title="Gerar MTR no SINIR"><i class="fas fa-file-contract"></i></button>'
@@ -153,26 +158,32 @@ class Coletas extends Page
 
     public static function excluir($request): string
     {
+        return self::cancelar($request);
+    }
+
+    public static function cancelar($request): string
+    {
         $post = $request->getPostVars();
         if ($err = CrudHelper::requireCsrf($post)) {
             return CrudHelper::jsonError($err);
         }
         $id = (int)($post['id'] ?? 0);
+        $justificativa = trim((string)($post['justificativa'] ?? ''));
         $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
         $coleta = EntityColeta::getById($id);
-        if (!$coleta || $coleta->status !== 'rascunho') {
-            return CrudHelper::jsonError('Somente coletas em rascunho podem ser excluídas.');
+        if (!$coleta || !ColetaMtrHelper::podeCancelar($coleta)) {
+            return CrudHelper::jsonError('Somente rascunhos ou coletas finalizadas podem ser cancelados.');
         }
         if (empty($usuario['is_admin']) && (int)$coleta->coletor_id !== (int)($usuario['id'] ?? 0)) {
-            return CrudHelper::jsonError('Sem permissão para excluir esta coleta.');
+            return CrudHelper::jsonError('Sem permissão para cancelar esta coleta.');
         }
         try {
-            ColetaService::cancelar($id);
+            $result = ColetaService::cancelar($id, $justificativa);
         } catch (\InvalidArgumentException $e) {
             return CrudHelper::jsonError($e->getMessage());
         }
 
-        return CrudHelper::jsonOk(['message' => 'Coleta excluída.']);
+        return CrudHelper::jsonOk(['message' => $result['message']]);
     }
 
     public static function get($request): string
@@ -204,6 +215,13 @@ class Coletas extends Page
         $mtrPrintBtn = ColetaMtrHelper::podeImprimirRelatorio($c)
             ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir</a>'
               .' <a href="'.URL.'/painel/coletas/mtr/'.$c->id.'/pdf" class="btn btn-sm btn-outline-danger"><i class="fas fa-file-pdf me-1"></i> Baixar PDF</a>'
+            : '';
+
+        $usuario = SessionUser::getUserLogedData()['usuario'] ?? [];
+        $podeCancelar = ColetaMtrHelper::podeCancelar($c)
+            && (!empty($usuario['is_admin']) || (int)$c->coletor_id === (int)($usuario['id'] ?? 0));
+        $cancelarBtn = $podeCancelar
+            ? '<button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelarColeta('.$c->id.', '.(ColetaMtrHelper::precisaCancelarMtrSinir($c) ? 'true' : 'false').')"><i class="fas fa-ban me-1"></i> Cancelar coleta</button>'
             : '';
 
         $sinirHtml = self::renderSinirDetalhe($c);
@@ -247,6 +265,7 @@ class Coletas extends Page
 
         $html = View::render('admin/modules/coletas/detalhe', [
             'mtr_print_btn' => $mtrPrintBtn,
+            'cancelar_btn' => $cancelarBtn,
             'sinir_reenviar_btn' => $sinirReenviarBtn,
             'cdf_admin_html' => $cdfAdminHtml,
             'cdf_upload_form' => SinirConfig::isEnabled() && $c->status === 'finalizada'

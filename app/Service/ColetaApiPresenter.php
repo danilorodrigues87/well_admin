@@ -239,6 +239,7 @@ class ColetaApiPresenter
                 'evidencias_count' => count($detalhe['evidencias']),
                 'pode_imprimir' => ColetaMtrHelper::podeImprimirRelatorio($c),
                 'pode_gerar_mtr' => ColetaMtrHelper::podeGerarMtr($c),
+                'pode_cancelar' => ColetaMtrHelper::podeCancelar($c),
             ],
         ];
     }

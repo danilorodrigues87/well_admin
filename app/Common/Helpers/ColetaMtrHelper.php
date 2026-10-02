@@ -91,6 +91,20 @@ class ColetaMtrHelper
         return ($c->status ?? '') !== 'cancelada';
     }
 
+    /** Cancelar relatório (rascunho ou finalizada). Se houver MTR no SINIR, cancela o manifesto também. */
+    public static function podeCancelar(Coleta $c): bool
+    {
+        return in_array($c->status ?? '', ['rascunho', 'finalizada'], true);
+    }
+
+    /** Há manifesto ativo no SINIR que precisa ser cancelado antes de marcar a coleta. */
+    public static function precisaCancelarMtrSinir(Coleta $c): bool
+    {
+        return SinirConfig::isEnabled()
+            && ($c->status ?? '') === 'finalizada'
+            && ($c->sinir_status ?? '') === 'enviado';
+    }
+
     /** Campo MTRº na impressão (número oficial ou rótulo da fase atual). */
     public static function rotuloImpressao(Coleta $c): string
     {

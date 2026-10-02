@@ -209,35 +209,82 @@ Isso é comum quando a API foi criada via MCP. Use **JSON Path customizado** (fu
 
 ---
 
-## Rota do dia + Frota — wiring manual (2026-09-18)
+## Rota do dia + Frota — wiring (atualizado 2026-10-02)
 
-API Calls já existem no projeto (**25**). O MCP **não** liga páginas nem ListViews.
+> **Status:** tela recriada — `Scaffold_74bj9gpe`.  
+> Guia: [FLUTTERFLOW_ROTA_DO_DIA_REBUILD.md](FLUTTERFLOW_ROTA_DO_DIA_REBUILD.md).
 
-### RouteOfTheDay — On Page Load
+API Calls incluem **WellAdmin Rota Rotas** (`GET /rota-do-dia/rotas?data=`).
+Scaffold: **RouteOfTheDay** (`Scaffold_74bj9gpe`).
 
-1. **Update App State** `rotaData` = *Current Date* formatado `YYYY-MM-DD` (Custom Function ou texto fixo no MVP).
-2. **WellAdmin Rota Paradas**:
-   - `baseUrl` ← `apiBaseUrl`
-   - `authToken` ← `authToken`
-   - `data` ← `rotaData`
-   - `coletor_id` ← `0` (coletor; backend usa o JWT) ou `userId` se gestor escolher outro coletor
-   - `rota_id` ← `0` (todas) ou ID da rota cadastral
-3. Guardar resposta em page state `paradasResponse`.
-4. **ListView** de `RouteStop`:
-   - **Generate Children from Variable**
-   - JSON Path: `$.data.paradas`
-   - Bind params do componente: nome, endereço, `status_parada`, etc.
+### Já ligado via MCP
+
+| Item | Status |
+|------|--------|
+| Page State `rotaDataIso`, `rotaId`, `totalParadas`, `selectedDate`, `paradaItems` | OK |
+| App State `rotaData`, `shareGpsEnabled` | OK |
+| **ON_INIT** → hoje (`yyyy-MM-dd`) → `rotaData` → Rotas + Paradas → `totalParadas` | OK |
+| Campo **DataOperacao** (TextField, ícone calendário) → change → Rotas + Paradas | OK |
+| Filtros empilhados (Column) — **sem** 2× Expanded na mesma Row | OK (evita crash FF) |
+| DropDown **RotaCadastral** + **IconButton CarregarRota** → `rotaId` + Paradas | OK |
+| Botão **Otimizar** → API + reload Paradas | parcial (`origin_lat/lng` manual) |
+| Switch GPS → `shareGpsEnabled` + permissão LOCATION | OK |
+| Contador `N paradas` | OK |
+| Bottom nav Início / Coletas / Rotas | OK |
+
+### Armadilha de layout (2026-10-02)
+
+O FF mostra *"layout option… reverted"* se dois filhos na **mesma Row** usam
+largura **Infinity/Expanded** (igual aos KPIs: ver regra ~47% + `UNEXPANDED`).
+
+**Não** use On Selected no DropDown enquanto o layout estiver quebrado — o editor
+buga. Padrão estável nesta tela:
+
+1. Data e rota em **Column** (`FiltrosRota`), não lado a lado com 2× Expand.
+2. Rota em Row: DropDown Expand + **IconButton fixo 40px** (`CarregarRota`).
+3. Carregar paradas = tap no **refresh**, não On Selected / On Tap do DropDown.
+
+### Manual no editor FlutterFlow (MCP não grava)
+
+1. **Seletor de data nativo (igual web)**  
+   Em `DataOperacao`: **Properties → Type = Date**.  
+   O MCP **não** grava Type Date / `dateTimePicker` (validate OK, update descarta).  
+   Formato da API: `yyyy-MM-dd`.
+
+2. **Opções do DropDown de rotas a partir da API**  
+   Options from Variable → resposta de `WellAdmin Rota Rotas` → `$.data.rotas[]`  
+   - Label: `nome` · Value: `id` (Integer)  
+   Depois de escolher a rota, tocar no **refresh** (`CarregarRota`).
+
+3. **Otimizar — origem GPS**  
+   Em `origin_lat` / `origin_lng`: **Current Device Location** → Latitude / Longitude.  
+   Sem isso a API responde 422.
+
+4. **ListView de paradas**  
+   Substituir os 2 cards estáticos por ListView → Generate from Variable  
+   JSON Path: `$.data.paradas` (output da última call Paradas / do refresh).  
+   Bind: `ordem`, `nome_fantasia`, `endereco`, `status_parada`, `maps_url`.  
+   Struct: `RotaParadaItem` (`rtpitm1`).
+
+5. **Marcar coletado / pulado**  
+   **WellAdmin Rota Parada Status** → reload Paradas.
+
+6. **Mapa** — markers a partir de lat/lng das paradas.
+
+7. **GPS contínuo** — Timer + **WellAdmin Frota Posicao** se `shareGpsEnabled`.
+
+8. **Aba Veículos** — sem página FleetMap ainda.
 
 ### Marcar parada coletada / pulada
 
-1. **WellAdmin Rota Parada Status** no tap do botão do `RouteStop`:
-   - `cliente_id`, `status` (`coletado` ou `pulado`), `data`, `coletor_id` (mesma regra acima)
+1. **WellAdmin Rota Parada Status** no tap do botão do item da lista:
+   - `cliente_id`, `status` (`coletado` ou `pulado`), `data`, `coletor_id`
 2. Atualizar lista com a resposta `$.data.paradas` ou refazer GET Paradas.
 
 ### GPS (SwitchComponent)
 
-1. Timer ou *On Toggle* → **WellAdmin Frota Posicao** com lat/lng do **Current Device Location**.
-2. Respeitar App State `shareGpsEnabled`.
+1. Toggle já grava `shareGpsEnabled` e pede LOCATION.
+2. Completar: Timer ou ação pós-toggle → **WellAdmin Frota Posicao** com **Current Device Location**.
 
 ### FleetMap — On Page Load
 

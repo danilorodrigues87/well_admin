@@ -187,6 +187,13 @@ $obRouter->get('/api/v1/rota-do-dia/paradas', [
     },
 ]);
 
+$obRouter->get('/api/v1/rota-do-dia/rotas', [
+    'middlewares' => $mod('rota_dia'),
+    function ($request) {
+        return RotaDoDia::rotas($request);
+    },
+]);
+
 $obRouter->post('/api/v1/rota-do-dia/otimizar', [
     'middlewares' => $mod('rota_dia'),
     function ($request) {

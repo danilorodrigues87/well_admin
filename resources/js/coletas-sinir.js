@@ -311,36 +311,76 @@
   };
 
   window.excluirColeta = function (id) {
-    var run = function () {
-      $.post(postUrl(), { acao: 'excluir_coleta', id: id, _csrf: csrf() }, function (d) {
+    window.cancelarColeta(id, false);
+  };
+
+  window.cancelarColeta = function (id, precisaJustificativaSinir) {
+    var run = function (justificativa) {
+      $.post(postUrl(), {
+        acao: 'cancelar_coleta',
+        id: id,
+        justificativa: justificativa || '',
+        _csrf: csrf()
+      }, function (d) {
         d = parseResp(d);
         if (!d.success) {
-          afterErr(d.message || 'Erro ao excluir.');
+          afterErr(d.message || 'Erro ao cancelar.');
           return;
         }
         if (typeof Swal !== 'undefined') {
-          Swal.fire('Excluída', d.message || 'Coleta excluída.', 'success');
+          Swal.fire('Cancelada', d.message || 'Coleta cancelada.', 'success');
+        }
+        var modalEl = document.getElementById('detalheModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+          var inst = bootstrap.Modal.getInstance(modalEl);
+          if (inst) {
+            inst.hide();
+          }
         }
         if (typeof listar === 'function') {
           listar(null, 1);
         }
       }, 'json').fail(function () {
-        afterErr('Falha ao excluir coleta.');
+        afterErr('Falha ao cancelar coleta.');
       });
     };
+
+    var precisaJust = !!precisaJustificativaSinir;
     if (typeof Swal !== 'undefined') {
-      Swal.fire({
-        title: 'Excluir rascunho?',
-        text: 'Esta coleta será cancelada e não aparecerá mais na listagem.',
+      var opts = {
+        title: precisaJust ? 'Cancelar coleta e MTR?' : 'Cancelar coleta?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Excluir',
-        cancelButtonText: 'Cancelar'
-      }).then(function (r) {
-        if (r.isConfirmed) run();
+        confirmButtonText: precisaJust ? 'Cancelar coleta e MTR' : 'Cancelar coleta',
+        confirmButtonColor: '#dc3545',
+        cancelButtonText: 'Voltar'
+      };
+      if (precisaJust) {
+        opts.input = 'textarea';
+        opts.inputLabel = 'Justificativa (obrigatória no SINIR)';
+        opts.inputPlaceholder = 'Motivo do cancelamento conforme exigência do órgão…';
+        opts.inputAttributes = { maxlength: 500 };
+        opts.preConfirm = function (value) {
+          if (!value || !String(value).trim()) {
+            Swal.showValidationMessage('Informe a justificativa.');
+          }
+          return value;
+        };
+      } else {
+        opts.text = 'O relatório ficará com status cancelado e sairá da listagem padrão.';
+      }
+      Swal.fire(opts).then(function (r) {
+        if (!r.isConfirmed) {
+          return;
+        }
+        run(precisaJust ? String(r.value || '').trim() : 'Cancelamento solicitado no painel.');
       });
-    } else if (confirm('Excluir rascunho?')) {
-      run();
+    } else if (confirm(precisaJust ? 'Cancelar coleta e MTR no SINIR?' : 'Cancelar coleta?')) {
+      var j = precisaJust ? prompt('Justificativa do cancelamento:') : 'Cancelamento solicitado no painel.';
+      if (precisaJust && (!j || !String(j).trim())) {
+        return;
+      }
+      run(String(j || '').trim());
     }
   };
 

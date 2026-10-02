@@ -222,10 +222,18 @@ class Coletas extends BaseApi
             return $err;
         }
 
-        try {
-            ColetaService::cancelar($id);
+        $body = $request->getPostVars();
+        $justificativa = trim((string)($body['justificativa'] ?? ''));
 
-            return ApiHelper::ok(['message' => 'Coleta cancelada.']);
+        try {
+            $result = ColetaService::cancelar($id, $justificativa);
+            $detalhe = ColetaService::detalhar($id);
+
+            return ApiHelper::ok([
+                'message' => $result['message'],
+                'sinir_cancelado' => $result['sinir_cancelado'],
+                'coleta' => ColetaApiPresenter::coletaDetalhe($detalhe),
+            ]);
         } catch (\InvalidArgumentException $e) {
             return self::handleInvalidArgument($e);
         } catch (\Throwable $e) {

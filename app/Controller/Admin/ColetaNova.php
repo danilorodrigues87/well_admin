@@ -190,7 +190,7 @@ class ColetaNova extends Page
                 'listar_itens' => self::acaoListarItens($coletaId, $usuario),
                 'salvar_rascunho_final' => self::acaoSalvarRascunhoFinal($request, $coletaId, $usuario),
                 'finalizar' => self::acaoFinalizar($request, $coletaId, $usuario),
-                'cancelar' => self::acaoCancelar($coletaId, $usuario),
+                'cancelar' => self::acaoCancelar($coletaId, $usuario, $post),
                 default => CrudHelper::jsonError('Ação inválida.'),
             };
         } catch (\InvalidArgumentException $e) {
@@ -444,10 +444,15 @@ class ColetaNova extends Page
         ]);
     }
 
-    private static function acaoCancelar(?int $coletaId, array $usuario): string
+    private static function acaoCancelar(?int $coletaId, array $usuario, array $post = []): string
     {
         self::assertColetaAccess($coletaId, $usuario);
-        ColetaService::cancelar($coletaId);
+        $justificativa = trim((string)($post['justificativa'] ?? ''));
+        if ($justificativa === '') {
+            $justificativa = 'Cancelamento no wizard de coleta.';
+        }
+        ColetaService::cancelar((int)$coletaId, $justificativa);
+
         return CrudHelper::jsonOk(['redirect' => URL.'/painel/coleta/nova']);
     }
 

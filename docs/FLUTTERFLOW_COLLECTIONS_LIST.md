@@ -101,13 +101,18 @@ Caminho típico no seletor de variável: **Widget State / Generator** → item d
    `parseColetaDetailItemsFromApi` (`$.data.itens[]`). A tela mostra um ListView
    com todos os resíduos; nomes longos são truncados (`nome_label`) e o texto
    do card usa Expanded para não estourar o badge de quantidade.
-   **Imprimir / PDF / MTR:**
+   **Imprimir / PDF / MTR / Cancelar:**
    - **Gerar PDF** (`Container_6ms03coe`): API Call **WellAdmin Coleta PDF**
      (`GET /coletas/{id}/pdf`). No editor FF, configure a resposta como **File** e
      acrescente a ação **Download File** após a call (o MCP grava a call; o
      download binário costuma precisar desse passo no UI). Deploy PHP com Dompdf
      obrigatório.
-   - **Imprimir / Gerar MTR:** ainda sem ação (próxima etapa).
+   - **Cancelar** (`Container_363uld0z`): API Call **WellAdmin Coleta Cancelar**
+     (`POST /coletas/{id}/cancelar`). Cancela rascunho ou finalizada; se houver
+     MTR no SINIR, cancela o manifesto antes. Sucesso → snackbar + volta à
+     **CollectionsList** (refresh). Opcional no editor: Alert Dialog de confirmação
+     antes da call.
+   - **Gerar MTR:** ainda sem ação (próxima etapa).
 
 ## Teste
 

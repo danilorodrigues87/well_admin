@@ -120,6 +120,7 @@ Coletor: vê clientes **vinculados a alguma rota** (mesmo pool cadastral; coleto
 | Método | Endpoint | Módulo | Ação |
 |--------|----------|--------|------|
 | GET | `/rota-do-dia/paradas` | `rota_dia` | Paradas do dia (query: `data`, gestor: `coletor_id`, `rota_id`) |
+| GET | `/rota-do-dia/rotas` | `rota_dia` | Rotas cadastrais com agendamento na data (query: `data`) → `rotas[]` com `id`, `nome`, `paradas` |
 | POST | `/rota-do-dia/otimizar` | `rota_dia` | Otimizar ordem (body/query: `data`, `coletor_id`, `rota_id`; body: `origin_lat`, `origin_lng`, `cliente_ids[]` opcional) |
 | POST | `/rota-do-dia/salvar-ordem` | `rota_dia` | Persistir ordem manual (`ordem[]`: `cliente_id`, `ordem`; query/body: `data`, `coletor_id`) |
 | POST | `/rota-do-dia/parada-status` | `rota_dia` | Status da parada (`cliente_id`, `status`: `pendente` \| `coletado` \| `pulado`; query/body: `data`, `coletor_id`) |
@@ -187,7 +188,7 @@ Body trocar senha:
 | POST | `/coletas/{id}/itens` | `coleta_nova` | Adicionar resíduo |
 | DELETE | `/coletas/{id}/itens/{itemId}` | `coleta_nova` | Remover resíduo |
 | POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais). **Requer `data_recebimento` preenchida** (PATCH transporte antes). |
-| POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar rascunho |
+| POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar relatório (rascunho ou finalizada). Se houver MTR no SINIR (`sinir_status=enviado`), cancela o manifesto antes. Body JSON opcional: `{ "justificativa": "..." }` (obrigatória na prática quando há MTR; default no servidor se vazia). |
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
 | GET | `/coletas/{id}/pdf` | `coletas` | PDF do relatório (Dompdf, mesmo layout do painel) |
 
@@ -208,9 +209,16 @@ Query `busca` em listagem: filtra por nome/cidade do cliente.
 - `resumo.transportador_label`, `veiculo_label`, `motorista_label`,
   `destinador_label`, `recebimento_label` e `tratamento_label`;
 - `resumo.relatorio_label`, `itens_count`, `evidencias_count`,
-  `pode_imprimir` e `pode_gerar_mtr`.
+  `pode_imprimir`, `pode_gerar_mtr` e `pode_cancelar`.
 
 O peso total soma somente itens cuja unidade seja `kg`.
+
+### Cancelar coleta
+
+`POST /coletas/{id}/cancelar` marca `status=cancelada`. Se a coleta tiver MTR
+ativo no SINIR, o servidor chama `cancelarManifesto` antes; falha no SINIR
+impede o cancelamento local. Resposta `data.message`, `data.sinir_cancelado` e
+`data.coleta` (detalhe atualizado).
 
 ### PDF do relatório
 

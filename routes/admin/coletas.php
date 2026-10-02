@@ -134,6 +134,7 @@ foreach ($coletaCrud as $route) {
                 'sinir_emitir_cdf' => $ctrl === Coletas::class ? Coletas::sinirEmitirCdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'sinir_baixar_cdf' => $ctrl === Coletas::class ? Coletas::sinirBaixarCdf($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'excluir_coleta' => $ctrl === Coletas::class ? Coletas::excluir($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
+                'cancelar_coleta' => $ctrl === Coletas::class ? Coletas::cancelar($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'salvar' => method_exists($ctrl, 'save') ? $ctrl::save($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'agendar_rota' => $ctrl === Agendamentos::class ? Agendamentos::agendarRota($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),
                 'list_solicitacoes' => $ctrl === Agendamentos::class ? Agendamentos::listSolicitacoes($request) : json_encode(['success' => false, 'message' => 'Ação inválida']),

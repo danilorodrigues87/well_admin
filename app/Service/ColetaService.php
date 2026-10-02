@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Common\ColetaDefaults;
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\OperadoraScope;
 use App\Common\SinirConfig;
@@ -380,13 +381,52 @@ class ColetaService
         return array_merge($result, ['numero_mtr' => $numeroMtr]);
     }
 
-    public static function cancelar(int $coletaId): void
+    /**
+     * Cancela relatório (rascunho ou finalizada). Se houver MTR no SINIR, cancela o manifesto antes.
+     *
+     * @return array{message:string,sinir_cancelado:bool}
+     */
+    public static function cancelar(int $coletaId, string $justificativa = ''): array
     {
         $coleta = EntityColeta::getById($coletaId);
-        if (!$coleta || $coleta->status !== 'rascunho') {
-            throw new \InvalidArgumentException('Somente rascunhos podem ser cancelados.');
+        if (!$coleta) {
+            throw new \InvalidArgumentException('Coleta não encontrada.');
         }
+        if (($coleta->status ?? '') === 'cancelada') {
+            throw new \InvalidArgumentException('Esta coleta já está cancelada.');
+        }
+        if (!ColetaMtrHelper::podeCancelar($coleta)) {
+            throw new \InvalidArgumentException('Somente rascunhos ou coletas finalizadas podem ser cancelados.');
+        }
+
+        $justificativa = trim($justificativa);
+        if ($justificativa === '') {
+            $justificativa = 'Cancelamento solicitado pelo usuário.';
+        }
+        $justificativa = mb_substr($justificativa, 0, 500);
+
+        $sinirCancelado = false;
+        if (ColetaMtrHelper::precisaCancelarMtrSinir($coleta)) {
+            $result = Sinir\SinirService::cancelarColeta($coletaId, $justificativa);
+            if (empty($result['ok'])) {
+                throw new \InvalidArgumentException(
+                    'Não foi possível cancelar o MTR no SINIR: '.($result['message'] ?? 'erro desconhecido')
+                );
+            }
+            $sinirCancelado = true;
+        } elseif (($coleta->sinir_status ?? '') === 'enviado') {
+            // SINIR desligado, mas coleta ainda marcada como enviada — só marca localmente.
+            EntityColeta::update($coletaId, ['sinir_status' => 'cancelado']);
+            $sinirCancelado = true;
+        }
+
         EntityColeta::update($coletaId, ['status' => 'cancelada']);
+
+        $msg = $sinirCancelado
+            ? 'Coleta e MTR cancelados.'
+            : 'Coleta cancelada.';
+
+        return ['message' => $msg, 'sinir_cancelado' => $sinirCancelado];
     }
 
     /** @return array{coleta: EntityColeta, snapshot: ?EntityColetaSnapshot, itens: ColetaItem[], evidencias: ColetaEvidencia[]} */

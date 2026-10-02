@@ -302,3 +302,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-01 | Custom functions do app FF recuperadas via API oficial (`/v2/updateProjectByYaml`) após corrupção pelo MCP; novo guia `docs/FLUTTERFLOW_MCP_GUIA.md` com armadilhas, formato dos arquivos e fluxo de trabalho |
 | 2026-10-01 | CollectionDetail: ListView de todos os resíduos (`ColetaResiduoItem` + `parseColetaDetailItemsFromApi`); nomes truncados (`nome_label`) e quantidade compacta no presenter |
 | 2026-10-01 | Relatório PDF via **Dompdf** (`ColetaRelatorioPdfService`): painel Baixar PDF (`/painel/coletas/mtr/{id}/pdf`), gerador e API `GET /coletas/{id}/pdf` — mesmo layout do HTML de impressão |
+| 2026-10-02 | Cancelar coleta (painel + API + app CardCom4): `ColetaService::cancelar` para rascunho/finalizada; cancela MTR SINIR se `enviado`; filtro Canceladas na listagem; botão no detalhe/lista |

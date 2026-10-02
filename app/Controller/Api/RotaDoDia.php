@@ -38,6 +38,29 @@ class RotaDoDia extends BaseApi
         }
     }
 
+    public static function rotas($request): \App\Http\Response
+    {
+        $user = self::user();
+        if ($user === []) {
+            return ApiHelper::fail('unauthorized', 'Não autenticado.', 401);
+        }
+
+        $params = $request->getQueryParams();
+        $data = RotaDoDiaRequestContext::resolveData($params);
+
+        try {
+            $rotas = RotaScopeService::rotasComAgendamentoNaData($data);
+
+            return ApiHelper::ok([
+                'rotas' => $rotas,
+                'data' => $data,
+                'total' => count($rotas),
+            ]);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiRotaDoDia::rotas');
+        }
+    }
+
     public static function otimizar($request): \App\Http\Response
     {
         $user = self::user();
