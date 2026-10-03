@@ -147,6 +147,10 @@ class RotaDoDiaService
             $originLng,
             $result['paradas']
         );
+        $result['static_map_url'] = GoogleMapsService::buildStaticMapUrl(
+            $result['paradas'],
+            isset($result['polyline']) ? (string)$result['polyline'] : null
+        );
 
         return $result;
     }

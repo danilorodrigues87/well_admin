@@ -390,6 +390,55 @@ class GoogleMapsService
     }
 
     /**
+     * URL Google Static Maps com pinos numerados (+ polyline opcional).
+     * Requer Static Maps API habilitada na chave de servidor.
+     *
+     * @param list<array<string,mixed>> $paradas
+     */
+    public static function buildStaticMapUrl(array $paradas, ?string $encodedPolyline = null, int $width = 640, int $height = 240): string
+    {
+        if (!MapsConfig::isServerConfigured()) {
+            return '';
+        }
+
+        $markers = [];
+        $n = 1;
+        foreach ($paradas as $p) {
+            $lat = isset($p['latitude']) ? (float)$p['latitude'] : (isset($p['lat']) ? (float)$p['lat'] : 0.0);
+            $lng = isset($p['longitude']) ? (float)$p['longitude'] : (isset($p['lng']) ? (float)$p['lng'] : 0.0);
+            if ($lat === 0.0 && $lng === 0.0) {
+                continue;
+            }
+            $label = $n <= 9 ? (string)$n : '';
+            $markers[] = 'markers='.rawurlencode('color:0x7C3AED|label:'.$label.'|'.$lat.','.$lng);
+            ++$n;
+        }
+        if ($markers === []) {
+            return '';
+        }
+
+        $width = max(100, min(640, $width));
+        $height = max(100, min(640, $height));
+        $parts = array_merge(
+            [
+                'size='.$width.'x'.$height,
+                'scale=2',
+                'maptype=roadmap',
+                'language=pt-BR',
+            ],
+            $markers
+        );
+
+        $poly = trim((string)($encodedPolyline ?? ''));
+        if ($poly !== '') {
+            $parts[] = 'path='.rawurlencode('weight:4|color:0x198754ff|enc:'.$poly);
+        }
+        $parts[] = 'key='.rawurlencode(MapsConfig::serverApiKey());
+
+        return 'https://maps.googleapis.com/maps/api/staticmap?'.implode('&', $parts);
+    }
+
+    /**
      * @param array<string,mixed>|null $body
      * @param list<string> $headers
      * @return array{ok:bool,status:int,body:?array,raw:string,error:?string}

@@ -45,6 +45,7 @@ class RotaDoDia extends BaseApi
                 'total' => count($paradas),
                 'rota_id' => $rotaId,
                 'sem_rota' => !RotaScopeService::operadoraTemClientesEmRotas(),
+                'static_map_url' => \App\Service\GoogleMapsService::buildStaticMapUrl($paradas),
             ]);
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiRotaDoDia::paradas');

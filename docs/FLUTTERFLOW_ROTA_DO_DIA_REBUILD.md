@@ -1,43 +1,62 @@
 # RouteOfTheDay — estado atual (`Scaffold_74bj9gpe`)
 
-## Marcadores + traçar rota (obrigatório no editor)
+## O que foi ajustado (2026-10-03)
 
-O MCP **não grava** o bind de markers do GoogleMap nativo (`placesValue` / `markerLatLngs` → rejeitados). O Page State **`mapPoints`** já é preenchido em todo reload.
+| Item | Status |
+|------|--------|
+| **Otimizar** abre Google Maps sozinho | **Removido** — só atualiza lista/`mapPoints`/`encodedPolyline` + snackbar |
+| Marcadores no mapa nativo | Bind `mapPoints` + `valueKey` (remonta ao carregar) + centro no 1º ponto |
+| Polyline no mapa | Custom Widget **`RotaMapPolyline`** criado (ver § abaixo) — **colocar na página pelo editor** |
+| Botões da ListView | Já configurados (ver tabela) |
 
-### 1) Ligar pinos (2 cliques)
+## Marcadores (mapa nativo — já na página)
 
-1. Seleciona **Google Map** (`Map Google Map`)
-2. Properties → **Num Markers: Multiple** → **Marker Type: LatLng**
-3. **Markers LatLng** → From Variable → Page State **`mapPoints`**
+O Google Map nativo continua no slot do mapa com:
 
-Sem isso o mapa fica só com tiles (Cascavel).
+- **Markers LatLng** → Page State `mapPoints`
+- **valueKey** baseado em `mapPoints.length` (força rebuild após o load)
+- **Centro inicial** → 1º ponto de `mapPoints` (fallback Cascavel)
+- Interação ligada (`allowInteraction: true`)
 
-`allowInteraction` está **false** de propósito: no Test Mode web o mapa rouba todos os cliques. No app mobile você pode religar depois.
+Se ainda não aparecer pino: cliente sem lat/lng na API (badge “Sem GPS” no web).
 
-### 2) Traçar rota (já ligado)
+## Custom Widget `RotaMapPolyline` (linha da rota)
 
-| Botão | Ação |
-|-------|------|
-| Ícone **directions** (verde, sobre o mapa) | Custom Action `openRotaDirections` + `buildRotaDirUrl(paradaItems)` → abre Google Maps com a sequência de paradas |
-| Ícone **directions** na linha da parada | Abre `maps_url` daquela parada |
-| **Otimizar** | GPS (fallback Cascavel) → API → atualiza lista/`mapPoints` → snackbar → **abre Google Maps** com `maps_dir_url` (ou `buildRotaDirUrl`) |
-| Ícone **directions** (verde) | Abre Google Maps com a sequência atual de paradas |
+Criado em Custom Code (`rotmap1`): desenha **marcadores + polyline** verde após otimizar.
 
-> O widget Google Map nativo do FlutterFlow **não desenha polyline**. A “rota”
-> operacional é o trajeto no Google Maps (igual ao botão navegar do painel web).
-> Após Otimizar, o app deve abrir o Maps automaticamente.
+**No editor FlutterFlow (obrigatório — MCP não grava o type do nó Custom):**
 
-Polyline desenhada **dentro** do widget GoogleMap do FF não existe sem Custom Widget — o equivalente operacional é abrir no Google Maps (como “navegar” no painel web).
+1. Custom Code → compile **RotaMapPolyline** (adicione dependency `google_maps_flutter` se pedir)
+2. Na página RouteOfTheDay → no container **Map** (altura 240), **substitua** o Google Map nativo pelo widget **RotaMapPolyline**
+3. Bind:
+   - `markers` → Page State **`mapPoints`**
+   - `encodedPolyline` → Page State **`encodedPolyline`**
+   - width = Infinity / height = 240
 
-## Fluxo alinhado ao painel web
+Depois de **Otimizar**, a API grava a polyline em `encodedPolyline` e a linha aparece no custom map.
 
-1. On Load / data → rotas → 1ª rota → paradas → `paradaItems` + `mapPoints`
-2. DropDown rota + botão verde refresh → troca clientes
-3. Otimizar (GPS) → nova ordem
-4. Directions → Google Maps com waypoints
+## Botões da ListView (por cliente)
+
+| Botão | Ícone | Ação | Status |
+|-------|-------|------|--------|
+| Directions | `directions_rounded` | `openRotaDirections(maps_url)` da parada | **OK** |
+| Coletado | `add_task_rounded` (verde) | `POST parada-status` status=`coletado` → reload paradas/`mapPoints` | **OK** |
+| Pulado | `block_rounded` | `POST parada-status` status=`pulado` → reload | **OK** |
+| Coletar / nova coleta | — | Não existe no app (não há página wizard NewCollection) | **Pendente** (só no web) |
+
+Ícone **my_location** sobre o mapa (`IconButton_14qhfy43`): **sem ação** ainda.  
+Ícone **directions** verde sobre o mapa: abre Google Maps com **toda** a sequência (`buildRotaDirUrl`).
+
+## Fluxo
+
+1. On Load → rotas → 1ª rota → paradas → `paradaItems` + `mapPoints`
+2. DropDown + refresh → troca clientes
+3. **Otimizar** → API → reordena lista/markers + salva `encodedPolyline` (**não** abre Maps)
+4. Botão verde do mapa → Google Maps (navegação)
+5. Directions na linha → Maps daquela parada
 
 ## API
 
 - `GET /rota-do-dia/paradas` exige `rota_id` > 0
-- `POST /rota-do-dia/otimizar`
+- `POST /rota-do-dia/otimizar` → `paradas`, `polyline`, `maps_dir_url`
 - `POST /rota-do-dia/parada-status`
