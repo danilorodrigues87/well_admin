@@ -137,7 +137,6 @@ class ColetaNova extends Page
             'situacao_recebido' => $coleta->situacao_recebimento === 'recebido' ? 'checked' : '',
             'data_recebimento' => $coleta->data_recebimento ?? '',
             'data_coleta' => $coleta->data_coleta ?? date('Y-m-d'),
-            'data_coleta_max' => date('Y-m-d'),
             'hora_coleta' => $coleta->hora ? substr((string)$coleta->hora, 0, 5) : date('H:i'),
         ]);
 
@@ -376,7 +375,7 @@ class ColetaNova extends Page
         }
         $parts = explode('/', ltrim($coleta->assinatura_cliente_path, '/'));
         $arquivo = end($parts);
-        $url = URL.'/storage/coletas/'.$coleta->id.'/'.rawurlencode($arquivo);
+        $url = \App\Service\EvidenceStorageService::publicUrl($coleta->id, (string)$arquivo);
 
         return '<p class="small text-success mt-2 mb-0">Assinatura registrada:</p>'
             .'<img src="'.CrudHelper::e($url).'" alt="Assinatura" class="img-fluid border mt-1" style="max-width:320px"/>';
@@ -489,9 +488,10 @@ class ColetaNova extends Page
 
         $html = '<div class="row g-2">';
         foreach ($evidencias as $e) {
-            $url = URL.'/storage/coletas/'.$e->coleta_id.'/'.basename($e->arquivo);
-            $html .= '<div class="col-md-4"><a href="'.$url.'" target="_blank">'
-                .'<img src="'.$url.'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"/></a></div>';
+            $url = \App\Service\EvidenceStorageService::publicUrl((int)$e->coleta_id, $e->arquivo);
+            $html .= '<div class="col-md-4"><a href="'.CrudHelper::e($url).'" target="_blank" rel="noopener">'
+                .'<img src="'.CrudHelper::e($url).'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"'
+                .' style="max-height:180px;width:100%;object-fit:cover;"/></a></div>';
         }
         $html .= '</div>';
 

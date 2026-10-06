@@ -1,35 +1,97 @@
-<div class="d-flex justify-content-end gap-2 mb-2 flex-wrap">
+<div class="d-flex justify-content-end gap-2 mb-3 flex-wrap">
     {{sinir_reenviar_btn}}
     {{mtr_print_btn}}
     {{cancelar_btn}}
 </div>
-<div class="row">
-    <div class="col-md-6">
-        <p><strong>Relatório:</strong> {{numero_relatorio}}</p>
-        <p><strong>MTR:</strong> {{numero_mtr}}</p>
-        <p><strong>Cliente:</strong> {{cliente}}</p>
-        <p><strong>Coletor:</strong> {{coletor}}</p>
-        <p><strong>Data:</strong> {{data_coleta}}</p>
-        <p><strong>Status:</strong> {{status}}</p>
-        <p><strong>Tratamento:</strong> {{tratamento}}</p>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="border rounded p-3 h-100 bg-light">
+            <div class="small text-muted">Relatório</div>
+            <div class="fs-5 fw-semibold">{{numero_relatorio}}</div>
+        </div>
     </div>
-    <div class="col-md-6">
-        <p><strong>Gerador:</strong> {{gerador}}</p>
-        <p><strong>Endereço:</strong> {{endereco}}</p>
-        <p><strong>Transportador:</strong> {{transportador}}</p>
-        <p><strong>Motorista:</strong> {{motorista}} · {{veiculo}}</p>
-        <p><strong>Destinador:</strong> {{destinador}}</p>
+    <div class="col-md-4">
+        <div class="border rounded p-3 h-100 bg-light">
+            <div class="small text-muted">MTR</div>
+            <div class="fs-5 fw-semibold">{{numero_mtr}}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="border rounded p-3 h-100 bg-light">
+            <div class="small text-muted">Status</div>
+            <div class="fs-5 fw-semibold">{{status}}</div>
+            <div class="small text-muted mt-1">Lançada em {{lancada_em}}</div>
+        </div>
     </div>
 </div>
-<hr/>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header py-2"><strong>1. Gerador</strong></div>
+            <div class="card-body small">
+                <p class="mb-1"><strong>{{gerador}}</strong></p>
+                <p class="mb-1 text-muted">{{gerador_razao}}</p>
+                <p class="mb-1">CNPJ: {{gerador_cnpj}}</p>
+                <p class="mb-1">{{endereco}}</p>
+                <p class="mb-1">Responsável: {{gerador_responsavel}}</p>
+                <p class="mb-1">Plano: {{gerador_plano}}</p>
+                <hr class="my-2"/>
+                <p class="mb-1"><strong>Data da coleta:</strong> {{data_coleta}}</p>
+                <p class="mb-0 text-muted">Cliente / coletor: {{cliente}} · {{coletor}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header py-2"><strong>2. Transportador</strong></div>
+            <div class="card-body small">
+                <p class="mb-1"><strong>{{transportador_nome}}</strong></p>
+                <p class="mb-1">CNPJ: {{transportador_cnpj}}</p>
+                <p class="mb-1">Motorista: {{motorista}}</p>
+                <p class="mb-1">Veículo: {{veiculo}}</p>
+                <hr class="my-2"/>
+                <p class="mb-0"><strong>Data da coleta:</strong> {{data_coleta}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header py-2"><strong>3. Destinador</strong></div>
+            <div class="card-body small">
+                <p class="mb-1"><strong>{{destinador_nome}}</strong></p>
+                <p class="mb-1">CNPJ: {{destinador_cnpj}}</p>
+                <p class="mb-1">{{destinador_endereco}}</p>
+                <p class="mb-1">Tratamento: {{tratamento}}</p>
+                <p class="mb-1">Recebimento: {{situacao_recebimento}}</p>
+                <hr class="my-2"/>
+                <p class="mb-1"><strong>Data de encerramento:</strong> {{data_encerramento}}</p>
+                <p class="mb-0 text-muted">Finalizada em: {{finalizada_em}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4"/>
+
+<h6 class="mb-2">Assinatura do gerador</h6>
+{{assinatura_html}}
+
+<hr class="my-4"/>
+
+<h6 class="mb-2">Relatório / observações</h6>
+<p class="mb-3">{{relatorio}}</p>
+
+<h6 class="mb-2">Resíduos coletados</h6>
+<table class="table table-sm"><thead><tr><th>Resíduo</th><th>Classe</th><th>Qtd</th></tr></thead><tbody>{{itens_html}}</tbody></table>
+
+<h6 class="mt-3 mb-2">Evidências</h6>
+<div class="row g-2">{{evidencias_html}}</div>
+
+<hr class="my-4"/>
 <h6>SINIR / MTR Nacional</h6>
 {{sinir_html}}
 <h6 class="mt-3">PDF MTR / CDF (portal gerador)</h6>
 <p class="mb-1">{{cdf_admin_html}}</p>
 {{cdf_upload_form}}
-<hr/>
-<p><strong>Relatório:</strong><br/>{{relatorio}}</p>
-<h6>Resíduos coletados</h6>
-<table class="table table-sm"><thead><tr><th>Resíduo</th><th>Classe</th><th>Qtd</th></tr></thead><tbody>{{itens_html}}</tbody></table>
-<h6 class="mt-3">Evidências</h6>
-<div class="row g-2">{{evidencias_html}}</div>

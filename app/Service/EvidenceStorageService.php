@@ -19,6 +19,14 @@ class EvidenceStorageService
 
     private const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
 
+    /** URL pública (painel) para um arquivo relativo `coletas/{id}/arquivo`. */
+    public static function publicUrl(int $coletaId, string $arquivoRelativoOuNome): string
+    {
+        $name = basename(str_replace('\\', '/', $arquivoRelativoOuNome));
+
+        return rtrim((string)URL, '/').'/storage/coletas/'.$coletaId.'/'.rawurlencode($name);
+    }
+
     public static function supportsWebp(): bool
     {
         return extension_loaded('gd') && function_exists('imagewebp');

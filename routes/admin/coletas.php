@@ -152,12 +152,22 @@ foreach ($coletaCrud as $route) {
 $obRouter->get('/storage/coletas/{coletaId}/{arquivo}', [
     'middlewares' => ['required-admin-login'],
     function ($request, int $coletaId, string $arquivo) {
-        $arquivo = basename($arquivo);
+        $arquivo = basename(rawurldecode($arquivo));
+        if ($arquivo === '' || $arquivo === '.' || $arquivo === '..') {
+            return new Response(404, 'Arquivo não encontrado');
+        }
         $path = \App\Common\StoragePath::join('coletas/'.$coletaId.'/'.$arquivo);
-        if (!is_file($path)) {
+        if (!is_file($path) || !is_readable($path)) {
             return new Response(404, 'Arquivo não encontrado');
         }
         $mime = mime_content_type($path) ?: 'application/octet-stream';
-        return new Response(200, file_get_contents($path), $mime);
+        if (str_ends_with(strtolower($arquivo), '.webp') && !str_starts_with($mime, 'image/')) {
+            $mime = 'image/webp';
+        }
+        $response = new Response(200, file_get_contents($path), $mime);
+        $response->addHeader('Cache-Control', 'private, max-age=3600');
+        $response->addHeader('Content-Length', (string)filesize($path));
+
+        return $response;
     },
 ]);

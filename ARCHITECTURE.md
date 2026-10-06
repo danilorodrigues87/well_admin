@@ -312,3 +312,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-03 | App RouteOfTheDay: Custom Widget `RotaMapPolyline` com pinos+polyline+coletor; `collectorLat/Lng`; Coletar→`POST /coletas`+CollectionDetail; `moveRotaParada`+`salvarRotaOrdem`; aceite mapa = Local Run (ver `FLUTTERFLOW_ROTA_DO_DIA_REBUILD.md`) |
 | 2026-10-06 | Storage EasyPanel: `StoragePath` + `STORAGE_PATH`; evidências/assinatura/CDF/boletos/Inter no volume; Dockerfile GD+WebP; `storage_diagnose.php`; doc `EVIDENCIAS.md` |
 | 2026-10-06 | Coleta com data anterior: `iniciarRascunho($dataColeta)` + filtro `data_referencia`; wizard edita data/hora; API `POST /coletas` aceita `data_coleta` |
+| 2026-10-06 | Fix data “hoje” rejeitada (`createFromFormat` sem `!`); data futura até +1 ano; modal detalhe por etapas (gerador/transportador/destinador) + assinatura + evidências |

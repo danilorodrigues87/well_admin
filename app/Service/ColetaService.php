@@ -617,7 +617,7 @@ class ColetaService
         }
     }
 
-    /** Normaliza Y-m-d: hoje se null/vazio; não futura; no máximo 2 anos atrás. */
+    /** Normaliza Y-m-d: hoje se null/vazio; aceita passada, hoje e futura (±2 anos / +1 ano). */
     public static function normalizeDataColeta(?string $dataColeta): string
     {
         $dataColeta = trim((string)$dataColeta);
@@ -627,17 +627,16 @@ class ColetaService
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataColeta)) {
             throw new \InvalidArgumentException('Data da coleta inválida. Use o formato AAAA-MM-DD.');
         }
-        $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $dataColeta);
+        // "!" zera a hora — sem isso, createFromFormat mantém a hora atual e "hoje" vira "futuro".
+        $dt = \DateTimeImmutable::createFromFormat('!Y-m-d', $dataColeta);
         if (!$dt || $dt->format('Y-m-d') !== $dataColeta) {
             throw new \InvalidArgumentException('Data da coleta inválida.');
         }
         $hoje = new \DateTimeImmutable('today');
-        if ($dt > $hoje) {
-            throw new \InvalidArgumentException('A data da coleta não pode ser futura.');
-        }
-        $limite = $hoje->modify('-2 years');
-        if ($dt < $limite) {
-            throw new \InvalidArgumentException('A data da coleta não pode ser anterior a 2 anos.');
+        $limiteMin = $hoje->modify('-2 years');
+        $limiteMax = $hoje->modify('+1 year');
+        if ($dt < $limiteMin || $dt > $limiteMax) {
+            throw new \InvalidArgumentException('A data da coleta deve estar entre 2 anos atrás e 1 ano à frente.');
         }
 
         return $dataColeta;

@@ -11,6 +11,7 @@ use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Service\ColetaCdfService;
 use App\Service\ColetaService;
+use App\Service\EvidenceStorageService;
 use App\Service\RotaScopeService;
 use App\Service\Sinir\ColetaSinirPrecheckService;
 use App\Service\Sinir\SinirService;
@@ -197,6 +198,9 @@ class Coletas extends Page
 
         $c = $det['coleta'];
         $s = $det['snapshot'];
+        if ($s === null) {
+            $s = new EntityColetaSnapshot();
+        }
         $itensHtml = '';
         foreach ($det['itens'] as $i) {
             $itensHtml .= '<tr><td>'.CrudHelper::e($i->nome).'</td><td>'.CrudHelper::e($i->classe_nome).'</td><td>'.number_format($i->quantidade, 3, ',', '.').' '.$i->unidade.'</td></tr>';
@@ -207,10 +211,40 @@ class Coletas extends Page
 
         $evidHtml = '';
         foreach ($det['evidencias'] as $e) {
-            $parts = explode('/', $e->arquivo);
-            $url = URL.'/storage/coletas/'.(int)($parts[1] ?? 0).'/'.basename($e->arquivo);
-            $evidHtml .= '<div class="col-md-4"><a href="'.$url.'" target="_blank"><img src="'.$url.'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"/></a></div>';
+            $url = EvidenceStorageService::publicUrl((int)$e->coleta_id, $e->arquivo);
+            $evidHtml .= '<div class="col-6 col-md-4">'
+                .'<a href="'.CrudHelper::e($url).'" target="_blank" rel="noopener">'
+                .'<img src="'.CrudHelper::e($url).'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"'
+                .' style="max-height:220px;width:100%;object-fit:cover;"'
+                .' onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'border rounded p-3 text-muted small\',textContent:\'Arquivo indisponível\'}))"/>'
+                .'</a></div>';
         }
+
+        $assinaturaHtml = '<p class="text-muted small mb-0">Sem assinatura registrada.</p>';
+        if (!empty($c->assinatura_cliente_path)) {
+            $sigUrl = EvidenceStorageService::publicUrl($c->id, $c->assinatura_cliente_path);
+            $assinaturaHtml = '<a href="'.CrudHelper::e($sigUrl).'" target="_blank" rel="noopener">'
+                .'<img src="'.CrudHelper::e($sigUrl).'" alt="Assinatura do gerador" class="img-fluid border rounded bg-white" style="max-width:360px;max-height:160px;object-fit:contain;"/>'
+                .'</a>';
+        }
+
+        $fmtDataHora = static function (?string $data, ?string $hora = null): string {
+            if ($data === null || $data === '') {
+                return '—';
+            }
+            $ts = strtotime($data.($hora ? ' '.$hora : ''));
+            if ($ts === false) {
+                return CrudHelper::e($data);
+            }
+            return $hora ? date('d/m/Y H:i', $ts) : date('d/m/Y', $ts);
+        };
+        $fmtTs = static function (?string $ts): string {
+            if ($ts === null || $ts === '') {
+                return '—';
+            }
+            $t = strtotime($ts);
+            return $t ? date('d/m/Y H:i', $t) : CrudHelper::e($ts);
+        };
 
         $mtrPrintBtn = ColetaMtrHelper::podeImprimirRelatorio($c)
             ? '<a href="'.URL.'/painel/coletas/mtr/'.$c->id.'" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-print me-1"></i> Imprimir</a>'
@@ -282,18 +316,30 @@ class Coletas extends Page
                 : ColetaMtrHelper::rotuloSemMtr($c),
             'cliente' => CrudHelper::e($c->cliente_nome),
             'coletor' => CrudHelper::e($c->coletor_nome),
-            'data_coleta' => $c->data_coleta ? date('d/m/Y H:i', strtotime($c->data_coleta.' '.($c->hora ?? '00:00:00'))) : '—',
+            'data_coleta' => $fmtDataHora($c->data_coleta, $c->hora),
+            'data_encerramento' => $fmtDataHora($c->data_recebimento),
+            'lancada_em' => $fmtTs($c->created_at),
+            'finalizada_em' => $fmtTs($c->finalized_at),
             'status' => CrudHelper::e($c->status),
+            'situacao_recebimento' => $c->situacao_recebimento === 'recebido' ? 'Recebido' : 'Pendente',
             'gerador' => CrudHelper::e($s->gerador_nome_fantasia ?? ''),
+            'gerador_razao' => CrudHelper::e($s->gerador_razao_social ?? ''),
+            'gerador_cnpj' => CrudHelper::e($s->gerador_cnpj ?? ''),
+            'gerador_responsavel' => CrudHelper::e($s->gerador_responsavel ?? '—'),
+            'gerador_plano' => CrudHelper::e($s->gerador_plano ?? '—'),
             'endereco' => CrudHelper::e($s->gerador_endereco ?? ''),
-            'transportador' => CrudHelper::e($s->transportador_nome ?? '').' — '.CrudHelper::e($s->transportador_cnpj ?? ''),
+            'transportador_nome' => CrudHelper::e($s->transportador_nome ?? ''),
+            'transportador_cnpj' => CrudHelper::e($s->transportador_cnpj ?? ''),
             'motorista' => CrudHelper::e($s->motorista_nome ?? ''),
-            'veiculo' => CrudHelper::e(($s->veiculo_descricao ?? '').' '.($s->veiculo_placa ?? '')),
-            'destinador' => CrudHelper::e($s->destinador_nome ?? ''),
-            'tratamento' => CrudHelper::e($c->tratamento ?? ''),
-            'relatorio' => nl2br(CrudHelper::e($c->relatorio ?? '')),
+            'veiculo' => CrudHelper::e(trim(($s->veiculo_descricao ?? '').' '.($s->veiculo_placa ?? ''))),
+            'destinador_nome' => CrudHelper::e($s->destinador_nome ?? ''),
+            'destinador_cnpj' => CrudHelper::e($s->destinador_cnpj ?? ''),
+            'destinador_endereco' => CrudHelper::e($s->destinador_endereco ?? ''),
+            'tratamento' => CrudHelper::e($c->tratamento ?: '—'),
+            'relatorio' => nl2br(CrudHelper::e($c->relatorio ?: '—')),
             'itens_html' => $itensHtml,
-            'evidencias_html' => $evidHtml ?: '<p class="text-muted">Sem evidências.</p>',
+            'evidencias_html' => $evidHtml ?: '<div class="col-12"><p class="text-muted mb-0">Sem evidências.</p></div>',
+            'assinatura_html' => $assinaturaHtml,
         ]);
 
         return CrudHelper::jsonOk(['html' => $html]);
