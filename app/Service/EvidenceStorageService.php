@@ -27,6 +27,47 @@ class EvidenceStorageService
         return rtrim((string)URL, '/').'/storage/coletas/'.$coletaId.'/'.rawurlencode($name);
     }
 
+    /** Caminho absoluto no disco a partir do relativo gravado no banco. */
+    public static function absolutePath(string $arquivoRelativo): string
+    {
+        return StoragePath::join(ltrim(str_replace('\\', '/', $arquivoRelativo), '/'));
+    }
+
+    public static function fileExists(string $arquivoRelativo, ?int $coletaId = null): bool
+    {
+        $arquivoRelativo = ltrim(str_replace('\\', '/', $arquivoRelativo), '/');
+        if ($arquivoRelativo === '') {
+            return false;
+        }
+
+        $candidates = [self::absolutePath($arquivoRelativo)];
+        if ($coletaId !== null && $coletaId > 0) {
+            $candidates[] = StoragePath::join('coletas/'.$coletaId.'/'.basename($arquivoRelativo));
+        }
+
+        foreach (array_unique($candidates) as $path) {
+            if (is_file($path) && is_readable($path)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Mensagem amigável para códigos de erro de $_FILES. */
+    public static function uploadErrorMessage(int $errorCode, string $label = 'Foto'): string
+    {
+        return match ($errorCode) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => $label.' excede o limite do servidor (aumente upload_max_filesize / post_max_size).',
+            UPLOAD_ERR_PARTIAL => $label.' foi enviada parcialmente. Tente novamente.',
+            UPLOAD_ERR_NO_FILE => $label.' não foi enviada.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Pasta temporária ausente no servidor.',
+            UPLOAD_ERR_CANT_WRITE => 'Falha ao gravar '.$label.' no disco (permissão).',
+            UPLOAD_ERR_EXTENSION => 'Upload de '.$label.' bloqueado por extensão PHP.',
+            default => $label.' inválida (erro '.$errorCode.').',
+        };
+    }
+
     public static function supportsWebp(): bool
     {
         return extension_loaded('gd') && function_exists('imagewebp');

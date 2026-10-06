@@ -211,13 +211,23 @@ class Coletas extends Page
 
         $evidHtml = '';
         foreach ($det['evidencias'] as $e) {
-            $url = EvidenceStorageService::publicUrl((int)$e->coleta_id, $e->arquivo);
-            $evidHtml .= '<div class="col-6 col-md-4">'
-                .'<a href="'.CrudHelper::e($url).'" target="_blank" rel="noopener">'
-                .'<img src="'.CrudHelper::e($url).'" class="img-fluid rounded border" alt="Evidência '.$e->ordem.'"'
-                .' style="max-height:220px;width:100%;object-fit:cover;"'
-                .' onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'border rounded p-3 text-muted small\',textContent:\'Arquivo indisponível\'}))"/>'
-                .'</a></div>';
+            $coletaIdEv = (int)($e->coleta_id ?: $c->id);
+            $nome = basename(str_replace('\\', '/', $e->arquivo));
+            $url = EvidenceStorageService::publicUrl($coletaIdEv, $e->arquivo);
+            $exists = EvidenceStorageService::fileExists($e->arquivo, $coletaIdEv);
+
+            $evidHtml .= '<div class="col-12 col-md-6 col-lg-4">';
+            if ($exists) {
+                $evidHtml .= '<a href="'.CrudHelper::e($url).'" target="_blank" rel="noopener" class="d-block border rounded overflow-hidden bg-white">'
+                    .'<img src="'.CrudHelper::e($url).'" alt="Evidência '.$e->ordem.'" class="img-fluid w-100" style="max-height:240px;object-fit:contain;background:#f8f9fa;"/>'
+                    .'</a>';
+            } else {
+                $evidHtml .= '<div class="border rounded p-3 bg-light">'
+                    .'<div class="small text-danger mb-1">Evidência '.$e->ordem.' — arquivo ausente no disco</div>'
+                    .'<a class="small" href="'.CrudHelper::e($url).'" target="_blank" rel="noopener">Tentar abrir</a>'
+                    .'</div>';
+            }
+            $evidHtml .= '<div class="small text-muted mt-1">Foto '.$e->ordem.' · '.CrudHelper::e($nome).'</div></div>';
         }
 
         $assinaturaHtml = '<p class="text-muted small mb-0">Sem assinatura registrada.</p>';
@@ -338,7 +348,9 @@ class Coletas extends Page
             'tratamento' => CrudHelper::e($c->tratamento ?: '—'),
             'relatorio' => nl2br(CrudHelper::e($c->relatorio ?: '—')),
             'itens_html' => $itensHtml,
-            'evidencias_html' => $evidHtml ?: '<div class="col-12"><p class="text-muted mb-0">Sem evidências.</p></div>',
+            'evidencias_html' => $evidHtml !== ''
+                ? $evidHtml
+                : '<div class="col-12"><p class="text-muted mb-0">Sem evidências registradas nesta coleta.</p></div>',
             'assinatura_html' => $assinaturaHtml,
         ]);
 

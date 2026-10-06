@@ -18,6 +18,7 @@ use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
 use App\Model\Entity\Transportadora as EntityTransportadora;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 use App\Service\ColetaService;
+use App\Service\EvidenceStorageService;
 use App\Session\User\Login as SessionUser;
 use App\Utils\View;
 
@@ -420,8 +421,15 @@ class ColetaNova extends Page
         $itens = EntityColetaItem::getByColetaId($coletaId);
         $evidencias = EntityColetaEvidencia::getByColetaId($coletaId);
 
+        $msg = 'Rascunho salvo. Confira o resumo e finalize a coleta.';
+        if ((int)($resumo['fotos_recebidas'] ?? 0) > 0) {
+            $msg = 'Relatório e '.(int)$resumo['fotos_recebidas'].' foto(s) salvos. Confira o resumo e finalize.';
+        } elseif ((int)($resumo['evidencias'] ?? 0) === 0) {
+            $msg = 'Relatório salvo (nenhuma foto nova). Confira o resumo e finalize a coleta.';
+        }
+
         return CrudHelper::jsonOk([
-            'message' => 'Rascunho salvo. Confira o resumo e finalize a coleta.',
+            'message' => $msg,
             'evidencias_html' => self::renderEvidenciasHtml($evidencias),
             'resumo_html' => self::renderResumoRascunho($itens, $evidencias, $resumo['motorista']),
             'rascunho_conferido' => true,
@@ -465,9 +473,23 @@ class ColetaNova extends Page
     {
         $files = [];
         foreach (['evidencia_1', 'evidencia_2', 'evidencia_3'] as $key) {
-            if (!empty($_FILES[$key]['tmp_name'])) {
-                $files[$key] = $_FILES[$key];
+            if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
+                continue;
             }
+            $err = (int)($_FILES[$key]['error'] ?? UPLOAD_ERR_NO_FILE);
+            if ($err === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            $ordem = (int)substr($key, -1);
+            if ($err !== UPLOAD_ERR_OK) {
+                throw new \InvalidArgumentException(
+                    EvidenceStorageService::uploadErrorMessage($err, 'Foto '.$ordem)
+                );
+            }
+            if (empty($_FILES[$key]['tmp_name'])) {
+                throw new \InvalidArgumentException('Foto '.$ordem.' não chegou ao servidor (limite de upload?).');
+            }
+            $files[$key] = $_FILES[$key];
         }
 
         return $files;

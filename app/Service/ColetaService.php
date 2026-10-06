@@ -283,15 +283,26 @@ class ColetaService
 
         EntityColeta::update($coletaId, ['relatorio' => trim($relatorio)]);
 
+        $fotosRecebidas = 0;
         foreach ($filesByKey as $key => $file) {
-            if (!is_array($file) || empty($file['tmp_name'])) {
+            if (!is_array($file)) {
+                continue;
+            }
+            $err = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+            if ($err === UPLOAD_ERR_NO_FILE) {
                 continue;
             }
             $ordem = (int)preg_replace('/\D/', '', (string)$key);
             if ($ordem < 1 || $ordem > 3) {
                 continue;
             }
+            if ($err !== UPLOAD_ERR_OK || empty($file['tmp_name'])) {
+                throw new \InvalidArgumentException(
+                    EvidenceStorageService::uploadErrorMessage($err, 'Foto '.$ordem)
+                );
+            }
             self::substituirEvidencia($coletaId, $ordem, $file);
+            $fotosRecebidas++;
         }
 
         if (!self::rascunhoFinalConferido($coletaId)) {
@@ -299,10 +310,12 @@ class ColetaService
         }
 
         $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
+        $qtdEvid = EntityColetaEvidencia::countByColeta($coletaId);
 
         return [
             'itens' => EntityColetaItem::countByColeta($coletaId),
-            'evidencias' => EntityColetaEvidencia::countByColeta($coletaId),
+            'evidencias' => $qtdEvid,
+            'fotos_recebidas' => $fotosRecebidas,
             'motorista' => trim((string)($snapshot->motorista_nome ?? '')),
         ];
     }

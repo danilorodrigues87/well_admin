@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install pdo pdo_mysql mysqli zip gd
 
+# Uploads de evidências (fotos até 5 MB × 3 + formulário)
+RUN printf "upload_max_filesize=12M\npost_max_size=40M\nmax_file_uploads=20\nmemory_limit=256M\n" \
+    > /usr/local/etc/php/conf.d/uploads.ini
+
 # Instalar o Composer dentro do container
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
