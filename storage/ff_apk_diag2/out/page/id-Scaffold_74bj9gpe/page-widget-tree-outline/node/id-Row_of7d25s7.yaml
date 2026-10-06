@@ -1,0 +1,10 @@
+key: Row_of7d25s7
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_space_between
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    minSizeValue:
+      inputValue: false
+name: Row

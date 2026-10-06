@@ -1,0 +1,33 @@
+key: IconButton_nffuzlwy
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        value: "439254322"
+        darkModeColor:
+          value: "442940266"
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: false
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 20
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY
+        iconDataValue:
+          inputValue:
+            codePoint: 63159
+            family: MaterialIcons
+            matchTextDirection: false
+            name: directions_rounded
+name: IconButton

@@ -1,0 +1,10 @@
+rootAction:
+  key: colinit1
+  action:
+    key: actcol001
+  followUpAction:
+    key: colinit2
+    action:
+      key: actcol002
+trigger:
+  triggerType: ON_INIT_STATE

@@ -1,0 +1,17 @@
+identifier:
+  name: parseRotaNomesFromApi
+  key: rtpn01
+arguments:
+  - identifier:
+      name: apiJson
+      key: rtpn02
+    dataType:
+      scalarType: JSON
+      nonNullable: false
+returnParameter:
+  dataType:
+    listType:
+      scalarType: String
+    nonNullable: true
+tests:
+  - parameterValues: {}

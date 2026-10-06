@@ -1,0 +1,24 @@
+key: Text_0ldyxkpk
+type: Text
+props:
+  text:
+    themeStyle: TITLE_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: userName
+              key: ast002
+            stateVariableType: APP_STATE
+        nodeKeyRef:
+          key: Scaffold_dwij8cyv
+      mostRecentInputValue: ""
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+  responsiveVisibility: {}
+parameterValues: {}
+valueKey: {}

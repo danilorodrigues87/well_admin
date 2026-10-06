@@ -1,0 +1,21 @@
+identifier:
+  name: buildRotaDirUrl
+  key: rtdir1
+arguments:
+  - identifier:
+      name: items
+      key: rtdir2
+    dataType:
+      listType:
+        scalarType: DataStruct
+      nonNullable: false
+      subType:
+        dataStructIdentifier:
+          name: RotaParadaItem
+          key: rtpitm1
+returnParameter:
+  dataType:
+    scalarType: String
+    nonNullable: true
+tests:
+  - parameterValues: {}

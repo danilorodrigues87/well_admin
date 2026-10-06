@@ -1,0 +1,6 @@
+rootAction:
+  key: navcol1
+  action:
+    key: actnavcol
+trigger:
+  triggerType: ON_TAP

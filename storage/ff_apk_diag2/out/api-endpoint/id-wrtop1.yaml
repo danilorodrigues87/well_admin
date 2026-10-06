@@ -1,0 +1,103 @@
+identifier:
+  name: WellAdmin Rota Otimizar
+  key: wrtop1
+url: "[baseUrl]\/rota-do-dia\/otimizar?data=[data]&coletor_id=[coletor_id]&rota_id=[rota_id]"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: data
+      key: rtd001
+    type: String
+    testValue: 2026-09-18
+  - identifier:
+      name: coletor_id
+      key: rtc001
+    type: Integer
+    testValue: "0"
+  - identifier:
+      name: rota_id
+      key: rtr001
+    type: Integer
+    testValue: "0"
+  - identifier:
+      name: origin_lat
+      key: rla001
+    type: Double
+    testValue: "-23.5"
+  - identifier:
+      name: origin_lng
+      key: rln001
+    type: Double
+    testValue: "-46.6"
+bodyType: JSON
+body: "{\n  \"origin_lat\": <origin_lat>,\n  \"origin_lng\": <origin_lng>\n}"
+jsonPathDefinitions:
+  - identifier:
+      name: mapsDirUrl
+      key: rtomdu1
+    jsonPath:
+      jsonPath: $.data.maps_dir_url
+      returnParameter:
+        dataType:
+          scalarType: String
+    inferredParameter:
+      dataType:
+        scalarType: String
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: data
+      key: rtpd01
+    variableIdentifier:
+      name: data
+      key: rtd001
+  - identifier:
+      name: coletor_id
+      key: rtpc01
+    variableIdentifier:
+      name: coletor_id
+      key: rtc001
+  - identifier:
+      name: rota_id
+      key: rtpr01
+    variableIdentifier:
+      name: rota_id
+      key: rtr001
+  - identifier:
+      name: origin_lat
+      key: rtpla1
+    variableIdentifier:
+      name: origin_lat
+      key: rla001
+  - identifier:
+      name: origin_lng
+      key: rtpln1
+    variableIdentifier:
+      name: origin_lng
+      key: rln001

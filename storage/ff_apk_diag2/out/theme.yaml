@@ -1,0 +1,307 @@
+loadingIndicatorStyle:
+  type: CIRCULAR
+  color:
+    themeColor: PRIMARY
+  diameter: 50
+defaultTypography:
+  primaryFontFamily: Inter
+  secondaryFontFamily: Inter
+  displaySmall:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 36
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.22
+    fontWeightValue:
+      inputValue: w700
+  headlineMedium:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 26
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.25
+    fontWeightValue:
+      inputValue: w600
+  headlineSmall:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.3
+    fontWeightValue:
+      inputValue: w600
+  titleMedium:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 16
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.35
+    fontWeightValue:
+      inputValue: w600
+  titleSmall:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.4
+    fontWeightValue:
+      inputValue: w600
+  bodyMedium:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.47
+    fontWeightValue:
+      inputValue: w400
+  bodySmall:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 12
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.38
+    fontWeightValue:
+      inputValue: w400
+  displayLarge:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 57
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.12
+    fontWeightValue:
+      inputValue: w700
+  displayMedium:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 45
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.16
+    fontWeightValue:
+      inputValue: w700
+  headlineLarge:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 32
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.2
+    fontWeightValue:
+      inputValue: w700
+  titleLarge:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 20
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.27
+    fontWeightValue:
+      inputValue: w600
+  labelLarge:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.33
+    fontWeightValue:
+      inputValue: w600
+  labelMedium:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 12
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.38
+    fontWeightValue:
+      inputValue: w600
+  labelSmall:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 11
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.27
+    fontWeightValue:
+      inputValue: w600
+  bodyLarge:
+    fontFamily: Inter
+    fontSizeValue:
+      inputValue: 16
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.5
+    fontWeightValue:
+      inputValue: w400
+breakPoints:
+  small: 479
+  medium: 767
+  large: 991
+spacingTokens:
+  - identifier:
+      name: none
+      key: none
+    value: 0
+  - identifier:
+      name: xs
+      key: xs
+    value: 4
+  - identifier:
+      name: sm
+      key: sm
+    value: 8
+  - identifier:
+      name: md
+      key: md
+    value: 16
+  - identifier:
+      name: lg
+      key: lg
+    value: 24
+  - identifier:
+      name: xl
+      key: xl
+    value: 32
+  - identifier:
+      name: xxl
+      key: xxl
+    value: 48
+  - identifier:
+      name: xxxl
+      key: xxxl
+    value: 64
+radiusTokens:
+  - identifier:
+      name: none
+      key: none
+    value: 0
+  - identifier:
+      name: xs
+      key: xs
+    value: 4
+  - identifier:
+      name: sm
+      key: sm
+    value: 8
+  - identifier:
+      name: md
+      key: md
+    value: 12
+  - identifier:
+      name: lg
+      key: lg
+    value: 16
+  - identifier:
+      name: xl
+      key: xl
+    value: 24
+  - identifier:
+      name: xxl
+      key: xxl
+    value: 32
+  - identifier:
+      name: full
+      key: full
+    value: 9999
+shadowTokens:
+  - identifier:
+      name: none
+      key: none
+    blurRadius: 0
+    color:
+      value: "0"
+    dx: 0
+    dy: 0
+    spreadRadius: 0
+  - identifier:
+      name: xs
+      key: xs
+    blurRadius: 1
+    color:
+      value: "335544320"
+    dx: 0
+    dy: 1
+    spreadRadius: 0
+  - identifier:
+      name: sm
+      key: sm
+    blurRadius: 2
+    color:
+      value: "436207616"
+    dx: 0
+    dy: 1
+    spreadRadius: 0
+  - identifier:
+      name: md
+      key: md
+    blurRadius: 4
+    color:
+      value: "436207616"
+    dx: 0
+    dy: 2
+    spreadRadius: 0
+  - identifier:
+      name: lg
+      key: lg
+    blurRadius: 8
+    color:
+      value: "436207616"
+    dx: 0
+    dy: 4
+    spreadRadius: 0
+  - identifier:
+      name: xl
+      key: xl
+    blurRadius: 16
+    color:
+      value: "436207616"
+    dx: 0
+    dy: 8
+    spreadRadius: 0
+  - identifier:
+      name: xxl
+      key: xxl
+    blurRadius: 24
+    color:
+      value: "436207616"
+    dx: 0
+    dy: 12
+    spreadRadius: 0

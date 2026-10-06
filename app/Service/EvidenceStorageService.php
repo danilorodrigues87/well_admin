@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\StoragePath;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 
 class EvidenceStorageService
@@ -105,8 +106,11 @@ class EvidenceStorageService
     /** @return array{arquivo:string,mime:string}|null */
     private static function persistFromSource(int $coletaId, int $ordem, string $sourcePath, string $mime): ?array
     {
-        $baseDir = dirname(__DIR__, 2).'/storage/coletas/'.$coletaId;
-        if (!is_dir($baseDir) && !mkdir($baseDir, 0755, true)) {
+        try {
+            $baseDir = StoragePath::ensureDir('coletas/'.$coletaId);
+        } catch (\Throwable $e) {
+            error_log('[EvidenceStorage] '.$e->getMessage());
+
             return null;
         }
 

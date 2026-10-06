@@ -1,0 +1,16 @@
+key: FloatingActionButton_3dm55pze
+type: FloatingActionButton
+props:
+  padding:
+    bottomValue:
+      inputValue: 30
+    animatedPadding: {}
+  floatingActionButton:
+    extended: false
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    elevationValue:
+      inputValue: 16
+    autofocusValue:
+      inputValue: false

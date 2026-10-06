@@ -1,0 +1,17 @@
+key: Column_po32ykbk
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 4
+    minSizeValue:
+      inputValue: true
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+name: Column

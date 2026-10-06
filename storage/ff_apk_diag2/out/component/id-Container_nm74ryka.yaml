@@ -1,0 +1,159 @@
+name: TextField
+description: ""
+params:
+  design_system_std_textfield_std_textfieldparam_label:
+    identifier:
+      name: label
+      key: design_system_std_textfield_std_textfieldparam_label
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_label_present:
+    identifier:
+      name: labelPresent
+      key: design_system_std_textfield_std_textfieldparam_label_present
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_helper:
+    identifier:
+      name: helper
+      key: design_system_std_textfield_std_textfieldparam_helper
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_helper_present:
+    identifier:
+      name: helperPresent
+      key: design_system_std_textfield_std_textfieldparam_helper_present
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_leading_icon:
+    identifier:
+      name: leadingIcon
+      key: design_system_std_textfield_std_textfieldparam_leading_icon
+    defaultValue:
+      icon:
+        sizeValue:
+          inputValue: 24
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY_TEXT
+        iconDataValue:
+          inputValue:
+            codePoint: 983357
+            family: MaterialIcons
+            matchTextDirection: false
+            name: search_rounded
+    dataType:
+      scalarType: WidgetProperty
+      subType:
+        widgetPropertyType: ICON
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_leading_icon_present:
+    identifier:
+      name: leadingIconPresent
+      key: design_system_std_textfield_std_textfieldparam_leading_icon_present
+    defaultValue:
+      serializedValue: "true"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_trailing_icon:
+    identifier:
+      name: trailingIcon
+      key: design_system_std_textfield_std_textfieldparam_trailing_icon
+    defaultValue: {}
+    dataType:
+      scalarType: WidgetProperty
+      subType:
+        widgetPropertyType: ICON
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_trailing_icon_present:
+    identifier:
+      name: trailingIconPresent
+      key: design_system_std_textfield_std_textfieldparam_trailing_icon_present
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_hint:
+    identifier:
+      name: hint
+      key: design_system_std_textfield_std_textfieldparam_hint
+    defaultValue:
+      serializedValue: Buscar cliente ou MTR...
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_value:
+    identifier:
+      name: value
+      key: design_system_std_textfield_std_textfieldparam_value
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_on_change:
+    identifier:
+      name: onChange
+      key: design_system_std_textfield_std_textfieldparam_on_change
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_on_submit:
+    identifier:
+      name: onSubmit
+      key: design_system_std_textfield_std_textfieldparam_on_submit
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_variant:
+    identifier:
+      name: variant
+      key: design_system_std_textfield_std_textfieldparam_variant
+    defaultValue:
+      serializedValue: outlined
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_textfield_std_textfieldparam_error:
+    identifier:
+      name: error
+      key: design_system_std_textfield_std_textfieldparam_error
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+node:
+  key: Container_nm74ryka

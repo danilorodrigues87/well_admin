@@ -1,0 +1,82 @@
+key: Container_uz29caov
+type: Container
+props: {}
+parameterValues:
+  parameterPasses:
+    rmw001:
+      paramIdentifier:
+        name: width
+        key: rmw001
+      widgetProperty:
+        dimensions:
+          width:
+            pixelsValue:
+              inputValue: Infinity
+              mostRecentInputValue: Infinity
+          height:
+            pixelsValue:
+              inputValue: 240
+              mostRecentInputValue: 240
+    rmp001:
+      paramIdentifier:
+        name: encodedPolyline
+        key: rmp001
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: encodedPolyline
+              key: rod011
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+    rmc001:
+      paramIdentifier:
+        name: collectorLat
+        key: rmc001
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: collectorLat
+              key: rod013
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+    rmc002:
+      paramIdentifier:
+        name: collectorLng
+        key: rmc002
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: collectorLng
+              key: rod014
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+    rmm001:
+      paramIdentifier:
+        name: markers
+        key: rmm001
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: mapPoints
+              key: rod010
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+  customWidgetIdentifier:
+    name: RotaMapPolyline
+    key: rotmap1
+enforceCustomWidgetDimensions: true
+customWidgetIdentifier:
+  name: RotaMapPolyline
+  key: rotmap1

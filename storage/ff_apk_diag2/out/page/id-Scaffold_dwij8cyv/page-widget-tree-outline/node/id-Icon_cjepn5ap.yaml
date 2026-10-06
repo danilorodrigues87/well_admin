@@ -1,0 +1,16 @@
+key: Icon_cjepn5ap
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 985093
+        family: MaterialIcons
+        matchTextDirection: false
+        name: minor_crash_rounded
+name: Icon

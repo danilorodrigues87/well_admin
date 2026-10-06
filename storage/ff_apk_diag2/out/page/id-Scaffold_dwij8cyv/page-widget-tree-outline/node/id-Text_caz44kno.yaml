@@ -1,0 +1,16 @@
+key: Text_caz44kno
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Todos
+    fontSizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.38
+name: Chip Label

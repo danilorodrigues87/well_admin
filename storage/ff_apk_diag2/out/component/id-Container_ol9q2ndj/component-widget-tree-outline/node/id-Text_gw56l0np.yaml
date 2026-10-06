@@ -1,0 +1,62 @@
+key: Text_gw56l0np
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: Início
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: label
+              key: design_system_std_nav_item_std_nav_itemparam_label
+        nodeKeyRef:
+          key: Container_ol9q2ndj
+        uiBuilderValue:
+          serializedValue: Início
+      mostRecentInputValue: Início
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: SECONDARY_TEXT
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: selected
+                        key: design_system_std_nav_item_std_nav_itemparam_selected
+                  nodeKeyRef:
+                    key: Container_ol9q2ndj
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY
+            elseValue:
+              inputValue:
+                color:
+                  themeColor: SECONDARY_TEXT
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.47
+name: Text

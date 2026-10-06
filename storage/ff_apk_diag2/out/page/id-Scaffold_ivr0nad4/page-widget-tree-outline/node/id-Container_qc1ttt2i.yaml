@@ -1,0 +1,22 @@
+key: Container_qc1ttt2i
+type: Container
+props:
+  container:
+    dimensions:
+      height:
+        pixelsValue:
+          inputValue: 34
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 8
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY
+    childAlignment:
+      xValue:
+        inputValue: 0
+      yValue:
+        inputValue: 0
+name: Chip

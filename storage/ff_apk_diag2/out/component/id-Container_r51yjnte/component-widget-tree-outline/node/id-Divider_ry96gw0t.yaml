@@ -1,0 +1,16 @@
+key: Divider_ry96gw0t
+type: Divider
+props:
+  divider:
+    heightValue:
+      inputValue: 16
+    thicknessValue:
+      inputValue: 1
+    colorValue:
+      inputValue:
+        themeColor: ALTERNATE
+    indentValue:
+      inputValue: 0
+    endIndentValue:
+      inputValue: 0
+name: Divider

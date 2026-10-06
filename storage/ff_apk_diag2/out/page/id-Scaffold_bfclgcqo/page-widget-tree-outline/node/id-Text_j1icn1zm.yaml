@@ -1,0 +1,24 @@
+key: Text_j1icn1zm
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: funcaoNome
+              key: ast007
+            stateVariableType: APP_STATE
+        nodeKeyRef:
+          key: Scaffold_dwij8cyv
+      mostRecentInputValue: Operacional Well S.A.
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.27
+name: Text

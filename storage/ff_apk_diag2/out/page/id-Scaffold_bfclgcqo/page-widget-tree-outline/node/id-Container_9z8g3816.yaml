@@ -1,0 +1,15 @@
+key: Container_9z8g3816
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 0
+    topValue:
+      inputValue: 0
+    rightValue:
+      inputValue: 0
+    bottomValue:
+      inputValue: 24
+name: Margin

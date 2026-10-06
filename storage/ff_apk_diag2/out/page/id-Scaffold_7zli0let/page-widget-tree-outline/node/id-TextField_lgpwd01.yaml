@@ -1,0 +1,59 @@
+key: TextField_lgpwd01
+type: TextField
+props:
+  padding: {}
+  textField:
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    inputDecoration:
+      inputBorderType: outline
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 8
+          mostRecentInputValue: 8
+      contentPadding:
+        leftValue:
+          inputValue: 16
+        topValue:
+          inputValue: 16
+        rightValue:
+          inputValue: 16
+        bottomValue:
+          inputValue: 16
+      hintStyle:
+        themeStyle: BODY_MEDIUM
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_TEXT
+      labelText:
+        textValue:
+          inputValue: SENHA
+      hintText:
+        textValue:
+          inputValue: Senha
+          mostRecentInputValue: Senha
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+      filledValue:
+        inputValue: true
+      fillColorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+    passwordField: true
+    keyboardType: TEXT
+    initialText:
+      textValue:
+        inputValue: WellEco@2026
+    width:
+      pixelsValue:
+        inputValue: Infinity
+    maxLinesValue:
+      inputValue: 1
+name: PasswordField
+parameterValues: {}
+valueKey: {}

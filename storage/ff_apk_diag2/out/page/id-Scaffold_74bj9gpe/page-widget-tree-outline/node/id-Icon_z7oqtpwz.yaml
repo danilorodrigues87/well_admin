@@ -1,0 +1,16 @@
+key: Icon_z7oqtpwz
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 16
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    iconDataValue:
+      inputValue:
+        codePoint: 62872
+        family: MaterialIcons
+        matchTextDirection: false
+        name: auto_fix_high_rounded
+name: Icon

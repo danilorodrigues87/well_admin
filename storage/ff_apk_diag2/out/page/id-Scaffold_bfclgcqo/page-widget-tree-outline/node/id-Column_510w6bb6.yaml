@@ -1,0 +1,9 @@
+key: Column_510w6bb6
+type: Column
+props:
+  column:
+    crossAxisAlignment: cross_axis_stretch
+    scrollable: false
+    minSizeValue:
+      inputValue: true
+name: Container Bordered Content

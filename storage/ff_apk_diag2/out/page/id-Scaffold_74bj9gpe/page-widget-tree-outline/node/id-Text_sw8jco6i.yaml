@@ -1,0 +1,32 @@
+key: Text_sw8jco6i
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: FUNCTION_CALL
+        functionCall:
+          stringInterpolation: {}
+          values:
+            - variable:
+                source: LOCAL_STATE
+                baseVariable:
+                  localState:
+                    fieldIdentifier:
+                      name: totalParadas
+                      key: rod003
+                    stateVariableType: WIDGET_CLASS_STATE
+                nodeKeyRef:
+                  key: Scaffold_74bj9gpe
+            - inputValue:
+                serializedValue: " paradas"
+      mostRecentInputValue: 0 paradas
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    heightValue:
+      inputValue: 1.38
+name: TotalParadas
+valueKey: {}

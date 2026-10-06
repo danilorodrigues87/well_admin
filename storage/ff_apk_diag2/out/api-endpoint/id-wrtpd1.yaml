@@ -1,0 +1,77 @@
+identifier:
+  name: WellAdmin Rota Paradas
+  key: wrtpd1
+url: "[baseUrl]\/rota-do-dia\/paradas?data=[data]&coletor_id=[coletor_id]&rota_id=[rota_id]"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: data
+      key: rtd001
+    type: String
+    testValue: 2026-09-18
+  - identifier:
+      name: coletor_id
+      key: rtc001
+    type: Integer
+    testValue: "0"
+  - identifier:
+      name: rota_id
+      key: rtr001
+    type: Integer
+    testValue: "0"
+jsonPathDefinitions:
+  - identifier:
+      name: paradasTotal
+      key: rtpdtot
+    jsonPath:
+      jsonPath: $.data.total
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: data
+      key: rtpd01
+    variableIdentifier:
+      name: data
+      key: rtd001
+  - identifier:
+      name: coletor_id
+      key: rtpc01
+    variableIdentifier:
+      name: coletor_id
+      key: rtc001
+  - identifier:
+      name: rota_id
+      key: rtpr01
+    variableIdentifier:
+      name: rota_id
+      key: rtr001

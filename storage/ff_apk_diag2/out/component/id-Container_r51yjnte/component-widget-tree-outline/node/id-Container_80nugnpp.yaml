@@ -1,0 +1,29 @@
+key: Container_80nugnpp
+type: Container
+props:
+  container:
+    dimensions: {}
+    boxDecoration:
+      boxShadow: {}
+      image: {}
+    maxDimensions: {}
+    minDimensions: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 8
+    topValue:
+      inputValue: 4
+    rightValue:
+      inputValue: 8
+    bottomValue:
+      inputValue: 4
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: Container Padding
+valueKey: {}

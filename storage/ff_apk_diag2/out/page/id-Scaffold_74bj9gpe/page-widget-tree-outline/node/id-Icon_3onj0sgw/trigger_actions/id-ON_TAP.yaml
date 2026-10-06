@@ -1,0 +1,34 @@
+rootAction:
+  key: 41pvjlsy
+  action:
+    key: tq60sjf5
+  followUpAction:
+    key: 2za7qqw2
+    action:
+      key: 4npnf6rk
+    followUpAction:
+      key: datchain1
+      action:
+        key: actdatiso
+      followUpAction:
+        key: datchain2
+        action:
+          key: actdatapp
+        followUpAction:
+          key: datchain5
+          action:
+            key: actdatrot
+          followUpAction:
+            key: datchain6
+            action:
+              key: actdatrotu
+            followUpAction:
+              key: datchain3
+              action:
+                key: actdatpar
+              followUpAction:
+                key: datchain4
+                action:
+                  key: actdatupd
+trigger:
+  triggerType: ON_TAP

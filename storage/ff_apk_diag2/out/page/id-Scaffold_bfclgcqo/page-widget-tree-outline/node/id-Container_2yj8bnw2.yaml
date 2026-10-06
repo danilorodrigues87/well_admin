@@ -1,0 +1,12 @@
+key: Container_2yj8bnw2
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: 0
+      height:
+        pixelsValue:
+          inputValue: 0
+name: Placeholder

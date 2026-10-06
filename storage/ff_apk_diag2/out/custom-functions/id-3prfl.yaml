@@ -1,0 +1,9 @@
+identifier:
+  name: formataData
+  key: 3prfl
+returnParameter:
+  dataType:
+    scalarType: String
+    nonNullable: true
+tests:
+  - parameterValues: {}

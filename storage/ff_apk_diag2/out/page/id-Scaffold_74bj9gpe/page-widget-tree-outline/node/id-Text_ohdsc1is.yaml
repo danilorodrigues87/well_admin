@@ -1,0 +1,24 @@
+key: Text_ohdsc1is
+type: Text
+props:
+  text:
+    themeStyle: BODY_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: endereco
+                key: rpf04
+        nodeKeyRef:
+          key: ListView_zq2w1nhb
+      mostRecentInputValue: "Av. Paulista, 1230"
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+name: Endereco
+valueKey: {}

@@ -1,0 +1,33 @@
+key: IconButton_8xu4apit
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        value: "436242266"
+        darkModeColor:
+          value: "441964963"
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: false
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 20
+        colorValue:
+          inputValue:
+            themeColor: SUCCESS
+        iconDataValue:
+          inputValue:
+            codePoint: 62777
+            family: MaterialIcons
+            matchTextDirection: false
+            name: add_task_rounded
+name: IconButton

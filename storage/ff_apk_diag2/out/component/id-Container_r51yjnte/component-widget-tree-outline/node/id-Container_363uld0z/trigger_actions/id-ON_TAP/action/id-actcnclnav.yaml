@@ -1,0 +1,7 @@
+navigate:
+  allowBack: true
+  isNavigateBack: false
+  replaceRoute: true
+  pageNodeKeyRef:
+    key: Scaffold_dwij8cyv
+key: actcnclnav

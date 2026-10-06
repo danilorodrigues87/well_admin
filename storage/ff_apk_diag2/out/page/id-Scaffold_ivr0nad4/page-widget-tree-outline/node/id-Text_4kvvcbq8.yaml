@@ -1,0 +1,13 @@
+key: Text_4kvvcbq8
+type: Text
+props:
+  text:
+    themeStyle: TITLE_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Atividade Recente
+    heightValue:
+      inputValue: 1.35
+    fontWeightValue:
+      inputValue: w700
+name: Text

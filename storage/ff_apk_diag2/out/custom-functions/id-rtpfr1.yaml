@@ -1,0 +1,16 @@
+identifier:
+  name: firstRotaIdFromApi
+  key: rtpfr1
+arguments:
+  - identifier:
+      name: apiJson
+      key: rtpfr2
+    dataType:
+      scalarType: JSON
+      nonNullable: false
+returnParameter:
+  dataType:
+    scalarType: Integer
+    nonNullable: true
+tests:
+  - parameterValues: {}

@@ -1,0 +1,16 @@
+key: Icon_ido5yemc
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 63615
+        family: MaterialIcons
+        matchTextDirection: false
+        name: local_shipping_rounded
+name: Icon

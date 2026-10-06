@@ -1,0 +1,16 @@
+snackBar:
+  textMessage:
+    inputValue:
+      serializedValue: N\u00E3o foi poss\u00EDvel cancelar a coleta.
+  textStyle:
+    variableColor:
+      inputValue:
+        color:
+          themeColor: PRIMARY_TEXT
+  durationMillis: 4000
+  shouldHidePreviousSnackbar: true
+  backgroundColor:
+    inputValue:
+      color:
+        themeColor: ERROR
+key: actcnclerr

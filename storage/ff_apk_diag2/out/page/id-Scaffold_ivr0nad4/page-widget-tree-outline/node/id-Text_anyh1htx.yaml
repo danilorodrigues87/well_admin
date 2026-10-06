@@ -1,0 +1,16 @@
+key: Text_anyh1htx
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Ver Rota
+    fontSizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.38
+name: Chip Label

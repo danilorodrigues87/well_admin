@@ -20,6 +20,14 @@
             <p class="small text-muted mb-3"><strong>Gerador:</strong> {{cliente_nome}} — {{gerador_endereco}}</p>
             <form id="form-transporte">
                 <div class="row">
+                    <div class="col-md-3 mb-2"><label>Data da coleta</label>
+                        <input type="date" class="form-control" name="data_coleta" id="data_coleta" value="{{data_coleta}}" required
+                               max="{{data_coleta_max}}" title="Pode ser uma data anterior se o lançamento for feito depois"/>
+                        <small class="text-muted">Use a data em que a coleta foi feita no cliente.</small>
+                    </div>
+                    <div class="col-md-3 mb-2"><label>Hora</label>
+                        <input type="time" class="form-control" name="hora" id="hora_coleta" value="{{hora_coleta}}"/>
+                    </div>
                     <div class="col-md-6 mb-2"><label>Transportadora</label><select class="form-select" name="transportadora_id" id="transportadora_id" required>{{transportadoras_options}}</select></div>
                     <div class="col-md-6 mb-2"><label>Coletor (motorista)</label>
                         <select class="form-select" name="motorista_coletor_id" id="motorista_coletor_id" {{motorista_locked}} required>{{motorista_options}}</select>

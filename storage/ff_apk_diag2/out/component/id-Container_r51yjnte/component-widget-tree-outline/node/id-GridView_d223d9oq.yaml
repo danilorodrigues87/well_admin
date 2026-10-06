@@ -1,0 +1,19 @@
+key: GridView_d223d9oq
+type: GridView
+props:
+  gridView:
+    shrinkWrapValue:
+      inputValue: true
+    crossAxisCountValue:
+      inputValue: 2
+    crossAxisSpacingValue:
+      inputValue: 8
+    mainAxisSpacingValue:
+      inputValue: 8
+    childAspectRatioValue:
+      inputValue: 3.5
+    primaryValue:
+      inputValue: false
+    isHorizontalValue:
+      inputValue: false
+name: Grid

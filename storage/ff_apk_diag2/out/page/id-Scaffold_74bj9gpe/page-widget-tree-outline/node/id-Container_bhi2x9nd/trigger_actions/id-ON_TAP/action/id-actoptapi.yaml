@@ -1,0 +1,117 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Rota Otimizar
+      key: wrtop1
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: data
+          key: rtd001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: rotaDataIso
+                key: rod001
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+      - variableIdentifier:
+          name: coletor_id
+          key: rtc001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: userId
+                key: ast003
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: rota_id
+          key: rtr001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: rotaId
+                key: rod002
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+      - variableIdentifier:
+          name: origin_lat
+          key: rla001
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: GLOBAL_PROPERTIES
+                  baseVariable:
+                    globalProperties:
+                      property: CURRENT_DEVICE_LOCATION
+            codeExpression:
+              arguments:
+                - identifier:
+                    name: loc
+                  dataType:
+                    scalarType: LatLng
+                    nonNullable: false
+              returnParameter:
+                dataType:
+                  scalarType: Double
+                  nonNullable: true
+              expression: "(loc == null || (loc.latitude == 0.0 && loc.longitude == 0.0)) ? -24.9555 : loc.latitude"
+              valid: true
+      - variableIdentifier:
+          name: origin_lng
+          key: rln001
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: GLOBAL_PROPERTIES
+                  baseVariable:
+                    globalProperties:
+                      property: CURRENT_DEVICE_LOCATION
+            codeExpression:
+              arguments:
+                - identifier:
+                    name: loc
+                  dataType:
+                    scalarType: LatLng
+                    nonNullable: false
+              returnParameter:
+                dataType:
+                  scalarType: Double
+                  nonNullable: true
+              expression: "(loc == null || (loc.latitude == 0.0 && loc.longitude == 0.0)) ? -53.4552 : loc.longitude"
+              valid: true
+outputVariableName: otimizarResult
+key: actoptapi

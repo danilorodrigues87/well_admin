@@ -1,0 +1,21 @@
+key: Text_3iwn8rno
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    translationIdentifier:
+      key: hj996hq1
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: totalPages
+              key: cl004
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_dwij8cyv
+      mostRecentInputValue: "1"
+name: Text_total_paginas

@@ -1,0 +1,33 @@
+key: IconButton_gwcxksgo
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        value: "869390546"
+        darkModeColor:
+          value: "860375114"
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: false
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 20
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_TEXT
+        iconDataValue:
+          inputValue:
+            codePoint: 62910
+            family: MaterialIcons
+            matchTextDirection: false
+            name: block_rounded
+name: IconButton

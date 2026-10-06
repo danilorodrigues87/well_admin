@@ -1,0 +1,15 @@
+key: Column_6wc00jjr
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_stretch
+    scrollable: false
+    minSizeValue:
+      inputValue: false
+      mostRecentInputValue: false
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+name: Column

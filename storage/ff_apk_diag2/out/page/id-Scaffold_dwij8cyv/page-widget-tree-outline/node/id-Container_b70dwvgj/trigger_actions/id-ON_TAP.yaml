@@ -1,0 +1,14 @@
+rootAction:
+  key: chpras1
+  action:
+    key: actcolfr0
+  followUpAction:
+    key: chpras2
+    action:
+      key: actcol001
+    followUpAction:
+      key: chpras3
+      action:
+        key: actcol002
+trigger:
+  triggerType: ON_TAP

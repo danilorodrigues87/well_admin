@@ -1,0 +1,72 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: coletaItems
+        key: cl006
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: coletasResultPrev
+                      actionKeyRef:
+                        key: actcolpv1
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Icon_4exbc2jc
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseColetaItemsFromApi
+              key: colp01
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+    - fieldIdentifier:
+        name: totalPages
+        key: cl004
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletasResultPrev
+              actionKeyRef:
+                key: actcolpv1
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.pagination.last_page
+          nodeKeyRef:
+            key: Icon_4exbc2jc
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: pageCurrent
+        key: cl003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletasResultPrev
+              actionKeyRef:
+                key: actcolpv1
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.pagination.page
+          nodeKeyRef:
+            key: Icon_4exbc2jc
+          actionComponentKeyRef: {}
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actcolpv2

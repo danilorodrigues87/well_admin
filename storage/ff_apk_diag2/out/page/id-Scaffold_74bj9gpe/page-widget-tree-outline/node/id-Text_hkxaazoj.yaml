@@ -1,0 +1,14 @@
+key: Text_hkxaazoj
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Operacional Well S.A.
+    colorValue:
+      inputValue:
+        value: "3439329279"
+    heightValue:
+      inputValue: 1.27
+name: Text

@@ -1,0 +1,48 @@
+key: Container_rmstmwjc
+type: Container
+props:
+  container:
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 16
+      border:
+        top:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+        right:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+        bottom:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+        left:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      boxShadow:
+        themeShadowToken:
+          name: sm
+          key: sm
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+      borderWidthValue:
+        inputValue: 1
+name: Container

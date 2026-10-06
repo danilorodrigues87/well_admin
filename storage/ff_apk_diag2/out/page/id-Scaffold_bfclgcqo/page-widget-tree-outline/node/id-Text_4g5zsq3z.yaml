@@ -1,0 +1,29 @@
+key: Text_4g5zsq3z
+type: Text
+props:
+  text:
+    themeStyle: TITLE_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: quantidade
+                key: cdf03
+        nodeKeyRef:
+          key: ListView_cddres01
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    heightValue:
+      inputValue: 1.4
+    fontWeightValue:
+      inputValue: w700
+name: QuantidadeResiduo
+valueKey: {}

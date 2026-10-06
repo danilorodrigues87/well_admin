@@ -1,0 +1,10 @@
+rootAction:
+  key: coltroot1
+  action:
+    key: actcolcrt
+  followUpAction:
+    key: coltroot2
+    action:
+      key: actcolnav
+trigger:
+  triggerType: ON_TAP

@@ -1,0 +1,12 @@
+key: Row_giwmdx7v
+type: Row
+props:
+  row:
+    mainAxisAlignmentValue:
+      inputValue: main_axis_space_between
+  padding:
+    leftValue:
+      inputValue: 32
+    rightValue:
+      inputValue: 32
+    animatedPadding: {}

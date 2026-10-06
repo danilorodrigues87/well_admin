@@ -1,0 +1,33 @@
+navigate:
+  allowBack: true
+  passedParameters:
+    parameterPasses:
+      cldtid1:
+        paramIdentifier:
+          name: coletaId
+          key: cldtid1
+        variable:
+          source: ACTION_OUTPUTS
+          defaultValue:
+            serializedValue: "0"
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletaCriarResult
+              actionKeyRef:
+                key: actcolcrt
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.coleta.id
+          nodeKeyRef:
+            key: IconButton_rotcol1
+          actionComponentKeyRef: {}
+    widgetClassNodeKeyRef:
+      key: Scaffold_bfclgcqo
+  isNavigateBack: false
+  replaceRoute: false
+  pageNodeKeyRef:
+    key: Scaffold_bfclgcqo
+key: actcolnav

@@ -1,0 +1,59 @@
+identifier:
+  name: RotaParadaItem
+  key: rtpitm1
+fields:
+  - identifier:
+      name: cliente_id
+      key: rpf01
+    dataType:
+      scalarType: Integer
+    description: ""
+  - identifier:
+      name: ordem
+      key: rpf02
+    dataType:
+      scalarType: Integer
+    description: ""
+  - identifier:
+      name: nome_fantasia
+      key: rpf03
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: endereco
+      key: rpf04
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: status_parada
+      key: rpf05
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: prioridade
+      key: rpf06
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: maps_url
+      key: rpf07
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: latitude
+      key: rpf08
+    dataType:
+      scalarType: Double
+    description: ""
+  - identifier:
+      name: longitude
+      key: rpf09
+    dataType:
+      scalarType: Double
+    description: ""
+description: Parada da rota do dia no app

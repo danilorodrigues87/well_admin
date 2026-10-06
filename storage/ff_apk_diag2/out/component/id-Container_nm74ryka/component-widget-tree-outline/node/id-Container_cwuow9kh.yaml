@@ -1,0 +1,1194 @@
+key: Container_cwuow9kh
+type: Container
+props:
+  container:
+    dimensions:
+      height:
+        pixelsValue:
+          inputValue: 40
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ONLY
+        topLeftValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: filled
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: ghost
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                elseValue:
+                  inputValue:
+                    serializedValue: "8"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+        topRightValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: filled
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: ghost
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                elseValue:
+                  inputValue:
+                    serializedValue: "8"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+        bottomLeftValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: filled
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: ghost
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                elseValue:
+                  inputValue:
+                    serializedValue: "8"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+        bottomRightValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: filled
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: ghost
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                elseValue:
+                  inputValue:
+                    serializedValue: "8"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+      border:
+        top:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "1"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "0"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "1"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "1"
+            mostRecentInputValue: 1
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  themeColor: ALTERNATE
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ERROR
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                  elseValue:
+                    inputValue:
+                      color:
+                        themeColor: ALTERNATE
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  themeColor: ALTERNATE
+            mostRecentInputValue:
+              themeColor: ALTERNATE
+        right:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "1"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "0"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "1"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "1"
+            mostRecentInputValue: 1
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  themeColor: ALTERNATE
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ERROR
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                  elseValue:
+                    inputValue:
+                      color:
+                        themeColor: ALTERNATE
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  themeColor: ALTERNATE
+            mostRecentInputValue:
+              themeColor: ALTERNATE
+        bottom:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "1"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "0"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "1"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "1"
+            mostRecentInputValue: 1
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  themeColor: ALTERNATE
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ERROR
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                  elseValue:
+                    inputValue:
+                      color:
+                        themeColor: ALTERNATE
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  themeColor: ALTERNATE
+            mostRecentInputValue:
+              themeColor: ALTERNATE
+        left:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "1"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "0"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "1"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "1"
+            mostRecentInputValue: 1
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  themeColor: ALTERNATE
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: WIDGET_CLASS_PARAMETER
+                        defaultValue:
+                          serializedValue: "false"
+                        baseVariable:
+                          widgetClass:
+                            paramIdentifier:
+                              name: error
+                              key: design_system_std_textfield_std_textfieldparam_error
+                        nodeKeyRef:
+                          key: Container_nm74ryka
+                        uiBuilderValue:
+                          serializedValue: "false"
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ERROR
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: filled
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: outlined
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_textfield_std_textfieldparam_variant
+                                nodeKeyRef:
+                                  key: Container_nm74ryka
+                                uiBuilderValue:
+                                  serializedValue: outlined
+                            - inputValue:
+                                serializedValue: ghost
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            value: "0"
+                  elseValue:
+                    inputValue:
+                      color:
+                        themeColor: ALTERNATE
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  themeColor: ALTERNATE
+            mostRecentInputValue:
+              themeColor: ALTERNATE
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            color:
+              value: "0"
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: filled
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: SECONDARY_BACKGROUND
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: ghost
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        value: "0"
+              elseValue:
+                inputValue:
+                  color:
+                    value: "0"
+              returnParameter:
+                dataType:
+                  scalarType: Color
+          uiBuilderValue:
+            color:
+              value: "0"
+        mostRecentInputValue:
+          value: "0"
+      borderColorValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            color:
+              themeColor: ALTERNATE
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: WIDGET_CLASS_PARAMETER
+                    defaultValue:
+                      serializedValue: "false"
+                    baseVariable:
+                      widgetClass:
+                        paramIdentifier:
+                          name: error
+                          key: design_system_std_textfield_std_textfieldparam_error
+                    nodeKeyRef:
+                      key: Container_nm74ryka
+                    uiBuilderValue:
+                      serializedValue: "false"
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: ERROR
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: filled
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        value: "0"
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: ghost
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        value: "0"
+              elseValue:
+                inputValue:
+                  color:
+                    themeColor: ALTERNATE
+              returnParameter:
+                dataType:
+                  scalarType: Color
+          uiBuilderValue:
+            color:
+              themeColor: ALTERNATE
+        mostRecentInputValue:
+          themeColor: ALTERNATE
+      borderWidthValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            serializedValue: "1"
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: WIDGET_CLASS_PARAMETER
+                    defaultValue:
+                      serializedValue: "false"
+                    baseVariable:
+                      widgetClass:
+                        paramIdentifier:
+                          name: error
+                          key: design_system_std_textfield_std_textfieldparam_error
+                    nodeKeyRef:
+                      key: Container_nm74ryka
+                    uiBuilderValue:
+                      serializedValue: "false"
+                  value:
+                    inputValue:
+                      serializedValue: "1"
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: filled
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      serializedValue: "1"
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: ghost
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      serializedValue: "0"
+              elseValue:
+                inputValue:
+                  serializedValue: "1"
+              returnParameter:
+                dataType:
+                  scalarType: Double
+          uiBuilderValue:
+            serializedValue: "1"
+        mostRecentInputValue: 1
+name: Container

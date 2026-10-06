@@ -1,0 +1,24 @@
+key: Icon_3onj0sgw
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 57918
+        family: MaterialIcons
+        matchTextDirection: false
+        name: event
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+valueKey: {}

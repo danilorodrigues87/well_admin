@@ -1,0 +1,10 @@
+key: Container_q7lvhji6
+type: Container
+props:
+  container:
+    boxDecoration:
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_BACKGROUND
+name: Container

@@ -1,0 +1,14 @@
+rootAction:
+  key: colroot1
+  action:
+    key: actstcol
+  followUpAction:
+    key: colroot2
+    action:
+      key: actstparc
+    followUpAction:
+      key: colroot3
+      action:
+        key: actstupc
+trigger:
+  triggerType: ON_TAP

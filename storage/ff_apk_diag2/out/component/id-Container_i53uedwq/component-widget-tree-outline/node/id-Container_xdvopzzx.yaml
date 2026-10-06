@@ -1,0 +1,171 @@
+key: Container_xdvopzzx
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "3"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: Android
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_switch_std_switchparam_variant
+                          nodeKeyRef:
+                            key: Container_i53uedwq
+                          uiBuilderValue:
+                            serializedValue: Android
+                      - inputValue:
+                          serializedValue: iOS 26+
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "2"
+            elseValue:
+              inputValue:
+                serializedValue: "3"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "3"
+      mostRecentInputValue: 3
+    topValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "3"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: Android
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_switch_std_switchparam_variant
+                          nodeKeyRef:
+                            key: Container_i53uedwq
+                          uiBuilderValue:
+                            serializedValue: Android
+                      - inputValue:
+                          serializedValue: iOS 26+
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "2"
+            elseValue:
+              inputValue:
+                serializedValue: "3"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "3"
+      mostRecentInputValue: 3
+    rightValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "3"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: Android
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_switch_std_switchparam_variant
+                          nodeKeyRef:
+                            key: Container_i53uedwq
+                          uiBuilderValue:
+                            serializedValue: Android
+                      - inputValue:
+                          serializedValue: iOS 26+
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "2"
+            elseValue:
+              inputValue:
+                serializedValue: "3"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "3"
+      mostRecentInputValue: 3
+    bottomValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "3"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: Android
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_switch_std_switchparam_variant
+                          nodeKeyRef:
+                            key: Container_i53uedwq
+                          uiBuilderValue:
+                            serializedValue: Android
+                      - inputValue:
+                          serializedValue: iOS 26+
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "2"
+            elseValue:
+              inputValue:
+                serializedValue: "3"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "3"
+      mostRecentInputValue: 3
+name: Container Padding

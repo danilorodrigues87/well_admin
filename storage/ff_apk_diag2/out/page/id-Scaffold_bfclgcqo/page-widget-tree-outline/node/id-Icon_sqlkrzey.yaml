@@ -1,0 +1,16 @@
+key: Icon_sqlkrzey
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 18
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    iconDataValue:
+      inputValue:
+        codePoint: 983183
+        family: MaterialIcons
+        matchTextDirection: false
+        name: photo_library_rounded
+name: Icon

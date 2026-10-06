@@ -1,0 +1,19 @@
+key: Column_cwh55x8p
+type: Column
+props:
+  column:
+    crossAxisAlignment: cross_axis_stretch
+    scrollable: false
+    listSpacing: {}
+    minSizeValue:
+      inputValue: true
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: Container Bordered Content
+valueKey: {}

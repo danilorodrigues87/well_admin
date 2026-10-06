@@ -1,0 +1,26 @@
+key: Text_0ekltyez
+type: Text
+props:
+  text:
+    themeStyle: TITLE_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: nome_fantasia
+                key: rpf03
+        nodeKeyRef:
+          key: ListView_zq2w1nhb
+      mostRecentInputValue: Hospital Central
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.4
+name: NomeCliente
+valueKey: {}

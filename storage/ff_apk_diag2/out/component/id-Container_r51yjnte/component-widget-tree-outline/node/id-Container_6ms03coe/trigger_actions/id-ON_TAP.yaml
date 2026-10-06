@@ -1,0 +1,6 @@
+rootAction:
+  key: cddpdf1
+  action:
+    key: actcddpdf1
+trigger:
+  triggerType: ON_TAP

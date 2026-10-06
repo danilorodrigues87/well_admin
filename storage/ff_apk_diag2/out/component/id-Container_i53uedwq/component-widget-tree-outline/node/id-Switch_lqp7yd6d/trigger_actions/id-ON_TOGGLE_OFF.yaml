@@ -1,0 +1,6 @@
+rootAction:
+  key: gpsoff1
+  action:
+    key: actgpsoff
+trigger:
+  triggerType: ON_TOGGLE_OFF

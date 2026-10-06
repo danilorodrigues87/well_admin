@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Common\StoragePath;
 use App\Model\Entity\Coleta as EntityColeta;
 
 /**
@@ -11,12 +12,7 @@ class ColetaCdfService
 {
     private static function dirForColeta(int $coletaId): string
     {
-        $dir = dirname(__DIR__, 2).'/storage/coletas/'.$coletaId;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-
-        return $dir;
+        return StoragePath::ensureDir('coletas/'.$coletaId);
     }
 
     public static function relativePath(int $coletaId, string $filename = 'cdf.pdf'): string
@@ -30,7 +26,7 @@ class ColetaCdfService
         if ($rel === '') {
             return null;
         }
-        $path = dirname(__DIR__, 2).'/storage/'.$rel;
+        $path = StoragePath::join($rel);
 
         return is_readable($path) ? $path : null;
     }

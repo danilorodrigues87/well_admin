@@ -1,0 +1,45 @@
+name: SwitchComponent2
+description: ""
+params:
+  design_system_std_switch_std_switchparam_label:
+    identifier:
+      name: label
+      key: design_system_std_switch_std_switchparam_label
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_switch_std_switchparam_label_present:
+    identifier:
+      name: labelPresent
+      key: design_system_std_switch_std_switchparam_label_present
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_switch_std_switchparam_variant:
+    identifier:
+      name: variant
+      key: design_system_std_switch_std_switchparam_variant
+    defaultValue:
+      serializedValue: Android
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_switch_std_switchparam_active:
+    identifier:
+      name: active
+      key: design_system_std_switch_std_switchparam_active
+    defaultValue:
+      serializedValue: "true"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+node:
+  key: Container_i53uedwq

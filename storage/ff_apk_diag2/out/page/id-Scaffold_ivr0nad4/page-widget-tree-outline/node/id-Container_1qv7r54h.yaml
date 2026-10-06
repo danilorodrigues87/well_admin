@@ -1,0 +1,9 @@
+key: Container_1qv7r54h
+type: Container
+props:
+  container: {}
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+name: Expanded Expanded Wrapper

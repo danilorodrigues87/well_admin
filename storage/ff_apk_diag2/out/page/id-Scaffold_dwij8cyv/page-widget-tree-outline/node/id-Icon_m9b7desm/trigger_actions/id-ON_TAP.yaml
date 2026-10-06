@@ -1,0 +1,47 @@
+rootAction:
+  key: pagnxt1
+  conditionActions:
+    trueActions:
+      - condition:
+          variable:
+            source: FUNCTION_CALL
+            functionCall:
+              values:
+                - variable:
+                    source: LOCAL_STATE
+                    baseVariable:
+                      localState:
+                        fieldIdentifier:
+                          name: pageCurrent
+                          key: cl003
+                        stateVariableType: WIDGET_CLASS_STATE
+                    nodeKeyRef:
+                      key: Scaffold_dwij8cyv
+                - variable:
+                    source: LOCAL_STATE
+                    baseVariable:
+                      localState:
+                        fieldIdentifier:
+                          name: totalPages
+                          key: cl004
+                        stateVariableType: WIDGET_CLASS_STATE
+                    nodeKeyRef:
+                      key: Scaffold_dwij8cyv
+              condition:
+                relation: LESS_THAN
+        trueAction:
+          key: pagnxt2
+          action:
+            key: actcolnext
+          followUpAction:
+            key: pagnxt3
+            action:
+              key: actcolnx1
+            followUpAction:
+              key: pagnxt4
+              action:
+                key: actcolnx2
+    hasMultiConditions: false
+    key: pagnxtc1
+trigger:
+  triggerType: ON_TAP

@@ -1,0 +1,13 @@
+node:
+  key: Scaffold_7zli0let
+  body:
+    key: Container_lgbdy1
+    children:
+      - key: Column_lgcol1
+        children:
+          - key: Image_9957on2p
+          - key: Text_lgtitle
+          - key: Text_lgsubti
+          - key: TextField_lgemail
+          - key: TextField_lgpwd01
+          - key: Button_lgenter

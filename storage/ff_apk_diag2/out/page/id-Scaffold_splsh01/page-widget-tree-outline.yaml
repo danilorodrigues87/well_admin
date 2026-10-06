@@ -1,0 +1,10 @@
+node:
+  key: Scaffold_splsh01
+  body:
+    key: Container_splbdy1
+    children:
+      - key: Column_splcol1
+        children:
+          - key: Image_xat4el02
+          - key: Text_spltitle
+          - key: ProgressBar_splld1

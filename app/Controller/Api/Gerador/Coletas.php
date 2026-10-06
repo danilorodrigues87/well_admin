@@ -47,7 +47,7 @@ class Coletas extends BaseApi
             return ApiHelper::fail('not_found', 'Evidência não encontrada.', 404);
         }
 
-        $path = dirname(__DIR__, 4).'/storage/'.$match->arquivo;
+        $path = \App\Common\StoragePath::join($match->arquivo);
         if (!is_readable($path)) {
             return ApiHelper::fail('not_found', 'Arquivo não encontrado.', 404);
         }

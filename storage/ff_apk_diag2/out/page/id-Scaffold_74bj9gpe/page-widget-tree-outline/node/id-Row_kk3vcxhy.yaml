@@ -1,0 +1,14 @@
+key: Row_kk3vcxhy
+type: Row
+props:
+  row:
+    listSpacing: {}
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+valueKey: {}

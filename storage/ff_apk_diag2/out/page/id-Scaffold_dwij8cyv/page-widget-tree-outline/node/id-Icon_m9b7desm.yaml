@@ -1,0 +1,15 @@
+key: Icon_m9b7desm
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 32
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 59294
+        family: MaterialIcons
+        matchTextDirection: true
+        name: arrow_right_sharp

@@ -1,0 +1,39 @@
+key: Icon_hkki6s53
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 16
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 63030
+        family: MaterialIcons
+        matchTextDirection: false
+        name: check_rounded
+  visibility:
+    visibleValue:
+      variable:
+        source: FUNCTION_CALL
+        functionCall:
+          values:
+            - variable:
+                source: LOCAL_STATE
+                baseVariable:
+                  localState:
+                    fieldIdentifier:
+                      name: filterStatus
+                      key: cl002
+                    stateVariableType: WIDGET_CLASS_STATE
+                nodeKeyRef:
+                  key: Scaffold_dwij8cyv
+            - inputValue:
+                serializedValue: finalizada
+          condition:
+            relation: EQUAL_TO
+      mostRecentInputValue: true
+name: chip_selected_finalizada
+parameterValues: {}
+valueKey: {}

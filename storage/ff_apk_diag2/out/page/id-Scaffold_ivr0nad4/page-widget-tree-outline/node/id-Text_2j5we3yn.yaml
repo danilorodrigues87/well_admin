@@ -1,0 +1,13 @@
+key: Text_2j5we3yn
+type: Text
+props:
+  text:
+    themeStyle: TITLE_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Coletas Finalizadas
+    heightValue:
+      inputValue: 1.35
+    fontWeightValue:
+      inputValue: w700
+name: Text

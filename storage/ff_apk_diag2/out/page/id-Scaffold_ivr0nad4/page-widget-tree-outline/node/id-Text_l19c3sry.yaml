@@ -1,0 +1,14 @@
+key: Text_l19c3sry
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Abertos
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.27
+name: Text

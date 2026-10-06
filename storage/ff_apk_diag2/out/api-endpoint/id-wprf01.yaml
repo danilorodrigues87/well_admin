@@ -1,0 +1,32 @@
+identifier:
+  name: WellAdmin Perfil
+  key: wprf01
+url: "[baseUrl]\/perfil"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001

@@ -1,0 +1,15 @@
+key: Container_bx2mgx8j
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 24
+    topValue:
+      inputValue: 16
+    rightValue:
+      inputValue: 24
+    bottomValue:
+      inputValue: 16
+name: Container Padding

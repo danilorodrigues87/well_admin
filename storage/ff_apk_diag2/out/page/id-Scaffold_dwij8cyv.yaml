@@ -1,0 +1,71 @@
+name: CollectionsList
+node:
+  key: Scaffold_dwij8cyv
+classModel:
+  stateFields:
+    - parameter:
+        identifier:
+          name: busca
+          key: cl001
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: filterStatus
+          key: cl002
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: pageCurrent
+          key: cl003
+        defaultValue:
+          serializedValue: "1"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "1"
+    - parameter:
+        identifier:
+          name: totalPages
+          key: cl004
+        defaultValue:
+          serializedValue: "1"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "1"
+    - parameter:
+        identifier:
+          name: isLoading
+          key: cl005
+        defaultValue:
+          serializedValue: "false"
+        dataType:
+          scalarType: Boolean
+          nonNullable: true
+      serializedDefaultValue:
+        - "false"
+    - parameter:
+        identifier:
+          name: coletaItems
+          key: cl006
+        dataType:
+          listType:
+            scalarType: DataStruct
+          subType:
+            dataStructIdentifier:
+              name: ColetaListItem
+              key: clitm1

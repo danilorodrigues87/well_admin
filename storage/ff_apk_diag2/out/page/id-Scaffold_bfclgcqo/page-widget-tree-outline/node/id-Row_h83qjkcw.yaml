@@ -1,0 +1,13 @@
+key: Row_h83qjkcw
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 8
+    minSizeValue:
+      inputValue: false
+name: Row

@@ -1,0 +1,10 @@
+rootAction:
+  key: cddinit1
+  action:
+    key: actcdd001
+  followUpAction:
+    key: cddinit2
+    action:
+      key: actcdd002
+trigger:
+  triggerType: ON_INIT_STATE

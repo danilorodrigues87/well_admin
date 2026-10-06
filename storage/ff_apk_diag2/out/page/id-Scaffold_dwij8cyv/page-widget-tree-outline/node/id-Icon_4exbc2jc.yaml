@@ -1,0 +1,15 @@
+key: Icon_4exbc2jc
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 32
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 59292
+        family: MaterialIcons
+        matchTextDirection: true
+        name: arrow_left_sharp

@@ -1,0 +1,35 @@
+identifier:
+  name: ColetaListItem
+  key: clitm1
+fields:
+  - identifier:
+      name: id
+      key: clf01
+    dataType:
+      scalarType: Integer
+    description: ""
+  - identifier:
+      name: display_mtr
+      key: clf02
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: cliente_nome
+      key: clf03
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: status_label
+      key: clf04
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: data_hora
+      key: clf05
+    dataType:
+      scalarType: String
+    description: ""
+description: Item listagem coletas app

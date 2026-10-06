@@ -1,0 +1,18 @@
+key: Row_3ilw2k26
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_center
+    listSpacing:
+      spacingValue:
+        inputValue: 16
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: PAGINACAO
+valueKey: {}

@@ -1,0 +1,30 @@
+key: Icon_3wf7i3i2
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 57490
+        family: MaterialIcons
+        matchTextDirection: true
+        name: arrow_back
+  padding:
+    topValue:
+      inputValue: 8
+    rightValue:
+      inputValue: 8
+    bottomValue:
+      inputValue: 8
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+valueKey: {}

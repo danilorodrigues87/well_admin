@@ -1,0 +1,16 @@
+node:
+  key: Container_nm74ryka
+  children:
+    - key: Container_ry2ltxtx
+      children:
+        - key: Column_goewinny
+          children:
+            - key: Text_hc62m6kw
+            - key: Container_cwuow9kh
+              children:
+                - key: Row_m30mcu6r
+                  children:
+                    - key: Icon_sn5qwg3b
+                    - key: TextField_8iutms3m
+                    - key: Icon_xgu8byuv
+            - key: Text_6b6rrd1o

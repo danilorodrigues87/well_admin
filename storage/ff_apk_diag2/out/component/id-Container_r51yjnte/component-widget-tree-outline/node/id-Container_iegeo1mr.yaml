@@ -1,0 +1,44 @@
+key: Container_iegeo1mr
+type: Button
+props:
+  button:
+    text:
+      themeStyle: LABEL_LARGE
+      textValue:
+        inputValue: Ver detalhes
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY
+    borderRadius:
+      type: FF_BORDER_RADIUS_ALL
+      allValue:
+        inputValue: 8
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 44
+    elevationValue:
+      inputValue: 0
+    fillColorValue:
+      inputValue:
+        value: "0"
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 20
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY
+        iconDataValue:
+          inputValue:
+            codePoint: 983699
+            family: MaterialIcons
+            matchTextDirection: false
+            name: visibility_rounded
+  responsiveVisibility: {}
+name: VerDetalhes
+parameterValues: {}
+valueKey: {}

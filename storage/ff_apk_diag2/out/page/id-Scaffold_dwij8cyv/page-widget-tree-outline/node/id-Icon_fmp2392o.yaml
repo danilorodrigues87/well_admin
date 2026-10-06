@@ -1,0 +1,16 @@
+key: Icon_fmp2392o
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 62974
+        family: MaterialIcons
+        matchTextDirection: false
+        name: calendar_today_rounded
+name: Icon

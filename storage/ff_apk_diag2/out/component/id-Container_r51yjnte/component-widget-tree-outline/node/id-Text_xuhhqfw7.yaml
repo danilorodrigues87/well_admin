@@ -1,0 +1,27 @@
+key: Text_xuhhqfw7
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: status
+              key: local_card_com4_97b7a2deparam_status
+        nodeKeyRef:
+          key: Container_r51yjnte
+        uiBuilderValue:
+          serializedValue: ""
+      mostRecentInputValue: ""
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    heightValue:
+      inputValue: 1.4
+name: Text

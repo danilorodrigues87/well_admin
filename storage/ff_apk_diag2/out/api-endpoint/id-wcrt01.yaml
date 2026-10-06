@@ -1,0 +1,67 @@
+identifier:
+  name: WellAdmin Coleta Criar
+  key: wcrt01
+url: "[baseUrl]\/coletas"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: cliente_id
+      key: cli001
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: observacao
+      key: obs001
+    type: String
+    testValue: ""
+bodyType: JSON
+body: "{\n  \"cliente_id\": <cliente_id>,\n  \"observacao\": \"<observacao>\"\n}"
+jsonPathDefinitions:
+  - identifier:
+      name: coletaId
+      key: col001
+    jsonPath:
+      jsonPath: $.data.coleta.id
+      returnParameter:
+        dataType:
+          scalarType: Integer
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: cliente_id
+      key: clip01
+    variableIdentifier:
+      name: cliente_id
+      key: cli001
+  - identifier:
+      name: observacao
+      key: obsp01
+    variableIdentifier:
+      name: observacao
+      key: obs001

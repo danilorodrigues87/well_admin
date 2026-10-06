@@ -1,0 +1,35 @@
+key: ListView_cddres01
+type: ListView
+props:
+  listView:
+    axis: FF_AXIS_VERTICAL
+    primary: false
+    listSpacing:
+      spacingValue:
+        inputValue: 8
+    shrinkWrapValue:
+      inputValue: true
+  padding:
+    type: FF_PADDING_ONLY
+    topValue:
+      inputValue: 12
+    bottomValue:
+      inputValue: 12
+    animatedPadding: {}
+  responsiveVisibility: {}
+name: ListaResiduos
+parameterValues: {}
+generatorVariable:
+  identifier:
+    name: residuoItem
+  variable:
+    source: LOCAL_STATE
+    baseVariable:
+      localState:
+        fieldIdentifier:
+          name: residuos
+          key: cdd016
+        stateVariableType: WIDGET_CLASS_STATE
+    nodeKeyRef:
+      key: Scaffold_bfclgcqo
+valueKey: {}

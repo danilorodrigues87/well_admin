@@ -1,0 +1,118 @@
+key: Switch_lqp7yd6d
+type: Switch
+props:
+  platformType: MATERIAL
+  visibility:
+    legacyVisible: true
+    visibleValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "true"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: Android
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_switch_std_switchparam_variant
+                          nodeKeyRef:
+                            key: Container_i53uedwq
+                          uiBuilderValue:
+                            serializedValue: Android
+                      - inputValue:
+                          serializedValue: iOS
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "true"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: Android
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_switch_std_switchparam_variant
+                          nodeKeyRef:
+                            key: Container_i53uedwq
+                          uiBuilderValue:
+                            serializedValue: Android
+                      - inputValue:
+                          serializedValue: iOS 26+
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "false"
+            elseValue:
+              inputValue:
+                serializedValue: "true"
+            returnParameter:
+              dataType:
+                scalarType: Boolean
+        uiBuilderValue:
+          serializedValue: "true"
+      mostRecentInputValue: true
+  switchWidget:
+    disabled:
+      disabledValue:
+        inputValue: false
+    initialValueValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "true"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "true"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: active
+                        key: design_system_std_switch_std_switchparam_active
+                  nodeKeyRef:
+                    key: Container_i53uedwq
+                  uiBuilderValue:
+                    serializedValue: "true"
+                value:
+                  inputValue:
+                    serializedValue: "true"
+            elseValue:
+              inputValue:
+                serializedValue: "false"
+            returnParameter:
+              dataType:
+                scalarType: Boolean
+        uiBuilderValue:
+          serializedValue: "true"
+      mostRecentInputValue: true
+    activeTrackColorValue:
+      inputValue:
+        themeColor: PRIMARY
+    inactiveThumbColorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    inactiveTrackColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+name: Switch

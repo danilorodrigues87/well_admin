@@ -1,0 +1,31 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: busca
+        key: cl001
+      setValue:
+        variable:
+          source: WIDGET_STATE
+          baseVariable:
+            widgetState:
+              returnParameter:
+                allowedDestinationTypes:
+                  - Integer
+                  - Double
+                  - Boolean
+                  - ImagePath
+                  - VideoPath
+                  - AudioPath
+                dataType:
+                  scalarType: String
+          nodeKeyRef:
+            key: TextField_clbus01
+    - fieldIdentifier:
+        name: pageCurrent
+        key: cl003
+      setValue:
+        inputValue:
+          serializedValue: "1"
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actsrchp1

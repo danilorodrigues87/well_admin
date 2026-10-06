@@ -1,0 +1,22 @@
+key: Container_6a353a23
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: 160
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 16
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+    minDimensions: {}
+  expanded:
+    expandedType: EXPANDED

@@ -1,0 +1,22 @@
+key: Container_9yu1vibx
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+    boxDecoration:
+      border:
+        bottom:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+name: CardResiduo
+valueKey: {}

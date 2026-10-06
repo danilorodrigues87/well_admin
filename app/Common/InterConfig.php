@@ -137,16 +137,16 @@ class InterConfig
 
     private static function projectPath(string $relative): string
     {
-        return rtrim(str_replace('\\', '/', dirname(__DIR__, 2)), '/').'/'.ltrim($relative, '/');
+        $relative = str_replace('\\', '/', ltrim($relative, '/'));
+        if (str_starts_with($relative, 'storage/')) {
+            return StoragePath::join(substr($relative, strlen('storage/')));
+        }
+
+        return rtrim(StoragePath::projectRoot(), '/').'/'.$relative;
     }
 
     private static function resolvePath(string $path): string
     {
-        $path = str_replace('\\', '/', $path);
-        if (preg_match('#^[A-Za-z]:/#', $path) || str_starts_with($path, '/')) {
-            return $path;
-        }
-
-        return self::projectPath($path);
+        return StoragePath::resolve($path);
     }
 }

@@ -1,0 +1,36 @@
+key: Text_vt8nzj48
+type: Text
+props:
+  text:
+    themeStyle: HEADLINE_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        defaultValue:
+          serializedValue: "0"
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: kpiColetasHoje
+              key: dsh101
+            stateVariableType: WIDGET_CLASS_STATE
+        operations:
+          - numberFormat:
+              formatType: CUSTOM
+              customFormat: "#"
+        nodeKeyRef:
+          key: Scaffold_ivr0nad4
+        uiBuilderValue:
+          serializedValue: "0"
+      mostRecentInputValue: "0"
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+      mostRecentInputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.3
+    fontWeightValue:
+      inputValue: w700
+name: Text

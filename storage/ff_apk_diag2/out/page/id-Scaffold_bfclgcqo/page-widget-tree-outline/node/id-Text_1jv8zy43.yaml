@@ -1,0 +1,30 @@
+key: Text_1jv8zy43
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: recebimento
+              key: cdd009
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_bfclgcqo
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    fontWeightValue:
+      inputValue: w500
+    textAlignValue:
+      inputValue: ALIGN_END
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+name: Text
+valueKey: {}

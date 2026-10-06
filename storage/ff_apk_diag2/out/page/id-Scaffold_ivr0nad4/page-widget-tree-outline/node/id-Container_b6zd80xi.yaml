@@ -1,0 +1,9 @@
+key: Container_b6zd80xi
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+name: Dimensions

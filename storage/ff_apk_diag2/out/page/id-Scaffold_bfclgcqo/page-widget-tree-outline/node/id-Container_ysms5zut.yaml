@@ -1,0 +1,12 @@
+key: Container_ysms5zut
+type: Container
+props:
+  container:
+    boxDecoration:
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          value: "221150514"
+          darkModeColor:
+            value: "224836458"
+name: Container

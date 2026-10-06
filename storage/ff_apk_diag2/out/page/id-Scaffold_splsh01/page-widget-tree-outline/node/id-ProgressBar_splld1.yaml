@@ -1,0 +1,40 @@
+key: ProgressBar_splld1
+type: ProgressBar
+props:
+  expanded:
+    expandedType: UNEXPANDED
+  responsiveVisibility: {}
+  progressBar:
+    shape: Circular
+    text:
+      themeStyle: BODY_SMALL
+      textValue:
+        inputValue: ""
+        mostRecentInputValue: ""
+    size:
+      width:
+        pixelsValue:
+          inputValue: 48
+      height:
+        pixelsValue:
+          inputValue: 4
+    percentValue:
+      inputValue: 0.75
+      mostRecentInputValue: 0.75
+    progressColorValue:
+      inputValue:
+        themeColor: PRIMARY
+      mostRecentInputValue:
+        themeColor: PRIMARY
+    backgroundColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+      mostRecentInputValue:
+        themeColor: ALTERNATE
+    animationValue:
+      inputValue: true
+  opacity:
+    opacityValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+valueKey: {}

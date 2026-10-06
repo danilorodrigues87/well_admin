@@ -1,0 +1,79 @@
+key: Text_6b6rrd1o
+type: Text
+props:
+  text:
+    themeStyle: BODY_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: helper
+              key: design_system_std_textfield_std_textfieldparam_helper
+        nodeKeyRef:
+          key: Container_nm74ryka
+        uiBuilderValue:
+          serializedValue: ""
+      mostRecentInputValue: ""
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: SECONDARY_TEXT
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: error
+                        key: design_system_std_textfield_std_textfieldparam_error
+                  nodeKeyRef:
+                    key: Container_nm74ryka
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    color:
+                      themeColor: ERROR
+            elseValue:
+              inputValue:
+                color:
+                  themeColor: SECONDARY_TEXT
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.38
+  visibility:
+    legacyVisible: false
+    visibleValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: "false"
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: helperPresent
+              key: design_system_std_textfield_std_textfieldparam_helper_present
+        nodeKeyRef:
+          key: Container_nm74ryka
+        uiBuilderValue:
+          serializedValue: "false"
+      mostRecentInputValue: false
+name: Text

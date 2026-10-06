@@ -1,0 +1,60 @@
+key: TextField_povdh1s4
+type: TextField
+props:
+  padding: {}
+  textField:
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+        mostRecentInputValue:
+          themeColor: PRIMARY_TEXT
+    inputDecoration:
+      inputBorderType: outline
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 8
+          mostRecentInputValue: 8
+      contentPadding:
+        leftValue:
+          inputValue: 12
+        topValue:
+          inputValue: 12
+        rightValue:
+          inputValue: 12
+        bottomValue:
+          inputValue: 12
+      hintStyle:
+        themeStyle: BODY_MEDIUM
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_TEXT
+      hintText:
+        textValue:
+          inputValue: Data
+          mostRecentInputValue: Data
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+      filledValue:
+        inputValue: true
+        mostRecentInputValue: true
+      fillColorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+    keyboardType: TEXT
+    width:
+      pixelsValue:
+        inputValue: 120
+    maxLinesValue:
+      inputValue: 1
+    readOnlyValue:
+      inputValue: true
+      mostRecentInputValue: true
+    autofocusValue:
+      inputValue: false
+name: DataOperacao
+parameterValues: {}
+valueKey: {}

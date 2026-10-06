@@ -7,6 +7,7 @@ use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\Helpers\ColetorSelectHelper;
 use App\Common\OperadoraScope;
 use App\Common\SinirConfig;
+use App\Common\StoragePath;
 use App\Model\Db\Database;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
@@ -48,13 +49,22 @@ class ColetaService
         return self::proximoNumeroRelatorio($db, $operadoraId);
     }
 
-    public static function iniciarRascunho(int $clienteId, int $coletorId, bool $isAdmin = false): int
-    {
+    /**
+     * @param string|null $dataColeta Y-m-d (coleta real). Null = hoje. Aceita data passada (até 2 anos).
+     */
+    public static function iniciarRascunho(
+        int $clienteId,
+        int $coletorId,
+        bool $isAdmin = false,
+        ?string $dataColeta = null
+    ): int {
         $cliente = EntityCliente::getById($clienteId);
         if (!$cliente || $cliente->status !== 'ativo') {
             throw new \InvalidArgumentException('Cliente inválido ou inativo.');
         }
         RotaScopeService::assertClientePermitido($clienteId, $coletorId, $isAdmin);
+
+        $dataColeta = self::normalizeDataColeta($dataColeta);
 
         $endereco = trim(implode(', ', array_filter([
             $cliente->logradouro,
@@ -88,7 +98,7 @@ class ColetaService
                     $destinador->id,
                     'rascunho',
                     $cliente->proxima_coleta ?? date('Y-m-d'),
-                    date('Y-m-d'),
+                    $dataColeta,
                     date('H:i:s'),
                 ]
             );
@@ -154,6 +164,12 @@ class ColetaService
         if ($coletorId > 0 && ColetorSelectHelper::isColetorAtivo($coletorId)) {
             $updateColeta['coletor_id'] = $coletorId;
         }
+        if (array_key_exists('data_coleta', $dados) && trim((string)$dados['data_coleta']) !== '') {
+            $updateColeta['data_coleta'] = self::normalizeDataColeta((string)$dados['data_coleta']);
+        }
+        if (array_key_exists('hora', $dados) && trim((string)$dados['hora']) !== '') {
+            $updateColeta['hora'] = self::normalizeHoraColeta((string)$dados['hora']);
+        }
         EntityColeta::update($coletaId, $updateColeta);
 
         EntityColetaSnapshot::update($coletaId, [
@@ -212,14 +228,11 @@ class ColetaService
             throw new \InvalidArgumentException('Assinatura inválida ou muito grande.');
         }
         $ext = strtolower($m[1]) === 'jpeg' ? 'jpg' : 'png';
-        $dir = dirname(__DIR__, 2).'/storage/coletas/'.$coletaId;
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
+        StoragePath::ensureDir('coletas/'.$coletaId);
         $rel = 'coletas/'.$coletaId.'/assinatura_cliente.'.$ext;
-        $path = dirname(__DIR__, 2).'/storage/'.$rel;
+        $path = StoragePath::join($rel);
         if (file_put_contents($path, $raw) === false) {
-            throw new \RuntimeException('Não foi possível salvar a assinatura.');
+            throw new \RuntimeException('Não foi possível salvar a assinatura em '.$path);
         }
         EntityColeta::update($coletaId, ['assinatura_cliente_path' => $rel]);
     }
@@ -598,9 +611,53 @@ class ColetaService
 
     private static function unlinkEvidenciaArquivo(string $arquivoRelativo): void
     {
-        $path = dirname(__DIR__, 2).'/storage/'.ltrim($arquivoRelativo, '/');
+        $path = StoragePath::join(ltrim($arquivoRelativo, '/'));
         if (is_file($path)) {
             @unlink($path);
         }
+    }
+
+    /** Normaliza Y-m-d: hoje se null/vazio; não futura; no máximo 2 anos atrás. */
+    public static function normalizeDataColeta(?string $dataColeta): string
+    {
+        $dataColeta = trim((string)$dataColeta);
+        if ($dataColeta === '') {
+            return date('Y-m-d');
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataColeta)) {
+            throw new \InvalidArgumentException('Data da coleta inválida. Use o formato AAAA-MM-DD.');
+        }
+        $dt = \DateTimeImmutable::createFromFormat('Y-m-d', $dataColeta);
+        if (!$dt || $dt->format('Y-m-d') !== $dataColeta) {
+            throw new \InvalidArgumentException('Data da coleta inválida.');
+        }
+        $hoje = new \DateTimeImmutable('today');
+        if ($dt > $hoje) {
+            throw new \InvalidArgumentException('A data da coleta não pode ser futura.');
+        }
+        $limite = $hoje->modify('-2 years');
+        if ($dt < $limite) {
+            throw new \InvalidArgumentException('A data da coleta não pode ser anterior a 2 anos.');
+        }
+
+        return $dataColeta;
+    }
+
+    /** Aceita HH:MM ou HH:MM:SS. */
+    public static function normalizeHoraColeta(string $hora): string
+    {
+        $hora = trim($hora);
+        if (preg_match('/^\d{2}:\d{2}$/', $hora)) {
+            $hora .= ':00';
+        }
+        if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $hora)) {
+            throw new \InvalidArgumentException('Hora da coleta inválida.');
+        }
+        $parts = array_map('intval', explode(':', $hora));
+        if ($parts[0] > 23 || $parts[1] > 59 || $parts[2] > 59) {
+            throw new \InvalidArgumentException('Hora da coleta inválida.');
+        }
+
+        return $hora;
     }
 }

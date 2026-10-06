@@ -1,0 +1,125 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: authToken
+        key: ast001
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: loginResult
+              actionKeyRef:
+                key: actlg001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.token
+          nodeKeyRef:
+            key: Button_lgenter
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: userName
+        key: ast002
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: loginResult
+              actionKeyRef:
+                key: actlg001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.user.nome
+          nodeKeyRef:
+            key: Button_lgenter
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: userId
+        key: ast003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: loginResult
+              actionKeyRef:
+                key: actlg001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.user.id
+          nodeKeyRef:
+            key: Button_lgenter
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: isAdmin
+        key: ast006
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: loginResult
+              actionKeyRef:
+                key: actlg001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.user.is_admin
+          nodeKeyRef:
+            key: Button_lgenter
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: funcaoNome
+        key: ast007
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: loginResult
+              actionKeyRef:
+                key: actlg001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.user.funcao_nome
+          nodeKeyRef:
+            key: Button_lgenter
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: userModulesCsv
+        key: ast008
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: loginResult
+              actionKeyRef:
+                key: actlg001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.user.modulos_csv
+          nodeKeyRef:
+            key: Button_lgenter
+          actionComponentKeyRef: {}
+  updateType: WIDGET
+  stateVariableType: APP_STATE
+key: actlg002

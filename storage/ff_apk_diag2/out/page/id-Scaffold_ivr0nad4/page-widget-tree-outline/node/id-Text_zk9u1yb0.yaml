@@ -1,0 +1,19 @@
+key: Text_zk9u1yb0
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Indústria Metal-X
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.47
+    maxLinesValue:
+      inputValue: 1
+    fontWeightValue:
+      inputValue: w600
+    overflowReplacement: ELLIPSIS
+name: Text

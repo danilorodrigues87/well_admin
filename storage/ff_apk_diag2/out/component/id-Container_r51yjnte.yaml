@@ -1,0 +1,42 @@
+name: CardCom4
+description: "card com 4 opções: ver de talhes, imprimir, gerar pdf e gerar MTR"
+params:
+  p8pw99:
+    identifier:
+      name: id
+      key: p8pw99
+    dataType:
+      scalarType: Integer
+      nonNullable: true
+  local_card_com4_97b7a2deparam_title:
+    identifier:
+      name: title
+      key: local_card_com4_97b7a2deparam_title
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  local_card_com4_97b7a2deparam_subtitle:
+    identifier:
+      name: subtitle
+      key: local_card_com4_97b7a2deparam_subtitle
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  local_card_com4_97b7a2deparam_status:
+    identifier:
+      name: status
+      key: local_card_com4_97b7a2deparam_status
+    defaultValue:
+      serializedValue: ""
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+node:
+  key: Container_r51yjnte

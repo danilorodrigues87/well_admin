@@ -1,0 +1,182 @@
+key: ProgressBar_x2mk37qk
+type: ProgressBar
+props:
+  visibility:
+    legacyVisible: false
+    visibleValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "false"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: loading
+                        key: design_system_std_button_std_buttonparam_loading
+                  nodeKeyRef:
+                    key: Container_18lw9l46
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    serializedValue: "true"
+            elseValue:
+              inputValue:
+                serializedValue: "false"
+            returnParameter:
+              dataType:
+                scalarType: Boolean
+        uiBuilderValue:
+          serializedValue: "false"
+      mostRecentInputValue: false
+  progressBar:
+    shape: Circular
+    size:
+      width:
+        pixelsValue:
+          inputValue: 14
+      height:
+        pixelsValue:
+          inputValue: 2
+    percentValue:
+      inputValue: 0
+    progressColorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: PRIMARY_TEXT
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: outline
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_18lw9l46
+                          uiBuilderValue:
+                            serializedValue: outline
+                      - inputValue:
+                          serializedValue: secondary
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      darkModeColor:
+                        value: "4294967295"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: outline
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_18lw9l46
+                          uiBuilderValue:
+                            serializedValue: outline
+                      - inputValue:
+                          serializedValue: outline
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY_TEXT
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: outline
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_18lw9l46
+                          uiBuilderValue:
+                            serializedValue: outline
+                      - inputValue:
+                          serializedValue: ghost
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: outline
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_18lw9l46
+                          uiBuilderValue:
+                            serializedValue: outline
+                      - inputValue:
+                          serializedValue: destructive
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      darkModeColor:
+                        value: "4294967295"
+            elseValue:
+              inputValue:
+                color:
+                  value: "4294967295"
+                  darkModeColor:
+                    value: "4294967295"
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: PRIMARY_TEXT
+      mostRecentInputValue:
+        themeColor: PRIMARY_TEXT
+    backgroundColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+    animationValue:
+      inputValue: true
+name: Progress

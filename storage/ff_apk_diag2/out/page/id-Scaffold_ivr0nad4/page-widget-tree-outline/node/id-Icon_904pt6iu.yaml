@@ -1,0 +1,16 @@
+key: Icon_904pt6iu
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    iconDataValue:
+      inputValue:
+        codePoint: 63477
+        family: MaterialIcons
+        matchTextDirection: false
+        name: home_rounded
+name: Icon

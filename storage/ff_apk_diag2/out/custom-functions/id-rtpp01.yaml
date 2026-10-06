@@ -1,0 +1,20 @@
+identifier:
+  name: parseRotaParadasFromApi
+  key: rtpp01
+arguments:
+  - identifier:
+      name: apiJson
+      key: rtpp02
+    dataType:
+      scalarType: JSON
+      nonNullable: false
+returnParameter:
+  dataType:
+    listType:
+      scalarType: DataStruct
+    subType:
+      dataStructIdentifier:
+        name: RotaParadaItem
+        key: rtpitm1
+tests:
+  - parameterValues: {}

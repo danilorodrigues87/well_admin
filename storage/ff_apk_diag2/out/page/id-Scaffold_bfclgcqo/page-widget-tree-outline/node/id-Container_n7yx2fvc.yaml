@@ -1,0 +1,25 @@
+key: Container_n7yx2fvc
+type: Container
+props:
+  container:
+    dimensions: {}
+    boxDecoration:
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      boxShadow: {}
+      image: {}
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY
+    maxDimensions: {}
+    minDimensions: {}
+    safeArea: true
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: header
+valueKey: {}

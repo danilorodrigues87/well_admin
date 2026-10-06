@@ -1,0 +1,3 @@
+pubspecDependencies:
+  - name: google_maps_flutter
+    version: 2.12.2

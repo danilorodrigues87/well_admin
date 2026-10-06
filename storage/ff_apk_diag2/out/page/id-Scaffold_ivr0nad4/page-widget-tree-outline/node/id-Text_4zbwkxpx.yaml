@@ -1,0 +1,25 @@
+key: Text_4zbwkxpx
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: RB
+    fontSizeValue:
+      inputValue: 15.2
+    colorValue:
+      inputValue:
+        value: "4294967295"
+        darkModeColor:
+          value: "4294967295"
+    heightValue:
+      inputValue: 1.38
+    maxLinesValue:
+      inputValue: 1
+    fontWeightValue:
+      inputValue: w600
+    textAlignValue:
+      inputValue: ALIGN_CENTER
+    overflowReplacement: CLIP
+name: Avatar Label

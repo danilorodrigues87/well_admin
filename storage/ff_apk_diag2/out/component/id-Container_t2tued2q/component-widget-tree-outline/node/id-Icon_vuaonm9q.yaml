@@ -1,0 +1,195 @@
+key: Icon_vuaonm9q
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 16
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: PRIMARY
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_t2tued2q
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: secondary
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      paletteColorName: on_secondary
+                      darkModeColor:
+                        value: "4294967295"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_t2tued2q
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: outline
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY_TEXT
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_t2tued2q
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: ghost
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_t2tued2q
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: destructive
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      paletteColorName: on_error
+                      darkModeColor:
+                        value: "4278190080"
+            elseValue:
+              inputValue:
+                color:
+                  value: "4294967295"
+                  paletteColorName: on_primary
+                  darkModeColor:
+                    value: "4294967295"
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: PRIMARY
+      mostRecentInputValue:
+        themeColor: PRIMARY
+    iconDataValue:
+      inputValue:
+        codePoint: 62775
+        family: MaterialIcons
+        matchTextDirection: false
+        name: add_rounded
+    variable:
+      source: WIDGET_CLASS_PARAMETER
+      defaultValue:
+        icon:
+          sizeValue:
+            inputValue: 24
+          colorValue:
+            inputValue:
+              themeColor: PRIMARY_TEXT
+          iconDataValue:
+            inputValue:
+              codePoint: 62775
+              family: MaterialIcons
+              matchTextDirection: false
+              name: add_rounded
+      baseVariable:
+        widgetClass:
+          paramIdentifier:
+            name: iconEnd
+            key: design_system_std_button_std_buttonparam_icon_end
+      nodeKeyRef:
+        key: Container_t2tued2q
+      uiBuilderValue:
+        icon:
+          sizeValue:
+            inputValue: 24
+          colorValue:
+            inputValue:
+              themeColor: PRIMARY_TEXT
+          iconDataValue:
+            inputValue:
+              codePoint: 62775
+              family: MaterialIcons
+              matchTextDirection: false
+              name: add_rounded
+  visibility:
+    legacyVisible: false
+    visibleValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: "false"
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: iconEndPresent
+              key: design_system_std_button_std_buttonparam_icon_end_present
+        nodeKeyRef:
+          key: Container_t2tued2q
+        uiBuilderValue:
+          serializedValue: "false"
+      mostRecentInputValue: false
+name: Icon

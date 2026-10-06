@@ -1,0 +1,13 @@
+key: Column_ccnm4u8d
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 2
+    minSizeValue:
+      inputValue: true
+name: Column

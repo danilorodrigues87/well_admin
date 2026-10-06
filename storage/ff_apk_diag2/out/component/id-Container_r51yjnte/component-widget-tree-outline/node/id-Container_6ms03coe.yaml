@@ -1,0 +1,49 @@
+key: Container_6ms03coe
+type: Button
+props:
+  button:
+    text:
+      themeStyle: LABEL_LARGE
+      textValue:
+        inputValue: Gerar PDF
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY
+    borderRadius:
+      type: FF_BORDER_RADIUS_ALL
+      allValue:
+        inputValue: 8
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 44
+    elevationValue:
+      inputValue: 0
+    fillColorValue:
+      inputValue:
+        value: "0"
+    borderColorValue:
+      inputValue:
+        themeColor: PRIMARY
+    borderWidthValue:
+      inputValue: 1
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 20
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY
+        iconDataValue:
+          inputValue:
+            codePoint: 983190
+            family: MaterialIcons
+            matchTextDirection: false
+            name: picture_as_pdf_rounded
+  responsiveVisibility: {}
+name: GerarPdf
+parameterValues: {}
+valueKey: {}

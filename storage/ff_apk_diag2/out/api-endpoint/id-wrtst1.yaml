@@ -1,0 +1,80 @@
+identifier:
+  name: WellAdmin Rota Parada Status
+  key: wrtst1
+url: "[baseUrl]\/rota-do-dia\/parada-status?data=[data]&coletor_id=[coletor_id]"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: data
+      key: rtd001
+    type: String
+    testValue: 2026-09-18
+  - identifier:
+      name: coletor_id
+      key: rtc001
+    type: Integer
+    testValue: "0"
+  - identifier:
+      name: cliente_id
+      key: rcl001
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: status
+      key: rst001
+    type: String
+    testValue: coletado
+bodyType: JSON
+body: "{\n  \"cliente_id\": <cliente_id>,\n  \"status\": \"<status>\"\n}"
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: data
+      key: rtpd01
+    variableIdentifier:
+      name: data
+      key: rtd001
+  - identifier:
+      name: coletor_id
+      key: rtpc01
+    variableIdentifier:
+      name: coletor_id
+      key: rtc001
+  - identifier:
+      name: cliente_id
+      key: rtcl01
+    variableIdentifier:
+      name: cliente_id
+      key: rcl001
+  - identifier:
+      name: status
+      key: rtst01
+    variableIdentifier:
+      name: status
+      key: rst001

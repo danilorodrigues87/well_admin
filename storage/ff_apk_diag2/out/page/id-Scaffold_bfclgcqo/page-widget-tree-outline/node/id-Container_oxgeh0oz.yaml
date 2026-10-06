@@ -1,0 +1,18 @@
+key: Container_oxgeh0oz
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+    boxDecoration:
+      border:
+        bottom:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+name: Container

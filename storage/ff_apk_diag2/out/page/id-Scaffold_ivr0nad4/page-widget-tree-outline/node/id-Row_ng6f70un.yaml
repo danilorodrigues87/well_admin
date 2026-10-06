@@ -1,0 +1,13 @@
+key: Row_ng6f70un
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: true
+    listSpacing:
+      spacingValue:
+        inputValue: 8
+    minSizeValue:
+      inputValue: true
+name: Row

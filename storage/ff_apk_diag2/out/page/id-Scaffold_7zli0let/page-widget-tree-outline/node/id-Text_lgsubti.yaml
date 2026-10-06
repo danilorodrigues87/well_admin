@@ -1,0 +1,21 @@
+key: Text_lgsubti
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Coletor de campo
+      mostRecentInputValue: Coletor de campo
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    textAlignValue:
+      inputValue: ALIGN_CENTER
+  padding:
+    bottomValue:
+      inputValue: 16
+      mostRecentInputValue: 16
+name: SubtitleText

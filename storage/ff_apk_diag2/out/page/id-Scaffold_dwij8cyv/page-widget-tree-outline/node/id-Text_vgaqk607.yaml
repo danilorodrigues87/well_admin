@@ -1,0 +1,28 @@
+key: Text_vgaqk607
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: Cliente/gerador
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: cliente_nome
+                key: clf03
+        nodeKeyRef:
+          key: ListView_qsfh7n67
+      mostRecentInputValue: —
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+  responsiveVisibility: {}
+name: text_cliente_nome
+parameterValues: {}
+valueKey: {}

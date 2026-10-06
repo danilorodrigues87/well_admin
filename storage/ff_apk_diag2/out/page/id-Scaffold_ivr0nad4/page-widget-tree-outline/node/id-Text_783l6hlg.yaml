@@ -1,0 +1,17 @@
+key: Text_783l6hlg
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Finalizadas
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.27
+    maxLinesValue:
+      inputValue: 1
+    overflowReplacement: ELLIPSIS
+name: Text

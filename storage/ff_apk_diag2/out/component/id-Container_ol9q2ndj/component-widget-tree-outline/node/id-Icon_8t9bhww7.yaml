@@ -1,0 +1,86 @@
+key: Icon_8t9bhww7
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: SECONDARY_TEXT
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: selected
+                        key: design_system_std_nav_item_std_nav_itemparam_selected
+                  nodeKeyRef:
+                    key: Container_ol9q2ndj
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY
+            elseValue:
+              inputValue:
+                color:
+                  themeColor: SECONDARY_TEXT
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 63477
+        family: MaterialIcons
+        matchTextDirection: false
+        name: home_rounded
+    variable:
+      source: WIDGET_CLASS_PARAMETER
+      defaultValue:
+        icon:
+          sizeValue:
+            inputValue: 24
+          colorValue:
+            inputValue:
+              themeColor: PRIMARY_TEXT
+          iconDataValue:
+            inputValue:
+              codePoint: 63477
+              family: MaterialIcons
+              matchTextDirection: false
+              name: home_rounded
+      baseVariable:
+        widgetClass:
+          paramIdentifier:
+            name: icon
+            key: design_system_std_nav_item_std_nav_itemparam_icon
+      nodeKeyRef:
+        key: Container_ol9q2ndj
+      uiBuilderValue:
+        icon:
+          sizeValue:
+            inputValue: 24
+          colorValue:
+            inputValue:
+              themeColor: PRIMARY_TEXT
+          iconDataValue:
+            inputValue:
+              codePoint: 63477
+              family: MaterialIcons
+              matchTextDirection: false
+              name: home_rounded
+name: Icon

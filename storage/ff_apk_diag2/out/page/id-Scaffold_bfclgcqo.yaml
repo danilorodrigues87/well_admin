@@ -1,0 +1,159 @@
+name: CollectionDetail
+description: Detalhes operacionais da coleta
+params:
+  cldtid1:
+    identifier:
+      name: coletaId
+      key: cldtid1
+    defaultValue:
+      serializedValue: "0"
+    dataType:
+      scalarType: Integer
+      nonNullable: true
+node:
+  key: Scaffold_bfclgcqo
+classModel:
+  stateFields:
+    - parameter:
+        identifier:
+          name: isLoading
+          key: cdd001
+        defaultValue:
+          serializedValue: "true"
+        dataType:
+          scalarType: Boolean
+          nonNullable: true
+      serializedDefaultValue:
+        - "true"
+    - parameter:
+        identifier:
+          name: pageTitle
+          key: cdd002
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: dataColeta
+          key: cdd003
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: horaColeta
+          key: cdd004
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: veiculoLinha
+          key: cdd006
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: motoristaNome
+          key: cdd007
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: destinadorNome
+          key: cdd008
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: recebimento
+          key: cdd009
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: relatorio
+          key: cdd010
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: clienteNome
+          key: cdd011
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: statusLabel
+          key: cdd012
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: pesoTotalLabel
+          key: cdd013
+        defaultValue:
+          serializedValue: "0,000 KG"
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - "0,000 KG"
+    - parameter:
+        identifier:
+          name: residuos
+          key: cdd016
+        dataType:
+          listType:
+            scalarType: DataStruct
+          subType:
+            dataStructIdentifier:
+              name: ColetaResiduoItem
+              key: cdditm1

@@ -1,0 +1,14 @@
+key: Text_jmirmlsu
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Recebimento
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.47
+name: Text

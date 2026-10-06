@@ -1,0 +1,30 @@
+key: Text_uch7knkx
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        defaultValue:
+          serializedValue: Operacional Well S.A.
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: funcaoNome
+              key: ast007
+            stateVariableType: APP_STATE
+        nodeKeyRef:
+          key: Scaffold_ivr0nad4
+        uiBuilderValue:
+          serializedValue: Operacional Well S.A.
+      mostRecentInputValue: Operacional Well S.A.
+    colorValue:
+      inputValue:
+        value: "3439329279"
+      mostRecentInputValue:
+        value: "3439329279"
+    heightValue:
+      inputValue: 1.27
+name: Text

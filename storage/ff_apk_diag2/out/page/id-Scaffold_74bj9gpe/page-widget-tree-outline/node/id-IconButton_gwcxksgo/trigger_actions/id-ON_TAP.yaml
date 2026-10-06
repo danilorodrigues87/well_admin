@@ -1,0 +1,14 @@
+rootAction:
+  key: pulroot1
+  action:
+    key: actstpul
+  followUpAction:
+    key: pulroot2
+    action:
+      key: actstparp
+    followUpAction:
+      key: pulroot3
+      action:
+        key: actstupp
+trigger:
+  triggerType: ON_TAP

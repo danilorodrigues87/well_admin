@@ -1,0 +1,9 @@
+key: Container_ry2ltxtx
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+name: Container

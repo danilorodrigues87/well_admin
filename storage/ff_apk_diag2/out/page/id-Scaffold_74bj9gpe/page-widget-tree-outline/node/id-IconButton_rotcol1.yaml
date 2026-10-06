@@ -1,0 +1,32 @@
+key: IconButton_rotcol1
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        themeColor: PRIMARY
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: true
+      mostRecentInputValue: true
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 20
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY_BACKGROUND
+        iconDataValue:
+          inputValue:
+            codePoint: 983409
+            family: MaterialIcons
+            matchTextDirection: false
+            name: note_add_rounded
+name: ColetarParada

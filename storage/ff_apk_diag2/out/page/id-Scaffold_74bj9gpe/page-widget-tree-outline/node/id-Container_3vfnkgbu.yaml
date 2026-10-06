@@ -1,0 +1,11 @@
+key: Container_3vfnkgbu
+type: Container
+props:
+  container:
+    boxDecoration:
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY
+    safeArea: true
+name: Container

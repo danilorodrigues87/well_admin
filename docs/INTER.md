@@ -37,11 +37,12 @@ storage/
       evidencia.jpg
 ```
 
-**Erro comum:** enviar arquivos para a pasta do Git/deploy que é recriada a cada build, em vez do volume bindado em `storage/`. O PHP só enxerga o que está em `/var/www/html/storage/...` dentro do container (confirme com `inter_diagnose.php`).
+**Erro comum:** enviar arquivos para a pasta do Git/deploy que é recriada a cada build, em vez do volume bindado em `storage/`. O PHP só enxerga o que está em `/var/www/html/storage/...` dentro do container (confirme com `inter_diagnose.php` ou `storage_diagnose.php`).
 
 **Diagnóstico no console do serviço (Easypanel → Terminal):**
 
 ```bash
+php database/scripts/storage_diagnose.php
 php database/scripts/inter_diagnose.php
 ```
 
@@ -52,6 +53,8 @@ php database/scripts/inter_smoke_token.php
 ```
 
 Confirme também `INTER_ENABLED=true` nas variáveis de ambiente do serviço (Easypanel) **e** redeploy após alterar env.
+
+Opcional: se o volume persistente **não** for `/var/www/html/storage`, defina `STORAGE_PATH` (mesmo valor para Inter, evidências e boletos).
 
 ## Configuração `.env`
 

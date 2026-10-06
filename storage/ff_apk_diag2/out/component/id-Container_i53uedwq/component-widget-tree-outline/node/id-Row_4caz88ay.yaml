@@ -1,0 +1,20 @@
+key: Row_4caz88ay
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    minSizeValue:
+      inputValue: true
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 0
+    topValue:
+      inputValue: 8
+    rightValue:
+      inputValue: 0
+    bottomValue:
+      inputValue: 8
+name: Row

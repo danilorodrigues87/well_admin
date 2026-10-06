@@ -1,0 +1,21 @@
+key: Text_ritey6g7
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: status_parada
+                key: rpf05
+        nodeKeyRef:
+          key: ListView_zq2w1nhb
+      mostRecentInputValue: Pendente
+name: StatusParada
+valueKey: {}

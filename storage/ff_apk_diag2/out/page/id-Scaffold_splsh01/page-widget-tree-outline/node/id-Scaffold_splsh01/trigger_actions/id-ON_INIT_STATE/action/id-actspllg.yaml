@@ -1,0 +1,10 @@
+navigate:
+  allowBack: true
+  passedParameters:
+    widgetClassNodeKeyRef:
+      key: Scaffold_7zli0let
+  isNavigateBack: false
+  replaceRoute: true
+  pageNodeKeyRef:
+    key: Scaffold_7zli0let
+key: actspllg

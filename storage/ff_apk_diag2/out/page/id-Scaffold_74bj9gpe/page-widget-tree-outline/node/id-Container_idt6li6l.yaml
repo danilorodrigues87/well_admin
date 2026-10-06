@@ -1,0 +1,31 @@
+key: Container_idt6li6l
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+    boxDecoration:
+      border:
+        bottom:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      boxShadow: {}
+      image: {}
+    maxDimensions: {}
+    minDimensions: {}
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: Container
+valueKey: {}

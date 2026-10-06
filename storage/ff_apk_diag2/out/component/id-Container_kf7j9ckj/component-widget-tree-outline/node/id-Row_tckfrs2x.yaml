@@ -1,0 +1,309 @@
+key: Row_tckfrs2x
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 8
+    minSizeValue:
+      inputValue: true
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "16"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: small
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "16"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: large
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "32"
+            elseValue:
+              inputValue:
+                serializedValue: "24"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "16"
+      mostRecentInputValue: 16
+    topValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "4"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: small
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "4"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: large
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "16"
+            elseValue:
+              inputValue:
+                serializedValue: "8"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "4"
+      mostRecentInputValue: 4
+    rightValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "16"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: small
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "16"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: large
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "32"
+            elseValue:
+              inputValue:
+                serializedValue: "24"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "16"
+      mostRecentInputValue: 16
+    bottomValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "4"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: small
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "4"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: small
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: size
+                                key: design_system_std_button_std_buttonparam_size
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: small
+                      - inputValue:
+                          serializedValue: large
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    serializedValue: "16"
+            elseValue:
+              inputValue:
+                serializedValue: "8"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "4"
+      mostRecentInputValue: 4
+  opacity:
+    opacityValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "1"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: loading
+                        key: design_system_std_button_std_buttonparam_loading
+                  nodeKeyRef:
+                    key: Container_kf7j9ckj
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    serializedValue: "0"
+            elseValue:
+              inputValue:
+                serializedValue: "1"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "1"
+      mostRecentInputValue: 1
+name: Row

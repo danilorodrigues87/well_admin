@@ -1,0 +1,31 @@
+key: Text_ysu4322x
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: status
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: status_label
+                key: clf04
+        nodeKeyRef:
+          key: ListView_qsfh7n67
+      mostRecentInputValue: —
+    fontSizeValue:
+      inputValue: 12
+    colorValue:
+      inputValue:
+        themeColor: SUCCESS
+    heightValue:
+      inputValue: 1.27
+name: Chip Label
+parameterValues: {}
+valueKey: {}

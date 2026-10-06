@@ -1,0 +1,11 @@
+key: Text_zdcnrf2w
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: GPS Ativo
+    heightValue:
+      inputValue: 1.47
+name: Text

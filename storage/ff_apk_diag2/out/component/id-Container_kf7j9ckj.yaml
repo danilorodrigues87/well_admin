@@ -1,0 +1,107 @@
+name: Button
+description: ""
+params:
+  design_system_std_button_std_buttonparam_icon:
+    identifier:
+      name: icon
+      key: design_system_std_button_std_buttonparam_icon
+    defaultValue: {}
+    dataType:
+      scalarType: WidgetProperty
+      subType:
+        widgetPropertyType: ICON
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_icon_present:
+    identifier:
+      name: iconPresent
+      key: design_system_std_button_std_buttonparam_icon_present
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_icon_end:
+    identifier:
+      name: iconEnd
+      key: design_system_std_button_std_buttonparam_icon_end
+    defaultValue: {}
+    dataType:
+      scalarType: WidgetProperty
+      subType:
+        widgetPropertyType: ICON
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_icon_end_present:
+    identifier:
+      name: iconEndPresent
+      key: design_system_std_button_std_buttonparam_icon_end_present
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_content:
+    identifier:
+      name: content
+      key: design_system_std_button_std_buttonparam_content
+    defaultValue:
+      serializedValue: Ver tudo
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_variant:
+    identifier:
+      name: variant
+      key: design_system_std_button_std_buttonparam_variant
+    defaultValue:
+      serializedValue: ghost
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_size:
+    identifier:
+      name: size
+      key: design_system_std_button_std_buttonparam_size
+    defaultValue:
+      serializedValue: small
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_full_width:
+    identifier:
+      name: fullWidth
+      key: design_system_std_button_std_buttonparam_full_width
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_loading:
+    identifier:
+      name: loading
+      key: design_system_std_button_std_buttonparam_loading
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+  design_system_std_button_std_buttonparam_disabled:
+    identifier:
+      name: disabled
+      key: design_system_std_button_std_buttonparam_disabled
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+node:
+  key: Container_kf7j9ckj

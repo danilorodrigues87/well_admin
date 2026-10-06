@@ -1,0 +1,10 @@
+rootAction:
+  key: gpson1
+  action:
+    key: actgpson
+  followUpAction:
+    key: gpson2
+    action:
+      key: actgpsperm
+trigger:
+  triggerType: ON_TOGGLE_ON

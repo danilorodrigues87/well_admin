@@ -1,0 +1,18 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: rotaDataIso
+        key: rod001
+      setValue:
+        variable:
+          source: GLOBAL_PROPERTIES
+          baseVariable:
+            globalProperties:
+              property: CURRENT_TIMESTAMP
+          operations:
+            - dateTimeFormat:
+                format: yyyy-MM-dd
+                isCustom: true
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actrodinit

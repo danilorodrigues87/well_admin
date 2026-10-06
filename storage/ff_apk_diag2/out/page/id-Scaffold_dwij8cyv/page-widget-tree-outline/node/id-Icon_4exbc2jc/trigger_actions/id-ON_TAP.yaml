@@ -1,0 +1,39 @@
+rootAction:
+  key: pagprv1
+  conditionActions:
+    trueActions:
+      - condition:
+          variable:
+            source: FUNCTION_CALL
+            functionCall:
+              values:
+                - variable:
+                    source: LOCAL_STATE
+                    baseVariable:
+                      localState:
+                        fieldIdentifier:
+                          name: pageCurrent
+                          key: cl003
+                        stateVariableType: WIDGET_CLASS_STATE
+                    nodeKeyRef:
+                      key: Scaffold_dwij8cyv
+                - inputValue:
+                    serializedValue: "1"
+              condition:
+                relation: GREATER_THAN
+        trueAction:
+          key: pagprv2
+          action:
+            key: actcolprev
+          followUpAction:
+            key: pagprv3
+            action:
+              key: actcolpv1
+            followUpAction:
+              key: pagprv4
+              action:
+                key: actcolpv2
+    hasMultiConditions: false
+    key: pagprvc1
+trigger:
+  triggerType: ON_TAP

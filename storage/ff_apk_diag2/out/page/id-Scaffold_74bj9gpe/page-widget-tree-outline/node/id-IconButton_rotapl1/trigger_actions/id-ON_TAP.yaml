@@ -1,0 +1,14 @@
+rootAction:
+  key: aplroot1
+  action:
+    key: actaplsel
+  followUpAction:
+    key: aplroot2
+    action:
+      key: actaplpar
+    followUpAction:
+      key: aplroot3
+      action:
+        key: actaplupd
+trigger:
+  triggerType: ON_TAP

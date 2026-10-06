@@ -95,10 +95,12 @@ app/Model/Entity/
 app/Session/User/
 database/migrations/   SQL numerado — aplicar via phpMyAdmin ou mysql CLI
 resources/view/        Templates {{placeholder}}
-storage/               Evidências e boletos (fora do Git)
+storage/               Evidências, Inter, boletos (fora do Git; EasyPanel: bind mount)
 docs/                  Documentação complementar
 .cursor/rules/         Regras Cursor Agent
 ```
+
+`App\Common\StoragePath` resolve a raiz (`STORAGE_PATH` opcional). Diagnóstico: `php database/scripts/storage_diagnose.php`.
 
 ---
 
@@ -307,3 +309,6 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-02 | Rota do dia app: Otimizar abre Google Maps (`maps_dir_url` + `openRotaDirections` sem `canLaunchUrl`); coords float na API; parser de paradas aceita lat/lng string |
 | 2026-10-03 | App RouteOfTheDay: Otimizar não abre Maps (só atualiza markers/`encodedPolyline`); Custom Widget `RotaMapPolyline` para polyline; mapa nativo com valueKey/centro dinâmico |
 | 2026-10-03 | App RouteOfTheDay: fallback **Static Map** (`staticMapUrl` + `buildRotaStaticMapUrl`) porque markers do GoogleMap nativo falham no Test Mode; API passa a expor `static_map_url` em paradas/otimizar |
+| 2026-10-03 | App RouteOfTheDay: Custom Widget `RotaMapPolyline` com pinos+polyline+coletor; `collectorLat/Lng`; Coletar→`POST /coletas`+CollectionDetail; `moveRotaParada`+`salvarRotaOrdem`; aceite mapa = Local Run (ver `FLUTTERFLOW_ROTA_DO_DIA_REBUILD.md`) |
+| 2026-10-06 | Storage EasyPanel: `StoragePath` + `STORAGE_PATH`; evidências/assinatura/CDF/boletos/Inter no volume; Dockerfile GD+WebP; `storage_diagnose.php`; doc `EVIDENCIAS.md` |
+| 2026-10-06 | Coleta com data anterior: `iniciarRascunho($dataColeta)` + filtro `data_referencia`; wizard edita data/hora; API `POST /coletas` aceita `data_coleta` |

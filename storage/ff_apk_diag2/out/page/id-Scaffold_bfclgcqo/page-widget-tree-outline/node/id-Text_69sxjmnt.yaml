@@ -1,0 +1,14 @@
+key: Text_69sxjmnt
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Data da Coleta
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    heightValue:
+      inputValue: 1.27
+name: Text

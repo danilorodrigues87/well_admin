@@ -1,0 +1,9 @@
+key: Container_zyme09gz
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+name: Dimensions

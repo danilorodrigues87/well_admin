@@ -1,0 +1,16 @@
+snackBar:
+  textMessage:
+    inputValue:
+      serializedValue: Rota otimizada. Use o botão verde para abrir no Google Maps.
+  textStyle:
+    variableColor:
+      inputValue:
+        color:
+          themeColor: PRIMARY_TEXT
+  durationMillis: 3500
+  shouldHidePreviousSnackbar: true
+  backgroundColor:
+    inputValue:
+      color:
+        themeColor: SUCCESS
+key: actoptsn2

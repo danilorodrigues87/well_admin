@@ -1,0 +1,191 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: paradaItems
+        key: rod007
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: otimizarResult
+                      actionKeyRef:
+                        key: actoptapi
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Container_bhi2x9nd
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseRotaParadasFromApi
+              key: rtpp01
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: mapPoints
+        key: rod010
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: ACTION_OUTPUTS
+                          baseVariable:
+                            actionOutput:
+                              outputVariableIdentifier:
+                                name: otimizarResult
+                              actionKeyRef:
+                                key: actoptapi
+                          operations:
+                            - apiResponseField:
+                                responseField: JSON_BODY
+                          nodeKeyRef:
+                            key: Container_bhi2x9nd
+                          actionComponentKeyRef: {}
+                    customFunction:
+                      name: parseRotaParadasFromApi
+                      key: rtpp01
+            customFunction:
+              name: paradaItemsToLatLngs
+              key: rtpll1
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: totalParadas
+        key: rod003
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: ACTION_OUTPUTS
+                          baseVariable:
+                            actionOutput:
+                              outputVariableIdentifier:
+                                name: otimizarResult
+                              actionKeyRef:
+                                key: actoptapi
+                          operations:
+                            - apiResponseField:
+                                responseField: JSON_BODY
+                          nodeKeyRef:
+                            key: Container_bhi2x9nd
+                          actionComponentKeyRef: {}
+                    customFunction:
+                      name: parseRotaParadasFromApi
+                      key: rtpp01
+            codeExpression:
+              arguments:
+                - identifier:
+                    name: items
+                  dataType:
+                    listType:
+                      scalarType: DataStruct
+                    nonNullable: false
+                    subType:
+                      dataStructIdentifier:
+                        name: RotaParadaItem
+                        key: rtpitm1
+              returnParameter:
+                dataType:
+                  scalarType: Integer
+                  nonNullable: true
+              expression: "items == null ? 0 : items.length"
+              valid: true
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: encodedPolyline
+        key: rod011
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          defaultValue:
+            serializedValue: ""
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: otimizarResult
+              actionKeyRef:
+                key: actoptapi
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.polyline
+          nodeKeyRef:
+            key: Container_bhi2x9nd
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: staticMapUrl
+        key: rod012
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: ACTION_OUTPUTS
+                          baseVariable:
+                            actionOutput:
+                              outputVariableIdentifier:
+                                name: otimizarResult
+                              actionKeyRef:
+                                key: actoptapi
+                          operations:
+                            - apiResponseField:
+                                responseField: JSON_BODY
+                          nodeKeyRef:
+                            key: Container_bhi2x9nd
+                          actionComponentKeyRef: {}
+                    customFunction:
+                      name: parseRotaParadasFromApi
+                      key: rtpp01
+              - variable:
+                  source: ACTION_OUTPUTS
+                  defaultValue:
+                    serializedValue: ""
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: otimizarResult
+                      actionKeyRef:
+                        key: actoptapi
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                    - jsonPathOperation:
+                        jsonPath: $.data.polyline
+                  nodeKeyRef:
+                    key: Container_bhi2x9nd
+                  actionComponentKeyRef: {}
+              - inputValue:
+                  serializedValue: AIzaSyD0N6JxIR4YeSqW_TBb3U2ja0S5ftFGBeo
+            customFunction:
+              name: buildRotaStaticMapUrl
+              key: rtstm1
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actoptupd

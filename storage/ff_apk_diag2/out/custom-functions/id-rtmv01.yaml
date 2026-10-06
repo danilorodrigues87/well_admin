@@ -1,0 +1,39 @@
+identifier:
+  name: moveRotaParada
+  key: rtmv01
+arguments:
+  - identifier:
+      name: items
+      key: rtmv02
+    dataType:
+      listType:
+        scalarType: DataStruct
+      nonNullable: false
+      subType:
+        dataStructIdentifier:
+          name: RotaParadaItem
+          key: rtpitm1
+  - identifier:
+      name: clienteId
+      key: rtmv03
+    dataType:
+      scalarType: Integer
+      nonNullable: true
+  - identifier:
+      name: delta
+      key: rtmv04
+    dataType:
+      scalarType: Integer
+      nonNullable: true
+returnParameter:
+  dataType:
+    listType:
+      scalarType: DataStruct
+    nonNullable: false
+    subType:
+      dataStructIdentifier:
+        name: RotaParadaItem
+        key: rtpitm1
+tests:
+  - parameterValues: {}
+description: "Move parada na lista (delta -1 sobe, +1 desce) e renumera ordem"

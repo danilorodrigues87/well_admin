@@ -1,0 +1,16 @@
+key: Text_2cciwkug
+type: Text
+props:
+  text:
+    themeStyle: LABEL_LARGE
+    selectable: false
+    textValue:
+      inputValue: Transporte
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.33
+    fontWeightValue:
+      inputValue: w700
+name: Text

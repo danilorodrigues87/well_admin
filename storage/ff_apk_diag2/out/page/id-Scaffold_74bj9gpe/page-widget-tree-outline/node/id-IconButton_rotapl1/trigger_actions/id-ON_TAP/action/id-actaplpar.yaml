@@ -1,0 +1,67 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Rota Paradas
+      key: wrtpd1
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: data
+          key: rtd001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: rotaDataIso
+                key: rod001
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+      - variableIdentifier:
+          name: coletor_id
+          key: rtc001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: userId
+                key: ast003
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: rota_id
+          key: rtr001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: rotaId
+                key: rod002
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+outputVariableName: paradasApplyRota
+key: actaplpar

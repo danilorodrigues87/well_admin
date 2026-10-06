@@ -1,0 +1,6 @@
+rootAction:
+  key: navrot1
+  action:
+    key: actnavrot
+trigger:
+  triggerType: ON_TAP

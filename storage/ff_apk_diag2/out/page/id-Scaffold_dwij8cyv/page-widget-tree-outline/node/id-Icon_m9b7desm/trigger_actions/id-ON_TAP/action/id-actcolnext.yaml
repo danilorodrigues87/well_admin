@@ -1,0 +1,43 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: pageCurrent
+        key: cl003
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: LOCAL_STATE
+                  baseVariable:
+                    localState:
+                      fieldIdentifier:
+                        name: pageCurrent
+                        key: cl003
+                      stateVariableType: WIDGET_CLASS_STATE
+                  nodeKeyRef:
+                    key: Scaffold_dwij8cyv
+              - inputValue:
+                  serializedValue: "1"
+            codeExpression:
+              arguments:
+                - identifier:
+                    name: pageCurrent
+                  dataType:
+                    scalarType: Integer
+                    nonNullable: true
+                - identifier:
+                    name: step
+                  dataType:
+                    scalarType: Integer
+                    nonNullable: true
+              returnParameter:
+                dataType:
+                  scalarType: Integer
+                  nonNullable: true
+              expression: pageCurrent + step
+              valid: true
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actcolnext

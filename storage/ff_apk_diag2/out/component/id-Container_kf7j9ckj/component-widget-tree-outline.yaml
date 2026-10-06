@@ -1,0 +1,13 @@
+node:
+  key: Container_kf7j9ckj
+  children:
+    - key: Container_erd8hv08
+      children:
+        - key: Stack_eu3adtlj
+          children:
+            - key: Row_tckfrs2x
+              children:
+                - key: Icon_0iq1suay
+                - key: Text_h7d4u5ju
+                - key: Icon_bp9ru19x
+            - key: ProgressBar_3xwtk7rb

@@ -1,0 +1,16 @@
+key: Icon_yuefv5zj
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 18
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 983927
+        family: MaterialIcons
+        matchTextDirection: false
+        name: route_rounded
+name: Chip Icon

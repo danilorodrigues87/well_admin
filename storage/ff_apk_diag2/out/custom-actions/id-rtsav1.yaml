@@ -1,0 +1,47 @@
+identifier:
+  name: salvarRotaOrdem
+  key: rtsav1
+arguments:
+  - identifier:
+      name: baseUrl
+      key: rtsav2
+    dataType:
+      scalarType: String
+      nonNullable: true
+  - identifier:
+      name: authToken
+      key: rtsav3
+    dataType:
+      scalarType: String
+      nonNullable: true
+  - identifier:
+      name: data
+      key: rtsav4
+    dataType:
+      scalarType: String
+      nonNullable: true
+  - identifier:
+      name: coletorId
+      key: rtsav5
+    dataType:
+      scalarType: Integer
+      nonNullable: true
+  - identifier:
+      name: items
+      key: rtsav6
+    dataType:
+      listType:
+        scalarType: DataStruct
+      nonNullable: false
+      subType:
+        dataStructIdentifier:
+          name: RotaParadaItem
+          key: rtpitm1
+returnParameter:
+  identifier:
+    key: rtsav7
+  dataType:
+    scalarType: Boolean
+    nonNullable: true
+includeContext: false
+description: POST salvar-ordem com lista atual de paradas

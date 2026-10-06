@@ -1,0 +1,10 @@
+rootAction:
+  key: locroot1
+  action:
+    key: actlocperm
+  followUpAction:
+    key: locroot2
+    action:
+      key: actlocupd
+trigger:
+  triggerType: ON_TAP

@@ -1,0 +1,13 @@
+key: Column_goewinny
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_stretch
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 6
+    minSizeValue:
+      inputValue: true
+name: Column

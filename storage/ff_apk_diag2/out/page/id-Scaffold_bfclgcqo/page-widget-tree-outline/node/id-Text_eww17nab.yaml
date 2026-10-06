@@ -1,0 +1,27 @@
+key: Text_eww17nab
+type: Text
+props:
+  text:
+    themeStyle: BODY_LARGE
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: nome
+                key: cdf01
+        nodeKeyRef:
+          key: ListView_cddres01
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    fontWeightValue:
+      inputValue: w600
+name: NomeResiduo
+valueKey: {}

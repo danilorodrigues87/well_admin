@@ -1,0 +1,14 @@
+rootAction:
+  key: optroot2
+  action:
+    key: actoptapi
+  followUpAction:
+    key: optroot4
+    action:
+      key: actoptupd
+    followUpAction:
+      key: optroot7
+      action:
+        key: actoptsn2
+trigger:
+  triggerType: ON_TAP

@@ -1,0 +1,53 @@
+key: TextField_clbus01
+type: TextField
+props:
+  padding: {}
+  textField:
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    inputDecoration:
+      inputBorderType: outline
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 8
+          mostRecentInputValue: 8
+      contentPadding:
+        leftValue:
+          inputValue: 16
+        topValue:
+          inputValue: 12
+        rightValue:
+          inputValue: 16
+        bottomValue:
+          inputValue: 12
+      hintStyle:
+        themeStyle: BODY_MEDIUM
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_TEXT
+      hintText:
+        textValue:
+          inputValue: "Buscar cliente, cidade ou MTR..."
+          mostRecentInputValue: "Buscar cliente, cidade ou MTR..."
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+      filledValue:
+        inputValue: true
+      fillColorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+    keyboardType: TEXT
+    width:
+      pixelsValue:
+        inputValue: Infinity
+    maxLinesValue:
+      inputValue: 1
+  responsiveVisibility: {}
+name: SearchField
+parameterValues: {}
+valueKey: {}

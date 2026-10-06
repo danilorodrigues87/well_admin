@@ -1,0 +1,114 @@
+name: RouteOfTheDay
+node:
+  key: Scaffold_74bj9gpe
+classModel:
+  stateFields:
+    - parameter:
+        identifier:
+          name: rotaDataIso
+          key: rod001
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: rotaId
+          key: rod002
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: totalParadas
+          key: rod003
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: paradaItems
+          key: rod007
+        dataType:
+          listType:
+            scalarType: DataStruct
+          subType:
+            dataStructIdentifier:
+              name: RotaParadaItem
+              key: rtpitm1
+    - parameter:
+        identifier:
+          name: rotaNomes
+          key: rod008
+        dataType:
+          listType:
+            scalarType: String
+    - parameter:
+        identifier:
+          name: rotaIds
+          key: rod009
+        dataType:
+          listType:
+            scalarType: Integer
+    - parameter:
+        identifier:
+          name: mapPoints
+          key: rod010
+        dataType:
+          listType:
+            scalarType: LatLng
+    - parameter:
+        identifier:
+          name: encodedPolyline
+          key: rod011
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: staticMapUrl
+          key: rod012
+        defaultValue:
+          serializedValue: ""
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - ""
+    - parameter:
+        identifier:
+          name: collectorLat
+          key: rod013
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Double
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"
+    - parameter:
+        identifier:
+          name: collectorLng
+          key: rod014
+        defaultValue:
+          serializedValue: "0"
+        dataType:
+          scalarType: Double
+          nonNullable: true
+      serializedDefaultValue:
+        - "0"

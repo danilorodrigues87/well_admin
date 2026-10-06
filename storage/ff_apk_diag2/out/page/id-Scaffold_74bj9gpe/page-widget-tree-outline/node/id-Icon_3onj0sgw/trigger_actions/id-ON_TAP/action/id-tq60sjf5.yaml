@@ -1,0 +1,46 @@
+datePicker:
+  pickerType: DATE_TIME_PICKER_TYPE_DATE
+  allowPast: false
+  defaultDateTime:
+    variable:
+      source: GLOBAL_PROPERTIES
+      baseVariable:
+        globalProperties:
+          property: CURRENT_TIMESTAMP
+  allowFuture: true
+  minDateTime:
+    inputValue: {}
+  maxDateTime: {}
+  useDefaultTheme: false
+  useCupertinoStyle: false
+  headerDateStyle:
+    themeStyle: HEADLINE_LARGE
+    fontSizeValue:
+      inputValue: 32
+    fontWeightValue:
+      inputValue: w600
+  headerBackgroundColor:
+    themeColor: PRIMARY
+  headerForegroundColor:
+    themeColor: INFO
+  pickerBackgroundColor:
+    themeColor: SECONDARY_BACKGROUND
+  pickerForegroundColor:
+    themeColor: PRIMARY_TEXT
+  selectedDateTimeForegroundColor:
+    themeColor: INFO
+  selectedDateTimeBackgroundColor:
+    themeColor: PRIMARY
+  actionButtonForegroundColor:
+    themeColor: PRIMARY_TEXT
+  cupertinoBackgroundColor:
+    themeColor: SECONDARY_BACKGROUND
+  cupertinoTextStyle:
+    themeStyle: HEADLINE_MEDIUM
+    variableColor:
+      inputValue:
+        color:
+          themeColor: PRIMARY_TEXT
+  iconSize: 24
+  dismissible: true
+key: tq60sjf5

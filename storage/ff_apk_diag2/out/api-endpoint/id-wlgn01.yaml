@@ -1,0 +1,135 @@
+identifier:
+  name: WellAdmin Login
+  key: wlgn01
+url: "[baseUrl]\/auth\/login"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: email
+      key: eml001
+    type: String
+    testValue: admin@well.eco
+  - identifier:
+      name: password
+      key: pwd001
+    type: String
+    testValue: WellEco@2026
+bodyType: JSON
+body: "{\n  \"email\": \"<email>\",\n  \"password\": \"<password>\"\n}"
+jsonPathDefinitions:
+  - identifier:
+      name: authToken
+      key: tok001
+    jsonPath:
+      jsonPath: $.data.token
+      returnParameter:
+        dataType:
+          scalarType: String
+    inferredParameter:
+      dataType:
+        scalarType: String
+  - identifier:
+      name: userName
+      key: uname1
+    jsonPath:
+      jsonPath: $.data.user.nome
+      returnParameter:
+        dataType:
+          scalarType: String
+    inferredParameter:
+      dataType:
+        scalarType: String
+  - identifier:
+      name: userId
+      key: uid001
+    jsonPath:
+      jsonPath: $.data.user.id
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+  - identifier:
+      name: isAdmin
+      key: adm001
+    jsonPath:
+      jsonPath: $.data.user.is_admin
+      returnParameter:
+        dataType:
+          scalarType: Boolean
+    inferredParameter:
+      dataType:
+        scalarType: Boolean
+  - identifier:
+      name: funcaoNome
+      key: fcn001
+    jsonPath:
+      jsonPath: $.data.user.funcao_nome
+      returnParameter:
+        dataType:
+          scalarType: String
+    inferredParameter:
+      dataType:
+        scalarType: String
+  - identifier:
+      name: userModulesCsv
+      key: mod001
+    jsonPath:
+      jsonPath: $.data.user.modulos_csv
+      returnParameter:
+        dataType:
+          scalarType: String
+    inferredParameter:
+      dataType:
+        scalarType: String
+  - identifier:
+      name: operadoraId
+      key: opid1
+    jsonPath:
+      jsonPath: $.data.user.operadora_id
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+  - identifier:
+      name: operadoraNome
+      key: opnm1
+    jsonPath:
+      jsonPath: $.data.user.operadora_nome
+      returnParameter:
+        dataType:
+          scalarType: String
+    inferredParameter:
+      dataType:
+        scalarType: String
+headers:
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: email
+      key: emlp01
+    variableIdentifier:
+      name: email
+      key: eml001
+  - identifier:
+      name: password
+      key: pwdp01
+    variableIdentifier:
+      name: password
+      key: pwd001
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1

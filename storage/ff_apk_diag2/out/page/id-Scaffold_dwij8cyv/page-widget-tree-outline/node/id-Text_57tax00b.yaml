@@ -1,0 +1,37 @@
+key: Text_57tax00b
+type: Text
+props:
+  text:
+    themeStyle: TITLE_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: "-"
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: display_mtr
+                key: clf02
+        nodeKeyRef:
+          key: ListView_qsfh7n67
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.4
+    fontWeightValue:
+      inputValue: w700
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: text_num_relatorio
+valueKey: {}

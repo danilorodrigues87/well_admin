@@ -1,0 +1,28 @@
+customAction:
+  customActionIdentifier:
+    name: openRotaDirections
+    key: opendir1
+  argumentValues:
+    arguments:
+      opdurl1:
+        value:
+          variable:
+            source: FUNCTION_CALL
+            functionCall:
+              values:
+                - variable:
+                    source: LOCAL_STATE
+                    baseVariable:
+                      localState:
+                        fieldIdentifier:
+                          name: paradaItems
+                          key: rod007
+                        stateVariableType: WIDGET_CLASS_STATE
+                    nodeKeyRef:
+                      key: Scaffold_74bj9gpe
+              customFunction:
+                name: buildRotaDirUrl
+                key: rtdir1
+            nodeKeyRef:
+              key: Scaffold_74bj9gpe
+key: actopendir

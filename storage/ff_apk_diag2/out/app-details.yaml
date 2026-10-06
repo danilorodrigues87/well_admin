@@ -1,0 +1,18 @@
+name: Well Coletas
+appSettings:
+  advancedSettings:
+    webBuildSettings: {}
+routingSettings:
+  enableRouting: true
+  appScheme: wellcoletas
+  appHost: admin.well.eco.br
+  enableFirebaseDynamicLinks: false
+  pagesAreSubroutesOfRoot: false
+  enableRouteObservers: false
+initialPageKeyRef:
+  key: Scaffold_7zli0let
+allAppNames:
+  appNames:
+    PROD:
+      packageName: admin.well.eco.br
+      displayName: Well Coletas

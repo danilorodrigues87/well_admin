@@ -1,0 +1,38 @@
+key: Button_lgenter
+type: Button
+props:
+  button:
+    text:
+      themeStyle: TITLE_MEDIUM
+      textValue:
+        inputValue: Entrar
+        mostRecentInputValue: Entrar
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_BACKGROUND
+        mostRecentInputValue:
+          themeColor: PRIMARY_BACKGROUND
+    borderRadius:
+      type: FF_BORDER_RADIUS_ALL
+      allValue:
+        inputValue: 12
+        mostRecentInputValue: 12
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 52
+    elevationValue:
+      inputValue: 2
+    fillColorValue:
+      inputValue:
+        themeColor: PRIMARY
+      mostRecentInputValue:
+        themeColor: PRIMARY
+  padding:
+    topValue:
+      inputValue: 8
+      mostRecentInputValue: 8
+name: LoginButton

@@ -1,0 +1,81 @@
+rootAction:
+  key: cnclroot1
+  action:
+    key: actcnclapi
+  followUpAction:
+    key: cnclfol01
+    conditionActions:
+      falseAction:
+        key: cnclfail1
+        action:
+          key: actcnclerr
+      trueActions:
+        - condition:
+            variable:
+              source: FUNCTION_CALL
+              functionCall:
+                values:
+                  - variable:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: ACTION_OUTPUTS
+                              baseVariable:
+                                actionOutput:
+                                  outputVariableIdentifier:
+                                    name: cancelResult
+                                  actionKeyRef:
+                                    key: actcnclapi
+                              operations:
+                                - apiResponseField:
+                                    responseField: JSON_BODY
+                                - jsonPathOperation:
+                                    jsonPath: $.data.message
+                              nodeKeyRef:
+                                key: Container_363uld0z
+                              actionComponentKeyRef: {}
+                          - variable: {}
+                        condition:
+                          relation: EXISTS_AND_NON_EMPTY
+                  - variable:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: ACTION_OUTPUTS
+                              baseVariable:
+                                actionOutput:
+                                  outputVariableIdentifier:
+                                    name: cancelResult
+                                  actionKeyRef:
+                                    key: actcnclapi
+                              operations:
+                                - apiResponseField:
+                                    responseField: JSON_BODY
+                                - jsonPathOperation:
+                                    jsonPath: $.data.message
+                              nodeKeyRef:
+                                key: Container_363uld0z
+                              actionComponentKeyRef: {}
+                          - variable:
+                              source: CONSTANTS
+                              baseVariable:
+                                constants:
+                                  value: "NULL"
+                        condition:
+                          relation: NOT_EQUAL_TO
+                combineConditions:
+                  operator: AND_OP
+          trueAction:
+            key: cnclok01
+            action:
+              key: actcnclok
+            followUpAction:
+              key: cnclnav01
+              action:
+                key: actcnclnav
+      hasMultiConditions: false
+      key: cnclcond1
+trigger:
+  triggerType: ON_TAP

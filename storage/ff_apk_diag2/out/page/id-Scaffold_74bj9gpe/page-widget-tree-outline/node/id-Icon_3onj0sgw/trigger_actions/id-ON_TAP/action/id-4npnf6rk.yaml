@@ -1,0 +1,19 @@
+key: 4npnf6rk
+setFormField:
+  formFieldInfo:
+    value:
+      variable:
+        source: WIDGET_STATE
+        baseVariable:
+          widgetState:
+            actionType: DATE_PICKER
+        operations:
+          - dateTimeFormat:
+              format: d/M/y
+              isCustom: false
+        nodeKeyRef:
+          key: Icon_3onj0sgw
+    nodeKeyPath:
+      keyPath:
+        - key: TextField_povdh1s4
+    cursorPosition: END

@@ -1,0 +1,79 @@
+key: Text_hc62m6kw
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: label
+              key: design_system_std_textfield_std_textfieldparam_label
+        nodeKeyRef:
+          key: Container_nm74ryka
+        uiBuilderValue:
+          serializedValue: ""
+      mostRecentInputValue: ""
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: PRIMARY_TEXT
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: error
+                        key: design_system_std_textfield_std_textfieldparam_error
+                  nodeKeyRef:
+                    key: Container_nm74ryka
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    color:
+                      themeColor: ERROR
+            elseValue:
+              inputValue:
+                color:
+                  themeColor: PRIMARY_TEXT
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: PRIMARY_TEXT
+      mostRecentInputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.38
+  visibility:
+    legacyVisible: false
+    visibleValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: "false"
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: labelPresent
+              key: design_system_std_textfield_std_textfieldparam_label_present
+        nodeKeyRef:
+          key: Container_nm74ryka
+        uiBuilderValue:
+          serializedValue: "false"
+      mostRecentInputValue: false
+name: Text

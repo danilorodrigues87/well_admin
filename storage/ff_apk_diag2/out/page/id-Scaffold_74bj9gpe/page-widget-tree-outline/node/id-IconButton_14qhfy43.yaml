@@ -1,0 +1,31 @@
+key: IconButton_14qhfy43
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        themeColor: SECONDARY_BACKGROUND
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: false
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 24
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY_TEXT
+        iconDataValue:
+          inputValue:
+            codePoint: 63728
+            family: MaterialIcons
+            matchTextDirection: false
+            name: my_location_rounded
+name: IconButton

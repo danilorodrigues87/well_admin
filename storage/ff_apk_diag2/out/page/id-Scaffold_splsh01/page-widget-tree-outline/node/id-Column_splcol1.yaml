@@ -1,0 +1,22 @@
+key: Column_splcol1
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_center
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 24
+        mostRecentInputValue: 24
+    minSizeValue:
+      inputValue: false
+      mostRecentInputValue: false
+  padding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+parameterValues: {}
+valueKey: {}

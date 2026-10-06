@@ -1,0 +1,25 @@
+key: Text_pyabder1
+type: Text
+props:
+  text:
+    themeStyle: BODY_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: detalhe
+                key: cdf02
+        nodeKeyRef:
+          key: ListView_cddres01
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+name: DetalheResiduo
+valueKey: {}

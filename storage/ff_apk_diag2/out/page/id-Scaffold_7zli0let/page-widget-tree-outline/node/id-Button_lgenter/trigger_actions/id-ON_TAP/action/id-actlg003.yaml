@@ -1,0 +1,10 @@
+navigate:
+  allowBack: false
+  passedParameters:
+    widgetClassNodeKeyRef:
+      key: Scaffold_ivr0nad4
+  isNavigateBack: false
+  replaceRoute: true
+  pageNodeKeyRef:
+    key: Scaffold_ivr0nad4
+key: actlg003

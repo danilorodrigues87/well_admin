@@ -1,0 +1,15 @@
+key: Container_l2gud3d4
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 8
+    topValue:
+      inputValue: 0
+    rightValue:
+      inputValue: 0
+    bottomValue:
+      inputValue: 0
+name: Text

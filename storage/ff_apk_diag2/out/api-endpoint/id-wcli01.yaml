@@ -1,0 +1,76 @@
+identifier:
+  name: WellAdmin Clientes Coleta
+  key: wcli01
+url: "[baseUrl]\/clientes\/coleta?page=[page]&per_page=[per_page]&busca=[busca]&escopo=[escopo]"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: page
+      key: pg0001
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: per_page
+      key: pp0001
+    type: Integer
+    testValue: "15"
+  - identifier:
+      name: busca
+      key: busq01
+    type: String
+    testValue: ""
+  - identifier:
+      name: escopo
+      key: esc001
+    type: String
+    testValue: pendentes
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: page
+      key: pgpar1
+    variableIdentifier:
+      name: page
+      key: pg0001
+  - identifier:
+      name: per_page
+      key: pppar1
+    variableIdentifier:
+      name: per_page
+      key: pp0001
+  - identifier:
+      name: busca
+      key: buspar
+    variableIdentifier:
+      name: busca
+      key: busq01
+  - identifier:
+      name: escopo
+      key: escpar
+    variableIdentifier:
+      name: escopo
+      key: esc001

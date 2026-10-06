@@ -1,0 +1,110 @@
+fields:
+  - parameter:
+      identifier:
+        name: authToken
+        key: ast001
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - ""
+  - parameter:
+      identifier:
+        name: userName
+        key: ast002
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - ""
+  - parameter:
+      identifier:
+        name: userId
+        key: ast003
+      dataType:
+        scalarType: Integer
+    persisted: true
+    serializedDefaultValue:
+      - "0"
+  - parameter:
+      identifier:
+        name: apiBaseUrl
+        key: ast004
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - https://admin.well.eco.br/api/v1
+  - parameter:
+      identifier:
+        name: activeColetaId
+        key: ast005
+      dataType:
+        scalarType: Integer
+    persisted: true
+    serializedDefaultValue:
+      - "0"
+  - parameter:
+      identifier:
+        name: isAdmin
+        key: ast006
+      dataType:
+        scalarType: Boolean
+    persisted: true
+    serializedDefaultValue:
+      - "false"
+  - parameter:
+      identifier:
+        name: funcaoNome
+        key: ast007
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - ""
+  - parameter:
+      identifier:
+        name: userModulesCsv
+        key: ast008
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - ""
+  - parameter:
+      identifier:
+        name: operadoraId
+        key: ast009
+      dataType:
+        scalarType: Integer
+    persisted: true
+    serializedDefaultValue:
+      - "1"
+  - parameter:
+      identifier:
+        name: operadoraNome
+        key: ast010
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - ""
+  - parameter:
+      identifier:
+        name: rotaData
+        key: ast011
+      dataType:
+        scalarType: String
+    persisted: true
+    serializedDefaultValue:
+      - ""
+  - parameter:
+      identifier:
+        name: shareGpsEnabled
+        key: ast012
+      dataType:
+        scalarType: Boolean
+    persisted: true
+    serializedDefaultValue:
+      - "false"
+securePersistedValues: false

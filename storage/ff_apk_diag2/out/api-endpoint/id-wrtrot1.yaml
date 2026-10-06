@@ -1,0 +1,55 @@
+identifier:
+  name: WellAdmin Rota Rotas
+  key: wrtrot1
+url: "[baseUrl]\/rota-do-dia\/rotas?data=[data]"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: data
+      key: rtd001
+    type: String
+    testValue: 2026-10-02
+jsonPathDefinitions:
+  - identifier:
+      name: rotasTotal
+      key: rtrotot
+    jsonPath:
+      jsonPath: $.data.total
+      returnParameter:
+        dataType:
+          scalarType: Integer
+    inferredParameter:
+      dataType:
+        scalarType: Integer
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: data
+      key: rtpd01
+    variableIdentifier:
+      name: data
+      key: rtd001

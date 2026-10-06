@@ -1,0 +1,16 @@
+key: Container_35ec17rx
+type: Container
+props:
+  container:
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 9999
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          value: "436373713"
+          darkModeColor:
+            value: "438941430"
+name: Container

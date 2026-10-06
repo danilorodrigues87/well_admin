@@ -1,0 +1,12 @@
+identifier:
+  name: openRotaDirections
+  key: opendir1
+arguments:
+  - identifier:
+      name: url
+      key: opdurl1
+    dataType:
+      scalarType: String
+      nonNullable: true
+includeContext: false
+description: Abre a URL de direcoes da rota no Google Maps

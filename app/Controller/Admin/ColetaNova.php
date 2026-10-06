@@ -46,7 +46,7 @@ class ColetaNova extends Page
             'data_hoje' => date('Y-m-d'),
         ]);
         $scripts = '<script>window.CRUD = { baseUrl: "/painel/coleta/nova", autoLoad: false };</script>'
-            .'<script src="'.URL.'/resources/js/coleta-selecionar.js"></script>';
+            .'<script src="'.URL.'/resources/js/coleta-selecionar.js?v=20261006"></script>';
 
         return self::getPage('Lançar Coleta', $content, 'coleta_nova', $scripts);
     }
@@ -136,6 +136,9 @@ class ColetaNova extends Page
                 : '',
             'situacao_recebido' => $coleta->situacao_recebimento === 'recebido' ? 'checked' : '',
             'data_recebimento' => $coleta->data_recebimento ?? '',
+            'data_coleta' => $coleta->data_coleta ?? date('Y-m-d'),
+            'data_coleta_max' => date('Y-m-d'),
+            'hora_coleta' => $coleta->hora ? substr((string)$coleta->hora, 0, 5) : date('H:i'),
         ]);
 
         $scripts = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css">'
@@ -143,7 +146,7 @@ class ColetaNova extends Page
             . self::crudScripts('/painel/coleta/nova/'.$coletaId, false)
             . '<script>window.COLETA_WIZARD = { rascunhoConferido: '.($rascunhoConferido ? 'true' : 'false').' };</script>'
             . '<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
-            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20260922"></script>';
+            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20261006"></script>';
 
         return self::getPage('Coleta #'.$coletaId, $content, 'coleta_nova', $scripts);
     }
@@ -252,10 +255,12 @@ class ColetaNova extends Page
     private static function acaoIniciar(array $post, array $usuario): string
     {
         $clienteId = (int)($post['cliente_id'] ?? 0);
+        $dataColeta = trim((string)($post['data_coleta'] ?? $post['data_referencia'] ?? ''));
         $coletaId = ColetaService::iniciarRascunho(
             $clienteId,
             (int)($usuario['id'] ?? 0),
-            !empty($usuario['is_admin'])
+            !empty($usuario['is_admin']),
+            $dataColeta !== '' ? $dataColeta : null
         );
         return CrudHelper::jsonOk(['coleta_id' => $coletaId, 'redirect' => URL.'/painel/coleta/nova/'.$coletaId]);
     }

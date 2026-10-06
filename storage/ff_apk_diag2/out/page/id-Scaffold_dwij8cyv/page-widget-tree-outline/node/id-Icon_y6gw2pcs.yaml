@@ -1,0 +1,16 @@
+key: Icon_y6gw2pcs
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 12
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    iconDataValue:
+      inputValue:
+        codePoint: 63052
+        family: MaterialIcons
+        matchTextDirection: false
+        name: cloud_done_rounded
+name: Icon

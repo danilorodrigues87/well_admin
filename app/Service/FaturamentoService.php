@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Common\CobrancaConfig;
 use App\Common\InterConfig;
 use App\Common\OperadoraScope;
+use App\Common\StoragePath;
 use App\Model\Db\Database;
 use App\Model\Db\Pagination;
 use App\Model\Entity\Cliente as EntityCliente;
@@ -416,13 +417,10 @@ class FaturamentoService
             return null;
         }
 
-        $dir = dirname(__DIR__, 2).'/storage/boletos';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
+        $dir = StoragePath::ensureDir('boletos');
 
         $relative = 'storage/boletos/'.$entityId.'.pdf';
-        $absolute = dirname(__DIR__, 2).'/'.$relative;
+        $absolute = $dir.'/'.$entityId.'.pdf';
         file_put_contents($absolute, $binary);
 
         return $relative;

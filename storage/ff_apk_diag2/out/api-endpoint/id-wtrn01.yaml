@@ -1,0 +1,146 @@
+identifier:
+  name: WellAdmin Coleta Transporte
+  key: wtrn01
+url: "[baseUrl]\/coletas\/[coletaId]\/transporte"
+callType: PATCH
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: coletaId
+      key: colid1
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: veiculo_id
+      key: veic01
+    type: Integer
+    testValue: "0"
+  - identifier:
+      name: relatorio
+      key: rel001
+    type: String
+    testValue: ""
+  - identifier:
+      name: tratamento
+      key: trt001
+    type: String
+    testValue: ""
+  - identifier:
+      name: situacao_recebimento
+      key: sit001
+    type: String
+    testValue: pendente
+  - identifier:
+      name: transportador_nome
+      key: tpn001
+    type: String
+    testValue: ""
+  - identifier:
+      name: transportador_cnpj
+      key: tpc001
+    type: String
+    testValue: ""
+  - identifier:
+      name: motorista_nome
+      key: mot001
+    type: String
+    testValue: ""
+  - identifier:
+      name: destinador_nome
+      key: dsn001
+    type: String
+    testValue: ""
+  - identifier:
+      name: destinador_cnpj
+      key: dsc001
+    type: String
+    testValue: ""
+bodyType: JSON
+body: "{\n  \"veiculo_id\": <veiculo_id>,\n  \"relatorio\": \"<relatorio>\",\n  \"tratamento\": \"<tratamento>\",\n  \"situacao_recebimento\": \"<situacao_recebimento>\",\n  \"transportador_nome\": \"<transportador_nome>\",\n  \"transportador_cnpj\": \"<transportador_cnpj>\",\n  \"motorista_nome\": \"<motorista_nome>\",\n  \"destinador_nome\": \"<destinador_nome>\",\n  \"destinador_cnpj\": \"<destinador_cnpj>\"\n}"
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: coletaId
+      key: colpar
+    variableIdentifier:
+      name: coletaId
+      key: colid1
+  - identifier:
+      name: veiculo_id
+      key: veip01
+    variableIdentifier:
+      name: veiculo_id
+      key: veic01
+  - identifier:
+      name: relatorio
+      key: relp01
+    variableIdentifier:
+      name: relatorio
+      key: rel001
+  - identifier:
+      name: tratamento
+      key: trtp01
+    variableIdentifier:
+      name: tratamento
+      key: trt001
+  - identifier:
+      name: situacao_recebimento
+      key: sitp01
+    variableIdentifier:
+      name: situacao_recebimento
+      key: sit001
+  - identifier:
+      name: transportador_nome
+      key: tpnp01
+    variableIdentifier:
+      name: transportador_nome
+      key: tpn001
+  - identifier:
+      name: transportador_cnpj
+      key: tpcp01
+    variableIdentifier:
+      name: transportador_cnpj
+      key: tpc001
+  - identifier:
+      name: motorista_nome
+      key: motp01
+    variableIdentifier:
+      name: motorista_nome
+      key: mot001
+  - identifier:
+      name: destinador_nome
+      key: dsnp01
+    variableIdentifier:
+      name: destinador_nome
+      key: dsn001
+  - identifier:
+      name: destinador_cnpj
+      key: dscp01
+    variableIdentifier:
+      name: destinador_cnpj
+      key: dsc001

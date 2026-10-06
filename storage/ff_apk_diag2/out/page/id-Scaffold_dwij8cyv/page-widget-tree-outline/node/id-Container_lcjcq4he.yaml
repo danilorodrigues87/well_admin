@@ -1,0 +1,23 @@
+key: Container_lcjcq4he
+type: Container
+props:
+  container:
+    dimensions: {}
+    boxDecoration:
+      boxShadow: {}
+      image: {}
+    maxDimensions: {}
+    minDimensions: {}
+  padding:
+    type: FF_PADDING_ALL
+    allValue:
+      inputValue: 16
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: Container Padding
+valueKey: {}

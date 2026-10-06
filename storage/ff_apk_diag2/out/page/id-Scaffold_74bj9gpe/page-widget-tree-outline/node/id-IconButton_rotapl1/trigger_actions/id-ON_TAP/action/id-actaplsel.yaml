@@ -1,0 +1,18 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: rotaId
+        key: rod002
+      setValue:
+        variable:
+          source: WIDGET_STATE
+          baseVariable:
+            widgetState:
+              returnParameter:
+                dataType:
+                  scalarType: Integer
+          nodeKeyRef:
+            key: DropDown_rotarota
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actaplsel

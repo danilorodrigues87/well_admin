@@ -1,0 +1,9 @@
+key: Container_0gdumo8n
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ALL
+    allValue:
+      inputValue: 16
+name: Container Padding

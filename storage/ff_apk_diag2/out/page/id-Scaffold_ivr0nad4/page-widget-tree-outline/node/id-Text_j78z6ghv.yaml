@@ -1,0 +1,18 @@
+key: Text_j78z6ghv
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Nova Coleta
+    fontSizeValue:
+      inputValue: 14
+    colorValue:
+      inputValue:
+        value: "4294967295"
+        darkModeColor:
+          value: "4294967295"
+    heightValue:
+      inputValue: 1.38
+name: Chip Label

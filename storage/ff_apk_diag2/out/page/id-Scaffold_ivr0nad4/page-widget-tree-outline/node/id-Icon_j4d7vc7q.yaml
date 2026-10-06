@@ -1,0 +1,16 @@
+key: Icon_j4d7vc7q
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 20
+    colorValue:
+      inputValue:
+        themeColor: INFO
+    iconDataValue:
+      inputValue:
+        codePoint: 63259
+        family: MaterialIcons
+        matchTextDirection: false
+        name: event_note_rounded
+name: Icon

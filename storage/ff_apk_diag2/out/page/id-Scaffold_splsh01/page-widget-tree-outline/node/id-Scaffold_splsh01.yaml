@@ -1,0 +1,14 @@
+key: Scaffold_splsh01
+type: Scaffold
+props:
+  scaffold:
+    safeArea: true
+    navBarItem:
+      show: false
+    hideKeyboardOnTap: true
+    backgroundColorValue:
+      inputValue:
+        themeColor: PRIMARY_BACKGROUND
+      mostRecentInputValue:
+        themeColor: PRIMARY_BACKGROUND
+name: SplashPage

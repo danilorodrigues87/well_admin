@@ -1,0 +1,17 @@
+identifier:
+  name: parseRotaIdsFromApi
+  key: rtpi01
+arguments:
+  - identifier:
+      name: apiJson
+      key: rtpi02
+    dataType:
+      scalarType: JSON
+      nonNullable: false
+returnParameter:
+  dataType:
+    listType:
+      scalarType: Integer
+    nonNullable: true
+tests:
+  - parameterValues: {}

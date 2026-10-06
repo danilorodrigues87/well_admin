@@ -1,0 +1,10 @@
+key: Column_drh59jrg
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    minSizeValue:
+      inputValue: false
+name: Column

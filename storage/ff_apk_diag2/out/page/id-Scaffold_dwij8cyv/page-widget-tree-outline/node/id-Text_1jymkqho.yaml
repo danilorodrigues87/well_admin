@@ -1,0 +1,16 @@
+key: Text_1jymkqho
+type: Text
+props:
+  text:
+    themeStyle: TITLE_SMALL
+    selectable: false
+    textValue:
+      inputValue: "Nº Relatório "
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.4
+    fontWeightValue:
+      inputValue: w700
+name: Text

@@ -1,0 +1,26 @@
+rootAction:
+  key: rodinit1
+  action:
+    key: actrodinit
+  followUpAction:
+    key: rodinit2
+    action:
+      key: actrodinita
+    followUpAction:
+      key: rodinit5
+      action:
+        key: actrodinitr
+      followUpAction:
+        key: rodinit6
+        action:
+          key: actrodinitru
+        followUpAction:
+          key: rodinit3
+          action:
+            key: actrodinitp
+          followUpAction:
+            key: rodinit4
+            action:
+              key: actrodinitt
+trigger:
+  triggerType: ON_INIT_STATE

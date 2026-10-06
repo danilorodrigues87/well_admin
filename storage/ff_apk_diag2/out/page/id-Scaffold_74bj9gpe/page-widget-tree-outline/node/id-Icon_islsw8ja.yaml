@@ -1,0 +1,16 @@
+key: Icon_islsw8ja
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    iconDataValue:
+      inputValue:
+        codePoint: 983927
+        family: MaterialIcons
+        matchTextDirection: false
+        name: route_rounded
+name: Icon

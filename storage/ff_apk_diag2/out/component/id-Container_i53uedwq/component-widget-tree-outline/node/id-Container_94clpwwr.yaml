@@ -1,0 +1,32 @@
+key: Container_94clpwwr
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 8
+    topValue:
+      inputValue: 0
+    rightValue:
+      inputValue: 0
+    bottomValue:
+      inputValue: 0
+  visibility:
+    legacyVisible: false
+    visibleValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: "false"
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: labelPresent
+              key: design_system_std_switch_std_switchparam_label_present
+        nodeKeyRef:
+          key: Container_i53uedwq
+        uiBuilderValue:
+          serializedValue: "false"
+      mostRecentInputValue: false
+name: Text

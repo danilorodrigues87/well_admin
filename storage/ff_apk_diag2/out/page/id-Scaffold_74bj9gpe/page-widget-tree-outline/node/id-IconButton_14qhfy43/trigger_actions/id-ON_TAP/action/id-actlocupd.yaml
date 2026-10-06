@@ -1,0 +1,61 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: collectorLat
+        key: rod013
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: GLOBAL_PROPERTIES
+                  baseVariable:
+                    globalProperties:
+                      property: CURRENT_DEVICE_LOCATION
+            codeExpression:
+              arguments:
+                - identifier:
+                    name: loc
+                  dataType:
+                    scalarType: LatLng
+                    nonNullable: false
+              returnParameter:
+                dataType:
+                  scalarType: Double
+                  nonNullable: true
+              expression: "(loc == null) ? 0.0 : loc.latitude"
+              valid: true
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: collectorLng
+        key: rod014
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: GLOBAL_PROPERTIES
+                  baseVariable:
+                    globalProperties:
+                      property: CURRENT_DEVICE_LOCATION
+            codeExpression:
+              arguments:
+                - identifier:
+                    name: loc
+                  dataType:
+                    scalarType: LatLng
+                    nonNullable: false
+              returnParameter:
+                dataType:
+                  scalarType: Double
+                  nonNullable: true
+              expression: "(loc == null) ? 0.0 : loc.longitude"
+              valid: true
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actlocupd

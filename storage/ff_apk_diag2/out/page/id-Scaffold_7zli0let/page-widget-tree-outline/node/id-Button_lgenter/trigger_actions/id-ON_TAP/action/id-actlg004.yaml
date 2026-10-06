@@ -1,0 +1,11 @@
+snackBar:
+  textMessage:
+    inputValue:
+      serializedValue: E-mail ou senha inválidos
+  durationMillis: 4000
+  shouldHidePreviousSnackbar: true
+  backgroundColor:
+    inputValue:
+      color:
+        themeColor: ERROR
+key: actlg004

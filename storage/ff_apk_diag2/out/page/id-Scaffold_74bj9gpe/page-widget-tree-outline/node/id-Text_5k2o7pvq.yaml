@@ -1,0 +1,14 @@
+key: Text_5k2o7pvq
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Otimizar
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    heightValue:
+      inputValue: 1.38
+name: Text

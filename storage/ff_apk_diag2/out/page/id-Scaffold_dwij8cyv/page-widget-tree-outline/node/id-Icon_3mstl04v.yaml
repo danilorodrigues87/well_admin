@@ -1,0 +1,16 @@
+key: Icon_3mstl04v
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 63035
+        family: MaterialIcons
+        matchTextDirection: false
+        name: chevron_right_rounded
+name: Icon

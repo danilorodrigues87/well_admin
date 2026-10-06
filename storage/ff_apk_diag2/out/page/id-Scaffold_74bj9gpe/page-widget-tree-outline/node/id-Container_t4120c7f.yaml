@@ -1,0 +1,16 @@
+key: Container_t4120c7f
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 16
+    topValue:
+      inputValue: 16
+    rightValue:
+      inputValue: 16
+    bottomValue:
+      inputValue: 16
+    animatedPadding: {}
+name: Container Padding

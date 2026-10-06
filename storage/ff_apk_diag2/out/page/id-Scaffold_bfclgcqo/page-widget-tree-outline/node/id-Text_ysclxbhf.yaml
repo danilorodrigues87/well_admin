@@ -1,0 +1,16 @@
+key: Text_ysclxbhf
+type: Text
+props:
+  text:
+    themeStyle: LABEL_LARGE
+    selectable: false
+    textValue:
+      inputValue: Relatório de Campo
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.33
+    fontWeightValue:
+      inputValue: w700
+name: Text

@@ -1,0 +1,14 @@
+key: Text_uabux2bs
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: 10:15 - Em andamento
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.27
+name: Text

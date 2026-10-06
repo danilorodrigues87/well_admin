@@ -39,7 +39,7 @@ if (is_file($key)) {
 }
 echo "\n\n";
 
-$interDir = dirname(__DIR__, 2).'/storage/inter';
+$interDir = \App\Common\StoragePath::join('inter');
 echo "Conteúdo de storage/inter:\n";
 if (!is_dir($interDir)) {
     echo "  (pasta não existe — crie storage/inter no volume persistente)\n";

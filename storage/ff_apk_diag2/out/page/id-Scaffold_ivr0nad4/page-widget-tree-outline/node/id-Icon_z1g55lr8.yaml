@@ -1,0 +1,16 @@
+key: Icon_z1g55lr8
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 18
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 63648
+        family: MaterialIcons
+        matchTextDirection: false
+        name: map_rounded
+name: Chip Icon

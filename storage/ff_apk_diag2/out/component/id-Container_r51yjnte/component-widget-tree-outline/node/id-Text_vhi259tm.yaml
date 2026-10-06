@@ -1,0 +1,36 @@
+key: Text_vhi259tm
+type: Text
+props:
+  text:
+    themeStyle: BODY_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: subtitle
+              key: local_card_com4_97b7a2deparam_subtitle
+        nodeKeyRef:
+          key: Container_r51yjnte
+        uiBuilderValue:
+          serializedValue: ""
+      mostRecentInputValue: ""
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.4
+  padding:
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: Text
+valueKey: {}

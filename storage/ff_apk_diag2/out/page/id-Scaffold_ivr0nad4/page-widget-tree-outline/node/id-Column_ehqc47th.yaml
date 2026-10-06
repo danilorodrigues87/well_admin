@@ -1,0 +1,13 @@
+key: Column_ehqc47th
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_start
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 4
+    minSizeValue:
+      inputValue: true
+name: Column

@@ -1,0 +1,10 @@
+key: Column_ey2y54ek
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_start
+    scrollable: false
+    minSizeValue:
+      inputValue: true
+name: Column

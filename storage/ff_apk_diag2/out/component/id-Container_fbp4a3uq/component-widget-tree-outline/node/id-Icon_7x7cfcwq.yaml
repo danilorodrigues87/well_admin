@@ -1,0 +1,198 @@
+key: Icon_7x7cfcwq
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 16
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            value: "4294967295"
+            darkModeColor:
+              value: "4294967295"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: primary
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_fbp4a3uq
+                          uiBuilderValue:
+                            serializedValue: primary
+                      - inputValue:
+                          serializedValue: secondary
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      darkModeColor:
+                        value: "4294967295"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: primary
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_fbp4a3uq
+                          uiBuilderValue:
+                            serializedValue: primary
+                      - inputValue:
+                          serializedValue: outline
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY_TEXT
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: primary
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_fbp4a3uq
+                          uiBuilderValue:
+                            serializedValue: primary
+                      - inputValue:
+                          serializedValue: ghost
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: primary
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_fbp4a3uq
+                          uiBuilderValue:
+                            serializedValue: primary
+                      - inputValue:
+                          serializedValue: destructive
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      darkModeColor:
+                        value: "4294967295"
+            elseValue:
+              inputValue:
+                color:
+                  value: "4294967295"
+                  darkModeColor:
+                    value: "4294967295"
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            value: "4294967295"
+            darkModeColor:
+              value: "4294967295"
+      mostRecentInputValue:
+        value: "4294967295"
+        darkModeColor:
+          value: "4294967295"
+    iconDataValue:
+      inputValue:
+        codePoint: 62775
+        family: MaterialIcons
+        matchTextDirection: false
+        name: add_rounded
+    variable:
+      source: WIDGET_CLASS_PARAMETER
+      defaultValue:
+        icon:
+          sizeValue:
+            inputValue: 24
+          colorValue:
+            inputValue:
+              themeColor: PRIMARY_TEXT
+          iconDataValue:
+            inputValue:
+              codePoint: 62775
+              family: MaterialIcons
+              matchTextDirection: false
+              name: add_rounded
+      baseVariable:
+        widgetClass:
+          paramIdentifier:
+            name: iconEnd
+            key: design_system_std_button_std_buttonparam_icon_end
+      nodeKeyRef:
+        key: Container_fbp4a3uq
+      uiBuilderValue:
+        icon:
+          sizeValue:
+            inputValue: 24
+          colorValue:
+            inputValue:
+              themeColor: PRIMARY_TEXT
+          iconDataValue:
+            inputValue:
+              codePoint: 62775
+              family: MaterialIcons
+              matchTextDirection: false
+              name: add_rounded
+  visibility:
+    legacyVisible: false
+    visibleValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: "false"
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: iconEndPresent
+              key: design_system_std_button_std_buttonparam_icon_end_present
+        nodeKeyRef:
+          key: Container_fbp4a3uq
+        uiBuilderValue:
+          serializedValue: "false"
+      mostRecentInputValue: false
+name: Icon

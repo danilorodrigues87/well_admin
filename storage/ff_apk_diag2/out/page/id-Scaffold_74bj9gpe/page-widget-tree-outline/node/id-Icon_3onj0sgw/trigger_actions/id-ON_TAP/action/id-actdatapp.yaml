@@ -1,0 +1,19 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: rotaData
+        key: ast011
+      setValue:
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: rotaDataIso
+                key: rod001
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+  updateType: WIDGET
+  stateVariableType: APP_STATE
+key: actdatapp

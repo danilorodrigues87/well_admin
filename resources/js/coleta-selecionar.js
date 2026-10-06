@@ -48,8 +48,13 @@
   window.loadPage = loadPage;
 
   window.iniciarColeta = function (clienteId) {
+    var filters = getFilterData();
     $.post(apiUrl(), {
-      acao: 'iniciar', cliente_id: clienteId, _csrf: csrf()
+      acao: 'iniciar',
+      cliente_id: clienteId,
+      data_referencia: filters.data_referencia || '',
+      data_coleta: filters.data_referencia || '',
+      _csrf: csrf()
     }, function (r) {
       r = typeof r === 'object' ? r : JSON.parse(r);
       if (r.success && r.redirect) {

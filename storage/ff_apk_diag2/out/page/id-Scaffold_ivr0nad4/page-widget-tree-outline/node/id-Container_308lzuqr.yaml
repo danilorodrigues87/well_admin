@@ -1,0 +1,29 @@
+key: Container_308lzuqr
+type: Container
+props:
+  container:
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 16
+      border:
+        left:
+          sizeValue:
+            inputValue: 4
+          colorValue:
+            inputValue:
+              themeColor: WARNING
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      boxShadow:
+        themeShadowToken:
+          name: sm
+          key: sm
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+name: Container

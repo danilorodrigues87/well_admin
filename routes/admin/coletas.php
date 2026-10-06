@@ -153,7 +153,7 @@ $obRouter->get('/storage/coletas/{coletaId}/{arquivo}', [
     'middlewares' => ['required-admin-login'],
     function ($request, int $coletaId, string $arquivo) {
         $arquivo = basename($arquivo);
-        $path = dirname(__DIR__, 2).'/storage/coletas/'.$coletaId.'/'.$arquivo;
+        $path = \App\Common\StoragePath::join('coletas/'.$coletaId.'/'.$arquivo);
         if (!is_file($path)) {
             return new Response(404, 'Arquivo não encontrado');
         }

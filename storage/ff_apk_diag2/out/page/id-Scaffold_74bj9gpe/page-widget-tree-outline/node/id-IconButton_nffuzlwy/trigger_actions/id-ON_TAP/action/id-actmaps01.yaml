@@ -1,0 +1,20 @@
+customAction:
+  customActionIdentifier:
+    name: openRotaDirections
+    key: opendir1
+  argumentValues:
+    arguments:
+      opdurl1:
+        value:
+          variable:
+            source: GENERATOR_VARIABLE
+            baseVariable:
+              generatorVariable: {}
+            operations:
+              - accessDataStructField:
+                  fieldIdentifier:
+                    name: maps_url
+                    key: rpf07
+            nodeKeyRef:
+              key: ListView_zq2w1nhb
+key: actmaps01

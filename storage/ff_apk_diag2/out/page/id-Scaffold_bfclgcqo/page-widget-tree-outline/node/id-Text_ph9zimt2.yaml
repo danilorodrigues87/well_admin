@@ -1,0 +1,28 @@
+key: Text_ph9zimt2
+type: Text
+props:
+  text:
+    themeStyle: TITLE_LARGE
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: dataColeta
+              key: cdd003
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_bfclgcqo
+    fontSizeValue:
+      inputValue: 16
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    heightValue:
+      inputValue: 1.27
+    fontWeightValue:
+      inputValue: w700
+name: Text
+valueKey: {}

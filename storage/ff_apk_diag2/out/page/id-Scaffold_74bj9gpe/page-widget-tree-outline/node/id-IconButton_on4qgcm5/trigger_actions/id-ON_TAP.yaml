@@ -1,0 +1,6 @@
+rootAction:
+  key: opendirroot
+  action:
+    key: actopendir
+trigger:
+  triggerType: ON_TAP

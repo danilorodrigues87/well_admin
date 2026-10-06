@@ -1,0 +1,22 @@
+identifier:
+  name: paradaItemsToLatLngs
+  key: rtpll1
+arguments:
+  - identifier:
+      name: items
+      key: rtpll2
+    dataType:
+      listType:
+        scalarType: DataStruct
+      nonNullable: false
+      subType:
+        dataStructIdentifier:
+          name: RotaParadaItem
+          key: rtpitm1
+returnParameter:
+  dataType:
+    listType:
+      scalarType: LatLng
+    nonNullable: true
+tests:
+  - parameterValues: {}

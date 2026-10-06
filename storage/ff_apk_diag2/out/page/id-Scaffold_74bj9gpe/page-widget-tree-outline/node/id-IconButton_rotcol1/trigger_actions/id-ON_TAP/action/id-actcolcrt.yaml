@@ -1,0 +1,49 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Coleta Criar
+      key: wcrt01
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: cliente_id
+          key: cli001
+        variable:
+          source: GENERATOR_VARIABLE
+          baseVariable:
+            generatorVariable: {}
+          operations:
+            - accessDataStructField:
+                fieldIdentifier:
+                  name: cliente_id
+                  key: rpf01
+          nodeKeyRef:
+            key: ListView_zq2w1nhb
+      - variableIdentifier:
+          name: observacao
+          key: obs001
+        inputValue:
+          serializedValue: ""
+outputVariableName: coletaCriarResult
+key: actcolcrt

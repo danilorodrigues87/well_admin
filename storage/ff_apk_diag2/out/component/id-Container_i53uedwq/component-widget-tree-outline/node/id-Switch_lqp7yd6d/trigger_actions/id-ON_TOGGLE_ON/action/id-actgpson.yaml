@@ -1,0 +1,11 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: shareGpsEnabled
+        key: ast012
+      setValue:
+        inputValue:
+          serializedValue: "true"
+  updateType: WIDGET
+  stateVariableType: APP_STATE
+key: actgpson

@@ -159,7 +159,7 @@ class Coletas extends Page
             return new Response(404, View::render('erros/404', ['URL' => URL]));
         }
 
-        $path = dirname(__DIR__, 3).'/storage/'.$match->arquivo;
+        $path = \App\Common\StoragePath::join($match->arquivo);
         if (!is_readable($path)) {
             return new Response(404, View::render('erros/404', ['URL' => URL]));
         }

@@ -1,0 +1,10 @@
+key: Container_me6olv60
+type: Container
+props:
+  container: {}
+  padding:
+    type: FF_PADDING_ALL
+    allValue:
+      inputValue: 12
+    animatedPadding: {}
+name: Column Padding

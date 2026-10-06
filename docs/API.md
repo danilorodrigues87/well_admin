@@ -186,7 +186,7 @@ Body trocar senha:
 | Método | Endpoint | Módulo | Ação |
 |--------|----------|--------|------|
 | GET | `/coletas?busca=&status=&page=&per_page=` | `coletas` | Listar (coletor vê só as suas) |
-| POST | `/coletas` | `coleta_nova` | Iniciar rascunho `{ "cliente_id": 1 }` |
+| POST | `/coletas` | `coleta_nova` | Iniciar rascunho `{ "cliente_id": 1, "data_coleta": "2026-10-05" }` (`data_coleta` opcional; padrão = hoje; até 2 anos atrás) |
 | GET | `/coletas/{id}` | `coletas` | Detalhe completo (wizard) |
 | PATCH | `/coletas/{id}/transporte` | `coleta_nova` | Salvar transporte/destinador |
 | POST | `/coletas/{id}/itens` | `coleta_nova` | Adicionar resíduo |

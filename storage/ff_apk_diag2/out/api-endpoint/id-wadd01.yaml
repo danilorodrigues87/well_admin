@@ -1,0 +1,80 @@
+identifier:
+  name: WellAdmin Coleta Add Item
+  key: wadd01
+url: "[baseUrl]\/coletas\/[coletaId]\/itens"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: coletaId
+      key: colid1
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: tipo_residuo_id
+      key: tip001
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: quantidade
+      key: qtd001
+    type: Double
+    testValue: "1"
+  - identifier:
+      name: unidade
+      key: uni001
+    type: String
+    testValue: kg
+bodyType: JSON
+body: "{\n  \"tipo_residuo_id\": <tipo_residuo_id>,\n  \"quantidade\": <quantidade>,\n  \"unidade\": \"<unidade>\"\n}"
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: coletaId
+      key: colpar
+    variableIdentifier:
+      name: coletaId
+      key: colid1
+  - identifier:
+      name: tipo_residuo_id
+      key: tipp01
+    variableIdentifier:
+      name: tipo_residuo_id
+      key: tip001
+  - identifier:
+      name: quantidade
+      key: qtdp01
+    variableIdentifier:
+      name: quantidade
+      key: qtd001
+  - identifier:
+      name: unidade
+      key: unip01
+    variableIdentifier:
+      name: unidade
+      key: uni001

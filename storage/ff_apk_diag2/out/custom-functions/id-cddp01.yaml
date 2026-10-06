@@ -1,0 +1,20 @@
+identifier:
+  name: parseColetaDetailItemsFromApi
+  key: cddp01
+arguments:
+  - identifier:
+      name: apiJson
+      key: cddp02
+    dataType:
+      scalarType: JSON
+      nonNullable: false
+returnParameter:
+  dataType:
+    listType:
+      scalarType: DataStruct
+    subType:
+      dataStructIdentifier:
+        name: ColetaResiduoItem
+        key: cdditm1
+tests:
+  - parameterValues: {}

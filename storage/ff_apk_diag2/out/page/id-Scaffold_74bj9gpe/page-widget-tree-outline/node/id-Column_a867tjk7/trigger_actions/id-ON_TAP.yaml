@@ -1,0 +1,6 @@
+rootAction:
+  key: navhome1
+  action:
+    key: actnavhome
+trigger:
+  triggerType: ON_TAP

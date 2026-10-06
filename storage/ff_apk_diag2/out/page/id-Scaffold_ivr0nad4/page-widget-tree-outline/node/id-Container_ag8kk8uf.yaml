@@ -1,0 +1,9 @@
+key: Container_ag8kk8uf
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+name: Dimensions

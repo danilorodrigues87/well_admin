@@ -1,0 +1,41 @@
+key: Container_i2jdyjkg
+type: Container
+props:
+  container: {}
+name: Switch
+parameterValues:
+  parameterPasses:
+    design_system_std_switch_std_switchparam_label:
+      paramIdentifier:
+        name: label
+        key: design_system_std_switch_std_switchparam_label
+      inputValue:
+        serializedValue: ""
+    design_system_std_switch_std_switchparam_label_present:
+      paramIdentifier:
+        name: labelPresent
+        key: design_system_std_switch_std_switchparam_label_present
+      inputValue:
+        serializedValue: "false"
+    design_system_std_switch_std_switchparam_variant:
+      paramIdentifier:
+        name: variant
+        key: design_system_std_switch_std_switchparam_variant
+      inputValue:
+        serializedValue: Android
+    design_system_std_switch_std_switchparam_active:
+      paramIdentifier:
+        name: active
+        key: design_system_std_switch_std_switchparam_active
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: shareGpsEnabled
+              key: ast012
+            stateVariableType: APP_STATE
+  widgetClassNodeKeyRef:
+    key: Container_i53uedwq
+componentClassKeyRef:
+  key: Container_i53uedwq

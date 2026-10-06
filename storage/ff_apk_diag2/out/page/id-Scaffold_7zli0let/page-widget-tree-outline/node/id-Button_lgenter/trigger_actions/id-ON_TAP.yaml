@@ -1,0 +1,81 @@
+rootAction:
+  key: lgroot01
+  action:
+    key: actlg001
+  followUpAction:
+    key: lgfol001
+    conditionActions:
+      falseAction:
+        key: lgfact01
+        action:
+          key: actlg004
+      trueActions:
+        - condition:
+            variable:
+              source: FUNCTION_CALL
+              functionCall:
+                values:
+                  - variable:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: ACTION_OUTPUTS
+                              baseVariable:
+                                actionOutput:
+                                  outputVariableIdentifier:
+                                    name: loginResult
+                                  actionKeyRef:
+                                    key: actlg001
+                              operations:
+                                - apiResponseField:
+                                    responseField: JSON_BODY
+                                - jsonPathOperation:
+                                    jsonPath: $.data.token
+                              nodeKeyRef:
+                                key: Button_lgenter
+                              actionComponentKeyRef: {}
+                          - variable: {}
+                        condition:
+                          relation: EXISTS_AND_NON_EMPTY
+                  - variable:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: ACTION_OUTPUTS
+                              baseVariable:
+                                actionOutput:
+                                  outputVariableIdentifier:
+                                    name: loginResult
+                                  actionKeyRef:
+                                    key: actlg001
+                              operations:
+                                - apiResponseField:
+                                    responseField: JSON_BODY
+                                - jsonPathOperation:
+                                    jsonPath: $.data.token
+                              nodeKeyRef:
+                                key: Button_lgenter
+                              actionComponentKeyRef: {}
+                          - variable:
+                              source: CONSTANTS
+                              baseVariable:
+                                constants:
+                                  value: "NULL"
+                        condition:
+                          relation: NOT_EQUAL_TO
+                combineConditions:
+                  operator: AND_OP
+          trueAction:
+            key: lgtact02
+            action:
+              key: actlg002
+            followUpAction:
+              key: lgtact03
+              action:
+                key: actlg003
+      hasMultiConditions: false
+      key: lgcond01
+trigger:
+  triggerType: ON_TAP

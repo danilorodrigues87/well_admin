@@ -1,0 +1,87 @@
+key: Chart_4m9ra0a0
+type: Chart
+props:
+  chart:
+    chartType: BAR
+    dimensions:
+      height:
+        pixelsValue:
+          inputValue: 160
+    data:
+      - numbersList:
+          xData:
+            source: LOCAL_STATE
+            baseVariable:
+              localState:
+                fieldIdentifier:
+                  name: chartLabels
+                  key: dsh120
+                stateVariableType: WIDGET_CLASS_STATE
+            nodeKeyRef:
+              key: Scaffold_ivr0nad4
+          yData:
+            source: LOCAL_STATE
+            baseVariable:
+              localState:
+                fieldIdentifier:
+                  name: chartValues
+                  key: dsh121
+                stateVariableType: WIDGET_CLASS_STATE
+            nodeKeyRef:
+              key: Scaffold_ivr0nad4
+        sourceType: NUMBERS_LIST
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY
+    barChart:
+      bars:
+        - {}
+      barChartAlignment: main_axis_space_evenly
+      axisInfo:
+        axisLabels:
+          bottom:
+            showLabels: true
+            labelStyle:
+              themeStyle: BODY_SMALL
+              selectable: false
+              fontSizeValue:
+                inputValue: 10
+              colorValue:
+                inputValue:
+                  themeColor: SECONDARY_TEXT
+              heightValue:
+                inputValue: 1
+            reservedSize: 20
+          left:
+            showLabels: false
+            labelStyle:
+              themeStyle: BODY_SMALL
+              selectable: false
+              fontSizeValue:
+                inputValue: 10
+              colorValue:
+                inputValue:
+                  themeColor: SECONDARY_TEXT
+              heightValue:
+                inputValue: 1
+            reservedSize: 0
+        axisBounds:
+          minY: 0
+          maxX: 5
+          maxY: 200
+      barBorderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 4
+      barWidthValue:
+        inputValue: 20
+      groupSpaceValue:
+        inputValue: 12
+    backgroundColorValue:
+      inputValue:
+        value: "0"
+    showBorderValue:
+      inputValue: false
+    showGridValue:
+      inputValue: false
+name: BarChart

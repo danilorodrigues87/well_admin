@@ -1,0 +1,17 @@
+key: Container_zuq3s2tx
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+      height:
+        pixelsValue:
+          inputValue: 1
+    boxDecoration:
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          themeColor: ALTERNATE
+name: Border Top

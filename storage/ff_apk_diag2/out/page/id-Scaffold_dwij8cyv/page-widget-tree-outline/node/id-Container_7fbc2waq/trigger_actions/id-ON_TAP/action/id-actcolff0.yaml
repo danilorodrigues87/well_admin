@@ -1,0 +1,17 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: filterStatus
+        key: cl002
+      setValue:
+        inputValue:
+          serializedValue: finalizada
+    - fieldIdentifier:
+        name: pageCurrent
+        key: cl003
+      setValue:
+        inputValue:
+          serializedValue: "1"
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actcolff0

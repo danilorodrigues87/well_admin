@@ -1,0 +1,87 @@
+key: DropDown_rotarota
+type: DropDown
+props:
+  padding: {}
+  dropDown:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: 120
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    hintText:
+      textValue:
+        inputValue: Selecione a rota
+        mostRecentInputValue: Selecione a rota
+    optionsHasKeyValues: true
+    valueType:
+      dataType:
+        scalarType: Integer
+    fillColorValue:
+      inputValue:
+        themeColor: SECONDARY_BACKGROUND
+    elevationValue:
+      inputValue: 2
+      mostRecentInputValue: 2
+    borderRadiusValue:
+      inputValue: 8
+      mostRecentInputValue: 8
+    borderColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+    borderWidthValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+    hidesUnderlineValue:
+      inputValue: true
+      mostRecentInputValue: true
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 24
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY
+        iconDataValue:
+          inputValue:
+            codePoint: 63531
+            family: MaterialIcons
+            matchTextDirection: false
+            name: keyboard_arrow_down_rounded
+    initialOptionKeyValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: rotaId
+              key: rod002
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+    optionsLabels:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: rotaNomes
+              key: rod008
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+    optionsValues:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: rotaIds
+              key: rod009
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_74bj9gpe
+name: RotaCadastral

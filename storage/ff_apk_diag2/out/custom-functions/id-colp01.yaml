@@ -1,0 +1,20 @@
+identifier:
+  name: parseColetaItemsFromApi
+  key: colp01
+arguments:
+  - identifier:
+      name: apiJson
+      key: colp02
+    dataType:
+      scalarType: JSON
+      nonNullable: false
+returnParameter:
+  dataType:
+    listType:
+      scalarType: DataStruct
+    subType:
+      dataStructIdentifier:
+        name: ColetaListItem
+        key: clitm1
+tests:
+  - parameterValues: {}

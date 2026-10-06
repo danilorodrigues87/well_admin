@@ -1,0 +1,27 @@
+key: Container_splbdy1
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfScreenSizeValue:
+          inputValue: 100
+      height:
+        percentOfScreenSizeValue:
+          inputValue: 100
+    boxDecoration:
+      boxShadow: {}
+      image: {}
+    maxDimensions: {}
+    minDimensions: {}
+  alignment:
+    xValue:
+      inputValue: 0
+    yValue:
+      inputValue: 0
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+valueKey: {}

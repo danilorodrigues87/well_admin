@@ -1,0 +1,35 @@
+key: Image_9957on2p
+type: Image
+props:
+  image:
+    type: FF_IMAGE_TYPE_ASSET
+    fit: FF_BOX_FIT_COVER
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: 120
+      height:
+        pixelsValue:
+          inputValue: 120
+    borderRadius:
+      type: FF_BORDER_RADIUS_ALL
+      allValue:
+        inputValue: 8
+    cacheFadeDuration: 500
+    pathValue:
+      inputValue: projects/well-coletas-by2777/assets/4glnqx4t2zhh/favicon.png
+    format: FF_IMAGE_FORMAT_AUTO
+  padding:
+    animatedPadding: {}
+  alignment:
+    xValue:
+      inputValue: 0
+    yValue:
+      inputValue: 0
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+valueKey: {}

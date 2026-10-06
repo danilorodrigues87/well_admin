@@ -1,0 +1,10 @@
+key: Stack_eu3adtlj
+type: Stack
+props:
+  stack:
+    childAlignment:
+      xValue:
+        inputValue: 0
+      yValue:
+        inputValue: 0
+name: Stack

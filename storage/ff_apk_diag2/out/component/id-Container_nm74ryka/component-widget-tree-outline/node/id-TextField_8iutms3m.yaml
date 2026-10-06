@@ -1,0 +1,212 @@
+key: TextField_8iutms3m
+type: TextField
+props:
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+  textField:
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      selectable: false
+      colorValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            color:
+              themeColor: PRIMARY_TEXT
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: filled
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: PRIMARY_TEXT
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: outlined
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_textfield_std_textfieldparam_variant
+                            nodeKeyRef:
+                              key: Container_nm74ryka
+                            uiBuilderValue:
+                              serializedValue: outlined
+                        - inputValue:
+                            serializedValue: ghost
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: PRIMARY_TEXT
+              elseValue:
+                inputValue:
+                  color:
+                    themeColor: PRIMARY_TEXT
+              returnParameter:
+                dataType:
+                  scalarType: Color
+          uiBuilderValue:
+            color:
+              themeColor: PRIMARY_TEXT
+        mostRecentInputValue:
+          themeColor: PRIMARY_TEXT
+      heightValue:
+        inputValue: 1.47
+    inputDecoration:
+      inputBorderType: none
+      contentPadding:
+        type: FF_PADDING_ALL
+        allValue:
+          inputValue: 0
+      hintStyle:
+        themeStyle: BODY_MEDIUM
+        selectable: false
+        colorValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              color:
+                themeColor: ACCENT_3
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: filled
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        color:
+                          themeColor: ACCENT_3
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: outlined
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_textfield_std_textfieldparam_variant
+                              nodeKeyRef:
+                                key: Container_nm74ryka
+                              uiBuilderValue:
+                                serializedValue: outlined
+                          - inputValue:
+                              serializedValue: ghost
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        color:
+                          themeColor: ACCENT_3
+                elseValue:
+                  inputValue:
+                    color:
+                      themeColor: ACCENT_3
+                returnParameter:
+                  dataType:
+                    scalarType: Color
+            uiBuilderValue:
+              color:
+                themeColor: ACCENT_3
+          mostRecentInputValue:
+            themeColor: ACCENT_3
+        heightValue:
+          inputValue: 1.47
+      hintText:
+        themeStyle: BODY_MEDIUM
+        selectable: false
+        textValue:
+          variable:
+            source: WIDGET_CLASS_PARAMETER
+            defaultValue:
+              serializedValue: Buscar cliente ou MTR...
+            baseVariable:
+              widgetClass:
+                paramIdentifier:
+                  name: hint
+                  key: design_system_std_textfield_std_textfieldparam_hint
+            nodeKeyRef:
+              key: Container_nm74ryka
+            uiBuilderValue:
+              serializedValue: Buscar cliente ou MTR...
+          mostRecentInputValue: Buscar cliente ou MTR...
+        heightValue:
+          inputValue: 1.47
+      denseValue:
+        inputValue: true
+    passwordField: false
+    initialText:
+      themeStyle: BODY_MEDIUM
+      selectable: false
+      textValue:
+        variable:
+          source: WIDGET_CLASS_PARAMETER
+          defaultValue:
+            serializedValue: ""
+          baseVariable:
+            widgetClass:
+              paramIdentifier:
+                name: value
+                key: design_system_std_textfield_std_textfieldparam_value
+          nodeKeyRef:
+            key: Container_nm74ryka
+          uiBuilderValue:
+            serializedValue: ""
+        mostRecentInputValue: ""
+      heightValue:
+        inputValue: 1.47
+    maxLinesValue:
+      inputValue: 1
+name: Input

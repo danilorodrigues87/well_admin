@@ -1,0 +1,72 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: coletaItems
+        key: cl006
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: coletasResultChipTodos
+                      actionKeyRef:
+                        key: actcol001
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Container_doyae1bb
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseColetaItemsFromApi
+              key: colp01
+          nodeKeyRef:
+            key: Scaffold_dwij8cyv
+    - fieldIdentifier:
+        name: totalPages
+        key: cl004
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletasResultChipTodos
+              actionKeyRef:
+                key: actcol001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.pagination.last_page
+          nodeKeyRef:
+            key: Container_doyae1bb
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: pageCurrent
+        key: cl003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: coletasResultChipTodos
+              actionKeyRef:
+                key: actcol001
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.pagination.page
+          nodeKeyRef:
+            key: Container_doyae1bb
+          actionComponentKeyRef: {}
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actcol002

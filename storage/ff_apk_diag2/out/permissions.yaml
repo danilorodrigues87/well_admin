@@ -1,0 +1,6 @@
+permissionMessages:
+  - permissionType: LOCATION
+    message:
+      textValue:
+        inputValue: Precisamos da sua localizacao para otimizar a rota do dia e compartilhar a posicao da frota durante as coletas.
+        mostRecentInputValue: Precisamos da sua localizacao para otimizar a rota do dia e compartilhar a posicao da frota durante as coletas.

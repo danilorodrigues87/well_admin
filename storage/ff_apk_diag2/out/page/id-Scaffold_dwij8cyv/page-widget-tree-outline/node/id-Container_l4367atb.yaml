@@ -1,0 +1,21 @@
+key: Container_l4367atb
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+    boxDecoration:
+      border:
+        top:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+name: Container

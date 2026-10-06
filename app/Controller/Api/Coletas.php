@@ -87,7 +87,13 @@ class Coletas extends BaseApi
         $clienteId = (int)($body['cliente_id'] ?? 0);
 
         try {
-            $coletaId = ColetaService::iniciarRascunho($clienteId, ApiContext::userId(), ApiContext::isAdmin());
+            $dataColeta = trim((string)($body['data_coleta'] ?? ''));
+            $coletaId = ColetaService::iniciarRascunho(
+                $clienteId,
+                ApiContext::userId(),
+                ApiContext::isAdmin(),
+                $dataColeta !== '' ? $dataColeta : null
+            );
             $detalhe = ColetaService::detalhar($coletaId);
 
             return ApiHelper::ok(ColetaApiPresenter::coletaDetalhe($detalhe), 201);
@@ -263,7 +269,7 @@ class Coletas extends BaseApi
             return ApiHelper::fail('not_found', 'Evidência não encontrada.', 404);
         }
 
-        $path = dirname(__DIR__, 3).'/storage/'.$match->arquivo;
+        $path = \App\Common\StoragePath::join($match->arquivo);
         if (!is_file($path)) {
             return ApiHelper::fail('not_found', 'Arquivo não encontrado.', 404);
         }

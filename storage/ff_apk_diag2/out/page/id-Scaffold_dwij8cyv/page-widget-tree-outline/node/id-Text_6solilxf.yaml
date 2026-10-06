@@ -1,0 +1,21 @@
+key: Text_6solilxf
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    translationIdentifier:
+      key: op4qcngs
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: pageCurrent
+              key: cl003
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_dwij8cyv
+      mostRecentInputValue: "1"
+name: Text_pagina_atual

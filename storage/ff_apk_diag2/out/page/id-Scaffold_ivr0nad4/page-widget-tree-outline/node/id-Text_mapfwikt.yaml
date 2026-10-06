@@ -1,0 +1,14 @@
+key: Text_mapfwikt
+type: Text
+props:
+  text:
+    themeStyle: LABEL_LARGE
+    selectable: false
+    textValue:
+      inputValue: Operação Hoje
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    heightValue:
+      inputValue: 1.33
+name: Text

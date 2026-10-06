@@ -1,0 +1,16 @@
+key: Icon_c8ddjth1
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 20
+    colorValue:
+      inputValue:
+        themeColor: WARNING
+    iconDataValue:
+      inputValue:
+        codePoint: 58121
+        family: MaterialIcons
+        matchTextDirection: false
+        name: help
+name: Icon

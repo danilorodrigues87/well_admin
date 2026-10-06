@@ -1,0 +1,864 @@
+key: Container_xek35vl8
+type: Container
+props:
+  container:
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ONLY
+        topLeftValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: small
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: large
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "16"
+                elseValue:
+                  inputValue:
+                    serializedValue: "12"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+        topRightValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: small
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: large
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "16"
+                elseValue:
+                  inputValue:
+                    serializedValue: "12"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+        bottomLeftValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: small
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: large
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "16"
+                elseValue:
+                  inputValue:
+                    serializedValue: "12"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+        bottomRightValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "8"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: small
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "8"
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: small
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: size
+                                    key: design_system_std_button_std_buttonparam_size
+                              nodeKeyRef:
+                                key: Container_t2tued2q
+                              uiBuilderValue:
+                                serializedValue: small
+                          - inputValue:
+                              serializedValue: large
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "16"
+                elseValue:
+                  inputValue:
+                    serializedValue: "12"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "8"
+          mostRecentInputValue: 8
+      border:
+        top:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "0"
+            mostRecentInputValue: 0
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  value: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ALTERNATE
+                  elseValue:
+                    inputValue:
+                      color:
+                        value: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  value: "0"
+            mostRecentInputValue:
+              value: "0"
+        right:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "0"
+            mostRecentInputValue: 0
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  value: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ALTERNATE
+                  elseValue:
+                    inputValue:
+                      color:
+                        value: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  value: "0"
+            mostRecentInputValue:
+              value: "0"
+        bottom:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "0"
+            mostRecentInputValue: 0
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  value: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ALTERNATE
+                  elseValue:
+                    inputValue:
+                      color:
+                        value: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  value: "0"
+            mostRecentInputValue:
+              value: "0"
+        left:
+          sizeValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                serializedValue: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          serializedValue: "1"
+                  elseValue:
+                    inputValue:
+                      serializedValue: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Double
+              uiBuilderValue:
+                serializedValue: "0"
+            mostRecentInputValue: 0
+          colorValue:
+            variable:
+              source: FUNCTION_CALL
+              defaultValue:
+                color:
+                  value: "0"
+              functionCall:
+                conditionalValue:
+                  ifConditionalValues:
+                    - condition:
+                        source: FUNCTION_CALL
+                        functionCall:
+                          values:
+                            - variable:
+                                source: WIDGET_CLASS_PARAMETER
+                                defaultValue:
+                                  serializedValue: ghost
+                                baseVariable:
+                                  widgetClass:
+                                    paramIdentifier:
+                                      name: variant
+                                      key: design_system_std_button_std_buttonparam_variant
+                                nodeKeyRef:
+                                  key: Container_t2tued2q
+                                uiBuilderValue:
+                                  serializedValue: ghost
+                            - inputValue:
+                                serializedValue: outline
+                          condition:
+                            relation: EQUAL_TO
+                      value:
+                        inputValue:
+                          color:
+                            themeColor: ALTERNATE
+                  elseValue:
+                    inputValue:
+                      color:
+                        value: "0"
+                  returnParameter:
+                    dataType:
+                      scalarType: Color
+              uiBuilderValue:
+                color:
+                  value: "0"
+            mostRecentInputValue:
+              value: "0"
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            color:
+              value: "0"
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: ghost
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_button_std_buttonparam_variant
+                            nodeKeyRef:
+                              key: Container_t2tued2q
+                            uiBuilderValue:
+                              serializedValue: ghost
+                        - inputValue:
+                            serializedValue: secondary
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: SECONDARY
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: ghost
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_button_std_buttonparam_variant
+                            nodeKeyRef:
+                              key: Container_t2tued2q
+                            uiBuilderValue:
+                              serializedValue: ghost
+                        - inputValue:
+                            serializedValue: outline
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        value: "0"
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: ghost
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_button_std_buttonparam_variant
+                            nodeKeyRef:
+                              key: Container_t2tued2q
+                            uiBuilderValue:
+                              serializedValue: ghost
+                        - inputValue:
+                            serializedValue: ghost
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        value: "0"
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: ghost
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_button_std_buttonparam_variant
+                            nodeKeyRef:
+                              key: Container_t2tued2q
+                            uiBuilderValue:
+                              serializedValue: ghost
+                        - inputValue:
+                            serializedValue: destructive
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: ERROR
+              elseValue:
+                inputValue:
+                  color:
+                    themeColor: PRIMARY
+              returnParameter:
+                dataType:
+                  scalarType: Color
+          uiBuilderValue:
+            color:
+              value: "0"
+        mostRecentInputValue:
+          value: "0"
+      borderColorValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            color:
+              value: "0"
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: ghost
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_button_std_buttonparam_variant
+                            nodeKeyRef:
+                              key: Container_t2tued2q
+                            uiBuilderValue:
+                              serializedValue: ghost
+                        - inputValue:
+                            serializedValue: outline
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: ALTERNATE
+              elseValue:
+                inputValue:
+                  color:
+                    value: "0"
+              returnParameter:
+                dataType:
+                  scalarType: Color
+          uiBuilderValue:
+            color:
+              value: "0"
+        mostRecentInputValue:
+          value: "0"
+      borderWidthValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            serializedValue: "0"
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: ghost
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_button_std_buttonparam_variant
+                            nodeKeyRef:
+                              key: Container_t2tued2q
+                            uiBuilderValue:
+                              serializedValue: ghost
+                        - inputValue:
+                            serializedValue: outline
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      serializedValue: "1"
+              elseValue:
+                inputValue:
+                  serializedValue: "0"
+              returnParameter:
+                dataType:
+                  scalarType: Double
+          uiBuilderValue:
+            serializedValue: "0"
+        mostRecentInputValue: 0
+  opacity:
+    opacityValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          serializedValue: "1"
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: WIDGET_CLASS_PARAMETER
+                  defaultValue:
+                    serializedValue: "false"
+                  baseVariable:
+                    widgetClass:
+                      paramIdentifier:
+                        name: disabled
+                        key: design_system_std_button_std_buttonparam_disabled
+                  nodeKeyRef:
+                    key: Container_t2tued2q
+                  uiBuilderValue:
+                    serializedValue: "false"
+                value:
+                  inputValue:
+                    serializedValue: "0.55"
+            elseValue:
+              inputValue:
+                serializedValue: "1"
+            returnParameter:
+              dataType:
+                scalarType: Double
+        uiBuilderValue:
+          serializedValue: "1"
+      mostRecentInputValue: 1
+name: Container

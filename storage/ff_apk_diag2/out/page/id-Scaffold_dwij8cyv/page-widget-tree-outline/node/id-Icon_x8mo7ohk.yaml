@@ -1,0 +1,16 @@
+key: Icon_x8mo7ohk
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 63477
+        family: MaterialIcons
+        matchTextDirection: false
+        name: home_rounded
+name: Icon

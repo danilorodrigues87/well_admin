@@ -1,0 +1,29 @@
+key: Container_7z7nmatt
+type: Container
+props:
+  container:
+    dimensions: {}
+    boxDecoration:
+      boxShadow: {}
+      image: {}
+    maxDimensions: {}
+    minDimensions: {}
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 24
+    topValue:
+      inputValue: 16
+    rightValue:
+      inputValue: 24
+    bottomValue:
+      inputValue: 16
+    animatedPadding: {}
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+name: Container Padding
+valueKey: {}

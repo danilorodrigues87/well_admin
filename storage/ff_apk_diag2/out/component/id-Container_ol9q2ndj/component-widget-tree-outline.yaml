@@ -1,0 +1,7 @@
+node:
+  key: Container_ol9q2ndj
+  children:
+    - key: Column_b0hywhga
+      children:
+        - key: Icon_8t9bhww7
+        - key: Text_gw56l0np

@@ -1,0 +1,88 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: totalParadas
+        key: rod003
+      setValue:
+        variable:
+          source: ACTION_OUTPUTS
+          defaultValue:
+            serializedValue: "0"
+          baseVariable:
+            actionOutput:
+              outputVariableIdentifier:
+                name: paradasAfterStatusP
+              actionKeyRef:
+                key: actstparp
+          operations:
+            - apiResponseField:
+                responseField: JSON_BODY
+            - jsonPathOperation:
+                jsonPath: $.data.total
+          nodeKeyRef:
+            key: IconButton_gwcxksgo
+          actionComponentKeyRef: {}
+    - fieldIdentifier:
+        name: paradaItems
+        key: rod007
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: paradasAfterStatusP
+                      actionKeyRef:
+                        key: actstparp
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: IconButton_gwcxksgo
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseRotaParadasFromApi
+              key: rtpp01
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: mapPoints
+        key: rod010
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: ACTION_OUTPUTS
+                          baseVariable:
+                            actionOutput:
+                              outputVariableIdentifier:
+                                name: paradasAfterStatusP
+                              actionKeyRef:
+                                key: actstparp
+                          operations:
+                            - apiResponseField:
+                                responseField: JSON_BODY
+                          nodeKeyRef:
+                            key: IconButton_gwcxksgo
+                          actionComponentKeyRef: {}
+                    customFunction:
+                      name: parseRotaParadasFromApi
+                      key: rtpp01
+            customFunction:
+              name: paradaItemsToLatLngs
+              key: rtpll1
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actstupp

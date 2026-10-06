@@ -1,0 +1,15 @@
+key: Icon_dxp7nvl8
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: INFO
+    iconDataValue:
+      inputValue:
+        codePoint: 62775
+        family: MaterialIcons
+        matchTextDirection: false
+        name: add_rounded

@@ -1,0 +1,21 @@
+key: Text_58fa22z4
+type: Text
+props:
+  text:
+    themeStyle: HEADLINE_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: userName
+              key: ast002
+            stateVariableType: APP_STATE
+    fontSizeValue:
+      inputValue: 18
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Greeting

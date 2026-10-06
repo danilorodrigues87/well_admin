@@ -1,0 +1,16 @@
+key: Icon_780pblr4
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 18
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    iconDataValue:
+      inputValue:
+        codePoint: 63131
+        family: MaterialIcons
+        matchTextDirection: false
+        name: description_rounded
+name: Icon

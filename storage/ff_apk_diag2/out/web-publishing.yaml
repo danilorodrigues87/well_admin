@@ -1,0 +1,7 @@
+webSettings:
+  PROD:
+    statusBarColor:
+      value: "4294046968"
+      darkModeColor:
+        value: "4280099880"
+    orientation: PORTRAIT_PRIMARY

@@ -1,0 +1,43 @@
+identifier:
+  name: WellAdmin Coleta PDF
+  key: wcpdf1
+url: "[baseUrl]\/coletas\/[coletaId]\/pdf"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bspdf1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tokpdf1
+    type: String
+    testValue: ""
+  - identifier:
+      name: coletaId
+      key: colpdf1
+    type: Integer
+    testValue: "1"
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bspdfp1
+    variableIdentifier:
+      name: baseUrl
+      key: bspdf1
+  - identifier:
+      name: authToken
+      key: atpdfp1
+    variableIdentifier:
+      name: authToken
+      key: tokpdf1
+  - identifier:
+      name: coletaId
+      key: cipdfp1
+    variableIdentifier:
+      name: coletaId
+      key: colpdf1

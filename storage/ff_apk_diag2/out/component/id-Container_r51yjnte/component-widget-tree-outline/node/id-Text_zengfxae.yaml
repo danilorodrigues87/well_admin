@@ -1,0 +1,30 @@
+key: Text_zengfxae
+type: Text
+props:
+  text:
+    themeStyle: TITLE_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: ""
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: title
+              key: local_card_com4_97b7a2deparam_title
+        nodeKeyRef:
+          key: Container_r51yjnte
+        uiBuilderValue:
+          serializedValue: ""
+      mostRecentInputValue: ""
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.4
+    maxLinesValue:
+      inputValue: 1
+    overflowReplacement: ELLIPSIS
+name: Text

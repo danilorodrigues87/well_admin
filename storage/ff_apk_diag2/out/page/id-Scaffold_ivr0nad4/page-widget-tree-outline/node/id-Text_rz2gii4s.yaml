@@ -1,0 +1,16 @@
+key: Text_rz2gii4s
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Rascunho
+    fontSizeValue:
+      inputValue: 12
+    colorValue:
+      inputValue:
+        themeColor: WARNING
+    heightValue:
+      inputValue: 1.27
+name: Chip Label

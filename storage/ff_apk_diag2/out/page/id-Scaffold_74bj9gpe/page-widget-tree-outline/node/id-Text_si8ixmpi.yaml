@@ -1,0 +1,14 @@
+key: Text_si8ixmpi
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Rotas
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+    heightValue:
+      inputValue: 1.27
+name: Text

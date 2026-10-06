@@ -1,0 +1,29 @@
+key: Text_3t3hn98m
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: GENERATOR_VARIABLE
+        defaultValue:
+          serializedValue: -/-/-
+        baseVariable:
+          generatorVariable: {}
+        operations:
+          - accessDataStructField:
+              fieldIdentifier:
+                name: data_hora
+                key: clf05
+        nodeKeyRef:
+          key: ListView_qsfh7n67
+      mostRecentInputValue: —
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.27
+name: Text
+parameterValues: {}
+valueKey: {}

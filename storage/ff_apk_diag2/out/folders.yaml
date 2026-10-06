@@ -1,0 +1,20 @@
+rootFolders:
+  - key: sftsbl0a
+    name: pages
+  - key: rn40r6bu
+    name: components
+widgetClassKeyToFolderKey:
+  Scaffold_7zli0let: sftsbl0a
+  Scaffold_splsh01: sftsbl0a
+  Scaffold_ivr0nad4: sftsbl0a
+  Container_kf7j9ckj: rn40r6bu
+  Scaffold_dwij8cyv: sftsbl0a
+  Scaffold_bfclgcqo: sftsbl0a
+  Container_fbp4a3uq: rn40r6bu
+  Container_t2tued2q: rn40r6bu
+  Container_18lw9l46: rn40r6bu
+  Container_r51yjnte: rn40r6bu
+  Container_nm74ryka: rn40r6bu
+  Container_ol9q2ndj: rn40r6bu
+  Scaffold_74bj9gpe: sftsbl0a
+  Container_i53uedwq: rn40r6bu

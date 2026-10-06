@@ -1,0 +1,29 @@
+key: Icon_ifytj9gi
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 24
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 57706
+        family: MaterialIcons
+        matchTextDirection: false
+        name: close
+  padding:
+    animatedPadding: {}
+  alignment:
+    xValue:
+      inputValue: 1
+    yValue:
+      inputValue: 0
+  responsiveVisibility: {}
+  opacity:
+    opacityValue:
+      inputValue: 1
+    animatedOpacity: {}
+  animatedAlignment: {}
+valueKey: {}

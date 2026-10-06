@@ -1,0 +1,58 @@
+name: NavItem
+description: ""
+params:
+  design_system_std_nav_item_std_nav_itemparam_label:
+    identifier:
+      name: label
+      key: design_system_std_nav_item_std_nav_itemparam_label
+    defaultValue:
+      serializedValue: Início
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_nav_item_std_nav_itemparam_icon:
+    identifier:
+      name: icon
+      key: design_system_std_nav_item_std_nav_itemparam_icon
+    defaultValue:
+      icon:
+        sizeValue:
+          inputValue: 24
+        colorValue:
+          inputValue:
+            themeColor: PRIMARY_TEXT
+        iconDataValue:
+          inputValue:
+            codePoint: 63477
+            family: MaterialIcons
+            matchTextDirection: false
+            name: home_rounded
+    dataType:
+      scalarType: WidgetProperty
+      subType:
+        widgetPropertyType: ICON
+    namedParameter:
+      isOptional: true
+  design_system_std_nav_item_std_nav_itemparam_target:
+    identifier:
+      name: target
+      key: design_system_std_nav_item_std_nav_itemparam_target
+    defaultValue:
+      serializedValue: dashboard
+    dataType:
+      scalarType: String
+    namedParameter:
+      isOptional: true
+  design_system_std_nav_item_std_nav_itemparam_selected:
+    identifier:
+      name: selected
+      key: design_system_std_nav_item_std_nav_itemparam_selected
+    defaultValue:
+      serializedValue: "false"
+    dataType:
+      scalarType: Boolean
+    namedParameter:
+      isOptional: true
+node:
+  key: Container_ol9q2ndj

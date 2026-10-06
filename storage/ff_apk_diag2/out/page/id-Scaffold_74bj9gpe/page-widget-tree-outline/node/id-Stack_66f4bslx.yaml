@@ -1,0 +1,12 @@
+key: Stack_66f4bslx
+type: Stack
+props:
+  expanded:
+    expandedType: UNEXPANDED
+  stack:
+    childAlignment:
+      xValue:
+        inputValue: -1
+      yValue:
+        inputValue: -1
+name: Stack

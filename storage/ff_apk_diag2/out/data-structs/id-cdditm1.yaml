@@ -1,0 +1,23 @@
+identifier:
+  name: ColetaResiduoItem
+  key: cdditm1
+fields:
+  - identifier:
+      name: nome
+      key: cdf01
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: detalhe
+      key: cdf02
+    dataType:
+      scalarType: String
+    description: ""
+  - identifier:
+      name: quantidade
+      key: cdf03
+    dataType:
+      scalarType: String
+    description: ""
+description: Item de resíduo no detalhe da coleta

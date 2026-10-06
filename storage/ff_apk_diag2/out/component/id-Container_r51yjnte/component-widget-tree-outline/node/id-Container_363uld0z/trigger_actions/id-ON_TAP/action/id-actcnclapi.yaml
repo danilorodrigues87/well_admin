@@ -1,0 +1,42 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Coleta Cancelar
+      key: wcncl1
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: coletaId
+          key: colid1
+        variable:
+          source: WIDGET_CLASS_PARAMETER
+          baseVariable:
+            widgetClass:
+              paramIdentifier:
+                name: id
+                key: p8pw99
+          nodeKeyRef:
+            key: Container_r51yjnte
+outputVariableName: cancelResult
+key: actcnclapi

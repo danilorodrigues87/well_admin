@@ -1,0 +1,39 @@
+identifier:
+  name: RotaMapPolyline
+  key: rotmap1
+parameters:
+  - identifier:
+      name: width
+      key: rmw001
+    dataType:
+      scalarType: WidgetProperty
+      nonNullable: false
+      subType:
+        widgetPropertyType: DIMENSIONS
+  - identifier:
+      name: markers
+      key: rmm001
+    dataType:
+      listType:
+        scalarType: LatLng
+      nonNullable: false
+  - identifier:
+      name: encodedPolyline
+      key: rmp001
+    dataType:
+      scalarType: String
+      nonNullable: false
+  - identifier:
+      name: collectorLat
+      key: rmc001
+    dataType:
+      scalarType: Double
+      nonNullable: false
+  - identifier:
+      name: collectorLng
+      key: rmc002
+    dataType:
+      scalarType: Double
+      nonNullable: false
+previewValues: {}
+description: "Mapa da rota com pinos, polyline e caminhao do coletor"

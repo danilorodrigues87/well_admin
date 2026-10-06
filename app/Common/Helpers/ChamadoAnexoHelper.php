@@ -2,6 +2,8 @@
 
 namespace App\Common\Helpers;
 
+use App\Common\StoragePath;
+
 class ChamadoAnexoHelper
 {
     private const MAX_BYTES = 5242880;
@@ -14,9 +16,7 @@ class ChamadoAnexoHelper
 
     public static function dirBase(): string
     {
-        $root = rtrim(str_replace('\\', '/', realpath(__DIR__.'/../../../') ?: (__DIR__.'/../../..')), '/');
-
-        return $root.'/storage/chamados';
+        return StoragePath::join('chamados');
     }
 
     public static function dirOperadora(int $operadoraId): string

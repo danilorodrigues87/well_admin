@@ -1,0 +1,154 @@
+key: Text_h7d4u5ju
+type: Text
+props:
+  text:
+    themeStyle: LABEL_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: WIDGET_CLASS_PARAMETER
+        defaultValue:
+          serializedValue: Ver tudo
+        baseVariable:
+          widgetClass:
+            paramIdentifier:
+              name: content
+              key: design_system_std_button_std_buttonparam_content
+        nodeKeyRef:
+          key: Container_kf7j9ckj
+        uiBuilderValue:
+          serializedValue: Ver tudo
+      mostRecentInputValue: Ver tudo
+    colorValue:
+      variable:
+        source: FUNCTION_CALL
+        defaultValue:
+          color:
+            themeColor: PRIMARY
+        functionCall:
+          conditionalValue:
+            ifConditionalValues:
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: secondary
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      darkModeColor:
+                        value: "4294967295"
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: outline
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY_TEXT
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: ghost
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      themeColor: PRIMARY
+              - condition:
+                  source: FUNCTION_CALL
+                  functionCall:
+                    values:
+                      - variable:
+                          source: WIDGET_CLASS_PARAMETER
+                          defaultValue:
+                            serializedValue: ghost
+                          baseVariable:
+                            widgetClass:
+                              paramIdentifier:
+                                name: variant
+                                key: design_system_std_button_std_buttonparam_variant
+                          nodeKeyRef:
+                            key: Container_kf7j9ckj
+                          uiBuilderValue:
+                            serializedValue: ghost
+                      - inputValue:
+                          serializedValue: destructive
+                    condition:
+                      relation: EQUAL_TO
+                value:
+                  inputValue:
+                    color:
+                      value: "4294967295"
+                      darkModeColor:
+                        value: "4294967295"
+            elseValue:
+              inputValue:
+                color:
+                  value: "4294967295"
+                  darkModeColor:
+                    value: "4294967295"
+            returnParameter:
+              dataType:
+                scalarType: Color
+        uiBuilderValue:
+          color:
+            themeColor: PRIMARY
+      mostRecentInputValue:
+        themeColor: PRIMARY
+    heightValue:
+      inputValue: 1.38
+    maxLinesValue:
+      inputValue: 1
+    overflowReplacement: CLIP
+name: Text

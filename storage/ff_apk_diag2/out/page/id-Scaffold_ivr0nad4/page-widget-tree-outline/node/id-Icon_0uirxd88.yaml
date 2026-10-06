@@ -1,0 +1,16 @@
+key: Icon_0uirxd88
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 20
+    colorValue:
+      inputValue:
+        themeColor: ERROR
+    iconDataValue:
+      inputValue:
+        codePoint: 983233
+        family: MaterialIcons
+        matchTextDirection: false
+        name: priority_high_rounded
+name: Icon

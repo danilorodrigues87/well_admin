@@ -1,0 +1,31 @@
+key: IconButton_on4qgcm5
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        themeColor: PRIMARY
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: false
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 24
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_BACKGROUND
+        iconDataValue:
+          inputValue:
+            codePoint: 58722
+            family: MaterialIcons
+            matchTextDirection: false
+            name: directions_rounded
+name: AbrirRotaMaps

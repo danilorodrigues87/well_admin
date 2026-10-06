@@ -1,0 +1,45 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Login
+      key: wlgn01
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_7zli0let
+      - variableIdentifier:
+          name: email
+          key: eml001
+        variable:
+          source: WIDGET_STATE
+          baseVariable:
+            widgetState:
+              returnParameter:
+                dataType:
+                  scalarType: String
+          nodeKeyRef:
+            key: TextField_lgemail
+      - variableIdentifier:
+          name: password
+          key: pwd001
+        variable:
+          source: WIDGET_STATE
+          baseVariable:
+            widgetState:
+              returnParameter:
+                dataType:
+                  scalarType: String
+          nodeKeyRef:
+            key: TextField_lgpwd01
+outputVariableName: loginResult
+key: actlg001

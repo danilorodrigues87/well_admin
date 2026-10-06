@@ -1,0 +1,86 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: rotaNomes
+        key: rod008
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: rotasInitResult
+                      actionKeyRef:
+                        key: actrodinitr
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Scaffold_74bj9gpe
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseRotaNomesFromApi
+              key: rtpn01
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: rotaIds
+        key: rod009
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: rotasInitResult
+                      actionKeyRef:
+                        key: actrodinitr
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Scaffold_74bj9gpe
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: parseRotaIdsFromApi
+              key: rtpi01
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+    - fieldIdentifier:
+        name: rotaId
+        key: rod002
+      setValue:
+        variable:
+          source: FUNCTION_CALL
+          functionCall:
+            values:
+              - variable:
+                  source: ACTION_OUTPUTS
+                  baseVariable:
+                    actionOutput:
+                      outputVariableIdentifier:
+                        name: rotasInitResult
+                      actionKeyRef:
+                        key: actrodinitr
+                  operations:
+                    - apiResponseField:
+                        responseField: JSON_BODY
+                  nodeKeyRef:
+                    key: Scaffold_74bj9gpe
+                  actionComponentKeyRef: {}
+            customFunction:
+              name: firstRotaIdFromApi
+              key: rtpfr1
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actrodinitru

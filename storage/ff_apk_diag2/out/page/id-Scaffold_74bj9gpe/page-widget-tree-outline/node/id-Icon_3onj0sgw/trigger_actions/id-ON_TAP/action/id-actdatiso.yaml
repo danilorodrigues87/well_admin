@@ -1,0 +1,26 @@
+localStateUpdate:
+  updates:
+    - fieldIdentifier:
+        name: rotaDataIso
+        key: rod001
+      setValue:
+        variable:
+          source: WIDGET_STATE
+          baseVariable:
+            widgetState:
+              actionType: DATE_PICKER
+          operations:
+            - dateTimeFormat:
+                format: yyyy-MM-dd
+                isCustom: true
+          nodeKeyRef:
+            key: Icon_3onj0sgw
+    - fieldIdentifier:
+        name: rotaId
+        key: rod002
+      setValue:
+        inputValue:
+          serializedValue: "0"
+  updateType: WIDGET
+  stateVariableType: WIDGET_CLASS_STATE
+key: actdatiso

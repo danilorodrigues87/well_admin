@@ -1,0 +1,16 @@
+key: Text_jp0fg4tf
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: SINIR
+    colorValue:
+      inputValue:
+        value: "4294967295"
+    heightValue:
+      inputValue: 1.27
+    fontWeightValue:
+      inputValue: w700
+name: Text

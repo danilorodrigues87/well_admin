@@ -1,0 +1,31 @@
+key: IconButton_rotapl1
+type: IconButton
+props:
+  iconButton:
+    disabled:
+      disabledValue:
+        inputValue: false
+    buttonSize:
+      pixelsValue:
+        inputValue: 40
+    fillColorValue:
+      inputValue:
+        themeColor: PRIMARY
+    borderRadiusValue:
+      inputValue: 8
+    showLoadingIndicatorValue:
+      inputValue: false
+    iconValue:
+      inputValue:
+        sizeValue:
+          inputValue: 22
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_BACKGROUND
+        iconDataValue:
+          inputValue:
+            codePoint: 62834
+            family: MaterialIcons
+            matchTextDirection: false
+            name: refresh_rounded
+name: AplicarRota

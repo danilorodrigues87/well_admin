@@ -1,0 +1,23 @@
+key: Column_gqgyyr68
+type: Column
+props:
+  column:
+    mainAxisAlignment: main_axis_center
+    crossAxisAlignment: cross_axis_center
+    scrollable: false
+    listSpacing:
+      spacingValue:
+        inputValue: 2
+    minSizeValue:
+      inputValue: true
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 8
+    topValue:
+      inputValue: 4
+    rightValue:
+      inputValue: 8
+    bottomValue:
+      inputValue: 4
+name: Column

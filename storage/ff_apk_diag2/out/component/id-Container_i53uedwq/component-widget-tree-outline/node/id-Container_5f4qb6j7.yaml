@@ -1,0 +1,329 @@
+key: Container_5f4qb6j7
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        pixelsValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "26"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: Android
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_switch_std_switchparam_variant
+                              nodeKeyRef:
+                                key: Container_i53uedwq
+                              uiBuilderValue:
+                                serializedValue: Android
+                          - inputValue:
+                              serializedValue: iOS 26+
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "39"
+                elseValue:
+                  inputValue:
+                    serializedValue: "26"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "26"
+          mostRecentInputValue: 26
+      height:
+        pixelsValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "26"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: Android
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_switch_std_switchparam_variant
+                              nodeKeyRef:
+                                key: Container_i53uedwq
+                              uiBuilderValue:
+                                serializedValue: Android
+                          - inputValue:
+                              serializedValue: iOS 26+
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "24"
+                elseValue:
+                  inputValue:
+                    serializedValue: "26"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "26"
+          mostRecentInputValue: 26
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ONLY
+        topLeftValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "13"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: Android
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_switch_std_switchparam_variant
+                              nodeKeyRef:
+                                key: Container_i53uedwq
+                              uiBuilderValue:
+                                serializedValue: Android
+                          - inputValue:
+                              serializedValue: iOS 26+
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "9999"
+                elseValue:
+                  inputValue:
+                    serializedValue: "13"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "13"
+          mostRecentInputValue: 13
+        topRightValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "13"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: Android
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_switch_std_switchparam_variant
+                              nodeKeyRef:
+                                key: Container_i53uedwq
+                              uiBuilderValue:
+                                serializedValue: Android
+                          - inputValue:
+                              serializedValue: iOS 26+
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "9999"
+                elseValue:
+                  inputValue:
+                    serializedValue: "13"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "13"
+          mostRecentInputValue: 13
+        bottomLeftValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "13"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: Android
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_switch_std_switchparam_variant
+                              nodeKeyRef:
+                                key: Container_i53uedwq
+                              uiBuilderValue:
+                                serializedValue: Android
+                          - inputValue:
+                              serializedValue: iOS 26+
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "9999"
+                elseValue:
+                  inputValue:
+                    serializedValue: "13"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "13"
+          mostRecentInputValue: 13
+        bottomRightValue:
+          variable:
+            source: FUNCTION_CALL
+            defaultValue:
+              serializedValue: "13"
+            functionCall:
+              conditionalValue:
+                ifConditionalValues:
+                  - condition:
+                      source: FUNCTION_CALL
+                      functionCall:
+                        values:
+                          - variable:
+                              source: WIDGET_CLASS_PARAMETER
+                              defaultValue:
+                                serializedValue: Android
+                              baseVariable:
+                                widgetClass:
+                                  paramIdentifier:
+                                    name: variant
+                                    key: design_system_std_switch_std_switchparam_variant
+                              nodeKeyRef:
+                                key: Container_i53uedwq
+                              uiBuilderValue:
+                                serializedValue: Android
+                          - inputValue:
+                              serializedValue: iOS 26+
+                        condition:
+                          relation: EQUAL_TO
+                    value:
+                      inputValue:
+                        serializedValue: "9999"
+                elseValue:
+                  inputValue:
+                    serializedValue: "13"
+                returnParameter:
+                  dataType:
+                    scalarType: Double
+            uiBuilderValue:
+              serializedValue: "13"
+          mostRecentInputValue: 13
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        variable:
+          source: FUNCTION_CALL
+          defaultValue:
+            color:
+              value: "4294967295"
+              darkModeColor:
+                value: "4294967295"
+          functionCall:
+            conditionalValue:
+              ifConditionalValues:
+                - condition:
+                    source: WIDGET_CLASS_PARAMETER
+                    defaultValue:
+                      serializedValue: "true"
+                    baseVariable:
+                      widgetClass:
+                        paramIdentifier:
+                          name: active
+                          key: design_system_std_switch_std_switchparam_active
+                    nodeKeyRef:
+                      key: Container_i53uedwq
+                    uiBuilderValue:
+                      serializedValue: "true"
+                  value:
+                    inputValue:
+                      color:
+                        value: "4294967295"
+                        darkModeColor:
+                          value: "4294967295"
+                - condition:
+                    source: FUNCTION_CALL
+                    functionCall:
+                      values:
+                        - variable:
+                            source: WIDGET_CLASS_PARAMETER
+                            defaultValue:
+                              serializedValue: Android
+                            baseVariable:
+                              widgetClass:
+                                paramIdentifier:
+                                  name: variant
+                                  key: design_system_std_switch_std_switchparam_variant
+                            nodeKeyRef:
+                              key: Container_i53uedwq
+                            uiBuilderValue:
+                              serializedValue: Android
+                        - inputValue:
+                            serializedValue: iOS 26+
+                      condition:
+                        relation: EQUAL_TO
+                  value:
+                    inputValue:
+                      color:
+                        themeColor: SECONDARY_BACKGROUND
+              elseValue:
+                inputValue:
+                  color:
+                    themeColor: PRIMARY_BACKGROUND
+              returnParameter:
+                dataType:
+                  scalarType: Color
+          uiBuilderValue:
+            color:
+              value: "4294967295"
+              darkModeColor:
+                value: "4294967295"
+        mostRecentInputValue:
+          value: "4294967295"
+          darkModeColor:
+            value: "4294967295"
+name: Container

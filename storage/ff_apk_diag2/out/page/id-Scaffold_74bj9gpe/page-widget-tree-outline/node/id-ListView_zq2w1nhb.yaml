@@ -1,0 +1,28 @@
+key: ListView_zq2w1nhb
+type: ListView
+props:
+  listView:
+    axis: FF_AXIS_VERTICAL
+    primary: true
+    shrinkWrapValue:
+      inputValue: false
+      mostRecentInputValue: false
+  expanded:
+    expandedType: EXPANDED
+    flexValue:
+      inputValue: 1
+parameterValues: {}
+generatorVariable:
+  identifier:
+    name: paradaItem
+  variable:
+    source: LOCAL_STATE
+    baseVariable:
+      localState:
+        fieldIdentifier:
+          name: paradaItems
+          key: rod007
+        stateVariableType: WIDGET_CLASS_STATE
+    nodeKeyRef:
+      key: Scaffold_74bj9gpe
+valueKey: {}

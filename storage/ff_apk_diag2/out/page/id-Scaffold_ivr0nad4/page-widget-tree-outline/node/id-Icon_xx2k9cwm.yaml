@@ -1,0 +1,18 @@
+key: Icon_xx2k9cwm
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 18
+    colorValue:
+      inputValue:
+        value: "4294967295"
+        darkModeColor:
+          value: "4294967295"
+    iconDataValue:
+      inputValue:
+        codePoint: 62775
+        family: MaterialIcons
+        matchTextDirection: false
+        name: add_rounded
+name: Chip Icon

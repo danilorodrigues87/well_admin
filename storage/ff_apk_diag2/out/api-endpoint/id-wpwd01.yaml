@@ -1,0 +1,69 @@
+identifier:
+  name: WellAdmin Perfil Senha
+  key: wpwd01
+url: "[baseUrl]\/perfil\/senha"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: senha_atual
+      key: pwdcur
+    type: String
+    testValue: ""
+  - identifier:
+      name: nova_senha
+      key: pwdnew
+    type: String
+    testValue: ""
+  - identifier:
+      name: confirmacao
+      key: pwdcnf
+    type: String
+    testValue: ""
+bodyType: JSON
+body: "{\n  \"senha_atual\": \"<senha_atual>\",\n  \"nova_senha\": \"<nova_senha>\",\n  \"confirmacao\": \"<confirmacao>\"\n}"
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: senha_atual
+      key: pwdp01
+    variableIdentifier:
+      name: senha_atual
+      key: pwdcur
+  - identifier:
+      name: nova_senha
+      key: pwdp02
+    variableIdentifier:
+      name: nova_senha
+      key: pwdnew
+  - identifier:
+      name: confirmacao
+      key: pwdp03
+    variableIdentifier:
+      name: confirmacao
+      key: pwdcnf
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001

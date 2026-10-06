@@ -1,0 +1,73 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Rota Parada Status
+      key: wrtst1
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: data
+          key: rtd001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: rotaDataIso
+                key: rod001
+              stateVariableType: WIDGET_CLASS_STATE
+          nodeKeyRef:
+            key: Scaffold_74bj9gpe
+      - variableIdentifier:
+          name: coletor_id
+          key: rtc001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: userId
+                key: ast003
+              stateVariableType: APP_STATE
+      - variableIdentifier:
+          name: cliente_id
+          key: rcl001
+        variable:
+          source: GENERATOR_VARIABLE
+          baseVariable:
+            generatorVariable: {}
+          operations:
+            - accessDataStructField:
+                fieldIdentifier:
+                  name: cliente_id
+                  key: rpf01
+          nodeKeyRef:
+            key: ListView_zq2w1nhb
+      - variableIdentifier:
+          name: status
+          key: rst001
+        inputValue:
+          serializedValue: coletado
+outputVariableName: statusColetadoResult
+key: actstcol

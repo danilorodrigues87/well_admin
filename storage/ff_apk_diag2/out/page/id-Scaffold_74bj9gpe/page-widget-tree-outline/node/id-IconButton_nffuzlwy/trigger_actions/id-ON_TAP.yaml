@@ -1,0 +1,6 @@
+rootAction:
+  key: mapsroot1
+  action:
+    key: actmaps01
+trigger:
+  triggerType: ON_TAP

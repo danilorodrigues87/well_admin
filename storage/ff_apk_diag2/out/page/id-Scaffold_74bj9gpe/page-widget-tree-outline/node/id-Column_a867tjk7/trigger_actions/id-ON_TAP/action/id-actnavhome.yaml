@@ -1,0 +1,9 @@
+navigate:
+  allowBack: true
+  passedParameters:
+    widgetClassNodeKeyRef:
+      key: Scaffold_ivr0nad4
+  isNavigateBack: false
+  pageNodeKeyRef:
+    key: Scaffold_ivr0nad4
+key: actnavhome

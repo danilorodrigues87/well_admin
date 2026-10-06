@@ -1,0 +1,30 @@
+key: ListView_qsfh7n67
+type: ListView
+props:
+  listView:
+    axis: FF_AXIS_VERTICAL
+    primary: true
+    listSpacing:
+      spacingValue:
+        inputValue: 16
+    shrinkWrapValue:
+      inputValue: true
+  padding:
+    type: FF_PADDING_ONLY
+    animatedPadding: {}
+  responsiveVisibility: {}
+parameterValues: {}
+generatorVariable:
+  identifier:
+    name: coletaItem
+  variable:
+    source: LOCAL_STATE
+    baseVariable:
+      localState:
+        fieldIdentifier:
+          name: coletaItems
+          key: cl006
+        stateVariableType: WIDGET_CLASS_STATE
+    nodeKeyRef:
+      key: Scaffold_dwij8cyv
+valueKey: {}

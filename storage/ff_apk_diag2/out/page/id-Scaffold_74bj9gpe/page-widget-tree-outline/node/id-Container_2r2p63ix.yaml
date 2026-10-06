@@ -1,0 +1,19 @@
+key: Container_2r2p63ix
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+          mostRecentInputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 240
+          mostRecentInputValue: 240
+    boxDecoration:
+      boxShape: FF_BOX_SHAPE_RECTANGLE
+      colorValue:
+        inputValue:
+          themeColor: ALTERNATE
+name: Map

@@ -1,0 +1,76 @@
+identifier:
+  name: WellAdmin Coletas Listar
+  key: wcol01
+url: "[baseUrl]\/coletas?page=[page]&per_page=[per_page]&status=[status]&busca=[busca]"
+callType: GET
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: page
+      key: pg0001
+    type: Integer
+    testValue: "1"
+  - identifier:
+      name: per_page
+      key: pp0001
+    type: Integer
+    testValue: "15"
+  - identifier:
+      name: status
+      key: st0001
+    type: String
+    testValue: ""
+  - identifier:
+      name: busca
+      key: bsc001
+    type: String
+    testValue: ""
+headers:
+  - "Authorization: Bearer [authToken]"
+endpointSettings: {}
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: page
+      key: pgpar1
+    variableIdentifier:
+      name: page
+      key: pg0001
+  - identifier:
+      name: per_page
+      key: pppar1
+    variableIdentifier:
+      name: per_page
+      key: pp0001
+  - identifier:
+      name: status
+      key: stpar1
+    variableIdentifier:
+      name: status
+      key: st0001
+  - identifier:
+      name: busca
+      key: bscpar
+    variableIdentifier:
+      name: busca
+      key: bsc001

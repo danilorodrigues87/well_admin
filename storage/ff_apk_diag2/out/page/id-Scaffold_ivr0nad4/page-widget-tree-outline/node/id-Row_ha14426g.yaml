@@ -1,0 +1,18 @@
+key: Row_ha14426g
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_center
+    crossAxisAlignment: cross_axis_center
+    listSpacing:
+      spacingValue:
+        inputValue: 6
+    minSizeValue:
+      inputValue: true
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 12
+    rightValue:
+      inputValue: 12
+name: Chip Content

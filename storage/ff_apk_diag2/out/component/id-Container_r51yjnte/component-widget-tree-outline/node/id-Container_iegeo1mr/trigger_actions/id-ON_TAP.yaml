@@ -1,0 +1,6 @@
+rootAction:
+  key: cddtap1
+  action:
+    key: actcddnav1
+trigger:
+  triggerType: ON_TAP

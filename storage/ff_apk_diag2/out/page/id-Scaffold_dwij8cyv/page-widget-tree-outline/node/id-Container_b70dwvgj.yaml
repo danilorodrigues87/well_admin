@@ -1,0 +1,52 @@
+key: Container_b70dwvgj
+type: Container
+props:
+  container:
+    dimensions:
+      height:
+        pixelsValue:
+          inputValue: 34
+    boxDecoration:
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 8
+      border:
+        top:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+        right:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+        bottom:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+        left:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+      borderWidthValue:
+        inputValue: 1
+    childAlignment:
+      xValue:
+        inputValue: 0
+      yValue:
+        inputValue: 0
+name: Chip_rascunho

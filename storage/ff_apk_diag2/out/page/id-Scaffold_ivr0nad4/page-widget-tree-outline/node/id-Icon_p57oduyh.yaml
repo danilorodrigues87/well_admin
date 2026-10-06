@@ -1,0 +1,16 @@
+key: Icon_p57oduyh
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 20
+    colorValue:
+      inputValue:
+        themeColor: SUCCESS
+    iconDataValue:
+      inputValue:
+        codePoint: 63029
+        family: MaterialIcons
+        matchTextDirection: false
+        name: check_circle_rounded
+name: Icon

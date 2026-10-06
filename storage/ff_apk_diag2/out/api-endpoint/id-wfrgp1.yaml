@@ -1,0 +1,69 @@
+identifier:
+  name: WellAdmin Frota Posicao
+  key: wfrgp1
+url: "[baseUrl]\/frota\/posicao"
+callType: POST
+variables:
+  - identifier:
+      name: baseUrl
+      key: bsurl1
+    type: String
+    testValue: https://admin.well.eco.br/api/v1
+  - identifier:
+      name: authToken
+      key: tok001
+    type: String
+    testValue: ""
+  - identifier:
+      name: latitude
+      key: flat01
+    type: Double
+    testValue: "-23.5"
+  - identifier:
+      name: longitude
+      key: flng01
+    type: Double
+    testValue: "-46.6"
+  - identifier:
+      name: accuracy_m
+      key: facc01
+    type: Double
+    testValue: "10"
+bodyType: JSON
+body: "{\n  \"latitude\": <latitude>,\n  \"longitude\": <longitude>,\n  \"accuracy_m\": <accuracy_m>\n}"
+headers:
+  - "Authorization: Bearer [authToken]"
+  - "Content-Type: application\/json"
+endpointSettings:
+  escapeVariablesInRequestBody: true
+parameters:
+  - identifier:
+      name: baseUrl
+      key: bsup01
+    variableIdentifier:
+      name: baseUrl
+      key: bsurl1
+  - identifier:
+      name: authToken
+      key: autp01
+    variableIdentifier:
+      name: authToken
+      key: tok001
+  - identifier:
+      name: latitude
+      key: fplat1
+    variableIdentifier:
+      name: latitude
+      key: flat01
+  - identifier:
+      name: longitude
+      key: fplng1
+    variableIdentifier:
+      name: longitude
+      key: flng01
+  - identifier:
+      name: accuracy_m
+      key: fpacc1
+    variableIdentifier:
+      name: accuracy_m
+      key: facc01

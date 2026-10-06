@@ -1,0 +1,16 @@
+snackBar:
+  textMessage:
+    inputValue:
+      serializedValue: Coleta cancelada.
+  textStyle:
+    variableColor:
+      inputValue:
+        color:
+          themeColor: PRIMARY_TEXT
+  durationMillis: 3000
+  shouldHidePreviousSnackbar: true
+  backgroundColor:
+    inputValue:
+      color:
+        themeColor: SUCCESS
+key: actcnclok

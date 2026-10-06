@@ -1,0 +1,46 @@
+database:
+  apiCall:
+    endpointIdentifier:
+      name: WellAdmin Coleta Detalhe
+      key: wcgt01
+    variables:
+      - variableIdentifier:
+          name: baseUrl
+          key: bsurl1
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: apiBaseUrl
+                key: ast004
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+      - variableIdentifier:
+          name: authToken
+          key: tok001
+        variable:
+          source: LOCAL_STATE
+          baseVariable:
+            localState:
+              fieldIdentifier:
+                name: authToken
+                key: ast001
+              stateVariableType: APP_STATE
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+      - variableIdentifier:
+          name: coletaId
+          key: colid1
+        variable:
+          source: WIDGET_CLASS_PARAMETER
+          baseVariable:
+            widgetClass:
+              paramIdentifier:
+                name: coletaId
+                key: cldtid1
+          nodeKeyRef:
+            key: Scaffold_bfclgcqo
+outputVariableName: coletaDetalheResult
+key: actcdd001

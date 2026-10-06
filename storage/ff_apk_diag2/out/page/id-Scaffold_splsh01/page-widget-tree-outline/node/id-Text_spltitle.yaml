@@ -1,0 +1,18 @@
+key: Text_spltitle
+type: Text
+props:
+  text:
+    themeStyle: HEADLINE_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Well Coletas
+      mostRecentInputValue: Well Coletas
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY
+      mostRecentInputValue:
+        themeColor: PRIMARY
+    fontWeightValue:
+      inputValue: w600
+  padding: {}
+name: SplashTitle
