@@ -88,15 +88,18 @@ class Coletas extends BaseApi
 
         try {
             $dataColeta = trim((string)($body['data_coleta'] ?? ''));
+            $clientUuid = trim((string)($body['client_uuid'] ?? ''));
+            $jaExistia = $clientUuid !== '' && EntityColeta::getByClientUuid($clientUuid) !== null;
             $coletaId = ColetaService::iniciarRascunho(
                 $clienteId,
                 ApiContext::userId(),
                 ApiContext::isAdmin(),
-                $dataColeta !== '' ? $dataColeta : null
+                $dataColeta !== '' ? $dataColeta : null,
+                $clientUuid !== '' ? $clientUuid : null
             );
             $detalhe = ColetaService::detalhar($coletaId);
 
-            return ApiHelper::ok(ColetaApiPresenter::coletaDetalhe($detalhe), 201);
+            return ApiHelper::ok(ColetaApiPresenter::coletaDetalhe($detalhe), $jaExistia ? 200 : 201);
         } catch (\InvalidArgumentException $e) {
             return self::handleInvalidArgument($e);
         } catch (\Throwable $e) {
@@ -123,6 +126,69 @@ class Coletas extends BaseApi
             return self::handleInvalidArgument($e);
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiColetas::updateTransporte');
+        }
+    }
+
+    public static function salvarRelatorio($request, int $id): \App\Http\Response
+    {
+        $coleta = EntityColeta::getById($id);
+        if (!$coleta) {
+            return ApiHelper::fail('not_found', 'Coleta não encontrada.', 404);
+        }
+        if ($err = self::assertColetaAccess($coleta)) {
+            return $err;
+        }
+
+        $body = $request->getPostVars();
+        $relatorio = trim((string)($body['relatorio'] ?? ''));
+        $filesByKey = [];
+        foreach (['evidencia_1', 'evidencia_2', 'evidencia_3'] as $key) {
+            if (!empty($_FILES[$key]) && is_array($_FILES[$key])) {
+                $filesByKey[$key] = $_FILES[$key];
+            }
+        }
+
+        try {
+            $resumo = ColetaService::salvarRascunhoFinal($id, $relatorio, $filesByKey);
+            $detalhe = ColetaService::detalhar($id);
+
+            return ApiHelper::ok([
+                'itens' => $resumo['itens'],
+                'evidencias' => $resumo['evidencias'],
+                'fotos_recebidas' => $resumo['fotos_recebidas'] ?? 0,
+                'motorista' => $resumo['motorista'],
+                'rascunho_conferido' => true,
+                'coleta' => ColetaApiPresenter::coletaDetalhe($detalhe),
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return self::handleInvalidArgument($e);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiColetas::salvarRelatorio');
+        }
+    }
+
+    public static function salvarAssinatura($request, int $id): \App\Http\Response
+    {
+        $coleta = EntityColeta::getById($id);
+        if (!$coleta) {
+            return ApiHelper::fail('not_found', 'Coleta não encontrada.', 404);
+        }
+        if ($err = self::assertColetaAccess($coleta)) {
+            return $err;
+        }
+
+        $body = $request->getPostVars();
+        $dataUrl = trim((string)($body['assinatura'] ?? $body['assinatura_data_url'] ?? ''));
+
+        try {
+            ColetaService::salvarAssinaturaCliente($id, $dataUrl);
+            $detalhe = ColetaService::detalhar($id);
+
+            return ApiHelper::ok(ColetaApiPresenter::coletaDetalhe($detalhe));
+        } catch (\InvalidArgumentException $e) {
+            return self::handleInvalidArgument($e);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiColetas::salvarAssinatura');
         }
     }
 

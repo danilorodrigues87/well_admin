@@ -1,0 +1,12 @@
+key: Text_cwst2r2d
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Classe E · 2 un
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

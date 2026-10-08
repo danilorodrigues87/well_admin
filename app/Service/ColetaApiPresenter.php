@@ -9,8 +9,10 @@ use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
+use App\Model\Entity\Destinador as EntityDestinador;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
 use App\Model\Entity\Operadora;
+use App\Model\Entity\Transportadora as EntityTransportadora;
 use App\Model\Entity\Usuario as EntityUsuario;
 use App\Model\Entity\Veiculo as EntityVeiculo;
 
@@ -103,6 +105,29 @@ class ColetaApiPresenter
         ];
     }
 
+    public static function transportadora(EntityTransportadora $t): array
+    {
+        return [
+            'id' => $t->id,
+            'nome' => $t->nome,
+            'cnpj' => $t->cnpj,
+            'is_padrao' => (bool)$t->is_padrao,
+            'label' => $t->nome.($t->cnpj !== '' ? ' — '.$t->cnpj : ''),
+        ];
+    }
+
+    public static function destinador(EntityDestinador $d): array
+    {
+        return [
+            'id' => $d->id,
+            'nome' => $d->nome,
+            'cnpj' => $d->cnpj,
+            'endereco' => $d->endereco,
+            'is_padrao' => (bool)$d->is_padrao,
+            'label' => $d->nome.($d->cnpj !== '' ? ' — '.$d->cnpj : ''),
+        ];
+    }
+
     public static function item(EntityColetaItem $i): array
     {
         return [
@@ -176,6 +201,7 @@ class ColetaApiPresenter
         return [
             'coleta' => [
                 'id' => $c->id,
+                'client_uuid' => $c->client_uuid,
                 'numero_mtr' => $c->numero_mtr,
                 'numero_relatorio' => $c->numero_relatorio,
                 'cliente_id' => $c->cliente_id,
@@ -183,6 +209,8 @@ class ColetaApiPresenter
                 'coletor_id' => $c->coletor_id,
                 'coletor_nome' => $c->coletor_nome,
                 'veiculo_id' => $c->veiculo_id,
+                'transportadora_id' => $c->transportadora_id,
+                'destinador_id' => $c->destinador_id,
                 'status' => $c->status,
                 'doc_referencia' => $c->doc_referencia,
                 'data_coleta' => $c->data_coleta,
@@ -191,6 +219,7 @@ class ColetaApiPresenter
                 'tratamento' => $c->tratamento,
                 'situacao_recebimento' => $c->situacao_recebimento,
                 'data_recebimento' => $c->data_recebimento,
+                'tem_assinatura_cliente' => $c->assinatura_cliente_path !== null && $c->assinatura_cliente_path !== '',
                 'sinir_status' => $c->sinir_status,
                 'sinir_man_numero' => $c->sinir_man_numero,
             ],

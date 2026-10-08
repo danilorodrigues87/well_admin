@@ -1,0 +1,24 @@
+key: Text_t4amqzk8
+type: Text
+props:
+  text:
+    themeStyle: TITLE_MEDIUM
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: clienteNome
+              key: cwcnom
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_4rp06q2q
+      mostRecentInputValue: Padaria Sao Jose
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+  responsiveVisibility: {}
+parameterValues: {}
+valueKey: {}

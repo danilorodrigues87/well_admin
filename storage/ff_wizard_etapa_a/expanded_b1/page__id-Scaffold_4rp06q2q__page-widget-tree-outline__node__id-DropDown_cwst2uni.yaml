@@ -1,0 +1,66 @@
+key: DropDown_cwst2uni
+type: DropDown
+props:
+  padding: {}
+  dropDown:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 48
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    optionsLabels:
+      values:
+        - translatableText:
+            textValue:
+              inputValue: Kg
+              mostRecentInputValue: Kg
+        - translatableText:
+            textValue:
+              inputValue: Litros
+              mostRecentInputValue: Litros
+        - translatableText:
+            textValue:
+              inputValue: Unid.
+              mostRecentInputValue: Unid.
+    optionsValues:
+      values:
+        - serializedValue: "kg"
+        - serializedValue: "l"
+        - serializedValue: "un"
+    hintText:
+      textValue:
+        inputValue: Unidade
+        mostRecentInputValue: Unidade
+    valueType:
+      dataType:
+        scalarType: String
+    fillColorValue:
+      inputValue:
+        themeColor: SECONDARY_BACKGROUND
+      mostRecentInputValue:
+        themeColor: SECONDARY_BACKGROUND
+    borderRadiusValue:
+      inputValue: 8
+      mostRecentInputValue: 8
+    borderColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+      mostRecentInputValue:
+        themeColor: ALTERNATE
+    borderWidthValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+    hidesUnderlineValue:
+      inputValue: true
+      mostRecentInputValue: true
+    elevationValue:
+      inputValue: 2
+      mostRecentInputValue: 2
+name: Unidade

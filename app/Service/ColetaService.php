@@ -56,13 +56,28 @@ class ColetaService
         int $clienteId,
         int $coletorId,
         bool $isAdmin = false,
-        ?string $dataColeta = null
+        ?string $dataColeta = null,
+        ?string $clientUuid = null
     ): int {
         $cliente = EntityCliente::getById($clienteId);
         if (!$cliente || $cliente->status !== 'ativo') {
             throw new \InvalidArgumentException('Cliente inválido ou inativo.');
         }
         RotaScopeService::assertClientePermitido($clienteId, $coletorId, $isAdmin);
+
+        $uuid = self::normalizeClientUuid($clientUuid);
+        if ($uuid !== null) {
+            $existente = EntityColeta::getByClientUuid($uuid);
+            if ($existente !== null) {
+                if ((int)$existente->cliente_id !== $clienteId) {
+                    throw new \InvalidArgumentException('client_uuid já usado em outra coleta.');
+                }
+
+                return $existente->id;
+            }
+        } else {
+            $uuid = self::generateClientUuid();
+        }
 
         $dataColeta = self::normalizeDataColeta($dataColeta);
 
@@ -88,9 +103,10 @@ class ColetaService
         try {
             $operadoraId = OperadoraScope::getOperadoraId();
             $db->execute(
-                'INSERT INTO coletas (operadora_id, cliente_id, coletor_id, transportadora_id, destinador_id, status, doc_referencia, data_coleta, hora)
-                 VALUES (?,?,?,?,?,?,?,?,?)',
+                'INSERT INTO coletas (client_uuid, operadora_id, cliente_id, coletor_id, transportadora_id, destinador_id, status, doc_referencia, data_coleta, hora)
+                 VALUES (?,?,?,?,?,?,?,?,?,?)',
                 [
+                    $uuid,
                     $operadoraId,
                     $clienteId,
                     $coletorId,
@@ -135,8 +151,44 @@ class ColetaService
             return $coletaId;
         } catch (\Throwable $e) {
             $db->rollBack();
+            if ($uuid !== null) {
+                $race = EntityColeta::getByClientUuid($uuid);
+                if ($race !== null && (int)$race->cliente_id === $clienteId) {
+                    return $race->id;
+                }
+            }
             throw $e;
         }
+    }
+
+    private static function normalizeClientUuid(?string $clientUuid): ?string
+    {
+        $uuid = strtolower(trim((string)$clientUuid));
+        if ($uuid === '') {
+            return null;
+        }
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid)) {
+            throw new \InvalidArgumentException('client_uuid inválido.');
+        }
+
+        return $uuid;
+    }
+
+    private static function generateClientUuid(): string
+    {
+        $bytes = random_bytes(16);
+        $bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
+        $bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
+        $hex = bin2hex($bytes);
+
+        return sprintf(
+            '%s-%s-%s-%s-%s',
+            substr($hex, 0, 8),
+            substr($hex, 8, 4),
+            substr($hex, 12, 4),
+            substr($hex, 16, 4),
+            substr($hex, 20, 12)
+        );
     }
 
     public static function salvarEtapaTransporte(int $coletaId, array $dados): void
@@ -208,11 +260,31 @@ class ColetaService
         ]);
     }
 
-    /** @deprecated Use salvarEtapaTransporte + salvarEtapaDestinador */
+    /**
+     * Compat API/app: aplica etapa 1 e/ou 4 conforme o body.
+     * Só exige transportadora/motorista se o payload trouxer dados de transporte.
+     */
     public static function salvarTransporte(int $coletaId, array $dados): void
     {
-        self::salvarEtapaTransporte($coletaId, $dados);
-        if (!empty($dados['destinador_id']) || !empty($dados['data_recebimento'])) {
+        $hasTransporte = (int)($dados['transportadora_id'] ?? 0) > 0
+            || trim((string)($dados['motorista_nome'] ?? '')) !== ''
+            || (int)($dados['veiculo_id'] ?? 0) > 0
+            || (array_key_exists('data_coleta', $dados) && trim((string)$dados['data_coleta']) !== '')
+            || (array_key_exists('hora', $dados) && trim((string)$dados['hora']) !== '');
+
+        $hasDestinador = (int)($dados['destinador_id'] ?? 0) > 0
+            || trim((string)($dados['data_recebimento'] ?? '')) !== ''
+            || array_key_exists('tratamento', $dados)
+            || array_key_exists('observacao_destinador', $dados)
+            || array_key_exists('situacao_recebimento', $dados);
+
+        if (!$hasTransporte && !$hasDestinador) {
+            throw new \InvalidArgumentException('Informe dados de transporte ou destinador.');
+        }
+        if ($hasTransporte) {
+            self::salvarEtapaTransporte($coletaId, $dados);
+        }
+        if ($hasDestinador) {
             self::salvarEtapaDestinador($coletaId, $dados);
         }
     }

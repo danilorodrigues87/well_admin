@@ -1,0 +1,29 @@
+key: Container_cwst2pad
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+      height:
+        pixelsValue:
+          inputValue: 140
+    boxDecoration:
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_BACKGROUND
+      borderRadiusValue:
+        inputValue: 8
+      border:
+        all:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+  padding:
+    type: FF_PADDING_ALL
+    allValue:
+      inputValue: 16
+name: AssinaturaPad

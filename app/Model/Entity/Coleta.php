@@ -11,6 +11,7 @@ class Coleta
     use TenantScoped;
 
     public int $id = 0;
+    public ?string $client_uuid = null;
     public int $operadora_id = 1;
     public ?int $numero_mtr = null;
     public ?int $numero_relatorio = null;
@@ -95,6 +96,28 @@ class Coleta
         return $row ? self::fromArray($row) : null;
     }
 
+    public static function getByClientUuid(string $clientUuid): ?self
+    {
+        $uuid = trim($clientUuid);
+        if ($uuid === '') {
+            return null;
+        }
+        $db = new Database();
+        $stmt = $db->execute(
+            'SELECT c.*, cl.nome_fantasia AS cliente_nome, cl.exige_mtr AS cliente_exige_mtr,
+                    u.nome AS coletor_nome
+             FROM coletas c
+             LEFT JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
+             LEFT JOIN usuarios u ON u.id = c.coletor_id AND u.operadora_id = c.operadora_id
+             WHERE c.client_uuid = ? AND c.operadora_id = ?
+             LIMIT 1',
+            [$uuid, ...self::tenantIdParams()]
+        );
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? self::fromArray($row) : null;
+    }
+
     public static function insert(array $data): int
     {
         return (int)(new Database('coletas'))->insert(self::ensureTenantInsert($data));
@@ -118,6 +141,8 @@ class Coleta
     {
         $c = new self();
         $c->id = (int)$row['id'];
+        $c->client_uuid = isset($row['client_uuid']) && $row['client_uuid'] !== null && $row['client_uuid'] !== ''
+            ? (string)$row['client_uuid'] : null;
         $c->operadora_id = (int)($row['operadora_id'] ?? 1);
         $c->numero_mtr = isset($row['numero_mtr']) && $row['numero_mtr'] !== null ? (int)$row['numero_mtr'] : null;
         $c->numero_relatorio = isset($row['numero_relatorio']) && $row['numero_relatorio'] !== null

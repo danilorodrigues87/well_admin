@@ -1,0 +1,31 @@
+key: Container_cwst4dat
+type: Container
+props:
+  container:
+    dimensions:
+      width:
+        percentOfContainingWidgetValue:
+          inputValue: 100
+      height:
+        pixelsValue:
+          inputValue: 48
+    boxDecoration:
+      colorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+      borderRadiusValue:
+        inputValue: 8
+      border:
+        all:
+          sizeValue:
+            inputValue: 1
+          colorValue:
+            inputValue:
+              themeColor: ALTERNATE
+  padding:
+    type: FF_PADDING_ONLY
+    leftValue:
+      inputValue: 16
+    rightValue:
+      inputValue: 16
+name: DataEncerramento

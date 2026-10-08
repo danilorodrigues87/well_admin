@@ -20,11 +20,13 @@
       continue;
     }
     final m = Map<String, dynamic>.from(raw);
+    final id = (m['id'] as num?)?.toInt() ?? 0;
     final nome = m['nome_label']?.toString() ?? m['nome']?.toString() ?? '';
     final detalhe = m['classe_nome']?.toString() ?? '';
     final quantidade = m['quantidade_label']?.toString() ?? '';
     out.add(
       ColetaResiduoItemStruct(
+        id: id,
         nome: nome,
         detalhe: detalhe,
         quantidade: quantidade,

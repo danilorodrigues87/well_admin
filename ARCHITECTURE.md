@@ -313,3 +313,9 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-06 | Storage EasyPanel: `StoragePath` + `STORAGE_PATH`; evidências/assinatura/CDF/boletos/Inter no volume; Dockerfile GD+WebP; `storage_diagnose.php`; doc `EVIDENCIAS.md` |
 | 2026-10-06 | Coleta com data anterior: `iniciarRascunho($dataColeta)` + filtro `data_referencia`; wizard edita data/hora; API `POST /coletas` aceita `data_coleta` |
 | 2026-10-06 | Fix data “hoje” rejeitada (`createFromFormat` sem `!`); data futura até +1 ano; modal detalhe por etapas (gerador/transportador/destinador) + assinatura + evidências |
+| 2026-10-06 | API wizard app: `GET /catalogos/transportadoras|destinadores`, `POST /coletas/{id}/relatorio` + `/assinatura`; PATCH transporte parcial (etapa 1 e/ou 4); presenter com FKs; smoke `api_coleta_wizard_smoke.php` |
+| 2026-10-06 | `coletas.client_uuid` (migration `051`) + idempotência em `POST /coletas` (replay 200); gancho offline |
+| 2026-10-08 | App FF **CollectionWizard**: RouteOfTheDay Coletar → `POST /coletas` + wizard; ON_INIT detalhe; Continuar etapa 1 `PATCH /transporte`; endpoints criar/transporte/catálogos/relatório; script `storage/ff_wizard_etapa_c/push_etapa_c.py` |
+| 2026-10-08 | Wizard etapa 2: ListView resíduos (`ColetaResiduoItem.id`), add/remove API, catálogo tipos + parsers `wtipn01`/`wtipi01`; footer Continuar/Voltar por `currentStep`; script `storage/ff_wizard_etapa_d/push_etapa_d.py` |
+| 2026-10-08 | Wizard etapa 3: `POST /relatorio` (texto) + banner ResumoOk; endpoint `wasg01` assinatura; fotos multipart ainda manuais/UI; script `storage/ff_wizard_etapa_e/push_etapa_e.py` |
+| 2026-10-08 | Wizard etapa 4: catálogos destinador/tratamento; PATCH destinador; finalizar → CollectionDetail; cancelar → back; scripts `storage/ff_wizard_etapa_f/push_etapa_f.py` |

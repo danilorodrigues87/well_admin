@@ -1,0 +1,12 @@
+key: Text_7tzqk85f
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Relatorio
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+name: Text

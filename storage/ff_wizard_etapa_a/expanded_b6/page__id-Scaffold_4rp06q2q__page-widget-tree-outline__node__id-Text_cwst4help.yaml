@@ -1,0 +1,12 @@
+key: Text_cwst4help
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: O MTR SINIR e gerado depois na listagem de Coletas.
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

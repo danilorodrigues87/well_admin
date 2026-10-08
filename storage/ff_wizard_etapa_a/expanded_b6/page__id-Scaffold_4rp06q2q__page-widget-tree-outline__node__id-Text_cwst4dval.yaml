@@ -1,0 +1,12 @@
+key: Text_cwst4dval
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: 06/10/2026
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

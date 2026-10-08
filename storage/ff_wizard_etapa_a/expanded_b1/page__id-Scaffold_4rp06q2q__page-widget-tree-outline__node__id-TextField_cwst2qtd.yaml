@@ -1,0 +1,49 @@
+key: TextField_cwst2qtd
+type: TextField
+props:
+  padding: {}
+  textField:
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    inputDecoration:
+      inputBorderType: outline
+      borderRadius:
+        type: FF_BORDER_RADIUS_ALL
+        allValue:
+          inputValue: 8
+      contentPadding:
+        leftValue:
+          inputValue: 16
+        topValue:
+          inputValue: 14
+        rightValue:
+          inputValue: 16
+        bottomValue:
+          inputValue: 14
+      hintStyle:
+        themeStyle: BODY_MEDIUM
+        colorValue:
+          inputValue:
+            themeColor: SECONDARY_TEXT
+      hintText:
+        textValue:
+          inputValue: 12,5
+          mostRecentInputValue: 12,5
+      borderColorValue:
+        inputValue:
+          themeColor: ALTERNATE
+      filledValue:
+        inputValue: true
+      fillColorValue:
+        inputValue:
+          themeColor: SECONDARY_BACKGROUND
+    keyboardType: NUMBER
+    width:
+      pixelsValue:
+        inputValue: Infinity
+    maxLinesValue:
+      inputValue: 1
+name: TextField

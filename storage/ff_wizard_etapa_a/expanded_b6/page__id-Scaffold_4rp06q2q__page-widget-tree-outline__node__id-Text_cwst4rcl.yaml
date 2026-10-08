@@ -1,0 +1,12 @@
+key: Text_cwst4rcl
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Recebido no destinador
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

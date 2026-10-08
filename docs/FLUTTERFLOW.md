@@ -53,6 +53,18 @@ Guia de edição pelo MCP, armadilhas e API oficial: [FLUTTERFLOW_MCP_GUIA.md](F
 | **WellAdmin Frota Posicao** | POST | `[baseUrl]/frota/posicao` |
 | **WellAdmin Frota Posicoes** | GET | `[baseUrl]/frota/posicoes?minutos=` |
 | **WellAdmin Catalogo Coletores** | GET | `[baseUrl]/catalogos/coletores` |
+| **WellAdmin Catalogo Transportadoras** | GET | `[baseUrl]/catalogos/transportadoras` |
+| **WellAdmin Catalogo Destinadores** | GET | `[baseUrl]/catalogos/destinadores` |
+| **WellAdmin Coleta Relatorio** | POST | `[baseUrl]/coletas/[coletaId]/relatorio` |
+| **WellAdmin Coleta Assinatura** | POST | `[baseUrl]/coletas/[coletaId]/assinatura` |
+
+### CollectionWizard (online C–F, 2026-10-08)
+
+Página `Scaffold_4rp06q2q` — 4 etapas com `currentStep` + footer Voltar/Continuar. Entrada: **RouteOfTheDay → Coletar** (`POST /coletas` com `data_coleta`/`client_uuid` → navega com `coletaId`).
+
+Scripts oficiais (`updateProjectByYaml`): `storage/ff_wizard_etapa_c|d|e|f/push_etapa_*.py`.
+
+Pendências online: fotos multipart nos slots, assinatura pad, dropdowns etapa 1 (transportadora/veículo/coletor) ligados aos catálogos, date picker de recebimento. Offline: etapas H–J.
 
 **Login** — JSON Paths de resposta: `authToken`, `userName`, `userId`, `isAdmin`, `funcaoNome`, `userModulesCsv`, `operadoraId`, `operadoraNome`.
 

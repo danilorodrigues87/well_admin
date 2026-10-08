@@ -1,0 +1,12 @@
+key: Text_cwst3ok1
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Relatorio salvo — confira antes de concluir
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

@@ -1,0 +1,24 @@
+key: Text_6hcel9pv
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      variable:
+        source: LOCAL_STATE
+        baseVariable:
+          localState:
+            fieldIdentifier:
+              name: clienteEndereco
+              key: cwcend
+            stateVariableType: WIDGET_CLASS_STATE
+        nodeKeyRef:
+          key: Scaffold_4rp06q2q
+      mostRecentInputValue: "Rua das Flores, 120 - Centro"
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+    heightValue:
+      inputValue: 1.27
+name: Text

@@ -1,0 +1,11 @@
+key: Row_cwst2r2r
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    listSpacing:
+      spacingValue:
+        inputValue: 8
+  padding: {}
+name: Row

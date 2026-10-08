@@ -1,0 +1,43 @@
+key: Button_cwst4sav
+type: Button
+props:
+  button:
+    text:
+      themeStyle: TITLE_SMALL
+      textValue:
+        inputValue: Salvar destinador
+        mostRecentInputValue: Salvar destinador
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY
+      fontWeightValue:
+        inputValue: w600
+    borderRadius:
+      type: FF_BORDER_RADIUS_ALL
+      allValue:
+        inputValue: 8
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 48
+    elevationValue:
+      inputValue: 0
+      mostRecentInputValue: 0
+    fillColorValue:
+      inputValue:
+        themeColor: SECONDARY_BACKGROUND
+      mostRecentInputValue:
+        themeColor: SECONDARY_BACKGROUND
+    borderColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+      mostRecentInputValue:
+        themeColor: ALTERNATE
+    borderWidthValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+  padding: {}
+name: Button

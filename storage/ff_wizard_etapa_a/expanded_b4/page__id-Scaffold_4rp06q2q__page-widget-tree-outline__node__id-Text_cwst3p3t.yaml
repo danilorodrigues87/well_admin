@@ -1,0 +1,12 @@
+key: Text_cwst3p3t
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Foto 3
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

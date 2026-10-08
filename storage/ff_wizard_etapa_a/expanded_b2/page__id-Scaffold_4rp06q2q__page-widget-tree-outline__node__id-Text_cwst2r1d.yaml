@@ -1,0 +1,12 @@
+key: Text_cwst2r1d
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Classe A · 12,5 kg
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

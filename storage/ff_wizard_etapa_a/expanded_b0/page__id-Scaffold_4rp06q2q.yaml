@@ -1,0 +1,48 @@
+name: CollectionWizard
+params:
+  cwcolid:
+    identifier:
+      name: coletaId
+      key: cwcolid
+    defaultValue:
+      serializedValue: "0"
+    dataType:
+      scalarType: Integer
+      nonNullable: true
+node:
+  key: Scaffold_4rp06q2q
+classModel:
+  stateFields:
+    - parameter:
+        identifier:
+          name: currentStep
+          key: cwstep
+        defaultValue:
+          serializedValue: "1"
+        dataType:
+          scalarType: Integer
+          nonNullable: true
+      serializedDefaultValue:
+        - "1"
+    - parameter:
+        identifier:
+          name: clienteNome
+          key: cwcnom
+        defaultValue:
+          serializedValue: Padaria Sao Jose
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - Padaria Sao Jose
+    - parameter:
+        identifier:
+          name: clienteEndereco
+          key: cwcend
+        defaultValue:
+          serializedValue: "Rua das Flores, 120 - Centro"
+        dataType:
+          scalarType: String
+          nonNullable: true
+      serializedDefaultValue:
+        - "Rua das Flores, 120 - Centro"

@@ -1,0 +1,12 @@
+key: Text_cwst3ok2
+type: Text
+props:
+  text:
+    themeStyle: LABEL_SMALL
+    selectable: false
+    textValue:
+      inputValue: Residuos: 2 · Motorista: Joao · Fotos: 1
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

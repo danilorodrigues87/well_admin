@@ -1,0 +1,11 @@
+key: Row_cwst2sigb
+type: Row
+props:
+  row:
+    mainAxisAlignment: main_axis_start
+    crossAxisAlignment: cross_axis_center
+    listSpacing:
+      spacingValue:
+        inputValue: 12
+  padding: {}
+name: Row

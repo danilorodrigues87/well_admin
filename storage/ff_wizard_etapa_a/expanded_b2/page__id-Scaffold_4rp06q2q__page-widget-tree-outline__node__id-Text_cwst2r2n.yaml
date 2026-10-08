@@ -1,0 +1,12 @@
+key: Text_cwst2r2n
+type: Text
+props:
+  text:
+    themeStyle: BODY_MEDIUM
+    selectable: false
+    textValue:
+      inputValue: Perfurocortante
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

@@ -1,0 +1,20 @@
+key: Icon_cwst3p1i
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 22
+      mostRecentInputValue: 22
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 58286
+        family: MaterialIcons
+        matchTextDirection: false
+        name: add_a_photo_rounded
+  padding: {}
+name: Icon

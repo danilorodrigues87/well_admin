@@ -1,0 +1,12 @@
+key: Text_cwst2ph
+type: Text
+props:
+  text:
+    themeStyle: BODY_SMALL
+    selectable: false
+    textValue:
+      inputValue: Area para assinar
+    colorValue:
+      inputValue:
+        themeColor: PRIMARY_TEXT
+name: Text

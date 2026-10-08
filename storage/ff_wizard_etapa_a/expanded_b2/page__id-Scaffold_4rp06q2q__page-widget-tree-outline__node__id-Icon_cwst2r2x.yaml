@@ -1,0 +1,20 @@
+key: Icon_cwst2r2x
+type: Icon
+props:
+  icon:
+    sizeValue:
+      inputValue: 22
+      mostRecentInputValue: 22
+    colorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+      mostRecentInputValue:
+        themeColor: SECONDARY_TEXT
+    iconDataValue:
+      inputValue:
+        codePoint: 57703
+        family: MaterialIcons
+        matchTextDirection: false
+        name: delete_outline_rounded
+  padding: {}
+name: Icon

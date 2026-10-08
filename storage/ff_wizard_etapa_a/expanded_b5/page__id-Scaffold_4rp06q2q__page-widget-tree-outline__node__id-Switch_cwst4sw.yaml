@@ -1,0 +1,21 @@
+key: Switch_cwst4sw
+type: Switch
+props:
+  platformType: MATERIAL
+  switchWidget:
+    disabled:
+      disabledValue:
+        inputValue: false
+    initialValueValue:
+      inputValue: false
+      mostRecentInputValue: false
+    activeTrackColorValue:
+      inputValue:
+        themeColor: PRIMARY
+    inactiveThumbColorValue:
+      inputValue:
+        themeColor: SECONDARY_TEXT
+    inactiveTrackColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+name: RecebidoSwitch

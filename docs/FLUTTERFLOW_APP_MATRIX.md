@@ -23,9 +23,9 @@
 | 4 | CollectionsList | Scaffold_dwij8cyv | Bottom nav inline + FAB | Lista coletas — [FLUTTERFLOW_COLLECTIONS_LIST.md](FLUTTERFLOW_COLLECTIONS_LIST.md) |
 | 5 | CollectionDetail | Scaffold_bfclgcqo | Inline | Detalhe operacional da coleta |
 | 6 | NewCollectionClientSelection | Scaffold_y00hrwko | Não | Escolher cliente |
-| 7 | CollectionWizardStep12 | Scaffold_cfjqs6at | Não | Wizard transporte + resíduos |
-| 8 | CollectionWizardFinalize | Scaffold_5bfhuarf | Não | Wizard finalizar + evidências |
-| 9 | RouteOfTheDay | Scaffold_92jb2sfk | BottomNav4 | Rota do dia + mapa |
+| 7 | **CollectionWizard** | Scaffold_4rp06q2q | Não (footer Voltar/Continuar) | Wizard 4 etapas (online C–F, 2026-10-08) |
+| 8 | CollectionWizardStep12 / Finalize | (legado design) | — | Substituídos por CollectionWizard |
+| 9 | RouteOfTheDay | Scaffold_74bj9gpe | Bottom nav inline | Rota do dia + mapa |
 | 10 | FleetMap | Scaffold_t85tsu07 | BottomNav5 | Mapa frota (gestor) |
 | 11 | UserProfileSettings | Scaffold_gx004zvy | Não | Perfil + configurações |
 | 12 | PerfilPage | Scaffold_perfil1 | Não | **Stub antigo** — substituir por UserProfileSettings |
@@ -58,17 +58,19 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 | **CollectionDetail** (continuar) | `coleta_nova` | — | — | → Wizard se rascunho |
 | **NewCollectionClientSelection** | `coleta_nova` | `GET /clientes/coleta` | Clientes Coleta | escopo pendentes/todos; tap → `POST /coletas` |
 | **NewCollectionClientSelection** | `coleta_nova` | `POST /coletas` | Coleta Criar | → activeColetaId → Wizard |
-| **CollectionWizardStep12** | `coleta_nova` | `GET /coletas/{id}` | Coleta Detalhe | On load |
-| **CollectionWizardStep12** | `coleta_nova` | `PATCH .../transporte` | Coleta Transporte | + `data_recebimento` no JSON |
-| **CollectionWizardStep12** | `coleta_nova` | Catálogos | Veículos, Tipos, Tratamentos | Dropdowns |
-| **CollectionWizardStep12** | `coleta_nova` | `POST/DELETE .../itens` | Add/Remove Item | Resíduos |
-| **CollectionWizardFinalize** | `coleta_nova` | `POST .../finalizar` | Finalizar | Multipart evidências **config manual FF** |
-| **CollectionWizardFinalize** | `coleta_nova` | `POST .../cancelar` | Cancelar | |
-| **RouteOfTheDay** | `rota_dia` | `GET /rota-do-dia/paradas` | **API** (sem FF) | Query `data`, gestor: `coletor_id`, `rota_id` **PLAN** paridade web |
-| **RouteOfTheDay** | `rota_dia` | `POST .../otimizar`, `salvar-ordem` | **API** | Google Map + polyline |
-| **RouteOfTheDay** | `rota_dia` | Switch GPS | `POST /frota/posicao` | **API** |
-| **RouteOfTheDay** | `rota_dia` | Paradas coletado/pulado | `POST .../parada-status` | **PLAN** |
-| **RouteOfTheDay** | `rota_dia` | — | — | url_launcher → Maps (`maps_url`) |
+| **CollectionWizard** | `coleta_nova` | `GET /coletas/{id}` | Coleta Detalhe | ON_INIT + state (cliente, transporte, resíduos) |
+| **CollectionWizard** | `coleta_nova` | `PATCH .../transporte` | Coleta Transporte | Etapa 1 Continuar; etapa 4 destinador |
+| **CollectionWizard** | `coleta_nova` | Catálogos | Tipos, Destinadores, Tratamentos (+ Transportadoras/Veículos API) | Tipos/destinador/tratamento ligados; dropdowns etapa 1 ainda UI |
+| **CollectionWizard** | `coleta_nova` | `POST/DELETE .../itens` | Add/Remove Item | ListView `residuos` + `ColetaResiduoItem.id` |
+| **CollectionWizard** | `coleta_nova` | `POST .../relatorio` | Coleta Relatorio | Texto; fotos multipart **pendente** |
+| **CollectionWizard** | `coleta_nova` | `POST .../finalizar` | Finalizar | Após PATCH destinador → CollectionDetail |
+| **CollectionWizard** | `coleta_nova` | `POST .../cancelar` | Cancelar | Volta à rota |
+| **RouteOfTheDay** (Coletar) | `coleta_nova` | `POST /coletas` | Coleta Criar | `data_coleta`+`client_uuid` → **CollectionWizard** |
+| **RouteOfTheDay** | `rota_dia` | `GET /rota-do-dia/paradas` | Rota Paradas | Query `data`, `coletor_id`, `rota_id` |
+| **RouteOfTheDay** | `rota_dia` | `POST .../otimizar`, `salvar-ordem` | Rota Otimizar / Salvar Ordem | Google Map + polyline / Static Map |
+| **RouteOfTheDay** | `rota_dia` | Switch GPS | `POST /frota/posicao` | Frota Posicao |
+| **RouteOfTheDay** | `rota_dia` | Paradas coletado/pulado | `POST .../parada-status` | Rota Parada Status |
+| **RouteOfTheDay** | `rota_dia` | — | — | Custom Action `openRotaDirections` → Maps |
 | **FleetMap** | `frota_mapa` | `GET /frota/posicoes` | **API** | Gestor/admin; atualização manual (sem polling agressivo) |
 | **FleetMap** | `frota_mapa` | Google Maps markers | — | Integração FF Maps |
 | **UserProfileSettings** | `perfil` | `GET /perfil` | Perfil | |

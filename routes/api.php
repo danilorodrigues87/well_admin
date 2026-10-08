@@ -110,6 +110,20 @@ $obRouter->get('/api/v1/catalogos/tratamentos', [
     },
 ]);
 
+$obRouter->get('/api/v1/catalogos/transportadoras', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request) {
+        return Catalogos::transportadoras($request);
+    },
+]);
+
+$obRouter->get('/api/v1/catalogos/destinadores', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request) {
+        return Catalogos::destinadores($request);
+    },
+]);
+
 $obRouter->get('/api/v1/coletas', [
     'middlewares' => $mod('coletas'),
     function ($request) {
@@ -135,6 +149,20 @@ $obRouter->patch('/api/v1/coletas/{id}/transporte', [
     'middlewares' => $mod('coleta_nova'),
     function ($request, int $id) {
         return Coletas::updateTransporte($request, $id);
+    },
+]);
+
+$obRouter->post('/api/v1/coletas/{id}/relatorio', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return Coletas::salvarRelatorio($request, $id);
+    },
+]);
+
+$obRouter->post('/api/v1/coletas/{id}/assinatura', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return Coletas::salvarAssinatura($request, $id);
     },
 ]);
 

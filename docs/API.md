@@ -180,17 +180,22 @@ Body trocar senha:
 | `GET /catalogos/veiculos` | `coleta_nova` | Veículos ativos |
 | `GET /catalogos/tipos-residuos` | `coleta_nova` | Tipos de resíduo ativos |
 | `GET /catalogos/tratamentos` | `coleta_nova` | Lista de tratamentos |
+| `GET /catalogos/transportadoras` | `coleta_nova` | Transportadoras ativas (`id`, `nome`, `cnpj`, `is_padrao`, `label`) |
+| `GET /catalogos/destinadores` | `coleta_nova` | Destinadores ativos (`id`, `nome`, `cnpj`, `endereco`, `is_padrao`, `label`) |
+| `GET /catalogos/coletores` | `rota_dia` | Coletores ativos (`id`, `nome`, `email`) — também usado no wizard |
 
 ### Coletas
 
 | Método | Endpoint | Módulo | Ação |
 |--------|----------|--------|------|
 | GET | `/coletas?busca=&status=&page=&per_page=` | `coletas` | Listar (coletor vê só as suas) |
-| POST | `/coletas` | `coleta_nova` | Iniciar rascunho `{ "cliente_id": 1, "data_coleta": "2026-10-05" }` (`data_coleta` opcional; padrão = hoje; até 2 anos atrás) |
+| POST | `/coletas` | `coleta_nova` | Iniciar rascunho `{ "cliente_id": 1, "data_coleta": "2026-10-05", "client_uuid": "uuid-v4" }` (`data_coleta` opcional; `client_uuid` opcional — idempotência offline/retry; servidor gera se omitido) |
 | GET | `/coletas/{id}` | `coletas` | Detalhe completo (wizard) |
-| PATCH | `/coletas/{id}/transporte` | `coleta_nova` | Salvar transporte/destinador |
+| PATCH | `/coletas/{id}/transporte` | `coleta_nova` | Salvar etapa 1 (transporte) e/ou etapa 4 (destinador) |
 | POST | `/coletas/{id}/itens` | `coleta_nova` | Adicionar resíduo |
 | DELETE | `/coletas/{id}/itens/{itemId}` | `coleta_nova` | Remover resíduo |
+| POST | `/coletas/{id}/relatorio` | `coleta_nova` | Salvar rascunho etapa 3 (relatório + fotos; **não** finaliza) |
+| POST | `/coletas/{id}/assinatura` | `coleta_nova` | Assinatura do cliente (JSON `assinatura` = data-URL PNG/JPEG) |
 | POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais). **Requer `data_recebimento` preenchida** (PATCH transporte antes). |
 | POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar relatório (rascunho ou finalizada). Se houver MTR no SINIR (`sinir_status=enviado`), cancela o manifesto antes. Body JSON opcional: `{ "justificativa": "..." }` (obrigatória na prática quando há MTR; default no servidor se vazia). |
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
@@ -236,11 +241,48 @@ impede o cancelamento local. Resposta `data.message`, `data.sinir_cancelado` e
 
 - Rascunho com ao menos 1 resíduo e motorista salvos (PATCH transporte).
 - **`data_recebimento` obrigatória** — data de chegada do resíduo no destinador final. Rascunho pode ficar sem data; finalização retorna erro 422 se ausente.
-- Multipart opcional: `evidencia_1`, `evidencia_2`, `evidencia_3` (JPEG/PNG/WebP, máx. 5 MB cada)
+- Preferível salvar etapa 3 antes via `POST /coletas/{id}/relatorio` (texto e/ou fotos).
+- Multipart opcional no finalizar: `evidencia_1`, `evidencia_2`, `evidencia_3` (JPEG/PNG/WebP, máx. 5 MB cada)
 
 ### PATCH transporte — campos (JSON)
 
-Espelha o wizard web: `veiculo_id`, `relatorio`, `tratamento`, `situacao_recebimento`, `data_recebimento`, `transportador_nome`, `transportador_cnpj`, `motorista_nome`, `destinador_*`, etc.
+Aplica **etapa 1** e/ou **etapa 4** conforme o que vier no body (não exige os dois de uma vez).
+
+**Etapa 1 — transporte**
+
+| Campo | Obrigatório | Notas |
+|-------|-------------|-------|
+| `transportadora_id` | sim (se salvar etapa 1) | FK ativa |
+| `motorista_nome` | sim (se salvar etapa 1) | Nome exibido no snapshot |
+| `coletor_id` | não | Se coletor ativo, atualiza `coletas.coletor_id` |
+| `veiculo_id` | não | Snapshot marca/modelo/placa |
+| `data_coleta` | não | `Y-m-d` |
+| `hora` | não | `H:i` ou `H:i:s` |
+
+**Etapa 4 — destinador**
+
+| Campo | Obrigatório | Notas |
+|-------|-------------|-------|
+| `destinador_id` | sim (se salvar etapa 4) | FK ativa |
+| `tratamento` | não | Catálogo `/catalogos/tratamentos` |
+| `observacao_destinador` | não | Snapshot |
+| `situacao_recebimento` | não | `recebido` ou `pendente` |
+| `data_recebimento` | para finalizar | `Y-m-d` |
+
+### POST relatório (rascunho etapa 3)
+
+`POST /coletas/{id}/relatorio` — JSON ou multipart.
+
+- Campo `relatorio` (texto)
+- Arquivos opcionais: `evidencia_1`, `evidencia_2`, `evidencia_3`
+- Exige motorista + ≥1 item (mesma regra do wizard web)
+- Exige relatório **ou** ao menos uma foto (nova ou já existente)
+- **Não** muda status (permanece `rascunho`)
+- Resposta: `itens`, `evidencias`, `fotos_recebidas`, `motorista`, `rascunho_conferido`, `coleta` (detalhe)
+
+### POST assinatura
+
+`POST /coletas/{id}/assinatura` — JSON `{ "assinatura": "data:image/png;base64,..." }` (aceita também `assinatura_data_url`).
 
 ## API Gerador (portal cliente)
 

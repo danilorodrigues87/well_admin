@@ -1,0 +1,61 @@
+key: DropDown_cwst4tra
+type: DropDown
+props:
+  padding: {}
+  dropDown:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 48
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    optionsLabels:
+      values:
+        - translatableText:
+            textValue:
+              inputValue: Autoclave
+              mostRecentInputValue: Autoclave
+        - translatableText:
+            textValue:
+              inputValue: Incineracao
+              mostRecentInputValue: Incineracao
+    optionsValues:
+      values:
+        - serializedValue: "Autoclave"
+        - serializedValue: "Incineracao"
+    hintText:
+      textValue:
+        inputValue: Selecione
+        mostRecentInputValue: Selecione
+    valueType:
+      dataType:
+        scalarType: String
+    fillColorValue:
+      inputValue:
+        themeColor: SECONDARY_BACKGROUND
+      mostRecentInputValue:
+        themeColor: SECONDARY_BACKGROUND
+    borderRadiusValue:
+      inputValue: 8
+      mostRecentInputValue: 8
+    borderColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+      mostRecentInputValue:
+        themeColor: ALTERNATE
+    borderWidthValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+    hidesUnderlineValue:
+      inputValue: true
+      mostRecentInputValue: true
+    elevationValue:
+      inputValue: 2
+      mostRecentInputValue: 2
+name: Tratamento

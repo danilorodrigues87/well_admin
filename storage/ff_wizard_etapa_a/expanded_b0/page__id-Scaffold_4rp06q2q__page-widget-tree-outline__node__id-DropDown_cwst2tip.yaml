@@ -1,0 +1,61 @@
+key: DropDown_cwst2tip
+type: DropDown
+props:
+  padding: {}
+  dropDown:
+    dimensions:
+      width:
+        pixelsValue:
+          inputValue: Infinity
+      height:
+        pixelsValue:
+          inputValue: 48
+    textStyle:
+      themeStyle: BODY_MEDIUM
+      colorValue:
+        inputValue:
+          themeColor: PRIMARY_TEXT
+    optionsLabels:
+      values:
+        - translatableText:
+            textValue:
+              inputValue: Residuo Infectante
+              mostRecentInputValue: Residuo Infectante
+        - translatableText:
+            textValue:
+              inputValue: Perfurocortante
+              mostRecentInputValue: Perfurocortante
+    optionsValues:
+      values:
+        - serializedValue: "1"
+        - serializedValue: "2"
+    hintText:
+      textValue:
+        inputValue: Buscar residuo
+        mostRecentInputValue: Buscar residuo
+    valueType:
+      dataType:
+        scalarType: String
+    fillColorValue:
+      inputValue:
+        themeColor: SECONDARY_BACKGROUND
+      mostRecentInputValue:
+        themeColor: SECONDARY_BACKGROUND
+    borderRadiusValue:
+      inputValue: 8
+      mostRecentInputValue: 8
+    borderColorValue:
+      inputValue:
+        themeColor: ALTERNATE
+      mostRecentInputValue:
+        themeColor: ALTERNATE
+    borderWidthValue:
+      inputValue: 1
+      mostRecentInputValue: 1
+    hidesUnderlineValue:
+      inputValue: true
+      mostRecentInputValue: true
+    elevationValue:
+      inputValue: 2
+      mostRecentInputValue: 2
+name: TipoResiduo
