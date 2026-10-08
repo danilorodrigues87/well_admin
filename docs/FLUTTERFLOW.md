@@ -64,7 +64,9 @@ Página `Scaffold_4rp06q2q` — 4 etapas com `currentStep` + footer Voltar/Conti
 
 Scripts oficiais (`updateProjectByYaml`): `storage/ff_wizard_etapa_c|d|e|f/push_etapa_*.py`.
 
-Pendências online: fotos multipart nos slots, assinatura pad, dropdowns etapa 1 (transportadora/veículo/coletor) ligados aos catálogos, date picker de recebimento. Offline: etapas H–J.
+Pendências online: fotos multipart nos slots, assinatura pad, date picker de recebimento. Offline: etapas H–J.
+
+Fluxo nova coleta (espelha painel `/painel/coleta/nova`): FAB CollectionsList → **NewCollectionClientSelection** (`GET /clientes/coleta`) → tap cliente → `POST /coletas` → **CollectionWizard** com id real. Etapa 1 do wizard: transportadora/veículo/coletor + data/hora vindos da API (não placeholder).
 
 **Login** — JSON Paths de resposta: `authToken`, `userName`, `userId`, `isAdmin`, `funcaoNome`, `userModulesCsv`, `operadoraId`, `operadoraNome`.
 

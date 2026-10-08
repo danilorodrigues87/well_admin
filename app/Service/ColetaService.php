@@ -50,6 +50,38 @@ class ColetaService
     }
 
     /**
+     * Garante migration 051 (idempotente). Evita falha do botão Coletar em prod
+     * quando o código já usa client_uuid mas o ALTER ainda não rodou na VPS.
+     */
+    private static function ensureClientUuidColumn(): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+        $db = new Database();
+        $col = $db->execute("SHOW COLUMNS FROM coletas LIKE 'client_uuid'")->fetch(PDO::FETCH_ASSOC);
+        if ($col) {
+            return;
+        }
+        try {
+            $db->execute(
+                'ALTER TABLE coletas
+                  ADD COLUMN client_uuid char(36) DEFAULT NULL AFTER id,
+                  ADD UNIQUE KEY uk_coletas_operadora_client_uuid (operadora_id, client_uuid)'
+            );
+            error_log('[ColetaService] migration 051 aplicada automaticamente (client_uuid)');
+        } catch (\Throwable $e) {
+            // Race com outro request / índice já criado: confirma se a coluna ficou OK.
+            $again = $db->execute("SHOW COLUMNS FROM coletas LIKE 'client_uuid'")->fetch(PDO::FETCH_ASSOC);
+            if (!$again) {
+                throw $e;
+            }
+        }
+    }
+
+    /**
      * @param string|null $dataColeta Y-m-d (coleta real). Null = hoje. Aceita data passada (até 2 anos).
      */
     public static function iniciarRascunho(
@@ -59,6 +91,8 @@ class ColetaService
         ?string $dataColeta = null,
         ?string $clientUuid = null
     ): int {
+        self::ensureClientUuidColumn();
+
         $cliente = EntityCliente::getById($clienteId);
         if (!$cliente || $cliente->status !== 'ativo') {
             throw new \InvalidArgumentException('Cliente inválido ou inativo.');

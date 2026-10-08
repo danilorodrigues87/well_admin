@@ -438,6 +438,7 @@ SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id =
 | SINIR legado marcado como enviado | `040_sinir_legado_enviado.sql`, `repair_sinir_legado.php` (datas inválidas `0000-00-00` — usar `CASE` com `> '1000-01-01'`) |
 | `proxima_coleta` após import | `repair_proxima_coleta.php` |
 | Agendamento portal | migrations `038` / `039` |
+| Botão Coletar falha em prod (`client_uuid`) | migration `051` + `apply_migration_051.php` / `diagnose_coleta_iniciar.php` |
 
 ### Novos repairs
 
@@ -453,6 +454,7 @@ Ao criar script:
 
 | Data | Alteração |
 |------|-----------|
+| 2026-10-08 | §15: migration `051` (`coletas.client_uuid`) — botão Coletar / `iniciarRascunho` em produção |
 | 2026-09-21 | Cutover concluído em produção; §15 operação pós-cutover; política de correção in-place no `well_admin` |
 | 2026-09-21 | Script `repair_proxima_coleta.php`; migrations `038`/`039` agendamento portal gerador |
 | 2026-09-19 | Seção 14 cutover final; script `purge_coletas_mtr_teste.php` (MTR 11917–11921) |

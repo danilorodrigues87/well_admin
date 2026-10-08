@@ -319,3 +319,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-08 | Wizard etapa 2: ListView resíduos (`ColetaResiduoItem.id`), add/remove API, catálogo tipos + parsers `wtipn01`/`wtipi01`; footer Continuar/Voltar por `currentStep`; script `storage/ff_wizard_etapa_d/push_etapa_d.py` |
 | 2026-10-08 | Wizard etapa 3: `POST /relatorio` (texto) + banner ResumoOk; endpoint `wasg01` assinatura; fotos multipart ainda manuais/UI; script `storage/ff_wizard_etapa_e/push_etapa_e.py` |
 | 2026-10-08 | Wizard etapa 4: catálogos destinador/tratamento; PATCH destinador; finalizar → CollectionDetail; cancelar → back; scripts `storage/ff_wizard_etapa_f/push_etapa_f.py` |
+| 2026-10-08 | App FF: FAB → **NewCollectionClientSelection** (lista `GET /clientes/coleta` + `POST /coletas`) → Wizard; etapa 1 dropdowns/data/hora ligados aos catálogos; script `storage/ff_cliente_select/push_all.py` |
+| 2026-10-08 | Painel Coletar em prod: erro genérico se falta `coletas.client_uuid` — mensagem aponta migration `051` / `apply_migration_051.php`; diag `diagnose_coleta_iniciar.php` |

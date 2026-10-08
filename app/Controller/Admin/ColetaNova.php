@@ -199,8 +199,14 @@ class ColetaNova extends Page
         } catch (\InvalidArgumentException $e) {
             return CrudHelper::jsonError($e->getMessage());
         } catch (\Throwable $e) {
-            error_log('[ColetaNova] '.$e->getMessage());
-            return CrudHelper::jsonError('Erro ao processar coleta.');
+            error_log('[ColetaNova] '.$e::class.': '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine());
+            $msg = 'Erro ao processar coleta.';
+            $raw = $e->getMessage();
+            if (str_contains($raw, 'client_uuid') || str_contains($raw, "Unknown column 'client_uuid'")) {
+                $msg = 'Banco desatualizado: falta a coluna client_uuid. Na VPS rode: php database/scripts/apply_migration_051.php';
+            }
+
+            return CrudHelper::jsonError($msg);
         }
     }
 
