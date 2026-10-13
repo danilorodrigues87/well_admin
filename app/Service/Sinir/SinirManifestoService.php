@@ -73,9 +73,68 @@ class SinirManifestoService
             return ['ok' => false, 'message' => $msg];
         }
 
+        $payload = self::alinharUnidadesComJwt($payload, (string)$tokenResult['token']);
         $response = $this->gateway->post('salvarManifestoLote', $payload, $tokenResult['token']);
 
         return $this->processarResposta($coletaId, $payload, $response);
+    }
+
+    /**
+     * JWT apiws traz sub "pessoaId,unidadeId". Se o .env/cadastro estiver com unidade antiga
+     * (ex.: 135551 vs 728559), alinha transportador/destinador Well à unidade do token.
+     *
+     * @param array<int,array<string,mixed>>|array<string,mixed> $payload
+     * @return array<int,array<string,mixed>>|array<string,mixed>
+     */
+    private static function alinharUnidadesComJwt(array $payload, string $accessToken): array
+    {
+        $unidadeJwt = self::unidadeFromJwt($accessToken);
+        if ($unidadeJwt === null || $unidadeJwt <= 0) {
+            return $payload;
+        }
+
+        $lista = array_is_list($payload) ? $payload : null;
+        if ($lista === null) {
+            return $payload;
+        }
+
+        foreach ($lista as $i => $manifesto) {
+            if (!is_array($manifesto)) {
+                continue;
+            }
+            $lista[$i]['codUnidadeTransportador'] = $unidadeJwt;
+            // Mesmo CNPJ transportador/destinador (Well): mesma unidade do token.
+            $cnpT = preg_replace('/\D/', '', (string)($manifesto['cnpTransportador'] ?? ''));
+            $cnpD = preg_replace('/\D/', '', (string)($manifesto['cnpDestinador'] ?? ''));
+            if ($cnpT !== '' && $cnpT === $cnpD) {
+                $lista[$i]['codUnidadeDestinador'] = $unidadeJwt;
+            }
+        }
+
+        return $lista;
+    }
+
+    private static function unidadeFromJwt(string $jwt): ?int
+    {
+        $parts = explode('.', $jwt);
+        if (count($parts) < 2) {
+            return null;
+        }
+        $b64 = strtr($parts[1], '-_', '+/');
+        $pad = strlen($b64) % 4;
+        if ($pad > 0) {
+            $b64 .= str_repeat('=', 4 - $pad);
+        }
+        $json = base64_decode($b64, true);
+        $data = is_string($json) ? json_decode($json, true) : null;
+        if (!is_array($data) || !is_string($data['sub'] ?? null)) {
+            return null;
+        }
+        if (!preg_match('/^(\d+),(\d+)$/', $data['sub'], $m)) {
+            return null;
+        }
+
+        return (int)$m[2];
     }
 
     /**
@@ -281,62 +340,171 @@ class SinirManifestoService
     /** @return array{ok:bool,message:string,details?:array<string,mixed>} */
     private function processarResposta(int $coletaId, ?array $payload, array $response): array
     {
-        $body = $response['body'] ?? [];
+        $body = is_array($response['body'] ?? null) ? $response['body'] : [];
+
+        // Formato nacional apiws (2026+): { respostaApiwsManifestoDTO, erroNacional, mensagemErroNacional }
+        if (array_key_exists('erroNacional', $body) || array_key_exists('respostaApiwsManifestoDTO', $body)) {
+            return $this->processarRespostaNacional($coletaId, $payload, $response, $body);
+        }
+
+        // Formato legado estadual: manifestoJSONDtos[].retornoCodigo
         $manifestos = is_array($body['manifestoJSONDtos'] ?? null) ? $body['manifestoJSONDtos'] : [];
         $primeiro = is_array($manifestos[0] ?? null) ? $manifestos[0] : null;
 
         if ($response['ok'] && $primeiro !== null && (int)($primeiro['retornoCodigo'] ?? -1) === 0) {
-            $manNumero = (string)($primeiro['manifestoCodigo'] ?? '');
-            $codigoBarras = (string)($primeiro['codigoBarra'] ?? $primeiro['codigoBarras'] ?? '');
-
-            $numeroMtr = self::manifestoParaNumeroMtr($manNumero);
-            $update = [
-                'sinir_man_numero' => $manNumero !== '' ? $manNumero : null,
-                'sinir_codigo_barras' => $codigoBarras !== '' ? $codigoBarras : null,
-                'sinir_status' => 'enviado',
-                'sinir_enviado_em' => date('Y-m-d H:i:s'),
-            ];
-            if ($numeroMtr !== null) {
-                $update['numero_mtr'] = $numeroMtr;
-            }
-            EntityColeta::update($coletaId, $update);
-
-            EntitySinirEnvio::registrar(
+            return $this->registrarSucessoManifesto(
                 $coletaId,
-                EntitySinirEnvio::proximaTentativa($coletaId),
-                'enviado',
                 $payload,
-                is_array($body) ? $body : null,
-                null
+                $body,
+                (string)($primeiro['manifestoCodigo'] ?? ''),
+                (string)($primeiro['codigoBarra'] ?? $primeiro['codigoBarras'] ?? ''),
+                (string)($primeiro['retorno'] ?? 'MTR enviado ao SINIR.')
             );
-
-            GeradorNotificacaoService::coletaMtrDisponivel($coletaId);
-
-            return [
-                'ok' => true,
-                'message' => (string)($primeiro['retorno'] ?? 'MTR enviado ao SINIR.'),
-                'details' => [
-                    'manifesto_codigo' => $manNumero,
-                    'codigo_barras' => $codigoBarras,
-                ],
-            ];
         }
 
         $msg = $this->extrairMensagemErro($response, $primeiro);
-        $audit = is_array($body) && $body !== [] ? $body : $response;
-        if (is_array($audit) && empty($audit['raw']) && !empty($response['raw'])) {
-            $audit['raw'] = mb_substr((string)$response['raw'], 0, 4000);
-        }
-        $this->registrarFalha($coletaId, $payload, $audit, $msg);
+        $this->registrarFalhaComRaw($coletaId, $payload, $response, $body, $msg);
 
         return [
             'ok' => false,
             'message' => $msg,
             'details' => [
                 'http_status' => $response['status'] ?? 0,
-                'sinir_body' => is_array($body) ? $body : null,
+                'sinir_body' => $body !== [] ? $body : null,
             ],
         ];
+    }
+
+    /**
+     * @param array<string,mixed>|null $payload
+     * @param array{ok:bool,status:int,body:?array,raw:string,error:?string} $response
+     * @param array<string,mixed> $body
+     * @return array{ok:bool,message:string,details?:array<string,mixed>}
+     */
+    private function processarRespostaNacional(int $coletaId, ?array $payload, array $response, array $body): array
+    {
+        $erroNacional = !empty($body['erroNacional']);
+        $msgNacional = trim((string)($body['mensagemErroNacional'] ?? ''));
+        $dto = $body['respostaApiwsManifestoDTO'] ?? null;
+
+        $primeiro = null;
+        if (is_array($dto)) {
+            if (array_is_list($dto) && is_array($dto[0] ?? null)) {
+                $primeiro = $dto[0];
+            } elseif (!array_is_list($dto)) {
+                $primeiro = $dto;
+            }
+        }
+
+        $retornoCodigo = is_array($primeiro) ? (int)($primeiro['retornoCodigo'] ?? -1) : -1;
+        $manNumero = is_array($primeiro)
+            ? (string)($primeiro['manifestoCodigo'] ?? $primeiro['manNumero'] ?? '')
+            : '';
+        $codigoBarras = is_array($primeiro)
+            ? (string)($primeiro['codigoBarra'] ?? $primeiro['codigoBarras'] ?? '')
+            : '';
+        $retorno = is_array($primeiro) ? trim((string)($primeiro['retorno'] ?? '')) : '';
+
+        $sucesso = $response['ok'] && !$erroNacional && (
+            ($primeiro !== null && $retornoCodigo === 0)
+            || ($manNumero !== '' && $msgNacional === '')
+        );
+
+        if ($sucesso) {
+            return $this->registrarSucessoManifesto(
+                $coletaId,
+                $payload,
+                $body,
+                $manNumero,
+                $codigoBarras,
+                $retorno !== '' ? $retorno : 'MTR enviado ao SINIR.'
+            );
+        }
+
+        $msg = $msgNacional;
+        if ($msg === '' && $retorno !== '') {
+            $msg = $retorno;
+        }
+        if ($msg === '') {
+            $msg = $this->extrairMensagemErro($response, $primeiro);
+        }
+        if ($msg === '' || str_contains($msg, 'HTTP 400')) {
+            $msg = 'SINIR rejeitou o manifesto (erroNacional)'
+                .($manNumero !== '' ? ' — man '.$manNumero : '')
+                .'.';
+        }
+
+        $this->registrarFalhaComRaw($coletaId, $payload, $response, $body, $msg);
+
+        return [
+            'ok' => false,
+            'message' => $msg,
+            'details' => [
+                'http_status' => $response['status'] ?? 0,
+                'sinir_body' => $body,
+                'erro_nacional' => $erroNacional,
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string,mixed>|null $payload
+     * @param array<string,mixed> $body
+     * @return array{ok:bool,message:string,details?:array<string,mixed>}
+     */
+    private function registrarSucessoManifesto(
+        int $coletaId,
+        ?array $payload,
+        array $body,
+        string $manNumero,
+        string $codigoBarras,
+        string $message
+    ): array {
+        $numeroMtr = self::manifestoParaNumeroMtr($manNumero);
+        $update = [
+            'sinir_man_numero' => $manNumero !== '' ? $manNumero : null,
+            'sinir_codigo_barras' => $codigoBarras !== '' ? $codigoBarras : null,
+            'sinir_status' => 'enviado',
+            'sinir_enviado_em' => date('Y-m-d H:i:s'),
+        ];
+        if ($numeroMtr !== null) {
+            $update['numero_mtr'] = $numeroMtr;
+        }
+        EntityColeta::update($coletaId, $update);
+
+        EntitySinirEnvio::registrar(
+            $coletaId,
+            EntitySinirEnvio::proximaTentativa($coletaId),
+            'enviado',
+            $payload,
+            $body,
+            null
+        );
+
+        GeradorNotificacaoService::coletaMtrDisponivel($coletaId);
+
+        return [
+            'ok' => true,
+            'message' => $message,
+            'details' => [
+                'manifesto_codigo' => $manNumero,
+                'codigo_barras' => $codigoBarras,
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string,mixed>|null $payload
+     * @param array{ok:bool,status:int,body:?array,raw:string,error:?string} $response
+     * @param array<string,mixed> $body
+     */
+    private function registrarFalhaComRaw(int $coletaId, ?array $payload, array $response, array $body, string $msg): void
+    {
+        $audit = $body !== [] ? $body : $response;
+        if (is_array($audit) && empty($audit['raw']) && !empty($response['raw'])) {
+            $audit['raw'] = mb_substr((string)$response['raw'], 0, 4000);
+        }
+        $this->registrarFalha($coletaId, $payload, $audit, $msg);
     }
 
     private static function manifestoParaNumeroMtr(string $manifestoCodigo): ?int
@@ -373,11 +541,14 @@ class SinirManifestoService
 
         $body = $response['body'] ?? null;
         if (is_array($body)) {
-            foreach (['mensagem', 'message', 'retorno', 'error', 'title', 'detail'] as $k) {
+            foreach (['mensagemErroNacional', 'mensagem', 'message', 'retorno', 'error', 'title', 'detail'] as $k) {
                 $v = $body[$k] ?? null;
                 if (is_string($v) && trim($v) !== '' && !in_array(strtolower(trim($v)), ['true', 'false'], true)) {
                     $candidates[] = trim($v);
                 }
+            }
+            if (!empty($body['erroNacional']) && $candidates === []) {
+                $candidates[] = 'SINIR retornou erroNacional sem mensagem detalhada.';
             }
             // Lote: vários itens com retorno
             $dtos = $body['manifestoJSONDtos'] ?? null;

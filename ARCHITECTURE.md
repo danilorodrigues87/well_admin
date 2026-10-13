@@ -149,7 +149,7 @@ app/Common/SinirConfig.php          — leitura .env SINIR_*
 app/Service/Sinir/
   SinirAuthService.php              — POST /token (Token API WS → acesso)
   SinirGateway.php                  — HTTP cURL para admin.sinir.gov.br
-  SinirPayloadBuilder.php           — manifestoJSONDtos → salvarManifestoLote
+  SinirPayloadBuilder.php           — array raiz → salvarManifestoLote (apiws nacional)
   SinirManifestoService.php         — envio, parse resposta, sinir_envios
   SinirRecebimentoService.php       — receberManifestoLote + PDF MTR (CDF light)
   SinirCdfService.php               — emiteCDF + buscaPdfCdf (CDF oficial)
@@ -325,3 +325,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR gateway: desliga `Expect: 100-continue`, strip `null`, unidades int; debug `sinir_debug_salvar_manifesto.php`; detalhe mostra resposta bruta |
 | 2026-10-13 | SINIR 400 Tomcat HTML: remove `Content-Length` duplicado no curl; modal escapa HTML; Classe I força IBAMA `(*)` |
 | 2026-10-13 | SINIR gateway: remove `Expect:` (Tomcat 9 400); probe auth bearer/x-access-token/raw; CLI sem session |
+| 2026-10-13 | SINIR apiws: `salvarManifestoLote` exige **array raiz**; resposta `erroNacional`/`respostaApiwsManifestoDTO`; alinha unidade ao JWT |

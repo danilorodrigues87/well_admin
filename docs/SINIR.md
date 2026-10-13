@@ -115,7 +115,7 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Listar tratamentos | GET | `/retornaListaTratamento` |
 | Listar estados físicos | GET | `/retornaListaEstadoFisico` |
 | Listar acondicionamentos | GET | `/retornaListaAcondicionamento` |
-| Emitir MTR | POST | `/salvarManifestoLote` |
+| Emitir MTR | POST | `/salvarManifestoLote` — body = **array JSON** de manifestos (`[{...}]`), não `{manifestoJSONDtos:[...]}` (este wrapper gera Tomcat 400) |
 | PDF MTR | POST | `/buscaPdfManifestoPorCodigoBarras/{cod}` — cache em `storage/coletas/{id}/` (`ColetaCdfService`, portal gerador) |
 | Cancelar | POST | `/cancelarManifesto` |
 | Receber (destinador) | POST | `/receberManifestoLote` — painel Coletas → **Receber no SINIR** (`SinirRecebimentoService`) |

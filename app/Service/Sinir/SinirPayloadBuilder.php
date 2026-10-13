@@ -13,7 +13,7 @@ use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
 
 /**
- * Monta payload para POST /salvarManifestoLote (formato manifestoJSONDtos).
+ * Monta payload para POST /salvarManifestoLote (array JSON raiz de manifestos).
  */
 class SinirPayloadBuilder
 {
@@ -117,45 +117,42 @@ class SinirPayloadBuilder
 
         $refInterna = $coleta->numero_relatorio ?: $coleta->numero_mtr ?: $coleta->id;
 
-        // Manuais MTR: codUnidade* como inteiro; não enviar armazenador null.
-        $payload = [
-            'manifestoJSONDtos' => [
-                [
-                    'cnpGerador' => $geradorCnpj,
-                    'codUnidadeGerador' => (int)$geradorUnidade,
-                    'cnpTransportador' => $transportadorCnpj,
-                    'codUnidadeTransportador' => (int)$credentials['transportador_unidade'],
-                    'cnpDestinador' => $destinadorCnpj,
-                    'codUnidadeDestinador' => (int)$credentials['destinador_unidade'],
-                    'seuCodigoReferencia' => (string)$refInterna,
-                    'manifObservacao' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
-                    'manifGeradorNomeResponsavel' => mb_substr(
-                        trim((string)($snapshot->gerador_responsavel ?: $snapshot->gerador_nome_fantasia)),
-                        0,
-                        300
-                    ),
-                    'manifGeradorCargoResponsavel' => 'Responsavel',
-                    'manifTransportadorNomeMotorista' => mb_substr(
-                        trim((string)$snapshot->motorista_nome) !== ''
-                            ? trim((string)$snapshot->motorista_nome)
-                            : 'Motorista',
-                        0,
-                        300
-                    ),
-                    'manifTransportadorPlacaVeiculo' => mb_substr(
-                        trim((string)$snapshot->veiculo_placa) !== ''
-                            ? preg_replace('/[^A-Za-z0-9]/', '', (string)$snapshot->veiculo_placa)
-                            : 'AAA0A00',
-                        0,
-                        10
-                    ),
-                    'manifTransportadorDataExpedicao' => $dataExpedicao,
-                    'itemManifestoJSONs' => $itemManifestoJSONs,
-                ],
-            ],
+        // API nacional (apiws 2026+): body = array raiz de manifestos (NÃO usar wrapper manifestoJSONDtos —
+        // o wrapper provoca HTTP 400 HTML no Tomcat).
+        $manifesto = [
+            'cnpGerador' => $geradorCnpj,
+            'codUnidadeGerador' => (int)$geradorUnidade,
+            'cnpTransportador' => $transportadorCnpj,
+            'codUnidadeTransportador' => (int)$credentials['transportador_unidade'],
+            'cnpDestinador' => $destinadorCnpj,
+            'codUnidadeDestinador' => (int)$credentials['destinador_unidade'],
+            'seuCodigoReferencia' => (string)$refInterna,
+            'manifObservacao' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
+            'manifGeradorNomeResponsavel' => mb_substr(
+                trim((string)($snapshot->gerador_responsavel ?: $snapshot->gerador_nome_fantasia)),
+                0,
+                300
+            ),
+            'manifGeradorCargoResponsavel' => 'Responsavel',
+            'manifTransportadorNomeMotorista' => mb_substr(
+                trim((string)$snapshot->motorista_nome) !== ''
+                    ? trim((string)$snapshot->motorista_nome)
+                    : 'Motorista',
+                0,
+                300
+            ),
+            'manifTransportadorPlacaVeiculo' => mb_substr(
+                trim((string)$snapshot->veiculo_placa) !== ''
+                    ? preg_replace('/[^A-Za-z0-9]/', '', (string)$snapshot->veiculo_placa)
+                    : 'AAA0A00',
+                0,
+                10
+            ),
+            'manifTransportadorDataExpedicao' => $dataExpedicao,
+            'itemManifestoJSONs' => $itemManifestoJSONs,
         ];
 
-        return ['ok' => true, 'payload' => $payload, 'errors' => []];
+        return ['ok' => true, 'payload' => [$manifesto], 'errors' => []];
     }
 
     /**
