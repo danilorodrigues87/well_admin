@@ -38,6 +38,13 @@ class SessionBootstrap
 
     public static function start(): void
     {
+        // Scripts CLI (migrations, diagnose SINIR, etc.) não usam cookie/sessão web.
+        if (PHP_SAPI === 'cli') {
+            self::$configured = true;
+
+            return;
+        }
+
         self::configure();
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();

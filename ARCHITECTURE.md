@@ -324,3 +324,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR MTR HTTP 400: mensagem da API no modal; IBAMA preserva `(*)`; placa/motorista com fallback; `dump_last_sinir_envio.php` |
 | 2026-10-13 | SINIR gateway: desliga `Expect: 100-continue`, strip `null`, unidades int; debug `sinir_debug_salvar_manifesto.php`; detalhe mostra resposta bruta |
 | 2026-10-13 | SINIR 400 Tomcat HTML: remove `Content-Length` duplicado no curl; modal escapa HTML; Classe I força IBAMA `(*)` |
+| 2026-10-13 | SINIR gateway: remove `Expect:` (Tomcat 9 400); probe auth bearer/x-access-token/raw; CLI sem session |

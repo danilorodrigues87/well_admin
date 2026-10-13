@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Reproduz POST /salvarManifestoLote com dump completo (headers + body).
+ * Reproduz POST /salvarManifestoLote com dump completo + variantes de auth/header.
  * Uso: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}
  */
 require dirname(__DIR__, 2).'/includes/app.php';
@@ -41,7 +41,8 @@ echo 'token_len='.strlen((string)$credentials['integration_token'])
     .' transp_unidade='.$credentials['transportador_unidade']
     .' dest_unidade='.$credentials['destinador_unidade'].PHP_EOL;
 
-$tokenResult = (new SinirAuthService())->obtainAccessToken(false, $credentials['integration_token']);
+SinirAuthService::clearCache();
+$tokenResult = (new SinirAuthService())->obtainAccessToken(true, $credentials['integration_token']);
 if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
     echo 'AUTH FALHOU: '.($tokenResult['error'] ?? 'sem token').PHP_EOL;
     echo json_encode($tokenResult, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
@@ -49,23 +50,48 @@ if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
 }
 echo 'access_token_len='.strlen((string)$tokenResult['token']).PHP_EOL;
 
-$response = (new SinirGateway(60))->post('salvarManifestoLote', $payload, $tokenResult['token']);
+// Smoke: lista resíduos (deve ser JSON 200 se auth/header ok)
+$probe = (new SinirGateway(60))->post('retornaListaResiduo', [], $tokenResult['token']);
+echo "--- probe retornaListaResiduo ---\n";
+echo 'status='.($probe['status'] ?? 0)
+    .' content_type='.($probe['content_type'] ?? '')
+    .' ok='.(!empty($probe['ok']) ? '1' : '0')
+    .' raw_len='.strlen((string)($probe['raw'] ?? '')).PHP_EOL;
+if (!empty($probe['request_headers'])) {
+    echo "request_headers:\n".$probe['request_headers'].PHP_EOL;
+}
 
-echo "--- response meta ---\n";
-echo 'status='.($response['status'] ?? 0)
-    .' ok='.(!empty($response['ok']) ? '1' : '0')
-    .' bytes_req='.($response['request_bytes'] ?? 0)
-    .' content_type='.($response['content_type'] ?? '').PHP_EOL;
-echo 'primary_ip='.($response['primary_ip'] ?? '').PHP_EOL;
-echo 'error='.($response['error'] ?? '(null)').PHP_EOL;
+$modes = ['bearer', 'x-access-token', 'raw'];
+$exit = 2;
+foreach ($modes as $mode) {
+    echo "\n===== salvarManifestoLote auth={$mode} =====\n";
+    $response = (new SinirGateway(60, $mode))->post('salvarManifestoLote', $payload, $tokenResult['token']);
+    echo 'status='.($response['status'] ?? 0)
+        .' ok='.(!empty($response['ok']) ? '1' : '0')
+        .' bytes_req='.($response['request_bytes'] ?? 0)
+        .' content_type='.($response['content_type'] ?? '').PHP_EOL;
+    echo 'error='.($response['error'] ?? '(null)').PHP_EOL;
+    if (!empty($response['request_headers'])) {
+        echo "--- request headers sent ---\n";
+        echo $response['request_headers'].PHP_EOL;
+    }
+    echo "--- response headers ---\n";
+    echo trim((string)($response['response_headers'] ?? '')).PHP_EOL;
+    $raw = (string)($response['raw'] ?? '');
+    echo '--- response raw ('.strlen($raw).' bytes) ---'.PHP_EOL;
+    if (stripos((string)($response['content_type'] ?? ''), 'html') !== false || str_contains($raw, '<html')) {
+        echo '(html omitido; use content_type/error acima)'.PHP_EOL;
+    } else {
+        echo $raw.PHP_EOL;
+    }
+    if (!empty($response['ok']) || (is_array($response['body'] ?? null))) {
+        echo "--- body decoded ---\n";
+        echo json_encode($response['body'] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+    }
+    if (!empty($response['ok']) || (is_array($response['body'] ?? null) && ($response['content_type'] ?? '') !== '' && !str_contains((string)$response['content_type'], 'html'))) {
+        $exit = !empty($response['ok']) ? 0 : 2;
+        break;
+    }
+}
 
-echo "--- response headers ---\n";
-echo trim((string)($response['response_headers'] ?? '')).PHP_EOL;
-
-echo "--- response raw (".strlen((string)($response['raw'] ?? ''))." bytes) ---\n";
-echo (string)($response['raw'] ?? '').PHP_EOL;
-
-echo "--- response body decoded ---\n";
-echo json_encode($response['body'] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
-
-exit(!empty($response['ok']) ? 0 : 2);
+exit($exit);

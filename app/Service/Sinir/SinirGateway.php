@@ -8,9 +8,13 @@ class SinirGateway
 {
     private int $timeout;
 
-    public function __construct(int $timeoutSeconds = 30)
+    /** @var 'bearer'|'x-access-token'|'raw' */
+    private string $authMode;
+
+    public function __construct(int $timeoutSeconds = 30, string $authMode = 'bearer')
     {
         $this->timeout = $timeoutSeconds;
+        $this->authMode = $authMode;
     }
 
     /** @return array{ok:bool,status:int,body:?array,raw:string,error:?string} */
@@ -59,21 +63,26 @@ class SinirGateway
      * @return array{
      *   ok:bool,status:int,body:?array,raw:string,error:?string,
      *   curl_errno?:int,primary_ip?:string,content_type?:?string,
-     *   response_headers?:string,request_bytes?:int,hint?:?string
+     *   response_headers?:string,request_headers?:?string,request_bytes?:int,hint?:?string
      * }
      */
     private function request(string $method, string $path, array $body, ?string $bearerToken): array
     {
         $url = rtrim(SinirConfig::baseUrl(), '/').'/'.ltrim($path, '/');
 
-        // Expect: vazio evita 100-continue — vários gateways Java/Tomcat respondem 400 sem body.
+        // Não enviar Expect (nem vazio): Tomcat 9 rejeita Expect: vazio com HTML 400.
+        // Corpos <1MB não disparam 100-continue no curl moderno.
         $headers = [
-            'Content-Type: application/json; charset=UTF-8',
+            'Content-Type: application/json',
             'Accept: application/json',
-            'Expect:',
         ];
         if ($bearerToken !== null && $bearerToken !== '') {
-            $headers[] = 'Authorization: Bearer '.$bearerToken;
+            $token = trim($bearerToken);
+            $headers = array_merge($headers, match ($this->authMode) {
+                'x-access-token' => ['x-access-token: '.$token],
+                'raw' => ['Authorization: '.$token],
+                default => ['Authorization: Bearer '.$token],
+            });
         }
 
         $ch = curl_init($url);
@@ -87,8 +96,6 @@ class SinirGateway
             CURLOPT_CONNECTTIMEOUT => 15,
             CURLOPT_TIMEOUT => $this->timeout,
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_CUSTOMREQUEST => $method,
-            // Não seguir redirect em POST (pode virar GET e perder body → 400 vazio).
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_HEADERFUNCTION => static function ($curl, string $headerLine) use (&$responseHeaders): int {
                 $responseHeaders .= $headerLine;
@@ -97,11 +104,18 @@ class SinirGateway
             },
         ];
 
+        if (defined('CURLINFO_HEADER_OUT')) {
+            curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        }
+
+        if (defined('CURL_HTTP_VERSION_1_1')) {
+            $opts[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
+        }
+
         if (defined('CURL_IPRESOLVE_V4')) {
             $opts[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
         }
 
-        // Aceita gzip/deflate se o SINIR comprimir.
         if (defined('CURLOPT_ENCODING')) {
             $opts[CURLOPT_ENCODING] = '';
         }
@@ -112,23 +126,31 @@ class SinirGateway
         }
 
         $jsonBody = '';
-        if ($method === 'POST') {
+        if (strtoupper($method) === 'POST') {
             $payload = self::stripNulls($body);
-            $jsonBody = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            if ($jsonBody === false) {
-                curl_close($ch);
+            // Body vazio (ex.: /token) — não enviar "{}"
+            if ($payload === []) {
+                $jsonBody = '';
+                $opts[CURLOPT_POST] = true;
+                $opts[CURLOPT_POSTFIELDS] = '';
+            } else {
+                $jsonBody = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($jsonBody === false) {
+                    curl_close($ch);
 
-                return [
-                    'ok' => false,
-                    'status' => 0,
-                    'body' => null,
-                    'raw' => '',
-                    'error' => 'Falha ao serializar JSON do payload SINIR.',
-                ];
+                    return [
+                        'ok' => false,
+                        'status' => 0,
+                        'body' => null,
+                        'raw' => '',
+                        'error' => 'Falha ao serializar JSON do payload SINIR.',
+                    ];
+                }
+                $opts[CURLOPT_POST] = true;
+                $opts[CURLOPT_POSTFIELDS] = $jsonBody;
             }
-            // NÃO setar Content-Length manualmente: o curl já envia.
-            // Content-Length duplicado → Tomcat HTTP 400 HTML genérico (sem JSON).
-            $opts[CURLOPT_POSTFIELDS] = $jsonBody;
+        } else {
+            $opts[CURLOPT_CUSTOMREQUEST] = $method;
         }
 
         curl_setopt_array($ch, $opts);
@@ -138,6 +160,9 @@ class SinirGateway
         $curlErrno = (int)curl_errno($ch);
         $primaryIp = (string)curl_getinfo($ch, CURLINFO_PRIMARY_IP);
         $contentType = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        $requestHeadersOut = defined('CURLINFO_HEADER_OUT')
+            ? (string)curl_getinfo($ch, CURLINFO_HEADER_OUT)
+            : '';
         curl_close($ch);
 
         if ($raw === false) {
@@ -153,6 +178,7 @@ class SinirGateway
                 'primary_ip' => $primaryIp !== '' ? $primaryIp : null,
                 'content_type' => $contentType !== '' ? $contentType : null,
                 'response_headers' => $responseHeaders,
+                'request_headers' => $requestHeadersOut !== '' ? $requestHeadersOut : null,
                 'request_bytes' => strlen($jsonBody),
                 'hint' => $hint,
             ];
@@ -180,7 +206,6 @@ class SinirGateway
                 $errorMsg = 'SINIR respondeu HTTP '.$status.' sem corpo. '
                     .'Verifique token/unidade e rode: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}';
             } elseif (stripos($contentType, 'text/html') !== false || str_contains($raw, '<html')) {
-                // Tomcat Bad Request — extrai Description se houver
                 $desc = '';
                 if (preg_match('/<b>Description<\/b>\s*([^<]+)/i', $raw, $m)) {
                     $desc = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES, 'UTF-8'));
@@ -200,6 +225,7 @@ class SinirGateway
             'primary_ip' => $primaryIp !== '' ? $primaryIp : null,
             'content_type' => $contentType !== '' ? $contentType : null,
             'response_headers' => $responseHeaders,
+            'request_headers' => $requestHeadersOut !== '' ? $requestHeadersOut : null,
             'request_bytes' => strlen($jsonBody),
         ];
     }
