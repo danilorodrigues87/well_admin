@@ -114,17 +114,16 @@ class SinirPayloadBuilder
 
         $refInterna = $coleta->numero_relatorio ?: $coleta->numero_mtr ?: $coleta->id;
 
+        // Manuais MTR: codUnidade* como inteiro; não enviar armazenador null.
         $payload = [
             'manifestoJSONDtos' => [
                 [
                     'cnpGerador' => $geradorCnpj,
-                    'codUnidadeGerador' => (string)$geradorUnidade,
+                    'codUnidadeGerador' => (int)$geradorUnidade,
                     'cnpTransportador' => $transportadorCnpj,
-                    'codUnidadeTransportador' => (string)$credentials['transportador_unidade'],
+                    'codUnidadeTransportador' => (int)$credentials['transportador_unidade'],
                     'cnpDestinador' => $destinadorCnpj,
-                    'codUnidadeDestinador' => (string)$credentials['destinador_unidade'],
-                    'cnpArmazenador' => null,
-                    'codUnidadeArmazenador' => null,
+                    'codUnidadeDestinador' => (int)$credentials['destinador_unidade'],
                     'seuCodigoReferencia' => (string)$refInterna,
                     'manifObservacao' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
                     'manifGeradorNomeResponsavel' => mb_substr(
@@ -132,7 +131,7 @@ class SinirPayloadBuilder
                         0,
                         300
                     ),
-                    'manifGeradorCargoResponsavel' => 'Responsável',
+                    'manifGeradorCargoResponsavel' => 'Responsavel',
                     'manifTransportadorNomeMotorista' => mb_substr(
                         trim((string)$snapshot->motorista_nome) !== ''
                             ? trim((string)$snapshot->motorista_nome)
@@ -143,7 +142,7 @@ class SinirPayloadBuilder
                     'manifTransportadorPlacaVeiculo' => mb_substr(
                         trim((string)$snapshot->veiculo_placa) !== ''
                             ? preg_replace('/[^A-Za-z0-9]/', '', (string)$snapshot->veiculo_placa)
-                            : 'SPLACA',
+                            : 'AAA0A00',
                         0,
                         10
                     ),

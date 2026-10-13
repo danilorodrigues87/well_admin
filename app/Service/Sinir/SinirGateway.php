@@ -55,12 +55,23 @@ class SinirGateway
         ];
     }
 
-    /** @return array{ok:bool,status:int,body:?array,raw:string,error:?string,curl_errno?:int,primary_ip?:string} */
+    /**
+     * @return array{
+     *   ok:bool,status:int,body:?array,raw:string,error:?string,
+     *   curl_errno?:int,primary_ip?:string,content_type?:?string,
+     *   response_headers?:string,request_bytes?:int,hint?:?string
+     * }
+     */
     private function request(string $method, string $path, array $body, ?string $bearerToken): array
     {
         $url = rtrim(SinirConfig::baseUrl(), '/').'/'.ltrim($path, '/');
 
-        $headers = ['Content-Type: application/json', 'Accept: application/json'];
+        // Expect: vazio evita 100-continue — vários gateways Java/Tomcat respondem 400 sem body.
+        $headers = [
+            'Content-Type: application/json; charset=UTF-8',
+            'Accept: application/json',
+            'Expect:',
+        ];
         if ($bearerToken !== null && $bearerToken !== '') {
             $headers[] = 'Authorization: Bearer '.$bearerToken;
         }
@@ -70,18 +81,29 @@ class SinirGateway
             return ['ok' => false, 'status' => 0, 'body' => null, 'raw' => '', 'error' => 'curl_init falhou'];
         }
 
+        $responseHeaders = '';
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 15,
             CURLOPT_TIMEOUT => $this->timeout,
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_CUSTOMREQUEST => $method,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 3,
+            // Não seguir redirect em POST (pode virar GET e perder body → 400 vazio).
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_HEADERFUNCTION => static function ($curl, string $headerLine) use (&$responseHeaders): int {
+                $responseHeaders .= $headerLine;
+
+                return strlen($headerLine);
+            },
         ];
 
         if (defined('CURL_IPRESOLVE_V4')) {
             $opts[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
+        }
+
+        // Aceita gzip/deflate se o SINIR comprimir.
+        if (defined('CURLOPT_ENCODING')) {
+            $opts[CURLOPT_ENCODING] = '';
         }
 
         if (!SinirConfig::sslVerify()) {
@@ -89,8 +111,24 @@ class SinirGateway
             $opts[CURLOPT_SSL_VERIFYHOST] = 0;
         }
 
+        $jsonBody = '';
         if ($method === 'POST') {
-            $opts[CURLOPT_POSTFIELDS] = json_encode($body, JSON_UNESCAPED_UNICODE);
+            $payload = self::stripNulls($body);
+            $jsonBody = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if ($jsonBody === false) {
+                curl_close($ch);
+
+                return [
+                    'ok' => false,
+                    'status' => 0,
+                    'body' => null,
+                    'raw' => '',
+                    'error' => 'Falha ao serializar JSON do payload SINIR.',
+                ];
+            }
+            $opts[CURLOPT_POSTFIELDS] = $jsonBody;
+            $headers[] = 'Content-Length: '.strlen($jsonBody);
+            $opts[CURLOPT_HTTPHEADER] = $headers;
         }
 
         curl_setopt_array($ch, $opts);
@@ -99,6 +137,7 @@ class SinirGateway
         $curlError = curl_error($ch);
         $curlErrno = (int)curl_errno($ch);
         $primaryIp = (string)curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+        $contentType = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close($ch);
 
         if ($raw === false) {
@@ -112,6 +151,9 @@ class SinirGateway
                 'error' => $curlError !== '' ? $curlError : 'Erro de rede',
                 'curl_errno' => $curlErrno,
                 'primary_ip' => $primaryIp !== '' ? $primaryIp : null,
+                'content_type' => $contentType !== '' ? $contentType : null,
+                'response_headers' => $responseHeaders,
+                'request_bytes' => strlen($jsonBody),
                 'hint' => $hint,
             ];
         }
@@ -133,6 +175,11 @@ class SinirGateway
             $errorMsg = $curlError;
         }
 
+        if (!$httpOk && ($errorMsg === null || $errorMsg === '') && trim($raw) === '') {
+            $errorMsg = 'SINIR respondeu HTTP '.$status.' sem corpo. '
+                .'Verifique token/unidade e rode: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}';
+        }
+
         return [
             'ok' => $httpOk && !$apiError,
             'status' => $status,
@@ -141,7 +188,28 @@ class SinirGateway
             'error' => $errorMsg,
             'curl_errno' => $curlErrno,
             'primary_ip' => $primaryIp !== '' ? $primaryIp : null,
+            'content_type' => $contentType !== '' ? $contentType : null,
+            'response_headers' => $responseHeaders,
+            'request_bytes' => strlen($jsonBody),
         ];
+    }
+
+    /** Remove chaves null recursivamente (API SINIR costuma rejeitar null explícito). */
+    private static function stripNulls(array $data): array
+    {
+        $out = [];
+        foreach ($data as $k => $v) {
+            if ($v === null) {
+                continue;
+            }
+            if (is_array($v)) {
+                $out[$k] = self::stripNulls($v);
+            } else {
+                $out[$k] = $v;
+            }
+        }
+
+        return $out;
     }
 
     private static function hintForCurlError(int $errno, string $message): ?string

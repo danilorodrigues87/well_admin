@@ -12,6 +12,9 @@ class SinirEnvio
     public int $tentativa = 1;
     public string $status = 'pendente';
     public ?string $mensagem_erro = null;
+    public ?string $response_payload = null;
+    public ?string $request_payload = null;
+    public ?string $created_at = null;
 
     public static function proximaTentativa(int $coletaId): int
     {
@@ -54,7 +57,8 @@ class SinirEnvio
     {
         $db = new Database();
         $stmt = $db->execute(
-            'SELECT * FROM sinir_envios WHERE coleta_id = ? ORDER BY id DESC LIMIT '.(int)$limit,
+            'SELECT id, coleta_id, tentativa, status, mensagem_erro, request_payload, response_payload, created_at
+             FROM sinir_envios WHERE coleta_id = ? ORDER BY id DESC LIMIT '.(int)$limit,
             [$coletaId]
         );
         $items = [];
@@ -73,6 +77,9 @@ class SinirEnvio
         $e->tentativa = (int)$row['tentativa'];
         $e->status = (string)$row['status'];
         $e->mensagem_erro = isset($row['mensagem_erro']) ? (string)$row['mensagem_erro'] : null;
+        $e->request_payload = isset($row['request_payload']) ? (string)$row['request_payload'] : null;
+        $e->response_payload = isset($row['response_payload']) ? (string)$row['response_payload'] : null;
+        $e->created_at = isset($row['created_at']) ? (string)$row['created_at'] : null;
 
         return $e;
     }

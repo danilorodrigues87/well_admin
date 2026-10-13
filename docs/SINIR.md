@@ -194,12 +194,13 @@ Revisar o CSV antes de aplicar em produção. Em XAMPP local, se curl falhar com
 O pré-check do painel só valida unidades/token/itens. Um **400** vem da API após o envio.
 
 1. No modal de erro, a mensagem deve trazer o texto do SINIR (não só “HTTP 400”).
-2. Na VPS, inspecione o último payload/resposta:
+2. Se a mensagem citar **sem corpo**, o gateway pode ter sido rejeitado antes de parsear o JSON (clássico: header `Expect: 100-continue`). O cliente HTTP do Well envia `Expect:` vazio e omite campos `null`.
+3. Na VPS, reproduza com dump completo:
    ```bash
-   php database/scripts/dump_last_sinir_envio.php
+   php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}
    php database/scripts/dump_last_sinir_envio.php {coleta_id}
    ```
-3. Causas frequentes: código IBAMA inválido ou sem `(*)` em perigoso; CNPJ/unidade do gerador não batem no portal; placa/motorista vazios; quantidade &lt; 0,1 kg; token da transportadora sem permissão sobre a unidade geradora.
+4. Causas frequentes: código IBAMA inválido ou sem `(*)` em perigoso; CNPJ/unidade do gerador não batem no portal; quantidade &lt; 0,1 kg; token da transportadora sem permissão sobre a unidade geradora.
 
 O campo `residuo` no JSON vai como **6 dígitos** (ex.: `150203`) e **com `(*)`** quando o cadastro indica perigoso (ex.: `200121(*)`).
 

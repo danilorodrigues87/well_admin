@@ -34,7 +34,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261013a"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261013b"></script>'
         );
     }
 
@@ -407,10 +407,19 @@ class Coletas extends Page
             if (!empty($result['details'])) {
                 $payload['details'] = $result['details'];
             }
-            // Último erro gravado em sinir_envios (ajuda a ver o JSON do SINIR no modal)
             $ultimos = \App\Model\Entity\SinirEnvio::listByColeta($id, 1);
-            if ($ultimos !== [] && ($ultimos[0]->mensagem_erro ?? '') !== '') {
-                $payload['sinir_hint'] = $ultimos[0]->mensagem_erro;
+            if ($ultimos !== []) {
+                $u = $ultimos[0];
+                if (($u->mensagem_erro ?? '') !== '') {
+                    $payload['sinir_hint'] = $u->mensagem_erro;
+                }
+                if (($u->response_payload ?? '') !== '') {
+                    $payload['sinir_response'] = mb_substr($u->response_payload, 0, 1500);
+                    if (empty($payload['message']) || str_contains((string)$payload['message'], 'sem corpo')
+                        || preg_match('/HTTP\s+400\)\s*:?\s*$/', (string)$payload['message'])) {
+                        $payload['message'] = trim((string)$payload['message']."\n\n".$payload['sinir_response']);
+                    }
+                }
             }
 
             return json_encode($payload, JSON_UNESCAPED_UNICODE);
@@ -634,9 +643,15 @@ class Coletas extends Page
                 'recebido' => 'success',
                 default => 'secondary',
             };
-            $historico .= '<li><span class="badge bg-'.$histBadge.'">T'.$envio->tentativa.' · '.$envio->status.'</span>';
+            $historico .= '<li class="mb-1"><span class="badge bg-'.$histBadge.'">T'.$envio->tentativa.' · '.$envio->status.'</span>';
             if ($envio->mensagem_erro) {
                 $historico .= ' — '.CrudHelper::e($envio->mensagem_erro);
+            }
+            if ($envio->status === 'erro' && $envio->response_payload) {
+                $snip = mb_substr($envio->response_payload, 0, 1200);
+                $historico .= '<details class="small mt-1"><summary>Resposta SINIR</summary>'
+                    .'<pre class="bg-light border rounded p-2 mb-0" style="white-space:pre-wrap;max-height:220px;overflow:auto">'
+                    .CrudHelper::e($snip).'</pre></details>';
             }
             $historico .= '</li>';
         }
