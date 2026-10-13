@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Reproduz POST /salvarManifestoLote com diagnóstico (JWT, listas GET, payload mínimo).
+ * Diagnóstico salvarManifestoLote — tenta formatos de payload até obter JSON (não HTML Tomcat).
  * Uso: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}
  */
 require dirname(__DIR__, 2).'/includes/app.php';
@@ -35,33 +35,81 @@ function jwtPayload(string $jwt): array
     return is_array($data) ? $data : [];
 }
 
-function printResponse(string $label, array $response): void
+function postRaw(string $url, string $token, string $jsonBody, array $extraHeaders = []): array
+{
+    $headers = array_merge([
+        'Content-Type: application/json',
+        'Accept: application/json',
+        'Authorization: Bearer '.$token,
+    ], $extraHeaders);
+
+    $ch = curl_init($url);
+    $respHeaders = '';
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $jsonBody,
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_ENCODING => 'gzip,deflate',
+        CURLOPT_HEADERFUNCTION => static function ($c, string $line) use (&$respHeaders): int {
+            $respHeaders .= $line;
+
+            return strlen($line);
+        },
+    ]);
+    if (defined('CURL_IPRESOLVE_V4')) {
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    }
+    if (defined('CURLINFO_HEADER_OUT')) {
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+    }
+    if (!SinirConfig::sslVerify()) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    }
+
+    $raw = curl_exec($ch);
+    $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $ctype = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    $reqHeaders = defined('CURLINFO_HEADER_OUT') ? (string)curl_getinfo($ch, CURLINFO_HEADER_OUT) : '';
+    curl_close($ch);
+
+    $body = is_string($raw) ? json_decode($raw, true) : null;
+
+    return [
+        'status' => $status,
+        'content_type' => $ctype,
+        'raw' => is_string($raw) ? $raw : '',
+        'body' => is_array($body) ? $body : null,
+        'request_headers' => $reqHeaders,
+        'response_headers' => $respHeaders,
+        'is_html' => is_string($raw) && (stripos($ctype, 'html') !== false || str_contains($raw, '<html')),
+        'is_json' => is_array($body),
+    ];
+}
+
+function show(string $label, array $r): void
 {
     echo "===== {$label} =====\n";
-    echo 'status='.($response['status'] ?? 0)
-        .' ok='.(!empty($response['ok']) ? '1' : '0')
-        .' content_type='.($response['content_type'] ?? '')
-        .' raw_len='.strlen((string)($response['raw'] ?? '')).PHP_EOL;
-    echo 'error='.($response['error'] ?? '(null)').PHP_EOL;
-    if (!empty($response['request_headers'])) {
-        echo "--- request headers ---\n".$response['request_headers'].PHP_EOL;
-    }
-    $raw = (string)($response['raw'] ?? '');
-    $ct = (string)($response['content_type'] ?? '');
-    if ($raw !== '' && (stripos($ct, 'html') !== false || str_starts_with(ltrim($raw), '<'))) {
-        echo "(html omitido)\n";
-    } elseif ($raw !== '') {
-        echo "--- raw ---\n".mb_substr($raw, 0, 2000).PHP_EOL;
-    }
-    if (is_array($response['body'] ?? null)) {
-        echo "--- body ---\n".json_encode($response['body'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+    echo 'status='.$r['status'].' json='.(!empty($r['is_json']) ? '1' : '0')
+        .' html='.(!empty($r['is_html']) ? '1' : '0')
+        .' ctype='.$r['content_type']
+        .' raw_len='.strlen($r['raw']).PHP_EOL;
+    if (!empty($r['is_json'])) {
+        echo json_encode($r['body'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+    } elseif ($r['raw'] !== '' && empty($r['is_html'])) {
+        echo mb_substr($r['raw'], 0, 500).PHP_EOL;
+    } else {
+        echo "(sem JSON — possível Tomcat HTML)\n";
     }
     echo PHP_EOL;
 }
 
-echo 'SINIR_ENABLED='.(SinirConfig::isEnabled() ? 'true' : 'false').PHP_EOL;
 echo 'baseUrl='.SinirConfig::baseUrl().PHP_EOL;
-echo 'unidade_env='.SinirConfig::unidade().' cnpj_env='.SinirConfig::cnpj().PHP_EOL;
+echo 'unidade_env='.SinirConfig::unidade().PHP_EOL;
 
 $built = (new SinirPayloadBuilder())->buildManifestoLote($coletaId);
 if (!$built['ok']) {
@@ -69,91 +117,197 @@ if (!$built['ok']) {
     exit(1);
 }
 $payload = $built['payload'];
-echo "--- payload coleta ---\n";
-echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+$m0 = $payload['manifestoJSONDtos'][0];
 
 $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
 if (!$credentials['ok']) {
-    echo "CREDENCIAIS:\n".implode("\n", $credentials['errors']).PHP_EOL;
+    echo implode("\n", $credentials['errors']).PHP_EOL;
     exit(1);
 }
 
 SinirAuthService::clearCache();
 $tokenResult = (new SinirAuthService())->obtainAccessToken(true, $credentials['integration_token']);
 if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
-    echo 'AUTH FALHOU: '.($tokenResult['error'] ?? 'sem token').PHP_EOL;
+    echo 'AUTH FALHOU: '.($tokenResult['error'] ?? '').PHP_EOL;
     exit(1);
 }
 $token = (string)$tokenResult['token'];
 $jwt = jwtPayload($token);
-echo 'access_token jwt.sub='.json_encode($jwt['sub'] ?? null, JSON_UNESCAPED_UNICODE)
-    .' tipo='.json_encode($jwt['tipo'] ?? null)
-    .' role='.json_encode($jwt['role'] ?? null).PHP_EOL;
-
 $jwtUnidade = null;
 if (is_string($jwt['sub'] ?? null) && preg_match('/^(\d+),(\d+)$/', $jwt['sub'], $m)) {
-    echo "jwt pessoa/codigo={$m[1]} unidade={$m[2]}\n";
     $jwtUnidade = (int)$m[2];
-    if ($jwtUnidade > 0 && $jwtUnidade !== (int)SinirConfig::unidade()) {
-        echo "ALERTA: SINIR_UNIDADE no .env=".SinirConfig::unidade()
-            ." difere da unidade do token JWT={$jwtUnidade}\n";
-    }
+    echo "jwt.sub={$jwt['sub']} → unidade_token={$jwtUnidade}\n";
 }
 
-$gw = new SinirGateway(60);
+$urlBase = rtrim(SinirConfig::baseUrl(), '/');
+$urlSave = $urlBase.'/salvarManifestoLote';
 
-// Listas oficiais = GET (POST → 405)
-printResponse('GET retornaListaResiduo', $gw->get('retornaListaResiduo', $token));
-$unidadesResp = $gw->get('retornaListaUnidade', $token);
-printResponse('GET retornaListaUnidade', $unidadesResp);
+// Smoke GET
+$gw = new SinirGateway(30);
+$ping = $gw->get('retornaListaUnidade', $token);
+echo 'GET retornaListaUnidade status='.($ping['status'] ?? 0).' ok='.(!empty($ping['ok']) ? '1' : '0').PHP_EOL;
 
-// Payload mínimo ASCII (isola acento / (*) / códigos)
-$minimal = [
+$transU = $jwtUnidade ?: (int)$m0['codUnidadeTransportador'];
+$destU = $jwtUnidade ?: (int)$m0['codUnidadeDestinador'];
+
+$itemInt = [
+    'quantidade' => 1.0,
+    'residuo' => '030308',
+    'codigoAcondicionamento' => 8,
+    'codigoClasse' => 43,
+    'codigoTecnologia' => 43,
+    'codigoTipoEstado' => 4,
+    'codigoUnidade' => 2,
+    'manifestoItemObservacao' => '',
+    'manifestoItemCodInterno' => '',
+    'manifestoItemCodInternoDestinador' => '',
+    'tipoDensidadeValor' => 1,
+    'tipoDensidadeUnidade' => 1,
+];
+$itemStr = [
+    'quantidade' => '1.00',
+    'residuo' => '030308',
+    'codigoAcondicionamento' => '8',
+    'codigoClasse' => '43',
+    'codigoTecnologia' => '43',
+    'codigoTipoEstado' => '4',
+    'codigoUnidade' => '2',
+    'manifestoItemObservacao' => '',
+    'manifestoItemCodInterno' => '',
+    'manifestoItemCodInternoDestinador' => '',
+    'tipoDensidadeValor' => '1',
+    'tipoDensidadeUnidade' => '1',
+];
+
+$variants = [];
+
+// A) ints + sem armazenador (atual)
+$variants['A_ints_sem_armazenador'] = [
     'manifestoJSONDtos' => [[
-        'cnpGerador' => $payload['manifestoJSONDtos'][0]['cnpGerador'],
-        'codUnidadeGerador' => $payload['manifestoJSONDtos'][0]['codUnidadeGerador'],
-        'cnpTransportador' => $payload['manifestoJSONDtos'][0]['cnpTransportador'],
-        'codUnidadeTransportador' => $jwtUnidade ?: $payload['manifestoJSONDtos'][0]['codUnidadeTransportador'],
-        'cnpDestinador' => $payload['manifestoJSONDtos'][0]['cnpDestinador'],
-        'codUnidadeDestinador' => $jwtUnidade ?: $payload['manifestoJSONDtos'][0]['codUnidadeDestinador'],
-        'seuCodigoReferencia' => 'dbg'.time(),
+        'cnpGerador' => $m0['cnpGerador'],
+        'codUnidadeGerador' => (int)$m0['codUnidadeGerador'],
+        'cnpTransportador' => $m0['cnpTransportador'],
+        'codUnidadeTransportador' => $transU,
+        'cnpDestinador' => $m0['cnpDestinador'],
+        'codUnidadeDestinador' => $destU,
+        'seuCodigoReferencia' => 'dbgA'.time(),
         'manifObservacao' => 'teste',
         'manifGeradorNomeResponsavel' => 'TESTE',
         'manifGeradorCargoResponsavel' => 'TESTE',
         'manifTransportadorNomeMotorista' => 'TESTE',
         'manifTransportadorPlacaVeiculo' => 'ABC1D23',
         'manifTransportadorDataExpedicao' => date('Ymd'),
-        'itemManifestoJSONs' => [[
-            'quantidade' => 1,
-            'residuo' => '030308',
-            'codigoAcondicionamento' => 8,
-            'codigoClasse' => 43,
-            'codigoTecnologia' => 43,
-            'codigoTipoEstado' => 4,
-            'codigoUnidade' => 1,
-            'manifestoItemObservacao' => 'papel',
-            'manifestoItemCodInterno' => '1',
-            'manifestoItemCodInternoDestinador' => '',
-            'tipoDensidadeValor' => 1,
-            'tipoDensidadeUnidade' => 1,
-        ]],
+        'itemManifestoJSONs' => [$itemInt],
     ]],
 ];
-echo "--- payload minimo (unidade transp/dest=".($jwtUnidade ?: 'original').", uni_residuo=1) ---\n";
-echo json_encode($minimal, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
-printResponse('POST salvarManifestoLote MINIMO', $gw->post('salvarManifestoLote', $minimal, $token));
 
-printResponse('POST salvarManifestoLote COLETA', $gw->post('salvarManifestoLote', $payload, $token));
+// B) strings (como vários PDFs estaduais)
+$variants['B_strings'] = [
+    'manifestoJSONDtos' => [[
+        'cnpGerador' => (string)$m0['cnpGerador'],
+        'codUnidadeGerador' => (string)$m0['codUnidadeGerador'],
+        'cnpTransportador' => (string)$m0['cnpTransportador'],
+        'codUnidadeTransportador' => (string)$transU,
+        'cnpDestinador' => (string)$m0['cnpDestinador'],
+        'codUnidadeDestinador' => (string)$destU,
+        'seuCodigoReferencia' => 'dbgB'.time(),
+        'manifObservacao' => 'teste',
+        'manifGeradorNomeResponsavel' => 'TESTE',
+        'manifGeradorCargoResponsavel' => 'TESTE',
+        'manifTransportadorNomeMotorista' => 'TESTE',
+        'manifTransportadorPlacaVeiculo' => 'ABC1D23',
+        'manifTransportadorDataExpedicao' => date('Ymd'),
+        'itemManifestoJSONs' => [$itemStr],
+    ]],
+];
 
-// Variante: unidades do JWT no payload da coleta
-if ($jwtUnidade) {
-    $payloadJwt = $payload;
-    $payloadJwt['manifestoJSONDtos'][0]['codUnidadeTransportador'] = $jwtUnidade;
-    $payloadJwt['manifestoJSONDtos'][0]['codUnidadeDestinador'] = $jwtUnidade;
-    printResponse(
-        'POST salvarManifestoLote COLETA+JWT_UNIDADE',
-        $gw->post('salvarManifestoLote', $payloadJwt, $token)
-    );
+// C) com armazenador null explícito
+$variants['C_com_null_armazenador'] = [
+    'manifestoJSONDtos' => [[
+        'cnpGerador' => $m0['cnpGerador'],
+        'codUnidadeGerador' => (int)$m0['codUnidadeGerador'],
+        'cnpTransportador' => $m0['cnpTransportador'],
+        'codUnidadeTransportador' => $transU,
+        'cnpDestinador' => $m0['cnpDestinador'],
+        'codUnidadeDestinador' => $destU,
+        'cnpArmazenador' => null,
+        'codUnidadeArmazenador' => null,
+        'seuCodigoReferencia' => 'dbgC'.time(),
+        'manifObservacao' => 'teste',
+        'manifGeradorNomeResponsavel' => 'TESTE',
+        'manifGeradorCargoResponsavel' => 'TESTE',
+        'manifTransportadorNomeMotorista' => 'TESTE',
+        'manifTransportadorPlacaVeiculo' => 'ABC1D23',
+        'manifTransportadorDataExpedicao' => date('Ymd'),
+        'itemManifestoJSONs' => [$itemInt],
+    ]],
+];
+
+// D) array raiz (sem wrapper) — alguns legados
+$variants['D_array_raiz'] = [[
+    'cnpGerador' => $m0['cnpGerador'],
+    'codUnidadeGerador' => (int)$m0['codUnidadeGerador'],
+    'cnpTransportador' => $m0['cnpTransportador'],
+    'codUnidadeTransportador' => $transU,
+    'cnpDestinador' => $m0['cnpDestinador'],
+    'codUnidadeDestinador' => $destU,
+    'seuCodigoReferencia' => 'dbgD'.time(),
+    'manifObservacao' => 'teste',
+    'manifGeradorNomeResponsavel' => 'TESTE',
+    'manifGeradorCargoResponsavel' => 'TESTE',
+    'manifTransportadorNomeMotorista' => 'TESTE',
+    'manifTransportadorPlacaVeiculo' => 'ABC1D23',
+    'manifTransportadorDataExpedicao' => date('Ymd'),
+    'itemManifestoJSONs' => [$itemInt],
+]];
+
+// E) paths alternativos
+$altPaths = [
+    'salvarManifestoLote',
+    'salvarManifesto',
+    'manifesto/salvarManifestoLote',
+    'salvarManifestoLote/',
+];
+
+foreach ($variants as $name => $body) {
+    $json = json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    // C precisa de null literais
+    if ($name === 'C_com_null_armazenador') {
+        $json = json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    $r = postRaw($urlSave, $token, $json);
+    show($name, $r);
+    if (!empty($r['is_json'])) {
+        echo "*** SUCESSO DE FORMATO: {$name} ***\n";
+        echo "Use este formato no SinirPayloadBuilder.\n";
+        exit(0);
+    }
 }
 
-exit(0);
+echo "--- paths alternativos (payload B_strings) ---\n";
+$jsonB = json_encode($variants['B_strings'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+foreach ($altPaths as $path) {
+    $r = postRaw($urlBase.'/'.ltrim($path, '/'), $token, $jsonB);
+    show('PATH '.$path, $r);
+    if (!empty($r['is_json'])) {
+        echo "*** SUCESSO DE PATH: {$path} ***\n";
+        exit(0);
+    }
+}
+
+// F) POST vazio / {} no mesmo path (vê se endpoint existe)
+show('POST body vazio', postRaw($urlSave, $token, ''));
+show('POST body {}', postRaw($urlSave, $token, '{}'));
+show('POST body []', postRaw($urlSave, $token, '[]'));
+
+// G) outro POST autenticado com body (cancelar) — se JSON, POST+JSON ok na API
+show(
+    'POST cancelarManifesto smoke',
+    postRaw($urlBase.'/cancelarManifesto', $token, json_encode([
+        'manifestoCodigo' => 1,
+        'justificativa' => 'teste diagnostico nao aplicar',
+    ], JSON_UNESCAPED_UNICODE))
+);
+
+echo "Nenhuma variante retornou JSON. Provável bloqueio do endpoint ou contrato diferente na API nacional.\n";
+exit(2);
