@@ -13,11 +13,12 @@ use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
 use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
 
 /**
- * Monta payload para POST /salvarManifestoLote (array JSON raiz de manifestos).
+ * Monta payload para POST /salvarManifestoLote (schema MMA/SIGOR nacional).
+ * Body = array JSON raiz. Gerador = unidade do token de acesso (não vai no JSON).
  */
 class SinirPayloadBuilder
 {
-    /** @return array{ok:bool,payload:?array,errors:string[]} */
+    /** @return array{ok:bool,payload:?array,errors:string[],gerador_unidade?:int} */
     public function buildManifestoLote(int $coletaId): array
     {
         $coleta = EntityColeta::getById($coletaId);
@@ -33,11 +34,6 @@ class SinirPayloadBuilder
         $cliente = EntityCliente::getById($coleta->cliente_id);
         if (!$cliente) {
             return ['ok' => false, 'payload' => null, 'errors' => ['Cliente da coleta não encontrado.']];
-        }
-
-        $geradorCnpj = preg_replace('/\D/', '', (string)$snapshot->gerador_cnpj);
-        if ($geradorCnpj === '') {
-            return ['ok' => false, 'payload' => null, 'errors' => ['CNPJ do gerador ausente no snapshot.']];
         }
 
         $geradorUnidade = (int)($cliente->sinir_cod_unidade ?? 0);
@@ -57,7 +53,7 @@ class SinirPayloadBuilder
         }
 
         $errors = [];
-        $itemManifestoJSONs = [];
+        $listaResiduos = [];
         foreach ($itens as $item) {
             $tipo = $item->tipo_residuo_id ? EntityTipoResiduo::getById($item->tipo_residuo_id) : null;
             if (!$tipo || !$this->tipoTemCodigosSinir($tipo)) {
@@ -74,21 +70,20 @@ class SinirPayloadBuilder
                 continue;
             }
 
-            [$densidadeValor, $densidadeUnidade] = $this->densidadeFromUnidade($item->unidade);
-
-            $itemManifestoJSONs[] = [
-                'quantidade' => round((float)$item->quantidade, 4),
-                'residuo' => $codIbama,
-                'codigoAcondicionamento' => (int)$tipo->tia_codigo,
-                'codigoClasse' => (int)$tipo->cla_codigo,
-                'codigoTecnologia' => (int)$tipo->tra_codigo,
-                'codigoTipoEstado' => (int)$tipo->tie_codigo,
-                'codigoUnidade' => (int)$tipo->uni_codigo,
-                'manifestoItemObservacao' => mb_substr((string)$item->nome, 0, 500),
-                'manifestoItemCodInterno' => (string)$item->id,
-                'tipoDensidadeValor' => $densidadeValor,
-                'tipoDensidadeUnidade' => $densidadeUnidade,
+            $residuo = [
+                'marQuantidade' => round((float)$item->quantidade, 4),
+                'resCodigoIbama' => $codIbama,
+                'uniCodigo' => (int)$tipo->uni_codigo,
+                'traCodigo' => (int)$tipo->tra_codigo,
+                'tieCodigo' => (int)$tipo->tie_codigo,
+                'tiaCodigo' => (int)$tipo->tia_codigo,
+                'claCodigo' => (int)$tipo->cla_codigo,
             ];
+            // Densidade só para Litro / m³ (manual SIGOR).
+            if (in_array(strtolower(trim((string)$item->unidade)), ['l', 'm3', 'm³'], true)) {
+                $residuo['marDensidade'] = 1;
+            }
+            $listaResiduos[] = $residuo;
         }
 
         if ($errors !== []) {
@@ -110,48 +105,60 @@ class SinirPayloadBuilder
             return ['ok' => false, 'payload' => null, 'errors' => ['Transportadora ou destinador não cadastrado na coleta.']];
         }
 
-        $dataExpedicao = $coleta->data_coleta
-            ? date('Ymd', strtotime($coleta->data_coleta))
-            : date('Ymd');
+        // Manual MMA/SIGOR: dataExpedição não pode ser anterior a hoje (código 005).
+        $dataExpedicaoMs = self::dataExpedicaoEpochMs($coleta->data_coleta);
 
-        $refInterna = $coleta->numero_relatorio ?: $coleta->numero_mtr ?: $coleta->id;
+        $refInterna = mb_substr((string)($coleta->numero_relatorio ?: $coleta->numero_mtr ?: $coleta->id), 0, 30);
+        $placa = preg_replace('/[^A-Za-z0-9]/', '', (string)($snapshot->veiculo_placa ?? '')) ?: 'AAA0A00';
+        $placa = mb_substr($placa, 0, 7);
+        $motorista = trim((string)$snapshot->motorista_nome);
+        $responsavel = trim((string)($snapshot->gerador_responsavel ?: $snapshot->gerador_nome_fantasia));
+        if ($responsavel === '') {
+            $responsavel = 'Responsavel';
+        }
 
-        // API nacional (apiws 2026+): body = array raiz de manifestos (NÃO usar wrapper manifestoJSONDtos —
-        // o wrapper provoca HTTP 400 HTML no Tomcat).
+        // Schema nacional (admin.sinir.gov.br / MMA): gerador = unidade do JWT do token.
+        // Token de integração deve ser gerado no portal logado como GERADOR (erro 002 se for só transportador).
         $manifesto = [
-            'cnpGerador' => $geradorCnpj,
-            'codUnidadeGerador' => (int)$geradorUnidade,
-            'cnpTransportador' => $transportadorCnpj,
-            'codUnidadeTransportador' => (int)$credentials['transportador_unidade'],
-            'cnpDestinador' => $destinadorCnpj,
-            'codUnidadeDestinador' => (int)$credentials['destinador_unidade'],
-            'seuCodigoReferencia' => (string)$refInterna,
-            'manifObservacao' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
-            'manifGeradorNomeResponsavel' => mb_substr(
-                trim((string)($snapshot->gerador_responsavel ?: $snapshot->gerador_nome_fantasia)),
-                0,
-                300
-            ),
-            'manifGeradorCargoResponsavel' => 'Responsavel',
-            'manifTransportadorNomeMotorista' => mb_substr(
-                trim((string)$snapshot->motorista_nome) !== ''
-                    ? trim((string)$snapshot->motorista_nome)
-                    : 'Motorista',
-                0,
-                300
-            ),
-            'manifTransportadorPlacaVeiculo' => mb_substr(
-                trim((string)$snapshot->veiculo_placa) !== ''
-                    ? preg_replace('/[^A-Za-z0-9]/', '', (string)$snapshot->veiculo_placa)
-                    : 'AAA0A00',
-                0,
-                10
-            ),
-            'manifTransportadorDataExpedicao' => $dataExpedicao,
-            'itemManifestoJSONs' => $itemManifestoJSONs,
+            'tipoManifesto' => 1,
+            'nomeResponsavel' => mb_substr($responsavel, 0, 300),
+            'seuCodigo' => $refInterna,
+            'dataExpedicao' => $dataExpedicaoMs,
+            'nomeMotorista' => mb_substr($motorista !== '' ? $motorista : 'Motorista', 0, 300),
+            'placaVeiculo' => $placa,
+            'observacoes' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
+            'transportador' => [
+                'cpfCnpj' => $transportadorCnpj,
+                'unidade' => (int)$credentials['transportador_unidade'],
+            ],
+            'destinador' => [
+                'cpfCnpj' => $destinadorCnpj,
+                'unidade' => (int)$credentials['destinador_unidade'],
+            ],
+            // Sem armazenador temporário: omitir o campo (manual CETESB/SIGOR).
+            'listaManifestoResiduos' => $listaResiduos,
         ];
 
-        return ['ok' => true, 'payload' => [$manifesto], 'errors' => []];
+        return ['ok' => true, 'payload' => [$manifesto], 'errors' => [], 'gerador_unidade' => $geradorUnidade];
+    }
+
+    /** Epoch ms em America/Sao_Paulo; nunca anterior a hoje 00:00. */
+    public static function dataExpedicaoEpochMs(?string $dataColeta): int
+    {
+        $tz = new \DateTimeZone('America/Sao_Paulo');
+        $hoje = new \DateTimeImmutable('today', $tz);
+        $base = $hoje;
+        if ($dataColeta) {
+            $ts = strtotime($dataColeta);
+            if ($ts !== false) {
+                $coletaDia = (new \DateTimeImmutable('@'.$ts))->setTimezone($tz)->setTime(0, 0);
+                if ($coletaDia >= $hoje) {
+                    $base = $coletaDia;
+                }
+            }
+        }
+
+        return (int)$base->setTime(12, 0)->format('U') * 1000;
     }
 
     /**

@@ -115,7 +115,7 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Listar tratamentos | GET | `/retornaListaTratamento` |
 | Listar estados físicos | GET | `/retornaListaEstadoFisico` |
 | Listar acondicionamentos | GET | `/retornaListaAcondicionamento` |
-| Emitir MTR | POST | `/salvarManifestoLote` — body = **array JSON** de manifestos (`[{...}]`), não `{manifestoJSONDtos:[...]}` (este wrapper gera Tomcat 400) |
+| Emitir MTR | POST | `/salvarManifestoLote` — body = **array JSON** no schema **MMA/SIGOR** (`transportador`/`destinador`/`listaManifestoResiduos`). Wrapper `{manifestoJSONDtos:[…]}` → Tomcat 400. **Token deve ser de Gerador** (unidade JWT = `clientes.sinir_cod_unidade`). Data de expedição ≥ hoje. |
 | PDF MTR | POST | `/buscaPdfManifestoPorCodigoBarras/{cod}` — cache em `storage/coletas/{id}/` (`ColetaCdfService`, portal gerador) |
 | Cancelar | POST | `/cancelarManifesto` |
 | Receber (destinador) | POST | `/receberManifestoLote` — painel Coletas → **Receber no SINIR** (`SinirRecebimentoService`) |
@@ -154,9 +154,11 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 ### Pré-requisitos antes do envio
 
 1. `.env`: `SINIR_ENABLED=true`, token, unidade e CNPJ configurados
-2. **Cliente (gerador):** campo **Cód. unidade SINIR** (`clientes.sinir_cod_unidade`) — código da unidade no portal MTR
-3. **Tipo de resíduo:** códigos IBAMA + mapeamento SINIR (`codigoTecnologia`, `codigoTipoEstado`, `codigoAcondicionamento`, `codigoClasse`, `codigoUnidade`)
-4. Migration `010_clientes_sinir_unidade.sql` aplicada
+2. **Token API WS de Gerador:** no portal MTR, logue na unidade **geradora** do cliente e gere o token. O `sub` do JWT (`pessoaId,unidadeId`) deve ser a mesma unidade de `clientes.sinir_cod_unidade`. Token só de transportador → código **002**.
+3. **Cliente (gerador):** campo **Cód. unidade SINIR** (`clientes.sinir_cod_unidade`)
+4. **Tipo de resíduo:** códigos IBAMA + mapeamento SINIR (`tra/tie/tia/cla/uni_codigo`)
+5. Migration `010_clientes_sinir_unidade.sql` aplicada
+6. Atualize `transportadoras`/`destinadores`.`sinir_cod_unidade` para a unidade do JWT (ex.: `728559`), não a antiga `135551`
 
 ### Smoke test (CLI)
 

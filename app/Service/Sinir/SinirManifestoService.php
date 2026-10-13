@@ -75,16 +75,39 @@ class SinirManifestoService
 
         $payload = self::alinharUnidadesComJwt($payload, (string)$tokenResult['token']);
         $unidadeJwt = self::unidadeFromJwt((string)$tokenResult['token']);
+        $geradorUnidadeCadastro = (int)($built['gerador_unidade'] ?? 0);
+
+        // Manual MMA: token deve ser de Gerador — a unidade do JWT precisa ser a do cliente gerador.
+        if ($unidadeJwt !== null && $geradorUnidadeCadastro > 0 && $unidadeJwt !== $geradorUnidadeCadastro) {
+            $msg = 'Token SINIR é da unidade '.$unidadeJwt
+                .', mas o gerador da coleta é a unidade '.$geradorUnidadeCadastro
+                .'. No portal MTR, gere o Token API WS logado como o GERADOR (cliente)'
+                .' — a API nacional rejeita token só de transportador (código 002).';
+            $this->registrarFalha($coletaId, $payload, [
+                'jwt_unidade' => $unidadeJwt,
+                'gerador_unidade' => $geradorUnidadeCadastro,
+            ], $msg);
+
+            return [
+                'ok' => false,
+                'message' => $msg,
+                'details' => [
+                    'jwt_unidade' => $unidadeJwt,
+                    'gerador_unidade' => $geradorUnidadeCadastro,
+                ],
+            ];
+        }
+
         $response = $this->gateway->post('salvarManifestoLote', $payload, $tokenResult['token']);
         $result = $this->processarResposta($coletaId, $payload, $response);
         if (empty($result['ok'])) {
             $m0 = (array_is_list($payload) && is_array($payload[0] ?? null)) ? $payload[0] : [];
             $result['details'] = array_merge(is_array($result['details'] ?? null) ? $result['details'] : [], [
                 'jwt_unidade' => $unidadeJwt,
+                'gerador_unidade_cadastro' => $geradorUnidadeCadastro,
                 'unidades_enviadas' => [
-                    'gerador' => $m0['codUnidadeGerador'] ?? null,
-                    'transportador' => $m0['codUnidadeTransportador'] ?? null,
-                    'destinador' => $m0['codUnidadeDestinador'] ?? null,
+                    'transportador' => $m0['transportador']['unidade'] ?? ($m0['codUnidadeTransportador'] ?? null),
+                    'destinador' => $m0['destinador']['unidade'] ?? ($m0['codUnidadeDestinador'] ?? null),
                 ],
             ]);
         }
@@ -115,8 +138,18 @@ class SinirManifestoService
             if (!is_array($manifesto)) {
                 continue;
             }
+            // Schema MMA/SIGOR (nacional)
+            if (isset($manifesto['transportador']) && is_array($manifesto['transportador'])) {
+                $lista[$i]['transportador']['unidade'] = $unidadeJwt;
+                $cnpT = preg_replace('/\D/', '', (string)($manifesto['transportador']['cpfCnpj'] ?? ''));
+                $cnpD = preg_replace('/\D/', '', (string)($manifesto['destinador']['cpfCnpj'] ?? ''));
+                if ($cnpT !== '' && $cnpT === $cnpD && isset($lista[$i]['destinador']) && is_array($lista[$i]['destinador'])) {
+                    $lista[$i]['destinador']['unidade'] = $unidadeJwt;
+                }
+                continue;
+            }
+            // Schema FEAM legado (estados)
             $lista[$i]['codUnidadeTransportador'] = $unidadeJwt;
-            // Mesmo CNPJ transportador/destinador (Well): mesma unidade do token.
             $cnpT = preg_replace('/\D/', '', (string)($manifesto['cnpTransportador'] ?? ''));
             $cnpD = preg_replace('/\D/', '', (string)($manifesto['cnpDestinador'] ?? ''));
             if ($cnpT !== '' && $cnpT === $cnpD) {
@@ -398,7 +431,16 @@ class SinirManifestoService
     {
         $erroNacional = !empty($body['erroNacional']);
         $msgNacional = trim((string)($body['mensagemErroNacional'] ?? ''));
-        $dto = $body['respostaApiwsManifestoDTO'] ?? null;
+        $dto = $body['respostaApiwsManifestoDTO'] ?? $body['objetoResposta'] ?? null;
+
+        // Resposta SIGOR às vezes vem como lista na raiz.
+        if ($dto === null && array_is_list($body) && is_array($body[0] ?? null)) {
+            $dto = $body;
+            $erroNacional = $erroNacional || !empty($body[0]['erroNacional']);
+            if ($msgNacional === '') {
+                $msgNacional = trim((string)($body[0]['mensagemErroNacional'] ?? ''));
+            }
+        }
 
         $primeiro = null;
         if (is_array($dto)) {
@@ -411,16 +453,31 @@ class SinirManifestoService
 
         $retornoCodigo = is_array($primeiro) ? (int)($primeiro['retornoCodigo'] ?? -1) : -1;
         $manNumero = is_array($primeiro)
-            ? (string)($primeiro['manifestoCodigo'] ?? $primeiro['manNumero'] ?? '')
+            ? (string)($primeiro['manifestoCodigo']
+                ?? $primeiro['manifestoNumeroNacional']
+                ?? $primeiro['manNumero']
+                ?? $primeiro['codigoGerado']
+                ?? '')
             : '';
         $codigoBarras = is_array($primeiro)
             ? (string)($primeiro['codigoBarra'] ?? $primeiro['codigoBarras'] ?? '')
             : '';
-        $retorno = is_array($primeiro) ? trim((string)($primeiro['retorno'] ?? '')) : '';
+        $retorno = is_array($primeiro)
+            ? trim((string)($primeiro['retorno']
+                ?? $primeiro['restResponseMensagem']
+                ?? $primeiro['mensagem']
+                ?? ''))
+            : '';
+
+        $restOk = is_array($primeiro) && (
+            ($primeiro['restResponseValido'] ?? null) === true
+            || ($manNumero !== '' && trim((string)($primeiro['mensagemErroNacional'] ?? '')) === '')
+        );
 
         $sucesso = $response['ok'] && !$erroNacional && (
             ($primeiro !== null && $retornoCodigo === 0)
-            || ($manNumero !== '' && $msgNacional === '')
+            || $restOk
+            || ($manNumero !== '' && $msgNacional === '' && $retornoCodigo <= 0)
         );
 
         if ($sucesso) {
@@ -441,10 +498,11 @@ class SinirManifestoService
         if ($msg === '') {
             $msg = $this->extrairMensagemErro($response, $primeiro);
         }
-        if ($msg === '' || str_contains($msg, 'HTTP 400')) {
+        if ($msg === '' || str_contains($msg, 'HTTP 400') || str_contains($msg, 'sem mensagem detalhada')) {
             $msg = 'SINIR rejeitou o manifesto (erroNacional)'
                 .($manNumero !== '' ? ' — man '.$manNumero : '')
-                .'.';
+                .'. Confira: token gerado como GERADOR; data de expedição ≥ hoje; schema MMA '
+                .'(transportador/destinador/listaManifestoResiduos).';
         }
 
         $this->registrarFalhaComRaw($coletaId, $payload, $response, $body, $msg);

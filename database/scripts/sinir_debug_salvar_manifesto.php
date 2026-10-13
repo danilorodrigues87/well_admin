@@ -1,12 +1,13 @@
 <?php
 
 /**
- * Diagnóstico salvarManifestoLote (coleta real + probes de schema).
+ * Diagnóstico salvarManifestoLote (schema MMA/SIGOR + checagem token gerador).
  * Uso: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}
  */
 require dirname(__DIR__, 2).'/includes/app.php';
 
-use App\Model\Db\Database;
+use App\Model\Entity\Cliente as EntityCliente;
+use App\Model\Entity\Coleta as EntityColeta;
 use App\Service\Sinir\SinirAuthService;
 use App\Service\Sinir\SinirCredentialsResolver;
 use App\Service\Sinir\SinirGateway;
@@ -25,9 +26,15 @@ if (!$built['ok']) {
     exit(1);
 }
 
-/** @var array<int,array<string,mixed>> $feamPayload */
-$feamPayload = $built['payload'];
-echo 'payload_is_list='.(array_is_list($feamPayload) ? '1' : '0').PHP_EOL;
+/** @var array<int,array<string,mixed>> $payload */
+$payload = $built['payload'];
+$geradorUnidade = (int)($built['gerador_unidade'] ?? 0);
+
+echo 'payload_is_list='.(array_is_list($payload) ? '1' : '0').PHP_EOL;
+echo 'schema_keys='.implode(',', array_keys($payload[0] ?? [])).PHP_EOL;
+echo 'gerador_unidade_cadastro='.$geradorUnidade.PHP_EOL;
+echo 'dataExpedicao_ms='.($payload[0]['dataExpedicao'] ?? '?')
+    .' (='.date('Y-m-d H:i', (int)(($payload[0]['dataExpedicao'] ?? 0) / 1000)).')'.PHP_EOL;
 
 $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
 if (!$credentials['ok']) {
@@ -45,85 +52,32 @@ if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
 $token = (string)$tokenResult['token'];
 $unidadeJwt = unidadeFromJwt($token);
 echo 'jwt.unidade='.($unidadeJwt ?? 'null').PHP_EOL;
-echo 'env_units transportador='.$credentials['transportador_unidade']
-    .' destinador='.$credentials['destinador_unidade'].PHP_EOL;
+echo 'env/cadastro units T='.$credentials['transportador_unidade']
+    .' D='.$credentials['destinador_unidade'].PHP_EOL;
 
-$feamAligned = alinharUnidadesComJwt($feamPayload, $token);
-$m0 = $feamAligned[0] ?? [];
-echo 'feam_aligned units T='.($m0['codUnidadeTransportador'] ?? '?')
-    .' D='.($m0['codUnidadeDestinador'] ?? '?')
-    .' G='.($m0['codUnidadeGerador'] ?? '?').PHP_EOL;
+if ($unidadeJwt !== null && $geradorUnidade > 0 && $unidadeJwt !== $geradorUnidade) {
+    echo "\n*** BLOQUEIO ESPERADO ***\n";
+    echo "Token JWT unidade={$unidadeJwt} ≠ gerador cadastro={$geradorUnidade}.\n";
+    echo "A API nacional (MMA/SIGOR) exige Token API WS gerado no portal\n";
+    echo "logado como a unidade GERADORA do cliente ({$geradorUnidade}).\n";
+    echo "Token só de transportador/destinador → erro 002.\n";
+    $coleta = EntityColeta::getById($coletaId);
+    $cli = $coleta ? EntityCliente::getById((int)$coleta->cliente_id) : null;
+    echo 'Cliente: '.($cli->nome_fantasia ?? $cli->razao_social ?? '?').PHP_EOL;
+}
+
+$payload = alinharSigor($payload, $unidadeJwt);
+echo 'payload_aligned T='.($payload[0]['transportador']['unidade'] ?? '?')
+    .' D='.($payload[0]['destinador']['unidade'] ?? '?').PHP_EOL;
+echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
 
 $gateway = new SinirGateway();
-
-$listaUnidades = $gateway->get('retornaListaUnidade', $token);
-echo 'retornaListaUnidade status='.$listaUnidades['status']
-    .' ok='.(($listaUnidades['ok'] ?? false) ? '1' : '0').PHP_EOL;
-if (is_array($listaUnidades['body'] ?? null)) {
-    $unidades = extrairLista($listaUnidades['body']);
-    $wellCnpj = preg_replace('/\D/', '', (string)($m0['cnpTransportador'] ?? ''));
-    $gerCnpj = preg_replace('/\D/', '', (string)($m0['cnpGerador'] ?? ''));
-    foreach ($unidades as $u) {
-        if (!is_array($u)) {
-            continue;
-        }
-        $cnp = preg_replace('/\D/', '', (string)($u['cnp'] ?? $u['cpfCnpj'] ?? $u['parCnpj'] ?? ''));
-        $cod = $u['codigo'] ?? $u['uniCodigo'] ?? $u['codUnidade'] ?? $u['unidade'] ?? null;
-        $nome = $u['nome'] ?? $u['descricao'] ?? $u['razaoSocial'] ?? '';
-        if ($cnp === $wellCnpj || $cnp === $gerCnpj || (int)$cod === (int)($unidadeJwt ?? 0)
-            || (int)$cod === (int)($m0['codUnidadeGerador'] ?? 0)
-            || (int)$cod === 135551 || (int)$cod === 728559) {
-            echo '  unidade hit cod='.$cod.' cnp='.$cnp.' nome='.mb_substr((string)$nome, 0, 60).PHP_EOL;
-        }
-    }
-}
-
-echo "\n===== PROBE_FEAM_aligned =====\n";
-printProbe($gateway->post('salvarManifestoLote', $feamAligned, $token));
-
-$feamPaper = $feamAligned;
-if (isset($feamPaper[0]['itemManifestoJSONs'][0])) {
-    $feamPaper[0]['itemManifestoJSONs'] = [$feamPaper[0]['itemManifestoJSONs'][0]];
-    // remove strings vazias
-    foreach ($feamPaper[0]['itemManifestoJSONs'] as $i => $item) {
-        foreach ($item as $k => $v) {
-            if ($v === '') {
-                unset($feamPaper[0]['itemManifestoJSONs'][$i][$k]);
-            }
-        }
-        $feamPaper[0]['itemManifestoJSONs'][$i]['quantidade'] = (float)$item['quantidade'];
-    }
-    echo "\n===== PROBE_FEAM_so_papelao_sem_vazios =====\n";
-    printProbe($gateway->post('salvarManifestoLote', $feamPaper, $token));
-}
-
-$sigor = buildSigorFromFeam($feamAligned[0], $unidadeJwt);
-echo "\n===== PROBE_SIGOR_nacional (token=gerador implícito) =====\n";
-echo json_encode($sigor, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
-printProbe($gateway->post('salvarManifestoLote', $sigor, $token));
+echo "\n===== POST salvarManifestoLote (SIGOR/MMA) =====\n";
+printProbe($gateway->post('salvarManifestoLote', $payload, $token));
 
 echo "\n=== via SinirManifestoService::enviarColeta (force) ===\n";
 $result = (new SinirManifestoService())->enviarColeta($coletaId, true);
 echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
-
-$db = new Database();
-$stmt = $db->execute(
-    'SELECT id, request_payload, response_payload, mensagem_erro, created_at
-     FROM sinir_envios WHERE coleta_id = ? ORDER BY id DESC LIMIT 1',
-    [$coletaId]
-);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
-if (is_array($row)) {
-    echo "\n=== último sinir_envios #{$row['id']} ===\n";
-    echo 'mensagem_erro: '.($row['mensagem_erro'] ?? '').PHP_EOL;
-    $req = json_decode((string)$row['request_payload'], true);
-    if (is_array($req) && isset($req[0]) && is_array($req[0])) {
-        echo 'request units T='.($req[0]['codUnidadeTransportador'] ?? $req[0]['transportador']['unidade'] ?? '?')
-            .' D='.($req[0]['codUnidadeDestinador'] ?? $req[0]['destinador']['unidade'] ?? '?')
-            .' G='.($req[0]['codUnidadeGerador'] ?? '(sigor/implícito)').PHP_EOL;
-        echo 'request keys: '.implode(', ', array_keys($req[0])).PHP_EOL;
-    }
-}
 
 exit(!empty($result['ok']) ? 0 : 2);
 
@@ -132,16 +86,12 @@ function printProbe(array $response): void
 {
     $body = $response['body'] ?? null;
     $raw = (string)($response['raw'] ?? '');
-    $isJson = is_array($body);
-    $isHtml = str_contains(strtolower((string)($response['content_type'] ?? '')), 'html')
-        || str_starts_with(ltrim($raw), '<');
-    echo 'status='.$response['status'].' json='.($isJson ? '1' : '0')
-        .' html='.($isHtml ? '1' : '0')
+    echo 'status='.$response['status'].' json='.(is_array($body) ? '1' : '0')
         .' raw_len='.strlen($raw).PHP_EOL;
-    if ($isJson) {
+    if (is_array($body)) {
         echo json_encode($body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
     } else {
-        echo '(sem JSON) '.mb_substr($raw, 0, 300).PHP_EOL;
+        echo mb_substr($raw, 0, 500).PHP_EOL;
     }
 }
 
@@ -149,21 +99,22 @@ function printProbe(array $response): void
  * @param array<int,array<string,mixed>> $payload
  * @return array<int,array<string,mixed>>
  */
-function alinharUnidadesComJwt(array $payload, string $accessToken): array
+function alinharSigor(array $payload, ?int $unidadeJwt): array
 {
-    $unidadeJwt = unidadeFromJwt($accessToken);
-    if ($unidadeJwt === null || $unidadeJwt <= 0 || !array_is_list($payload)) {
+    if ($unidadeJwt === null || $unidadeJwt <= 0) {
         return $payload;
     }
-    foreach ($payload as $i => $manifesto) {
-        if (!is_array($manifesto)) {
+    foreach ($payload as $i => $m) {
+        if (!is_array($m)) {
             continue;
         }
-        $payload[$i]['codUnidadeTransportador'] = $unidadeJwt;
-        $cnpT = preg_replace('/\D/', '', (string)($manifesto['cnpTransportador'] ?? ''));
-        $cnpD = preg_replace('/\D/', '', (string)($manifesto['cnpDestinador'] ?? ''));
-        if ($cnpT !== '' && $cnpT === $cnpD) {
-            $payload[$i]['codUnidadeDestinador'] = $unidadeJwt;
+        if (isset($m['transportador']) && is_array($m['transportador'])) {
+            $payload[$i]['transportador']['unidade'] = $unidadeJwt;
+            $cnpT = preg_replace('/\D/', '', (string)($m['transportador']['cpfCnpj'] ?? ''));
+            $cnpD = preg_replace('/\D/', '', (string)($m['destinador']['cpfCnpj'] ?? ''));
+            if ($cnpT !== '' && $cnpT === $cnpD && isset($payload[$i]['destinador'])) {
+                $payload[$i]['destinador']['unidade'] = $unidadeJwt;
+            }
         }
     }
 
@@ -191,75 +142,4 @@ function unidadeFromJwt(string $jwt): ?int
     }
 
     return (int)$m[2];
-}
-
-/**
- * Formato SIGOR/nacional (stallone MtrWSType.gerarLoteMTR): array raiz, gerador = unidade do token.
- *
- * @param array<string,mixed> $feam
- * @return array<int,array<string,mixed>>
- */
-function buildSigorFromFeam(array $feam, ?int $unidadeJwt): array
-{
-    $itens = [];
-    foreach ($feam['itemManifestoJSONs'] ?? [] as $item) {
-        if (!is_array($item)) {
-            continue;
-        }
-        $itens[] = [
-            'resCodigoIbama' => (string)($item['residuo'] ?? ''),
-            'marQuantidade' => (float)($item['quantidade'] ?? 0),
-            'claCodigo' => (int)($item['codigoClasse'] ?? 0),
-            'traCodigo' => (int)($item['codigoTecnologia'] ?? 0),
-            'tieCodigo' => (int)($item['codigoTipoEstado'] ?? 0),
-            'tiaCodigo' => (int)($item['codigoAcondicionamento'] ?? 0),
-            'uniCodigo' => (int)($item['codigoUnidade'] ?? 0),
-        ];
-    }
-
-    $dataExp = (string)($feam['manifTransportadorDataExpedicao'] ?? date('Ymd'));
-    // SIGOR tipicamente usa epoch ms; se a API rejeitar, o probe mostra.
-    $ts = strtotime(substr($dataExp, 0, 4).'-'.substr($dataExp, 4, 2).'-'.substr($dataExp, 6, 2).' 12:00:00');
-    $unidadeT = (int)($unidadeJwt ?: ($feam['codUnidadeTransportador'] ?? 0));
-    $unidadeD = (int)($unidadeJwt ?: ($feam['codUnidadeDestinador'] ?? 0));
-
-    return [[
-        'nomeResponsavel' => (string)($feam['manifGeradorNomeResponsavel'] ?? 'Responsavel'),
-        'seuCodigo' => (string)($feam['seuCodigoReferencia'] ?? ''),
-        'dataExpedicao' => $ts ? (int)($ts * 1000) : null,
-        'nomeMotorista' => (string)($feam['manifTransportadorNomeMotorista'] ?? ''),
-        'placaVeiculo' => (string)($feam['manifTransportadorPlacaVeiculo'] ?? ''),
-        'observacoes' => (string)($feam['manifObservacao'] ?? ''),
-        'transportador' => [
-            'cpfCnpj' => (string)($feam['cnpTransportador'] ?? ''),
-            'unidade' => $unidadeT,
-        ],
-        'destinador' => [
-            'cpfCnpj' => (string)($feam['cnpDestinador'] ?? ''),
-            'unidade' => $unidadeD,
-        ],
-        'armazenadorTemporario' => [
-            'cpfCnpj' => '99999999999999',
-            'unidade' => 99999,
-        ],
-        'listaManifestoResiduos' => $itens,
-    ]];
-}
-
-/** @param mixed $body @return list<mixed> */
-function extrairLista($body): array
-{
-    if (!is_array($body)) {
-        return [];
-    }
-    if (array_is_list($body)) {
-        return $body;
-    }
-    foreach (['objetoResposta', 'lista', 'unidades', 'retornaListaUnidade'] as $k) {
-        if (isset($body[$k]) && is_array($body[$k]) && array_is_list($body[$k])) {
-            return $body[$k];
-        }
-    }
-
-    return [];
 }

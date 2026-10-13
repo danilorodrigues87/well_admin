@@ -327,3 +327,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR gateway: remove `Expect:` (Tomcat 9 400); probe auth bearer/x-access-token/raw; CLI sem session |
 | 2026-10-13 | SINIR apiws: `salvarManifestoLote` exige **array raiz**; resposta `erroNacional`/`respostaApiwsManifestoDTO`; alinha unidade ao JWT |
 | 2026-10-13 | SINIR `erroNacional` sem mensagem: debug probe FEAM vs SIGOR; strip strings vazias; details com `jwt_unidade`/`unidades_enviadas` |
+| 2026-10-13 | SINIR MMA/SIGOR: payload `listaManifestoResiduos`; dataExpedição ≥ hoje; bloqueia se JWT ≠ unidade gerador do cliente (token precisa ser de Gerador) |
