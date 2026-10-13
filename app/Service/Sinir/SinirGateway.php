@@ -116,8 +116,9 @@ class SinirGateway
             $opts[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
         }
 
+        // Evita br/zstd no Accept-Encoding (alguns proxies/WAF respondem 400 HTML).
         if (defined('CURLOPT_ENCODING')) {
-            $opts[CURLOPT_ENCODING] = '';
+            $opts[CURLOPT_ENCODING] = 'gzip,deflate';
         }
 
         if (!SinirConfig::sslVerify()) {

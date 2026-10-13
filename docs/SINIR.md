@@ -81,7 +81,7 @@ Erro se faltar token de integração:
 | Campo | Valor |
 |-------|-------|
 | CNPJ | 18.675.233/0001-50 |
-| Código unidade | 135551 |
+| Código unidade | 135551 (confira se bate com o `sub` do JWT do token de acesso: `pessoaId,unidadeId`) |
 | Empresa | WIDMER TRINDADE DE BEM - ME |
 | CPF usuário | 027.506.321-61 |
 
