@@ -189,6 +189,20 @@ Script `sinir_sync_residuos.php` consulta as listas oficiais e preenche `cod_iba
 
 Revisar o CSV antes de aplicar em produção. Em XAMPP local, se curl falhar com certificado SSL: `SINIR_SSL_VERIFY=false` no `.env`.
 
+### HTTP 400 em “Gerar MTR”
+
+O pré-check do painel só valida unidades/token/itens. Um **400** vem da API após o envio.
+
+1. No modal de erro, a mensagem deve trazer o texto do SINIR (não só “HTTP 400”).
+2. Na VPS, inspecione o último payload/resposta:
+   ```bash
+   php database/scripts/dump_last_sinir_envio.php
+   php database/scripts/dump_last_sinir_envio.php {coleta_id}
+   ```
+3. Causas frequentes: código IBAMA inválido ou sem `(*)` em perigoso; CNPJ/unidade do gerador não batem no portal; placa/motorista vazios; quantidade &lt; 0,1 kg; token da transportadora sem permissão sobre a unidade geradora.
+
+O campo `residuo` no JSON vai como **6 dígitos** (ex.: `150203`) e **com `(*)`** quando o cadastro indica perigoso (ex.: `200121(*)`).
+
 ### Timeout / `http_status: 0`
 
 Se o smoke test retorna `Operation timed out` com `http_status: 0`, **não é erro do token** — o PHP no servidor **não consegue conectar** a `admin.sinir.gov.br`.

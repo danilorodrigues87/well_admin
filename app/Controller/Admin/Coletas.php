@@ -34,7 +34,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261002a"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261013a"></script>'
         );
     }
 
@@ -403,7 +403,17 @@ class Coletas extends Page
             return CrudHelper::jsonOk(['message' => $result['message']]);
         }
         if (!$result['ok']) {
-            return CrudHelper::jsonError($result['message']);
+            $payload = ['success' => false, 'message' => $result['message']];
+            if (!empty($result['details'])) {
+                $payload['details'] = $result['details'];
+            }
+            // Último erro gravado em sinir_envios (ajuda a ver o JSON do SINIR no modal)
+            $ultimos = \App\Model\Entity\SinirEnvio::listByColeta($id, 1);
+            if ($ultimos !== [] && ($ultimos[0]->mensagem_erro ?? '') !== '') {
+                $payload['sinir_hint'] = $ultimos[0]->mensagem_erro;
+            }
+
+            return json_encode($payload, JSON_UNESCAPED_UNICODE);
         }
 
         return CrudHelper::jsonOk([

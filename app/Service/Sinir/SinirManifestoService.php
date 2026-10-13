@@ -323,9 +323,20 @@ class SinirManifestoService
         }
 
         $msg = $this->extrairMensagemErro($response, $primeiro);
-        $this->registrarFalha($coletaId, $payload, is_array($body) ? $body : $response, $msg);
+        $audit = is_array($body) && $body !== [] ? $body : $response;
+        if (is_array($audit) && empty($audit['raw']) && !empty($response['raw'])) {
+            $audit['raw'] = mb_substr((string)$response['raw'], 0, 4000);
+        }
+        $this->registrarFalha($coletaId, $payload, $audit, $msg);
 
-        return ['ok' => false, 'message' => $msg, 'details' => ['http_status' => $response['status']]];
+        return [
+            'ok' => false,
+            'message' => $msg,
+            'details' => [
+                'http_status' => $response['status'] ?? 0,
+                'sinir_body' => is_array($body) ? $body : null,
+            ],
+        ];
     }
 
     private static function manifestoParaNumeroMtr(string $manifestoCodigo): ?int
@@ -345,20 +356,66 @@ class SinirManifestoService
     /** @param array<string,mixed>|null $primeiro */
     private function extrairMensagemErro(array $response, ?array $primeiro): string
     {
+        $candidates = [];
+
         if ($primeiro !== null) {
-            $retorno = trim((string)($primeiro['retorno'] ?? ''));
-            if ($retorno !== '') {
-                return $retorno;
+            foreach (['retorno', 'mensagem', 'message', 'erroMensagem', 'descricao'] as $k) {
+                $v = trim((string)($primeiro[$k] ?? ''));
+                if ($v !== '') {
+                    $candidates[] = $v;
+                }
             }
         }
 
         if (!empty($response['error'])) {
-            return (string)$response['error'];
+            $candidates[] = trim((string)$response['error']);
         }
 
-        $body = $response['body'] ?? [];
-        if (is_array($body) && !empty($body['mensagem'])) {
-            return (string)$body['mensagem'];
+        $body = $response['body'] ?? null;
+        if (is_array($body)) {
+            foreach (['mensagem', 'message', 'retorno', 'error', 'title', 'detail'] as $k) {
+                $v = $body[$k] ?? null;
+                if (is_string($v) && trim($v) !== '' && !in_array(strtolower(trim($v)), ['true', 'false'], true)) {
+                    $candidates[] = trim($v);
+                }
+            }
+            // Lote: vários itens com retorno
+            $dtos = $body['manifestoJSONDtos'] ?? null;
+            if (is_array($dtos)) {
+                foreach ($dtos as $dto) {
+                    if (!is_array($dto)) {
+                        continue;
+                    }
+                    $r = trim((string)($dto['retorno'] ?? $dto['mensagem'] ?? ''));
+                    if ($r !== '') {
+                        $candidates[] = $r;
+                    }
+                }
+            }
+            if (!empty($body['erros']) && is_array($body['erros'])) {
+                foreach ($body['erros'] as $e) {
+                    if (is_string($e) && trim($e) !== '') {
+                        $candidates[] = trim($e);
+                    } elseif (is_array($e)) {
+                        $r = trim((string)($e['mensagem'] ?? $e['message'] ?? $e['retorno'] ?? ''));
+                        if ($r !== '') {
+                            $candidates[] = $r;
+                        }
+                    }
+                }
+            }
+        }
+
+        $candidates = array_values(array_unique(array_filter($candidates)));
+        if ($candidates !== []) {
+            return mb_substr(implode(' | ', $candidates), 0, 500);
+        }
+
+        $raw = trim((string)($response['raw'] ?? ''));
+        if ($raw !== '') {
+            $snippet = mb_substr(preg_replace('/\s+/', ' ', $raw) ?? $raw, 0, 280);
+
+            return 'Falha ao enviar MTR ao SINIR (HTTP '.($response['status'] ?? 0).'): '.$snippet;
         }
 
         return 'Falha ao enviar MTR ao SINIR (HTTP '.($response['status'] ?? 0).').';

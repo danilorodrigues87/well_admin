@@ -2,6 +2,7 @@
 
 namespace App\Service\Sinir;
 
+use App\Common\Helpers\IbamaCodigoHelper;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Destinador as EntityDestinador;
 use App\Model\Entity\Transportadora as EntityTransportadora;
@@ -64,7 +65,7 @@ class SinirPayloadBuilder
                 continue;
             }
 
-            $codIbama = preg_replace('/\D/', '', (string)($item->cod_ibama ?: $tipo->cod_ibama));
+            $codIbama = self::residuoCodigoSinir((string)($item->cod_ibama ?: $tipo->cod_ibama));
             if ($codIbama === '') {
                 $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem código IBAMA.';
                 continue;
@@ -132,8 +133,20 @@ class SinirPayloadBuilder
                         300
                     ),
                     'manifGeradorCargoResponsavel' => 'Responsável',
-                    'manifTransportadorNomeMotorista' => mb_substr(trim((string)$snapshot->motorista_nome), 0, 300),
-                    'manifTransportadorPlacaVeiculo' => mb_substr(trim((string)$snapshot->veiculo_placa), 0, 10),
+                    'manifTransportadorNomeMotorista' => mb_substr(
+                        trim((string)$snapshot->motorista_nome) !== ''
+                            ? trim((string)$snapshot->motorista_nome)
+                            : 'Motorista',
+                        0,
+                        300
+                    ),
+                    'manifTransportadorPlacaVeiculo' => mb_substr(
+                        trim((string)$snapshot->veiculo_placa) !== ''
+                            ? preg_replace('/[^A-Za-z0-9]/', '', (string)$snapshot->veiculo_placa)
+                            : 'SPLACA',
+                        0,
+                        10
+                    ),
                     'manifTransportadorDataExpedicao' => $dataExpedicao,
                     'itemManifestoJSONs' => $itemManifestoJSONs,
                 ],
@@ -207,7 +220,7 @@ class SinirPayloadBuilder
                 $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem mapeamento SINIR.';
                 continue;
             }
-            $codIbama = preg_replace('/\D/', '', (string)($item->cod_ibama ?: $tipo->cod_ibama));
+            $codIbama = self::residuoCodigoSinir((string)($item->cod_ibama ?: $tipo->cod_ibama));
             if ($codIbama === '') {
                 $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem código IBAMA.';
                 continue;
@@ -249,6 +262,32 @@ class SinirPayloadBuilder
         ];
 
         return ['ok' => true, 'payload' => $payload, 'errors' => []];
+    }
+
+    /**
+     * Código IBAMA para a API: 6 dígitos + "(*)" se perigoso (ex.: 200121(*)).
+     * Manuais MTR usam sem pontos; o asterisco deve ser preservado.
+     */
+    public static function residuoCodigoSinir(string $codIbama): string
+    {
+        $raw = trim($codIbama);
+        if ($raw === '') {
+            return '';
+        }
+        $hazardous = str_contains($raw, '*');
+        $normalized = IbamaCodigoHelper::normalize($raw);
+        if ($normalized === '') {
+            $digits = preg_replace('/\D/', '', $raw) ?? '';
+            if ($digits === '') {
+                return '';
+            }
+            $digits = str_pad(substr($digits, -6), 6, '0', STR_PAD_LEFT);
+
+            return $hazardous ? $digits.'(*)' : $digits;
+        }
+        $digits = str_replace('.', '', $normalized);
+
+        return $hazardous ? $digits.'(*)' : $digits;
     }
 
     /** @return array{0:int,1:int} */

@@ -321,3 +321,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-08 | Wizard etapa 4: catálogos destinador/tratamento; PATCH destinador; finalizar → CollectionDetail; cancelar → back; scripts `storage/ff_wizard_etapa_f/push_etapa_f.py` |
 | 2026-10-08 | App FF: FAB → **NewCollectionClientSelection** (lista `GET /clientes/coleta` + `POST /coletas`) → Wizard; etapa 1 dropdowns/data/hora ligados aos catálogos; script `storage/ff_cliente_select/push_all.py` |
 | 2026-10-08 | Painel Coletar em prod: erro genérico se falta `coletas.client_uuid` — mensagem aponta migration `051` / `apply_migration_051.php`; diag `diagnose_coleta_iniciar.php` |
+| 2026-10-13 | SINIR MTR HTTP 400: mensagem da API no modal; IBAMA preserva `(*)`; placa/motorista com fallback; `dump_last_sinir_envio.php` |

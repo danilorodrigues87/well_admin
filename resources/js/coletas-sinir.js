@@ -33,7 +33,12 @@
 
   function afterErr(msg) {
     if (typeof Swal !== 'undefined') {
-      Swal.fire('Erro SINIR', msg || 'Erro', 'error');
+      Swal.fire({
+        title: 'Erro SINIR',
+        html: '<p class="text-start mb-0" style="white-space:pre-wrap;word-break:break-word">'
+          + (msg || 'Erro') + '</p>',
+        icon: 'error'
+      });
     } else {
       alert(msg || 'Erro');
     }
@@ -58,7 +63,7 @@
       if (d.success) {
         afterOk(id, d.message);
       } else {
-        afterErr(d.message);
+        afterErr(d.message || d.sinir_hint || 'Erro ao emitir MTR.');
       }
     }, 'json').fail(function () {
       afterErr('Falha de rede.');

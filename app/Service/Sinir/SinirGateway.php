@@ -119,15 +119,26 @@ class SinirGateway
         $decoded = json_decode($raw, true);
         $bodyArray = is_array($decoded) ? $decoded : null;
         $apiError = is_array($bodyArray) && !empty($bodyArray['erro']);
+        $httpOk = $status >= 200 && $status < 300;
+
+        $errorMsg = null;
+        if ($apiError) {
+            $errorMsg = (string)($bodyArray['mensagem'] ?? $bodyArray['message'] ?? 'Erro retornado pela API SINIR');
+        } elseif (!$httpOk && is_array($bodyArray)) {
+            $errorMsg = (string)($bodyArray['mensagem'] ?? $bodyArray['message'] ?? $bodyArray['retorno'] ?? '');
+            if ($errorMsg === '') {
+                $errorMsg = null;
+            }
+        } elseif ($curlError !== '') {
+            $errorMsg = $curlError;
+        }
 
         return [
-            'ok' => $status >= 200 && $status < 300 && !$apiError,
+            'ok' => $httpOk && !$apiError,
             'status' => $status,
             'body' => $bodyArray,
             'raw' => $raw,
-            'error' => $apiError
-                ? (string)($bodyArray['mensagem'] ?? 'Erro retornado pela API SINIR')
-                : ($curlError !== '' ? $curlError : null),
+            'error' => $errorMsg,
             'curl_errno' => $curlErrno,
             'primary_ip' => $primaryIp !== '' ? $primaryIp : null,
         ];
