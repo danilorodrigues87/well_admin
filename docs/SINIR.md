@@ -162,7 +162,7 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 | Operadora (Well piloto) | `operadoras.sinir_*` → fallback `.env` | Listas, sync; fallback receber/CDF |
 | Gerador (cliente) | `clientes.sinir_integration_token` | **Emitir MTR** |
 | Destinador | `destinadores.sinir_integration_token` | **Receber MTR / CDF** (obrigatório se destinador ≠ operadora) |
-| Transportadora | `transportadoras.sinir_cod_unidade` (+ token opcional) | Unidade no JSON da emissão |
+| Transportadora | `transportadoras.sinir_cod_unidade` | Unidade no JSON da emissão (sem token) |
 
 `.env` idealmente só: `SINIR_ENABLED`, `SINIR_ENV`, `SINIR_SSL_VERIFY` (+ fallback piloto).
 

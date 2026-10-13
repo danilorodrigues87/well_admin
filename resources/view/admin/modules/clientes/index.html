@@ -20,16 +20,17 @@
             <div class="col-md-6 mb-2"><label>Nome fantasia *</label><input class="form-control" name="nome_fantasia" id="crud-nome_fantasia" required/></div>
             <div class="col-md-6 mb-2"><label>Razão social *</label><input class="form-control" name="razao_social" id="crud-razao_social" required/></div>
             <div class="col-md-4 mb-2"><label>CNPJ</label><input class="form-control" name="cnpj" id="crud-cnpj"/></div>
-            <div class="col-md-4 mb-2"><label>Cód. unidade SINIR</label><input class="form-control" name="sinir_cod_unidade" id="crud-sinir_cod_unidade" inputmode="numeric" placeholder="Gerador no portal MTR"/></div>
+            <div class="col-md-4 mb-2"><label>Cód. unidade SINIR</label><input class="form-control" name="sinir_cod_unidade" id="crud-sinir_cod_unidade" inputmode="numeric" placeholder="Código da unidade geradora"/></div>
             <div class="col-md-4 mb-2 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="exige_mtr" id="crud-exige_mtr" value="1"/><label class="form-check-label" for="crud-exige_mtr">Cliente exige MTR (alerta se pendente)</label></div></div>
             <div class="col-12"><hr class="my-2"><strong>SINIR — Token do gerador</strong>
-                <small class="text-muted d-block mb-2">Necessário para emitir MTR. O cliente gera no portal MTR (unidade geradora) e envia, ou cadastra no portal gerador.</small>
+                <small class="text-muted d-block mb-2">Necessário para emitir o MTR. Gere no portal MTR (unidade geradora) ou peça ao cliente cadastrar no portal gerador.</small>
             </div>
             <div class="col-md-8 mb-2">
                 <label>Situação do token</label>
                 <input class="form-control form-control-sm bg-light" id="crud-sinir_token_status" readonly tabindex="-1" value=""/>
                 <label class="mt-2">Token API WS (gerador)</label>
-                <input class="form-control" type="password" name="sinir_integration_token" id="crud-sinir_integration_token" autocomplete="new-password" placeholder="Cole o token — deixe em branco para manter o atual"/>
+                <input class="form-control" type="password" name="sinir_integration_token" id="crud-sinir_integration_token" autocomplete="new-password" placeholder="Cole o token gerado no portal MTR"/>
+                <div class="form-text">Deixe em branco para manter o token já cadastrado.</div>
             </div>
             <div class="col-md-4 mb-2 d-flex align-items-end">
                 <div class="form-check mb-2">

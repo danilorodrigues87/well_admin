@@ -332,3 +332,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR MMA/SIGOR: payload `listaManifestoResiduos`; dataExpedição ≥ hoje; bloqueia se JWT ≠ unidade gerador do cliente (token precisa ser de Gerador) |
 | 2026-10-13 | SINIR: `clientes.sinir_integration_token` (052); emissão usa token do gerador; Well `.env` só recebimento/CDF; cadastro admin + portal gerador |
 | 2026-10-13 | SINIR multitenancy: `destinadores.sinir_integration_token` (053); `forRecebimento`; `SinirConfig` lê `operadoras` com fallback `.env` |
+| 2026-10-13 | SINIR UI: remove token da transportadora; tokens só em cliente/gerador e destinador; textos sem menção a `.env` |

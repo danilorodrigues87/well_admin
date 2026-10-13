@@ -86,7 +86,7 @@ class Destinadores extends Page
             'sinir_integration_token' => '',
             'sinir_token_status' => $temToken
                 ? 'Token já cadastrado — deixe em branco para manter.'
-                : 'Nenhum token — receber/CDF usará token da operadora (.env) se houver.',
+                : 'Nenhum token cadastrado.',
             'is_padrao' => $d->is_padrao,
             'ativo' => $d->ativo,
         ]);

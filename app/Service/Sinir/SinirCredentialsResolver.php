@@ -112,8 +112,8 @@ class SinirCredentialsResolver
         }
 
         if ($token === '') {
-            $errors[] = 'Destinador sem Token API WS. Cadastre em Destinadores '
-                .'ou configure o token da operadora (tabela operadoras / .env piloto).';
+            $errors[] = 'Destinador sem Token API WS. Cadastre o token em Destinadores '
+                .'(ou no cadastro da operadora, se for o destinador padrão).';
         }
 
         return [

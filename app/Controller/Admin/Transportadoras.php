@@ -75,7 +75,6 @@ class Transportadoras extends Page
             'nome' => $t->nome,
             'cnpj' => $t->cnpj,
             'sinir_cod_unidade' => $t->sinir_cod_unidade ?? '',
-            'sinir_integration_token' => $t->sinir_integration_token ?? '',
             'is_padrao' => $t->is_padrao,
             'ativo' => $t->ativo,
         ]);
@@ -95,10 +94,6 @@ class Transportadoras extends Page
             'sinir_cod_unidade' => ($post['sinir_cod_unidade'] ?? '') !== '' ? (int)$post['sinir_cod_unidade'] : null,
             'ativo' => CrudHelper::parseAtivo($post, $id <= 0),
         ];
-        $token = trim((string)($post['sinir_integration_token'] ?? ''));
-        if ($token !== '') {
-            $data['sinir_integration_token'] = $token;
-        }
 
         if ($data['nome'] === '' || $data['cnpj'] === '') {
             return CrudHelper::jsonError('Nome e CNPJ são obrigatórios.');
