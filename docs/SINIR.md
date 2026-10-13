@@ -81,7 +81,7 @@ Erro se faltar token de integração:
 | Campo | Valor |
 |-------|-------|
 | CNPJ | 18.675.233/0001-50 |
-| Código unidade | 135551 (confira se bate com o `sub` do JWT do token de acesso: `pessoaId,unidadeId`) |
+| Código unidade | deve bater com o `sub` do JWT (`pessoaId,unidadeId`) — ex.: token atual usa **728559** (não 135551) |
 | Empresa | WIDMER TRINDADE DE BEM - ME |
 | CPF usuário | 027.506.321-61 |
 
@@ -91,7 +91,7 @@ Erro se faltar token de integração:
 
 ```env
 SINIR_ENV=production
-SINIR_UNIDADE=135551
+SINIR_UNIDADE=728559
 SINIR_CNPJ=18675233000150
 SINIR_INTEGRATION_TOKEN=   # gerado em Configurações > Gerar Token API WS
 SINIR_ENABLED=true

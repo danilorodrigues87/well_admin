@@ -50,28 +50,34 @@ function selfPretty(?string $json, bool $compact = false): string
     if (!is_array($data)) {
         return mb_substr($json, 0, 2000);
     }
-    if ($compact && isset($data['manifestoJSONDtos'][0])) {
+    $m = null;
+    if ($compact && isset($data['manifestoJSONDtos'][0]) && is_array($data['manifestoJSONDtos'][0])) {
         $m = $data['manifestoJSONDtos'][0];
-        $itens = $m['itemManifestoJSONs'] ?? [];
+    } elseif ($compact && array_is_list($data) && is_array($data[0] ?? null)) {
+        $m = $data[0];
+    }
+    if ($compact && is_array($m)) {
+        $itens = $m['itemManifestoJSONs'] ?? $m['listaManifestoResiduos'] ?? [];
         $resumo = [
+            'schema' => isset($m['listaManifestoResiduos']) ? 'sigor' : 'feam',
             'cnpGerador' => $m['cnpGerador'] ?? null,
             'codUnidadeGerador' => $m['codUnidadeGerador'] ?? null,
-            'cnpTransportador' => $m['cnpTransportador'] ?? null,
-            'codUnidadeTransportador' => $m['codUnidadeTransportador'] ?? null,
-            'cnpDestinador' => $m['cnpDestinador'] ?? null,
-            'codUnidadeDestinador' => $m['codUnidadeDestinador'] ?? null,
-            'placa' => $m['manifTransportadorPlacaVeiculo'] ?? null,
-            'motorista' => $m['manifTransportadorNomeMotorista'] ?? null,
-            'dataExpedicao' => $m['manifTransportadorDataExpedicao'] ?? null,
+            'cnpTransportador' => $m['cnpTransportador'] ?? ($m['transportador']['cpfCnpj'] ?? null),
+            'codUnidadeTransportador' => $m['codUnidadeTransportador'] ?? ($m['transportador']['unidade'] ?? null),
+            'cnpDestinador' => $m['cnpDestinador'] ?? ($m['destinador']['cpfCnpj'] ?? null),
+            'codUnidadeDestinador' => $m['codUnidadeDestinador'] ?? ($m['destinador']['unidade'] ?? null),
+            'placa' => $m['manifTransportadorPlacaVeiculo'] ?? ($m['placaVeiculo'] ?? null),
+            'motorista' => $m['manifTransportadorNomeMotorista'] ?? ($m['nomeMotorista'] ?? null),
+            'dataExpedicao' => $m['manifTransportadorDataExpedicao'] ?? ($m['dataExpedicao'] ?? null),
             'itens' => array_map(static fn ($i) => [
-                'residuo' => $i['residuo'] ?? null,
-                'qtd' => $i['quantidade'] ?? null,
-                'cla' => $i['codigoClasse'] ?? null,
-                'tra' => $i['codigoTecnologia'] ?? null,
-                'tie' => $i['codigoTipoEstado'] ?? null,
-                'tia' => $i['codigoAcondicionamento'] ?? null,
-                'uni' => $i['codigoUnidade'] ?? null,
-            ], $itens),
+                'residuo' => $i['residuo'] ?? ($i['resCodigoIbama'] ?? null),
+                'qtd' => $i['quantidade'] ?? ($i['marQuantidade'] ?? null),
+                'cla' => $i['codigoClasse'] ?? ($i['claCodigo'] ?? null),
+                'tra' => $i['codigoTecnologia'] ?? ($i['traCodigo'] ?? null),
+                'tie' => $i['codigoTipoEstado'] ?? ($i['tieCodigo'] ?? null),
+                'tia' => $i['codigoAcondicionamento'] ?? ($i['tiaCodigo'] ?? null),
+                'uni' => $i['codigoUnidade'] ?? ($i['uniCodigo'] ?? null),
+            ], is_array($itens) ? $itens : []),
         ];
 
         return json_encode($resumo, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

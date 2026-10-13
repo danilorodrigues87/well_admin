@@ -231,12 +231,12 @@ class SinirGateway
         ];
     }
 
-    /** Remove chaves null recursivamente (API SINIR costuma rejeitar null explícito). */
+    /** Remove null e string vazia recursivamente (API SINIR costuma rejeitar ambos). */
     private static function stripNulls(array $data): array
     {
         $out = [];
         foreach ($data as $k => $v) {
-            if ($v === null) {
+            if ($v === null || $v === '') {
                 continue;
             }
             if (is_array($v)) {

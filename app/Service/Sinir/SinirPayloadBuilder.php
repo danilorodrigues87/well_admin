@@ -86,7 +86,6 @@ class SinirPayloadBuilder
                 'codigoUnidade' => (int)$tipo->uni_codigo,
                 'manifestoItemObservacao' => mb_substr((string)$item->nome, 0, 500),
                 'manifestoItemCodInterno' => (string)$item->id,
-                'manifestoItemCodInternoDestinador' => '',
                 'tipoDensidadeValor' => $densidadeValor,
                 'tipoDensidadeUnidade' => $densidadeUnidade,
             ];

@@ -74,9 +74,22 @@ class SinirManifestoService
         }
 
         $payload = self::alinharUnidadesComJwt($payload, (string)$tokenResult['token']);
+        $unidadeJwt = self::unidadeFromJwt((string)$tokenResult['token']);
         $response = $this->gateway->post('salvarManifestoLote', $payload, $tokenResult['token']);
+        $result = $this->processarResposta($coletaId, $payload, $response);
+        if (empty($result['ok'])) {
+            $m0 = (array_is_list($payload) && is_array($payload[0] ?? null)) ? $payload[0] : [];
+            $result['details'] = array_merge(is_array($result['details'] ?? null) ? $result['details'] : [], [
+                'jwt_unidade' => $unidadeJwt,
+                'unidades_enviadas' => [
+                    'gerador' => $m0['codUnidadeGerador'] ?? null,
+                    'transportador' => $m0['codUnidadeTransportador'] ?? null,
+                    'destinador' => $m0['codUnidadeDestinador'] ?? null,
+                ],
+            ]);
+        }
 
-        return $this->processarResposta($coletaId, $payload, $response);
+        return $result;
     }
 
     /**
