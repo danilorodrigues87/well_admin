@@ -3,12 +3,16 @@
 namespace App\Service\Sinir;
 
 use App\Common\SinirConfig;
+use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\Destinador as EntityDestinador;
 use App\Model\Entity\Transportadora as EntityTransportadora;
 
 /**
- * Token de integração e unidades SINIR por coleta (Well ou transportadora terceira).
+ * Credenciais SINIR por coleta.
+ *
+ * - Emissão de MTR: token do **cliente gerador** (API nacional MMA/SIGOR).
+ * - Recebimento / CDF: token da **transportadora** ou `.env` Well.
  */
 class SinirCredentialsResolver
 {
@@ -16,6 +20,64 @@ class SinirCredentialsResolver
      * @return array{
      *   ok:bool,
      *   integration_token:?string,
+     *   token_source:?string,
+     *   transportador_unidade:?int,
+     *   destinador_unidade:?int,
+     *   gerador_unidade:?int,
+     *   errors:string[]
+     * }
+     */
+    public function forEmissaoManifesto(int $coletaId): array
+    {
+        $base = $this->resolverUnidadesEParceiros($coletaId);
+        if ($base['coleta'] === null) {
+            return $this->failEmissao($base['errors']);
+        }
+
+        $errors = $base['errors'];
+        $cliente = $base['cliente'];
+        $geradorUnidade = $cliente ? (int)($cliente->sinir_cod_unidade ?? 0) : 0;
+        if ($geradorUnidade <= 0) {
+            $errors[] = 'Cliente sem código unidade SINIR (cadastro do gerador).';
+        }
+
+        $token = $cliente ? trim((string)($cliente->sinir_integration_token ?? '')) : '';
+        if ($token === '') {
+            $errors[] = 'Cliente sem Token API WS do gerador. Cadastre em Clientes (admin) '
+                .'ou no perfil do portal gerador — o token deve ser gerado no portal MTR '
+                .'na unidade geradora do cliente.';
+        }
+
+        if ($errors !== []) {
+            return [
+                'ok' => false,
+                'integration_token' => null,
+                'token_source' => null,
+                'transportador_unidade' => $base['transportador_unidade'],
+                'destinador_unidade' => $base['destinador_unidade'],
+                'gerador_unidade' => $geradorUnidade > 0 ? $geradorUnidade : null,
+                'errors' => $errors,
+            ];
+        }
+
+        return [
+            'ok' => true,
+            'integration_token' => $token,
+            'token_source' => 'cliente',
+            'transportador_unidade' => $base['transportador_unidade'],
+            'destinador_unidade' => $base['destinador_unidade'],
+            'gerador_unidade' => $geradorUnidade,
+            'errors' => [],
+        ];
+    }
+
+    /**
+     * Token Well/transportadora — recebimento, CDF.
+     *
+     * @return array{
+     *   ok:bool,
+     *   integration_token:?string,
+     *   token_source:?string,
      *   transportador_unidade:?int,
      *   destinador_unidade:?int,
      *   errors:string[]
@@ -23,11 +85,73 @@ class SinirCredentialsResolver
      */
     public function forColeta(int $coletaId): array
     {
-        $coleta = EntityColeta::getById($coletaId);
-        if (!$coleta) {
-            return ['ok' => false, 'integration_token' => null, 'transportador_unidade' => null, 'destinador_unidade' => null, 'errors' => ['Coleta não encontrada.']];
+        $base = $this->resolverUnidadesEParceiros($coletaId);
+        if ($base['coleta'] === null) {
+            return [
+                'ok' => false,
+                'integration_token' => null,
+                'token_source' => null,
+                'transportador_unidade' => null,
+                'destinador_unidade' => null,
+                'errors' => $base['errors'],
+            ];
         }
 
+        $errors = $base['errors'];
+        $transportadora = $base['transportadora'];
+        $token = trim((string)($transportadora->sinir_integration_token ?? ''));
+        $source = 'transportadora';
+        if ($token === '') {
+            if (!SinirConfig::isConfigured()) {
+                $errors[] = 'Configure token SINIR no .env (Well) ou no cadastro da transportadora.';
+            } else {
+                $token = SinirConfig::integrationToken();
+                $source = 'env';
+            }
+        }
+        if ($token === '') {
+            $errors[] = 'Token de integração SINIR da Well/transportadora ausente.';
+        }
+
+        return [
+            'ok' => $errors === [],
+            'integration_token' => $token !== '' ? $token : null,
+            'token_source' => $token !== '' ? $source : null,
+            'transportador_unidade' => $base['transportador_unidade'],
+            'destinador_unidade' => $base['destinador_unidade'],
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * @return array{
+     *   ok:bool,
+     *   coleta:?EntityColeta,
+     *   cliente:?EntityCliente,
+     *   transportadora:?EntityTransportadora,
+     *   destinador:?EntityDestinador,
+     *   transportador_unidade:?int,
+     *   destinador_unidade:?int,
+     *   errors:string[]
+     * }
+     */
+    private function resolverUnidadesEParceiros(int $coletaId): array
+    {
+        $coleta = EntityColeta::getById($coletaId);
+        if (!$coleta) {
+            return [
+                'ok' => false,
+                'coleta' => null,
+                'cliente' => null,
+                'transportadora' => null,
+                'destinador' => null,
+                'transportador_unidade' => null,
+                'destinador_unidade' => null,
+                'errors' => ['Coleta não encontrada.'],
+            ];
+        }
+
+        $cliente = EntityCliente::getById((int)$coleta->cliente_id);
         $transportadora = $coleta->transportadora_id
             ? EntityTransportadora::getById((int)$coleta->transportadora_id)
             : EntityTransportadora::getPadrao();
@@ -36,13 +160,14 @@ class SinirCredentialsResolver
             : EntityDestinador::getPadrao();
 
         $errors = [];
-        $token = trim((string)($transportadora->sinir_integration_token ?? ''));
-        if ($token === '') {
-            if (!SinirConfig::isConfigured()) {
-                $errors[] = 'Configure token SINIR na operadora (.env) ou no cadastro da transportadora.';
-            } else {
-                $token = SinirConfig::integrationToken();
-            }
+        if (!$cliente) {
+            $errors[] = 'Cliente da coleta não encontrado.';
+        }
+        if (!$transportadora) {
+            $errors[] = 'Transportadora não cadastrada.';
+        }
+        if (!$destinador) {
+            $errors[] = 'Destinador não cadastrado.';
         }
 
         $transUnidade = (int)($transportadora->sinir_cod_unidade ?? 0);
@@ -61,15 +186,28 @@ class SinirCredentialsResolver
             $errors[] = 'Destinador sem código unidade SINIR.';
         }
 
-        if ($token === '') {
-            $errors[] = 'Token de integração SINIR ausente.';
-        }
-
         return [
             'ok' => $errors === [],
-            'integration_token' => $token !== '' ? $token : null,
+            'coleta' => $coleta,
+            'cliente' => $cliente,
+            'transportadora' => $transportadora,
+            'destinador' => $destinador,
             'transportador_unidade' => $transUnidade > 0 ? $transUnidade : null,
             'destinador_unidade' => $destUnidade > 0 ? $destUnidade : null,
+            'errors' => $errors,
+        ];
+    }
+
+    /** @param string[] $errors */
+    private function failEmissao(array $errors): array
+    {
+        return [
+            'ok' => false,
+            'integration_token' => null,
+            'token_source' => null,
+            'transportador_unidade' => null,
+            'destinador_unidade' => null,
+            'gerador_unidade' => null,
             'errors' => $errors,
         ];
     }

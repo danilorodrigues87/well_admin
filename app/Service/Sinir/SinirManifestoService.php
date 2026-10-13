@@ -55,7 +55,7 @@ class SinirManifestoService
         }
 
         $payload = $built['payload'];
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        $credentials = (new SinirCredentialsResolver())->forEmissaoManifesto($coletaId);
         if (!$credentials['ok']) {
             $msg = implode(' ', $credentials['errors']);
             $this->registrarFalha($coletaId, $payload, null, $msg);
@@ -67,22 +67,25 @@ class SinirManifestoService
 
         $tokenResult = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
         if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
-            $msg = 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha desconhecida');
+            $msg = 'Autenticação SINIR (token do gerador): '.($tokenResult['error'] ?? 'falha desconhecida');
             $this->registrarFalha($coletaId, $payload, $tokenResult, $msg);
 
             return ['ok' => false, 'message' => $msg];
         }
 
-        $payload = self::alinharUnidadesComJwt($payload, (string)$tokenResult['token']);
+        // Com token do gerador, a unidade do JWT é a do cliente — não sobrescrever transportador/destinador.
+        // Alinhamento JWT só faz sentido com token Well (legado / fallback).
+        if (($credentials['token_source'] ?? '') !== 'cliente') {
+            $payload = self::alinharUnidadesComJwt($payload, (string)$tokenResult['token']);
+        }
         $unidadeJwt = self::unidadeFromJwt((string)$tokenResult['token']);
-        $geradorUnidadeCadastro = (int)($built['gerador_unidade'] ?? 0);
+        $geradorUnidadeCadastro = (int)($credentials['gerador_unidade'] ?? $built['gerador_unidade'] ?? 0);
 
-        // Manual MMA: token deve ser de Gerador — a unidade do JWT precisa ser a do cliente gerador.
+        // Token do cliente deve ter sido gerado na unidade geradora cadastrada.
         if ($unidadeJwt !== null && $geradorUnidadeCadastro > 0 && $unidadeJwt !== $geradorUnidadeCadastro) {
-            $msg = 'Token SINIR é da unidade '.$unidadeJwt
-                .', mas o gerador da coleta é a unidade '.$geradorUnidadeCadastro
-                .'. No portal MTR, gere o Token API WS logado como o GERADOR (cliente)'
-                .' — a API nacional rejeita token só de transportador (código 002).';
+            $msg = 'Token do gerador é da unidade '.$unidadeJwt
+                .', mas o cadastro do cliente tem unidade '.$geradorUnidadeCadastro
+                .'. Confira o Cód. unidade SINIR e regenere o Token API WS logado nessa unidade no portal MTR.';
             $this->registrarFalha($coletaId, $payload, [
                 'jwt_unidade' => $unidadeJwt,
                 'gerador_unidade' => $geradorUnidadeCadastro,

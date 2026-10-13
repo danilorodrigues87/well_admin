@@ -132,6 +132,13 @@ $obRouter->post('/gerador/perfil', [
     },
 ]);
 
+$obRouter->post('/gerador/perfil/sinir', [
+    'middlewares' => $geradorAuth,
+    function ($request) {
+        Gerador\Perfil::saveSinir($request);
+    },
+]);
+
 $obRouter->get('/gerador/boletos', [
     'middlewares' => $geradorAuth,
     function ($request) {

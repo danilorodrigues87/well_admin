@@ -149,8 +149,9 @@ app/Common/SinirConfig.php          — leitura .env SINIR_*
 app/Service/Sinir/
   SinirAuthService.php              — POST /token (Token API WS → acesso)
   SinirGateway.php                  — HTTP cURL para admin.sinir.gov.br
-  SinirPayloadBuilder.php           — array raiz → salvarManifestoLote (apiws nacional)
-  SinirManifestoService.php         — envio, parse resposta, sinir_envios
+  SinirPayloadBuilder.php           — schema MMA/SIGOR → salvarManifestoLote
+  SinirManifestoService.php         — emissão com token do **cliente gerador**
+  SinirCredentialsResolver.php      — emissão→cliente; recebimento/CDF→Well/.env
   SinirRecebimentoService.php       — receberManifestoLote + PDF MTR (CDF light)
   SinirCdfService.php               — emiteCDF + buscaPdfCdf (CDF oficial)
   ColetaCdfService.php              — storage PDF portal gerador
@@ -160,7 +161,7 @@ app/Service/Sinir/
 app/Model/Entity/SinirEnvio.php     — histórico de tentativas
 ```
 
-Com `SINIR_ENABLED=true`, `ColetaService::finalizar()` **não** grava `numero_mtr`; tenta registro no SINIR e o número é preenchido no sucesso (`SinirManifestoService`). Impressão/portal usam `ColetaMtrHelper`. Doc: `docs/SINIR.md`.
+Token do gerador: `clientes.sinir_integration_token` (admin Clientes + portal `/gerador/perfil`). Token Well no `.env` só para listas/recebimento/CDF. Doc: `docs/SINIR.md`.
 
 ### Integração Banco Inter + Faturamento
 
@@ -328,3 +329,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR apiws: `salvarManifestoLote` exige **array raiz**; resposta `erroNacional`/`respostaApiwsManifestoDTO`; alinha unidade ao JWT |
 | 2026-10-13 | SINIR `erroNacional` sem mensagem: debug probe FEAM vs SIGOR; strip strings vazias; details com `jwt_unidade`/`unidades_enviadas` |
 | 2026-10-13 | SINIR MMA/SIGOR: payload `listaManifestoResiduos`; dataExpedição ≥ hoje; bloqueia se JWT ≠ unidade gerador do cliente (token precisa ser de Gerador) |
+| 2026-10-13 | SINIR: `clientes.sinir_integration_token` (052); emissão usa token do gerador; Well `.env` só recebimento/CDF; cadastro admin + portal gerador |

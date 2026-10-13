@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Common\GeradorScope;
+use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\ClienteUsuario;
 
 class GeradorPerfilService
@@ -36,5 +37,43 @@ class GeradorPerfilService
         ]);
 
         return ['success' => true, 'message' => 'Senha alterada com sucesso.'];
+    }
+
+    /**
+     * Atualiza unidade + token SINIR do cliente logado no portal gerador.
+     *
+     * @param array<string,mixed> $post
+     * @return array{success:bool, message?:string}
+     */
+    public static function salvarSinir(int $clienteId, array $post): array
+    {
+        if ($clienteId <= 0 || $clienteId !== GeradorScope::getClienteId()) {
+            return ['success' => false, 'message' => 'Sessão inválida.'];
+        }
+
+        $cliente = EntityCliente::getById($clienteId);
+        if (!$cliente) {
+            return ['success' => false, 'message' => 'Cliente não encontrado.'];
+        }
+
+        $data = [];
+        $unidade = (int)($post['sinir_cod_unidade'] ?? 0);
+        $data['sinir_cod_unidade'] = $unidade > 0 ? $unidade : null;
+
+        if (!empty($post['limpar_sinir_token'])) {
+            $data['sinir_integration_token'] = null;
+        } else {
+            $token = trim((string)($post['sinir_integration_token'] ?? ''));
+            if ($token !== '') {
+                if (strlen($token) < 20) {
+                    return ['success' => false, 'message' => 'Token API WS inválido (muito curto).'];
+                }
+                $data['sinir_integration_token'] = $token;
+            }
+        }
+
+        EntityCliente::update($clienteId, $data);
+
+        return ['success' => true, 'message' => 'Dados SINIR salvos.'];
     }
 }

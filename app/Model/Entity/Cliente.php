@@ -16,6 +16,8 @@ class Cliente
     public string $razao_social = '';
     public string $cnpj = '';
     public ?int $sinir_cod_unidade = null;
+    /** Token API WS do gerador (unidade do cliente no portal MTR). Não expor em listagens. */
+    public ?string $sinir_integration_token = null;
     public int $exige_mtr = 0;
     public string $email = '';
     public string $telefone = '';
@@ -141,6 +143,8 @@ class Cliente
         $c->sinir_cod_unidade = isset($row['sinir_cod_unidade']) && $row['sinir_cod_unidade'] !== null
             ? (int)$row['sinir_cod_unidade']
             : null;
+        $tok = isset($row['sinir_integration_token']) ? trim((string)$row['sinir_integration_token']) : '';
+        $c->sinir_integration_token = $tok !== '' ? $tok : null;
         $c->exige_mtr = (int)($row['exige_mtr'] ?? 0);
         $c->email = (string)($row['email'] ?? '');
         $c->telefone = (string)($row['telefone'] ?? '');

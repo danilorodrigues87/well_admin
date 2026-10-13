@@ -22,6 +22,21 @@
             <div class="col-md-4 mb-2"><label>CNPJ</label><input class="form-control" name="cnpj" id="crud-cnpj"/></div>
             <div class="col-md-4 mb-2"><label>Cód. unidade SINIR</label><input class="form-control" name="sinir_cod_unidade" id="crud-sinir_cod_unidade" inputmode="numeric" placeholder="Gerador no portal MTR"/></div>
             <div class="col-md-4 mb-2 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="exige_mtr" id="crud-exige_mtr" value="1"/><label class="form-check-label" for="crud-exige_mtr">Cliente exige MTR (alerta se pendente)</label></div></div>
+            <div class="col-12"><hr class="my-2"><strong>SINIR — Token do gerador</strong>
+                <small class="text-muted d-block mb-2">Necessário para emitir MTR. O cliente gera no portal MTR (unidade geradora) e envia, ou cadastra no portal gerador.</small>
+            </div>
+            <div class="col-md-8 mb-2">
+                <label>Situação do token</label>
+                <input class="form-control form-control-sm bg-light" id="crud-sinir_token_status" readonly tabindex="-1" value=""/>
+                <label class="mt-2">Token API WS (gerador)</label>
+                <input class="form-control" type="password" name="sinir_integration_token" id="crud-sinir_integration_token" autocomplete="new-password" placeholder="Cole o token — deixe em branco para manter o atual"/>
+            </div>
+            <div class="col-md-4 mb-2 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="limpar_sinir_token" id="crud-limpar_sinir_token" value="1"/>
+                    <label class="form-check-label" for="crud-limpar_sinir_token">Remover token cadastrado</label>
+                </div>
+            </div>
             <div class="col-md-4 mb-2"><label>E-mail</label><input class="form-control" name="email" id="crud-email" type="email"/></div>
             <div class="col-md-4 mb-2"><label>Telefone</label><input class="form-control" name="telefone" id="crud-telefone"/></div>
             <div class="col-md-6 mb-2"><label>Plano</label><select class="form-select" name="plano_id" id="crud-plano_id">{{planos_options_modal}}</select></div>

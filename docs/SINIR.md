@@ -153,12 +153,20 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 
 ### Pré-requisitos antes do envio
 
-1. `.env`: `SINIR_ENABLED=true`, token, unidade e CNPJ configurados
-2. **Token API WS de Gerador:** no portal MTR, logue na unidade **geradora** do cliente e gere o token. O `sub` do JWT (`pessoaId,unidadeId`) deve ser a mesma unidade de `clientes.sinir_cod_unidade`. Token só de transportador → código **002**.
-3. **Cliente (gerador):** campo **Cód. unidade SINIR** (`clientes.sinir_cod_unidade`)
-4. **Tipo de resíduo:** códigos IBAMA + mapeamento SINIR (`tra/tie/tia/cla/uni_codigo`)
-5. Migration `010_clientes_sinir_unidade.sql` aplicada
-6. Atualize `transportadoras`/`destinadores`.`sinir_cod_unidade` para a unidade do JWT (ex.: `728559`), não a antiga `135551`
+### Tokens: o que fica onde
+
+| Token | Onde | Uso |
+|-------|------|-----|
+| Well (operadora) | `.env` `SINIR_INTEGRATION_TOKEN` | Listas, sync, **recebimento/CDF** |
+| Gerador (cliente) | `clientes.sinir_integration_token` | **Emitir MTR** (`salvarManifestoLote`) |
+
+Cadastro do token do gerador: **Admin → Clientes** ou **Portal gerador → Meu perfil → SINIR**.
+
+1. `.env`: `SINIR_ENABLED=true` + token/unidade/CNPJ da **Well**
+2. Migration `052_clientes_sinir_token.sql` aplicada
+3. **Cliente:** `sinir_cod_unidade` + `sinir_integration_token` (token gerado no portal MTR na unidade geradora)
+4. **Transportadora/destinador:** `sinir_cod_unidade` no banco (ex.: `728559`)
+5. **Tipo de resíduo:** códigos IBAMA + mapeamento SINIR (`tra/tie/tia/cla/uni_codigo`)
 
 ### Smoke test (CLI)
 

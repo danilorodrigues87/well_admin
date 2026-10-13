@@ -90,9 +90,15 @@ class SinirPayloadBuilder
             return ['ok' => false, 'payload' => null, 'errors' => $errors];
         }
 
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
-        if (!$credentials['ok']) {
-            return ['ok' => false, 'payload' => null, 'errors' => $credentials['errors']];
+        $credentials = (new SinirCredentialsResolver())->forEmissaoManifesto($coletaId);
+        // Unidades transportador/destinador bastam para montar o JSON; token do gerador
+        // é exigido no envio (SinirManifestoService). Aqui só bloqueia se faltar unidade.
+        $unitErrors = array_values(array_filter(
+            $credentials['errors'] ?? [],
+            static fn (string $e): bool => !str_contains($e, 'Token API WS')
+        ));
+        if ($credentials['transportador_unidade'] === null || $credentials['destinador_unidade'] === null) {
+            return ['ok' => false, 'payload' => null, 'errors' => $unitErrors !== [] ? $unitErrors : $credentials['errors']];
         }
 
         $transportadora = $coleta->transportadora_id

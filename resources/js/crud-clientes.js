@@ -187,6 +187,64 @@
 
   window.abrirPortalUsuarios = abrirPortalUsuarios;
 
+  var _editarOriginal = window.editar;
+  window.editar = function (id) {
+    if (typeof _editarOriginal === 'function') {
+      _editarOriginal(id);
+    }
+    setTimeout(function () {
+      var limpar = document.getElementById('crud-limpar_sinir_token');
+      if (limpar) {
+        limpar.checked = false;
+      }
+      var tok = document.getElementById('crud-sinir_integration_token');
+      if (tok) {
+        tok.value = '';
+      }
+      var exige = document.getElementById('crud-exige_mtr');
+      var statusEl = document.getElementById('crud-sinir_token_status');
+      if (exige && statusEl) {
+        // exige_mtr: crud-module seta .value em checkbox; corrige checked
+        var body = new URLSearchParams();
+        body.append('acao', 'get');
+        body.append('id', String(id));
+        body.append('_csrf', getCsrf());
+        fetch(apiUrl(), { method: 'POST', body: body, credentials: 'same-origin', headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.text(); })
+          .then(function (text) {
+            var data = parseResp(text);
+            if (data.success && exige) {
+              exige.checked = !!parseInt(data.exige_mtr || 0, 10);
+            }
+          })
+          .catch(function () {});
+      }
+    }, 250);
+  };
+
+  var _novoOriginal = window.novo;
+  window.novo = function () {
+    if (typeof _novoOriginal === 'function') {
+      _novoOriginal();
+    }
+    var statusEl = document.getElementById('crud-sinir_token_status');
+    if (statusEl) {
+      statusEl.value = 'Nenhum token cadastrado.';
+    }
+    var limpar = document.getElementById('crud-limpar_sinir_token');
+    if (limpar) {
+      limpar.checked = false;
+    }
+    var tok = document.getElementById('crud-sinir_integration_token');
+    if (tok) {
+      tok.value = '';
+    }
+    var exige = document.getElementById('crud-exige_mtr');
+    if (exige) {
+      exige.checked = false;
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('btn-portal-salvar')?.addEventListener('click', salvarPortalUsuario);
     document.getElementById('btn-portal-reset')?.addEventListener('click', resetarSenhaPortal);

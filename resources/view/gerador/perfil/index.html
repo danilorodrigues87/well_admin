@@ -47,4 +47,36 @@
             </div>
         </div>
     </div>
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-transparent"><i class="fas fa-leaf me-1 text-success"></i> SINIR — Token do gerador (MTR)</div>
+            <div class="card-body">
+                <p class="small text-muted">Para a operadora emitir o MTR no SINIR, é necessário o <strong>Token API WS</strong> gerado no portal MTR na <strong>sua unidade geradora</strong>. Gere o token em Configurações → Gerar Token API WS e cole abaixo.</p>
+                <form method="post" action="{{URL}}/gerador/perfil/sinir">
+                    {{csrf_field}}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Cód. unidade SINIR</label>
+                            <input type="number" min="1" name="sinir_cod_unidade" class="form-control" value="{{sinir_cod_unidade}}" placeholder="Ex.: 437042"/>
+                            <div class="form-text">Código da sua unidade no portal MTR.</div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Token API WS</label>
+                            <input type="password" name="sinir_integration_token" class="form-control" autocomplete="new-password" placeholder="{{sinir_token_placeholder}}"/>
+                            <div class="form-text">{{sinir_token_hint}}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="limpar_sinir_token" id="limpar_sinir_token" value="1"/>
+                                <label class="form-check-label" for="limpar_sinir_token">Remover token cadastrado</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Salvar dados SINIR</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

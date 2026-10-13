@@ -116,6 +116,11 @@ class Clientes extends Page
             'razao_social' => $c->razao_social,
             'cnpj' => $c->cnpj,
             'sinir_cod_unidade' => $c->sinir_cod_unidade,
+            'sinir_integration_token' => '',
+            'sinir_token_status' => trim((string)($c->sinir_integration_token ?? '')) !== ''
+                ? 'Token já cadastrado — deixe em branco para manter, ou cole um novo para substituir.'
+                : 'Nenhum token cadastrado.',
+            'sinir_token_cadastrado' => trim((string)($c->sinir_integration_token ?? '')) !== '' ? 1 : 0,
             'exige_mtr' => $c->exige_mtr,
             'email' => $c->email,
             'telefone' => $c->telefone,
@@ -211,6 +216,15 @@ class Clientes extends Page
             'maps_link' => trim((string)($post['maps_link'] ?? '')),
             'geocode_status' => 'pendente',
         ];
+
+        if (!empty($post['limpar_sinir_token'])) {
+            $data['sinir_integration_token'] = null;
+        } else {
+            $tokenGerador = trim((string)($post['sinir_integration_token'] ?? ''));
+            if ($tokenGerador !== '') {
+                $data['sinir_integration_token'] = $tokenGerador;
+            }
+        }
 
         if ($data['nome_fantasia'] === '' || $data['razao_social'] === '') {
             return CrudHelper::jsonError('Nome fantasia e razão social são obrigatórios.');

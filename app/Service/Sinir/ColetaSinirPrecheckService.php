@@ -37,26 +37,36 @@ class ColetaSinirPrecheckService
         $errors = [];
 
         $cliente = EntityCliente::getById($coleta->cliente_id);
-        $geradorOk = $cliente && (int)($cliente->sinir_cod_unidade ?? 0) > 0;
+        $geradorUnidadeOk = $cliente && (int)($cliente->sinir_cod_unidade ?? 0) > 0;
+        $geradorTokenOk = $cliente && trim((string)($cliente->sinir_integration_token ?? '')) !== '';
+        $geradorOk = $geradorUnidadeOk && $geradorTokenOk;
         $checks[] = [
             'key' => 'gerador',
             'label' => 'Gerador (cliente)',
             'ok' => $geradorOk,
-            'detail' => $geradorOk
-                ? 'Unidade SINIR: '.$cliente->sinir_cod_unidade
-                : 'Cadastre o código unidade SINIR no cliente.',
+            'detail' => !$cliente
+                ? 'Cliente não encontrado.'
+                : (!$geradorUnidadeOk
+                    ? 'Cadastre o Cód. unidade SINIR no cliente.'
+                    : ($geradorTokenOk
+                        ? 'Unidade '.$cliente->sinir_cod_unidade.' · token API WS cadastrado'
+                        : 'Unidade '.$cliente->sinir_cod_unidade.' · falta Token API WS do gerador (cadastro ou portal).')),
         ];
-        if (!$geradorOk) {
+        if (!$geradorUnidadeOk) {
             $errors[] = 'Cliente sem código unidade SINIR.';
+        }
+        if ($geradorUnidadeOk && !$geradorTokenOk) {
+            $errors[] = 'Cliente sem Token API WS do gerador.';
         }
 
         $transportadora = $coleta->transportadora_id
             ? EntityTransportadora::getById((int)$coleta->transportadora_id)
             : EntityTransportadora::getPadrao();
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
         $transUnidade = (int)($transportadora->sinir_cod_unidade ?? 0);
-        $tokenOk = trim((string)($credentials['integration_token'] ?? '')) !== '';
-        $transOk = $transportadora && $transUnidade > 0 && $tokenOk;
+        if ($transUnidade <= 0 && SinirConfig::isConfigured()) {
+            $transUnidade = (int)SinirConfig::unidade();
+        }
+        $transOk = $transportadora && $transUnidade > 0;
         $checks[] = [
             'key' => 'transportador',
             'label' => 'Transportador',
@@ -68,8 +78,9 @@ class ColetaSinirPrecheckService
                 : 'Transportadora não vinculada à coleta.',
         ];
         if (!$transOk) {
-            $errors[] = 'Transportadora sem unidade SINIR ou token de integração.';
+            $errors[] = 'Transportadora sem unidade SINIR.';
         }
+        // Token Well (.env) só é exigido para recebimento/CDF — não bloqueia emissão.
 
         $destinador = $coleta->destinador_id
             ? EntityDestinador::getById((int)$coleta->destinador_id)
