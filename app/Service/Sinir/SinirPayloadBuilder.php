@@ -65,7 +65,10 @@ class SinirPayloadBuilder
                 continue;
             }
 
-            $codIbama = self::residuoCodigoSinir((string)($item->cod_ibama ?: $tipo->cod_ibama));
+            $codIbama = self::residuoCodigoSinir(
+                (string)($item->cod_ibama ?: $tipo->cod_ibama),
+                (int)($tipo->cla_codigo ?? 0)
+            );
             if ($codIbama === '') {
                 $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem código IBAMA.';
                 continue;
@@ -74,7 +77,7 @@ class SinirPayloadBuilder
             [$densidadeValor, $densidadeUnidade] = $this->densidadeFromUnidade($item->unidade);
 
             $itemManifestoJSONs[] = [
-                'quantidade' => (float)$item->quantidade,
+                'quantidade' => round((float)$item->quantidade, 4),
                 'residuo' => $codIbama,
                 'codigoAcondicionamento' => (int)$tipo->tia_codigo,
                 'codigoClasse' => (int)$tipo->cla_codigo,
@@ -219,7 +222,10 @@ class SinirPayloadBuilder
                 $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem mapeamento SINIR.';
                 continue;
             }
-            $codIbama = self::residuoCodigoSinir((string)($item->cod_ibama ?: $tipo->cod_ibama));
+            $codIbama = self::residuoCodigoSinir(
+                (string)($item->cod_ibama ?: $tipo->cod_ibama),
+                (int)($tipo->cla_codigo ?? 0)
+            );
             if ($codIbama === '') {
                 $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem código IBAMA.';
                 continue;
@@ -228,7 +234,7 @@ class SinirPayloadBuilder
                 'codigoSequencial' => $seq,
                 'justificativa' => null,
                 'codigoInterno' => null,
-                'qtdRecebida' => (float)$item->quantidade,
+                'qtdRecebida' => round((float)$item->quantidade, 4),
                 'residuo' => $codIbama,
                 'codigoTecnologia' => (int)$tipo->tra_codigo,
                 'codigoTipoEstado' => (int)$tipo->tie_codigo,
@@ -266,14 +272,15 @@ class SinirPayloadBuilder
     /**
      * Código IBAMA para a API: 6 dígitos + "(*)" se perigoso (ex.: 200121(*)).
      * Manuais MTR usam sem pontos; o asterisco deve ser preservado.
+     * Classe SINIR 1 (Classe I) também força "(*)" quando o cadastro omitiu.
      */
-    public static function residuoCodigoSinir(string $codIbama): string
+    public static function residuoCodigoSinir(string $codIbama, int $claCodigo = 0): string
     {
         $raw = trim($codIbama);
         if ($raw === '') {
             return '';
         }
-        $hazardous = str_contains($raw, '*');
+        $hazardous = str_contains($raw, '*') || $claCodigo === 1;
         $normalized = IbamaCodigoHelper::normalize($raw);
         if ($normalized === '') {
             $digits = preg_replace('/\D/', '', $raw) ?? '';

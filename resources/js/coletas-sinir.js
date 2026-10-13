@@ -31,16 +31,31 @@
     }
   }
 
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   function afterErr(msg) {
+    var text = String(msg || 'Erro');
+    // Se veio HTML do Tomcat, mostra só texto legível
+    if (/<\/?[a-z][\s\S]*>/i.test(text)) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = text;
+      text = (tmp.textContent || tmp.innerText || text).replace(/\s+/g, ' ').trim();
+    }
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: 'Erro SINIR',
         html: '<p class="text-start mb-0" style="white-space:pre-wrap;word-break:break-word">'
-          + (msg || 'Erro') + '</p>',
+          + escapeHtml(text) + '</p>',
         icon: 'error'
       });
     } else {
-      alert(msg || 'Erro');
+      alert(text);
     }
   }
 

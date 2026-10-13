@@ -323,3 +323,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-08 | Painel Coletar em prod: erro genérico se falta `coletas.client_uuid` — mensagem aponta migration `051` / `apply_migration_051.php`; diag `diagnose_coleta_iniciar.php` |
 | 2026-10-13 | SINIR MTR HTTP 400: mensagem da API no modal; IBAMA preserva `(*)`; placa/motorista com fallback; `dump_last_sinir_envio.php` |
 | 2026-10-13 | SINIR gateway: desliga `Expect: 100-continue`, strip `null`, unidades int; debug `sinir_debug_salvar_manifesto.php`; detalhe mostra resposta bruta |
+| 2026-10-13 | SINIR 400 Tomcat HTML: remove `Content-Length` duplicado no curl; modal escapa HTML; Classe I força IBAMA `(*)` |

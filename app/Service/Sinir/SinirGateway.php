@@ -126,9 +126,9 @@ class SinirGateway
                     'error' => 'Falha ao serializar JSON do payload SINIR.',
                 ];
             }
+            // NÃO setar Content-Length manualmente: o curl já envia.
+            // Content-Length duplicado → Tomcat HTTP 400 HTML genérico (sem JSON).
             $opts[CURLOPT_POSTFIELDS] = $jsonBody;
-            $headers[] = 'Content-Length: '.strlen($jsonBody);
-            $opts[CURLOPT_HTTPHEADER] = $headers;
         }
 
         curl_setopt_array($ch, $opts);
@@ -175,9 +175,19 @@ class SinirGateway
             $errorMsg = $curlError;
         }
 
-        if (!$httpOk && ($errorMsg === null || $errorMsg === '') && trim($raw) === '') {
-            $errorMsg = 'SINIR respondeu HTTP '.$status.' sem corpo. '
-                .'Verifique token/unidade e rode: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}';
+        if (!$httpOk && ($errorMsg === null || $errorMsg === '')) {
+            if (trim($raw) === '') {
+                $errorMsg = 'SINIR respondeu HTTP '.$status.' sem corpo. '
+                    .'Verifique token/unidade e rode: php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}';
+            } elseif (stripos($contentType, 'text/html') !== false || str_contains($raw, '<html')) {
+                // Tomcat Bad Request — extrai Description se houver
+                $desc = '';
+                if (preg_match('/<b>Description<\/b>\s*([^<]+)/i', $raw, $m)) {
+                    $desc = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES, 'UTF-8'));
+                }
+                $errorMsg = 'SINIR/Tomcat HTTP '.$status
+                    .($desc !== '' ? ': '.$desc : ' (resposta HTML, não JSON — possível header/payload malformado).');
+            }
         }
 
         return [

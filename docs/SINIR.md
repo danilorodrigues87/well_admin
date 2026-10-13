@@ -194,7 +194,7 @@ Revisar o CSV antes de aplicar em produção. Em XAMPP local, se curl falhar com
 O pré-check do painel só valida unidades/token/itens. Um **400** vem da API após o envio.
 
 1. No modal de erro, a mensagem deve trazer o texto do SINIR (não só “HTTP 400”).
-2. Se a mensagem citar **sem corpo**, o gateway pode ter sido rejeitado antes de parsear o JSON (clássico: header `Expect: 100-continue`). O cliente HTTP do Well envia `Expect:` vazio e omite campos `null`.
+2. Se a resposta for **HTML Tomcat** (`Content-Type: text/html`, “HTTP Status 400 – Bad Request”), costuma ser framing HTTP — em especial **`Content-Length` duplicado** no cliente. O gateway Well não envia `Content-Length` manual (o curl calcula) e manda `Expect:` vazio / sem campos `null`.
 3. Na VPS, reproduza com dump completo:
    ```bash
    php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}
