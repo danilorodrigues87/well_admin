@@ -151,7 +151,8 @@ app/Service/Sinir/
   SinirGateway.php                  — HTTP cURL para admin.sinir.gov.br
   SinirPayloadBuilder.php           — schema MMA/SIGOR → salvarManifestoLote
   SinirManifestoService.php         — emissão com token do **cliente gerador**
-  SinirCredentialsResolver.php      — emissão→cliente; recebimento/CDF→Well/.env
+  SinirCredentialsResolver.php      — emissão→cliente; recebimento→destinador→operadora/.env
+app/Common/SinirConfig.php          — operadoras.sinir_* + fallback .env (flags globais no .env)
   SinirRecebimentoService.php       — receberManifestoLote + PDF MTR (CDF light)
   SinirCdfService.php               — emiteCDF + buscaPdfCdf (CDF oficial)
   ColetaCdfService.php              — storage PDF portal gerador
@@ -330,3 +331,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR `erroNacional` sem mensagem: debug probe FEAM vs SIGOR; strip strings vazias; details com `jwt_unidade`/`unidades_enviadas` |
 | 2026-10-13 | SINIR MMA/SIGOR: payload `listaManifestoResiduos`; dataExpedição ≥ hoje; bloqueia se JWT ≠ unidade gerador do cliente (token precisa ser de Gerador) |
 | 2026-10-13 | SINIR: `clientes.sinir_integration_token` (052); emissão usa token do gerador; Well `.env` só recebimento/CDF; cadastro admin + portal gerador |
+| 2026-10-13 | SINIR multitenancy: `destinadores.sinir_integration_token` (053); `forRecebimento`; `SinirConfig` lê `operadoras` com fallback `.env` |

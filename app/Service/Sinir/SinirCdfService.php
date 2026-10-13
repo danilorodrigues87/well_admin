@@ -76,7 +76,7 @@ class SinirCdfService
             'listaMtr' => [$manifesto],
         ];
 
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        $credentials = (new SinirCredentialsResolver())->forRecebimento($coletaId);
         if (!$credentials['ok']) {
             return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
         }
@@ -164,7 +164,7 @@ class SinirCdfService
             return ['ok' => false, 'message' => 'Sem código CDF SINIR.'];
         }
 
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        $credentials = (new SinirCredentialsResolver())->forRecebimento($coletaId);
         if (!$credentials['ok']) {
             return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
         }

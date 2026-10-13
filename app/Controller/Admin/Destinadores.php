@@ -45,10 +45,13 @@ class Destinadores extends Page
         foreach ($rows as $d) {
             $padrao = $d->is_padrao ? ' <span class="badge bg-primary">Padrão</span>' : '';
             $unidade = $d->sinir_cod_unidade ? CrudHelper::e((string)$d->sinir_cod_unidade) : '—';
+            $tok = trim((string)($d->sinir_integration_token ?? '')) !== ''
+                ? ' <span class="badge bg-success">token</span>'
+                : '';
             $itens .= '<tr>
                 <td>'.CrudHelper::e($d->nome).$padrao.'</td>
                 <td>'.CrudHelper::e($d->cnpj).'</td>
-                <td>'.$unidade.'</td>
+                <td>'.$unidade.$tok.'</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="editar('.$d->id.')"><i class="fas fa-edit"></i></button>
                     '.($d->is_padrao ? '' : CrudHelper::btnDesativar($d->id)).'
@@ -70,6 +73,8 @@ class Destinadores extends Page
             return CrudHelper::jsonError('Destinador não encontrado.');
         }
 
+        $temToken = trim((string)($d->sinir_integration_token ?? '')) !== '';
+
         return CrudHelper::jsonOk([
             'id' => $d->id,
             'nome' => $d->nome,
@@ -78,6 +83,10 @@ class Destinadores extends Page
             'telefone' => $d->telefone,
             'responsavel' => $d->responsavel,
             'sinir_cod_unidade' => $d->sinir_cod_unidade ?? '',
+            'sinir_integration_token' => '',
+            'sinir_token_status' => $temToken
+                ? 'Token já cadastrado — deixe em branco para manter.'
+                : 'Nenhum token — receber/CDF usará token da operadora (.env) se houver.',
             'is_padrao' => $d->is_padrao,
             'ativo' => $d->ativo,
         ]);
@@ -100,6 +109,15 @@ class Destinadores extends Page
             'sinir_cod_unidade' => ($post['sinir_cod_unidade'] ?? '') !== '' ? (int)$post['sinir_cod_unidade'] : null,
             'ativo' => CrudHelper::parseAtivo($post, $id <= 0),
         ];
+
+        if (!empty($post['limpar_sinir_token'])) {
+            $data['sinir_integration_token'] = null;
+        } else {
+            $token = trim((string)($post['sinir_integration_token'] ?? ''));
+            if ($token !== '') {
+                $data['sinir_integration_token'] = $token;
+            }
+        }
 
         if ($data['nome'] === '' || $data['cnpj'] === '') {
             return CrudHelper::jsonError('Nome e CNPJ são obrigatórios.');

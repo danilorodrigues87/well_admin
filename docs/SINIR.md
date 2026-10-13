@@ -87,18 +87,20 @@ Erro se faltar token de integração:
 
 **Login/senha do portal:** válidos apenas para acesso **web** (via Gov.br). **Não servem mais** para `/gettoken` na API.
 
-**Nunca commitar** senha ou token de integração no Git. Usar `.env`:
+**Nunca commitar** senha ou token no Git. Preferência: `operadoras` / cadastros; `.env` como fallback piloto:
 
 ```env
+SINIR_ENABLED=true
 SINIR_ENV=production
+SINIR_SSL_VERIFY=true
+# Fallback piloto (também em operadoras.sinir_* via seed_operadora_well.php):
 SINIR_UNIDADE=728559
 SINIR_CNPJ=18675233000150
-SINIR_INTEGRATION_TOKEN=   # gerado em Configurações > Gerar Token API WS
-SINIR_ENABLED=true
+SINIR_INTEGRATION_TOKEN=
 SINIR_UNIDADE_DESTINADOR=
 ```
 
-`SINIR_UNIDADE_DESTINADOR` é opcional (default = `SINIR_UNIDADE`).
+Sincronizar operadora #1 a partir do `.env`: `php database/scripts/seed_operadora_well.php`
 
 ---
 
@@ -153,20 +155,22 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 
 ### Pré-requisitos antes do envio
 
-### Tokens: o que fica onde
+### Tokens: o que fica onde (multitenancy)
 
 | Token | Onde | Uso |
 |-------|------|-----|
-| Well (operadora) | `.env` `SINIR_INTEGRATION_TOKEN` | Listas, sync, **recebimento/CDF** |
-| Gerador (cliente) | `clientes.sinir_integration_token` | **Emitir MTR** (`salvarManifestoLote`) |
+| Operadora (Well piloto) | `operadoras.sinir_*` → fallback `.env` | Listas, sync; fallback receber/CDF |
+| Gerador (cliente) | `clientes.sinir_integration_token` | **Emitir MTR** |
+| Destinador | `destinadores.sinir_integration_token` | **Receber MTR / CDF** (obrigatório se destinador ≠ operadora) |
+| Transportadora | `transportadoras.sinir_cod_unidade` (+ token opcional) | Unidade no JSON da emissão |
 
-Cadastro do token do gerador: **Admin → Clientes** ou **Portal gerador → Meu perfil → SINIR**.
+`.env` idealmente só: `SINIR_ENABLED`, `SINIR_ENV`, `SINIR_SSL_VERIFY` (+ fallback piloto).
 
-1. `.env`: `SINIR_ENABLED=true` + token/unidade/CNPJ da **Well**
-2. Migration `052_clientes_sinir_token.sql` aplicada
-3. **Cliente:** `sinir_cod_unidade` + `sinir_integration_token` (token gerado no portal MTR na unidade geradora)
-4. **Transportadora/destinador:** `sinir_cod_unidade` no banco (ex.: `728559`)
-5. **Tipo de resíduo:** códigos IBAMA + mapeamento SINIR (`tra/tie/tia/cla/uni_codigo`)
+1. Migrations `052` (cliente) e `053` (destinador) aplicadas
+2. **Cliente:** unidade + token gerador (admin ou portal `/gerador/perfil`)
+3. **Destinador:** unidade + token (terceiro); Well padrão pode herdar operadora/`.env`
+4. **Transportadora:** unidade SINIR no banco
+5. **Tipo de resíduo:** mapeamento `tra/tie/tia/cla/uni_codigo`
 
 ### Smoke test (CLI)
 

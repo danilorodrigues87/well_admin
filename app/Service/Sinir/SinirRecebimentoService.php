@@ -50,7 +50,7 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => implode(' ', $built['errors'])];
         }
 
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        $credentials = (new SinirCredentialsResolver())->forRecebimento($coletaId);
         if (!$credentials['ok']) {
             return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
         }
@@ -87,7 +87,7 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => 'Coleta sem código de barras SINIR.'];
         }
 
-        $credentials = (new SinirCredentialsResolver())->forColeta($coletaId);
+        $credentials = (new SinirCredentialsResolver())->forRecebimento($coletaId);
         if (!$credentials['ok']) {
             return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
         }

@@ -18,6 +18,8 @@ class Destinador
     public string $telefone = '';
     public string $responsavel = '';
     public ?int $sinir_cod_unidade = null;
+    /** Token API WS do destinador (receber MTR / CDF). */
+    public ?string $sinir_integration_token = null;
     public int $is_padrao = 0;
     public int $ativo = 1;
 
@@ -108,6 +110,8 @@ class Destinador
         $d->responsavel = (string)($row['responsavel'] ?? '');
         $d->sinir_cod_unidade = isset($row['sinir_cod_unidade']) && $row['sinir_cod_unidade'] !== null
             ? (int)$row['sinir_cod_unidade'] : null;
+        $tok = isset($row['sinir_integration_token']) ? trim((string)$row['sinir_integration_token']) : '';
+        $d->sinir_integration_token = $tok !== '' ? $tok : null;
         $d->is_padrao = (int)($row['is_padrao'] ?? 0);
         $d->ativo = (int)($row['ativo'] ?? 1);
 
