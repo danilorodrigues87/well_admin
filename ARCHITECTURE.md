@@ -333,4 +333,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR: `clientes.sinir_integration_token` (052); emissão usa token do gerador; Well `.env` só recebimento/CDF; cadastro admin + portal gerador |
 | 2026-10-13 | SINIR multitenancy: `destinadores.sinir_integration_token` (053); `forRecebimento`; `SinirConfig` lê `operadoras` com fallback `.env` |
 | 2026-10-13 | SINIR UI: remove token da transportadora; tokens só em cliente/gerador e destinador; textos sem menção a `.env` |
-| 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); painel, portal gerador e API compartilham o mesmo template |
+| 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |

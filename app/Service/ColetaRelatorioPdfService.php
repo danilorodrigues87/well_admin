@@ -16,7 +16,7 @@ class ColetaRelatorioPdfService
 {
     /**
      * @param array{coleta: EntityColeta, snapshot: mixed, itens: array, evidencias?: array} $detalhe
-     * @param array{auto_print?: bool, rotulo?: string, status_aviso?: bool, for_pdf?: bool} $opts
+     * @param array{auto_print?: bool, rotulo?: string, status_aviso?: bool, for_pdf?: bool, pdf_download_url?: string, evidencia_img_url?: callable(int,int,string):string} $opts
      */
     public static function viewVars(array $detalhe, array $opts = []): array
     {
@@ -76,7 +76,8 @@ class ColetaRelatorioPdfService
         $evidenciasHtml = self::buildEvidenciasHtml(
             $detalhe['evidencias'] ?? [],
             (int)$c->id,
-            $forPdf
+            $forPdf,
+            $opts
         );
 
         return [
@@ -118,24 +119,31 @@ class ColetaRelatorioPdfService
 
     /**
      * @param iterable<\App\Model\Entity\ColetaEvidencia> $evidencias
+     * @param array{evidencia_img_url?: callable(int,int,string):string} $opts
      */
-    private static function buildEvidenciasHtml(iterable $evidencias, int $coletaId, bool $forPdf): string
+    private static function buildEvidenciasHtml(iterable $evidencias, int $coletaId, bool $forPdf, array $opts = []): string
     {
         $items = '';
+        $imgUrlFn = $opts['evidencia_img_url'] ?? null;
         foreach ($evidencias as $e) {
             $coletaIdEv = (int)($e->coleta_id ?: $coletaId);
             $ordem = (int)$e->ordem;
+            $arquivo = (string)$e->arquivo;
             if ($forPdf) {
                 $src = EvidenceStorageService::dataUriForEmbed(
-                    (string)$e->arquivo,
+                    $arquivo,
                     $coletaIdEv,
                     (string)($e->mime ?? '')
                 );
             } else {
-                if (!EvidenceStorageService::fileExists((string)$e->arquivo, $coletaIdEv)) {
+                if (!EvidenceStorageService::fileExists($arquivo, $coletaIdEv)) {
                     continue;
                 }
-                $src = EvidenceStorageService::publicUrl($coletaIdEv, (string)$e->arquivo);
+                if (is_callable($imgUrlFn)) {
+                    $src = (string)$imgUrlFn($coletaIdEv, $ordem, $arquivo);
+                } else {
+                    $src = EvidenceStorageService::publicUrl($coletaIdEv, $arquivo);
+                }
             }
             if ($src === null || $src === '') {
                 continue;

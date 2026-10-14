@@ -205,11 +205,15 @@ class Coletas extends Page
             return View::render('erros/405', ['URL' => URL]);
         }
 
+        $geradorEvidenciaUrl = static fn (int $coletaId, int $ordem, string $arquivo): string => rtrim((string)URL, '/')
+            .'/gerador/coletas/'.$coletaId.'/evidencias/'.$ordem;
+
         return \App\Service\ColetaRelatorioPdfService::renderHtml($det, [
             'auto_print' => ($request->getQueryParams()['print'] ?? '') === '1',
             'rotulo' => (string)(ColetaMtrHelper::numeroExibicao($c) ?? ''),
             'status_aviso' => false,
             'pdf_download_url' => URL.'/gerador/coletas/'.$id.'/pdf',
+            'evidencia_img_url' => $geradorEvidenciaUrl,
         ]);
     }
 
