@@ -35,9 +35,15 @@ class EvidenceStorageService
 
     public static function fileExists(string $arquivoRelativo, ?int $coletaId = null): bool
     {
+        return self::resolveReadablePath($arquivoRelativo, $coletaId) !== null;
+    }
+
+    /** Primeiro caminho legível no disco (candidatos iguais ao legado fileExists). */
+    public static function resolveReadablePath(string $arquivoRelativo, ?int $coletaId = null): ?string
+    {
         $arquivoRelativo = ltrim(str_replace('\\', '/', $arquivoRelativo), '/');
         if ($arquivoRelativo === '') {
-            return false;
+            return null;
         }
 
         $candidates = [self::absolutePath($arquivoRelativo)];
@@ -47,11 +53,59 @@ class EvidenceStorageService
 
         foreach (array_unique($candidates) as $path) {
             if (is_file($path) && is_readable($path)) {
-                return true;
+                return $path;
             }
         }
 
-        return false;
+        return null;
+    }
+
+    /**
+     * Data URI para embed em HTML/PDF (Dompdf não renderiza WebP — converte para JPEG).
+     */
+    public static function dataUriForEmbed(string $arquivoRelativo, ?int $coletaId = null, ?string $hintMime = null): ?string
+    {
+        $path = self::resolveReadablePath($arquivoRelativo, $coletaId);
+        if ($path === null) {
+            return null;
+        }
+
+        $mime = $hintMime !== null && $hintMime !== ''
+            ? $hintMime
+            : self::detectMime($path, '');
+
+        $isWebp = $mime === 'image/webp' || str_ends_with(strtolower($path), '.webp');
+        if ($isWebp && extension_loaded('gd')) {
+            $image = self::loadImage($path, 'image/webp');
+            if ($image === null) {
+                return null;
+            }
+            ob_start();
+            $ok = imagejpeg($image, null, 88);
+            imagedestroy($image);
+            $jpeg = ob_get_clean();
+            if (!$ok || $jpeg === false || $jpeg === '') {
+                return null;
+            }
+
+            return 'data:image/jpeg;base64,'.base64_encode($jpeg);
+        }
+
+        if (!self::isAllowedMime($mime) && !in_array($mime, ['image/jpeg', 'image/png'], true)) {
+            return null;
+        }
+
+        $bytes = file_get_contents($path);
+        if ($bytes === false) {
+            return null;
+        }
+
+        $embedMime = in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true) ? $mime : 'image/jpeg';
+        if ($embedMime === 'image/webp') {
+            return null;
+        }
+
+        return 'data:'.$embedMime.';base64,'.base64_encode($bytes);
     }
 
     /** Mensagem amigável para códigos de erro de $_FILES. */

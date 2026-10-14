@@ -101,6 +101,40 @@ body.mtr-print-page {
   padding: 2px 4px;
 }
 
+.mtr-evidencias-cell {
+  border: none;
+  padding: 8px 4px;
+}
+
+.mtr-evidencias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.mtr-evidencia-item {
+  flex: 0 0 calc(50% - 5px);
+  max-width: calc(50% - 5px);
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+.mtr-evidencia-item img {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+}
+
+.mtr-evidencia-caption {
+  font-size: 9px;
+  color: #666;
+  margin-top: 4px;
+}
+
 @media print {
   body.mtr-print-page {
     background: #fff;
@@ -114,5 +148,9 @@ body.mtr-print-page {
 
   .mtr-table {
     max-width: 100%;
+  }
+
+  .mtr-evidencia-item img {
+    max-height: 180px;
   }
 }

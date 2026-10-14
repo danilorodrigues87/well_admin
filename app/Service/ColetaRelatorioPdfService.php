@@ -15,7 +15,7 @@ use Dompdf\Options;
 class ColetaRelatorioPdfService
 {
     /**
-     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array} $detalhe
+     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array, evidencias?: array} $detalhe
      * @param array{auto_print?: bool, rotulo?: string, status_aviso?: bool, for_pdf?: bool} $opts
      */
     public static function viewVars(array $detalhe, array $opts = []): array
@@ -73,6 +73,12 @@ class ColetaRelatorioPdfService
             ? '<a class="btn btn-outline-danger" href="'.CrudHelper::e($pdfUrl).'">Baixar PDF</a>'
             : '';
 
+        $evidenciasHtml = self::buildEvidenciasHtml(
+            $detalhe['evidencias'] ?? [],
+            (int)$c->id,
+            $forPdf
+        );
+
         return [
             'URL' => URL,
             'css_link_or_inline' => $cssLinkOrInline,
@@ -105,12 +111,53 @@ class ColetaRelatorioPdfService
             'tratamento' => CrudHelper::e(mb_strtoupper((string)($c->tratamento ?? ''), 'UTF-8')),
             'itens_html' => $itensHtml,
             'total_peso' => number_format($totalKg, 3, ',', '.').' KG',
+            'evidencias_html' => $evidenciasHtml,
             'auto_print_script' => $autoPrint,
         ];
     }
 
     /**
-     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array} $detalhe
+     * @param iterable<\App\Model\Entity\ColetaEvidencia> $evidencias
+     */
+    private static function buildEvidenciasHtml(iterable $evidencias, int $coletaId, bool $forPdf): string
+    {
+        $items = '';
+        foreach ($evidencias as $e) {
+            $coletaIdEv = (int)($e->coleta_id ?: $coletaId);
+            $ordem = (int)$e->ordem;
+            if ($forPdf) {
+                $src = EvidenceStorageService::dataUriForEmbed(
+                    (string)$e->arquivo,
+                    $coletaIdEv,
+                    (string)($e->mime ?? '')
+                );
+            } else {
+                if (!EvidenceStorageService::fileExists((string)$e->arquivo, $coletaIdEv)) {
+                    continue;
+                }
+                $src = EvidenceStorageService::publicUrl($coletaIdEv, (string)$e->arquivo);
+            }
+            if ($src === null || $src === '') {
+                continue;
+            }
+
+            $items .= '<div class="mtr-evidencia-item">'
+                .'<img src="'.CrudHelper::e($src).'" alt="Evidência '.$ordem.'" />'
+                .'<div class="mtr-evidencia-caption">Foto '.$ordem.'</div>'
+                .'</div>';
+        }
+
+        if ($items === '') {
+            return '';
+        }
+
+        return '<tr><td colspan="15" style="border:none;height:6px;"></td></tr>'
+            .'<tr class="mtr-section"><td colspan="15">EVIDÊNCIAS</td></tr>'
+            .'<tr><td colspan="15" class="mtr-evidencias-cell"><div class="mtr-evidencias">'.$items.'</div></td></tr>';
+    }
+
+    /**
+     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array, evidencias?: array} $detalhe
      */
     public static function renderHtml(array $detalhe, array $opts = []): string
     {
@@ -118,7 +165,7 @@ class ColetaRelatorioPdfService
     }
 
     /**
-     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array} $detalhe
+     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array, evidencias?: array} $detalhe
      */
     public static function renderPdfBytes(array $detalhe, array $opts = []): string
     {
@@ -150,7 +197,7 @@ class ColetaRelatorioPdfService
     }
 
     /**
-     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array} $detalhe
+     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array, evidencias?: array} $detalhe
      */
     public static function pdfResponse(array $detalhe, array $opts = []): \App\Http\Response
     {
