@@ -34,7 +34,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261015d"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261015e"></script>'
         );
     }
 
@@ -599,7 +599,13 @@ class Coletas extends Page
             return View::render('erros/404', ['URL' => URL]);
         }
 
-        return new Response(200, $bytes, 'application/pdf');
+        $nome = !empty($c->sinir_cdf_codigo)
+            ? 'cdf_sinir_'.preg_replace('/\D/', '', (string)$c->sinir_cdf_codigo).'.pdf'
+            : 'cdf_'.$id.'.pdf';
+        $resp = new Response(200, $bytes, 'application/pdf');
+        $resp->addHeader('Content-Disposition', 'attachment; filename="'.$nome.'"');
+
+        return $resp;
     }
 
     public static function sinirConsultar($request): string

@@ -252,10 +252,24 @@
     }
   };
 
+  function baixarArquivo(path) {
+    var href = typeof wellAppUrl === 'function'
+      ? wellAppUrl(path)
+      : (typeof url_base !== 'undefined' ? url_base : '/').replace(/\/+$/, '') + path;
+    var a = document.createElement('a');
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
   window.sinirBaixarCdf = function (id) {
     $.post(postUrl(), { acao: 'sinir_baixar_cdf', id: id, _csrf: csrf() }, function (d) {
       d = parseResp(d);
       if (d.success) {
+        baixarArquivo('/painel/coletas/cdf/' + id);
         afterOk(id, d.message);
       } else {
         afterErr(d.message);
