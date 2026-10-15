@@ -6,6 +6,7 @@ use App\Common\SinirConfig;
 use App\Model\Entity\Cliente as EntityCliente;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaSnapshot as EntityColetaSnapshot;
+use App\Model\Entity\Destinador as EntityDestinador;
 use App\Model\Entity\SinirEnvio as EntitySinirEnvio;
 use App\Service\ColetaCdfService;
 
@@ -64,7 +65,13 @@ class SinirCdfService
         $dataYmd = date('Ymd', strtotime($refDate));
         $resp = trim((string)($responsavel ?? ''));
         if ($resp === '') {
-            $resp = trim((string)($snapshot->destinador_responsavel ?? 'Responsável técnico'));
+            $destinador = $coleta->destinador_id
+                ? EntityDestinador::getById((int)$coleta->destinador_id)
+                : EntityDestinador::getPadrao();
+            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? ''));
+        }
+        if ($resp === '') {
+            return ['ok' => false, 'message' => 'Destinador sem responsável cadastrado. Atualize o cadastro antes de emitir o CDF.'];
         }
 
         $payload = [

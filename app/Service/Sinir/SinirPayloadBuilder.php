@@ -227,7 +227,15 @@ class SinirPayloadBuilder
             $destinador = $coleta->destinador_id
                 ? EntityDestinador::getById((int)$coleta->destinador_id)
                 : EntityDestinador::getPadrao();
-            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? 'Responsável'));
+            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? ''));
+        }
+        if ($resp === '') {
+            return [
+                'ok' => false,
+                'payload' => null,
+                'errors' => ['Destinador sem responsável cadastrado. Atualize o cadastro do destinador antes de receber no SINIR.'],
+                'format' => 'nacional',
+            ];
         }
 
         $itens = EntityColetaItem::getByColetaId($coletaId);
@@ -339,7 +347,15 @@ class SinirPayloadBuilder
             $destinador = $coleta->destinador_id
                 ? EntityDestinador::getById((int)$coleta->destinador_id)
                 : EntityDestinador::getPadrao();
-            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? 'Responsável'));
+            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? ''));
+        }
+        if ($resp === '') {
+            return [
+                'ok' => false,
+                'payload' => null,
+                'errors' => ['Destinador sem responsável cadastrado. Atualize o cadastro do destinador antes de receber no SINIR.'],
+                'format' => 'legado',
+            ];
         }
         $cargoFinal = trim((string)($cargo ?? '')) !== '' ? trim((string)$cargo) : 'Responsável';
 

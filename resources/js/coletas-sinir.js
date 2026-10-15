@@ -181,12 +181,10 @@
   };
 
   window.sinirReceber = function (id) {
-    var run = function (resp, cargo) {
+    var run = function () {
       $.post(postUrl(), {
         acao: 'sinir_receber',
         id: id,
-        responsavel: resp || '',
-        cargo: cargo || '',
         _csrf: csrf()
       }, function (d) {
         d = parseResp(d);
@@ -203,44 +201,26 @@
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: 'Receber MTR no SINIR (destinador)',
-        html: '<p class="small text-muted text-start mb-2">Confirma o recebimento no portal nacional usando os dados da coleta (data de recebimento, itens e responsável).</p>'
-          + '<label for="sinir-receb-resp" class="form-label small text-start w-100 mb-1">Responsável cadastrado no destinador</label>'
-          + '<input id="sinir-receb-resp" type="text" class="form-control swal2-input" placeholder="Nome exatamente como cadastrado no SINIR" autocomplete="name">',
+        html: '<p class="small text-muted text-start mb-0">Confirma o recebimento no portal nacional usando a data, os itens e o responsável cadastrados para o destinador desta coleta.</p>',
         showCancelButton: true,
         confirmButtonText: 'Registrar recebimento',
-        focusConfirm: false,
-        didOpen: function () {
-          var el = document.getElementById('sinir-receb-resp');
-          if (el) {
-            el.focus();
-          }
-        },
-        preConfirm: function () {
-          var el = document.getElementById('sinir-receb-resp');
-          var v = el ? String(el.value || '').trim() : '';
-          if (!v) {
-            Swal.showValidationMessage('Informe o responsável cadastrado no SINIR.');
-            return false;
-          }
-          return { responsavel: v };
-        }
+        focusConfirm: true
       }).then(function (r) {
         if (r.isConfirmed) {
           Swal.fire({ title: 'Enviando…', allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
-          run(r.value && r.value.responsavel ? r.value.responsavel : '', '');
+          run();
         }
       });
     } else if (confirm('Registrar recebimento no SINIR?')) {
-      run('', '');
+      run();
     }
   };
 
   window.sinirEmitirCdf = function (id) {
-    var run = function (resp) {
+    var run = function () {
       $.post(postUrl(), {
         acao: 'sinir_emitir_cdf',
         id: id,
-        responsavel: resp || '',
         _csrf: csrf()
       }, function (d) {
         d = parseResp(d);
@@ -257,30 +237,18 @@
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: 'Emitir CDF no SINIR',
-        html: '<p class="small text-muted text-start mb-2">Emite o certificado de destinação para este MTR (destinador). Requer recebimento já registrado.</p>'
-          + '<label for="sinir-cdf-resp" class="form-label small text-start w-100 mb-1">Responsável técnico (opcional)</label>'
-          + '<input id="sinir-cdf-resp" type="text" class="form-control swal2-input" placeholder="Nome do responsável técnico" autocomplete="name">',
+        html: '<p class="small text-muted text-start mb-0">Emite o certificado de destinação usando o responsável cadastrado para o destinador. Requer recebimento já confirmado no SINIR.</p>',
         showCancelButton: true,
         confirmButtonText: 'Emitir CDF',
-        focusConfirm: false,
-        didOpen: function () {
-          var el = document.getElementById('sinir-cdf-resp');
-          if (el) {
-            el.focus();
-          }
-        },
-        preConfirm: function () {
-          var el = document.getElementById('sinir-cdf-resp');
-          return el ? String(el.value || '').trim() : '';
-        }
+        focusConfirm: true
       }).then(function (r) {
         if (r.isConfirmed) {
           Swal.fire({ title: 'Processando…', allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
-          run(r.value ? String(r.value).trim() : '');
+          run();
         }
       });
     } else if (confirm('Emitir CDF no SINIR?')) {
-      run('');
+      run();
     }
   };
 

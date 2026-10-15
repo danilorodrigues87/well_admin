@@ -34,7 +34,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261015c"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261015d"></script>'
         );
     }
 
@@ -489,15 +489,7 @@ class Coletas extends Page
         if ($id <= 0) {
             return CrudHelper::jsonError('Coleta inválida.');
         }
-        $responsavel = trim((string)($post['responsavel'] ?? ''));
-        $cargo = trim((string)($post['cargo'] ?? ''));
-
-        $result = SinirService::receberColeta(
-            $id,
-            true,
-            $responsavel !== '' ? $responsavel : null,
-            $cargo !== '' ? $cargo : null
-        );
+        $result = SinirService::receberColeta($id, true);
         if (!$result['ok']) {
             return CrudHelper::jsonError($result['message']);
         }
@@ -515,9 +507,7 @@ class Coletas extends Page
         if ($id <= 0) {
             return CrudHelper::jsonError('Coleta inválida.');
         }
-        $responsavel = trim((string)($post['responsavel'] ?? ''));
-
-        $result = SinirService::emitirCdfColeta($id, $responsavel !== '' ? $responsavel : null);
+        $result = SinirService::emitirCdfColeta($id);
         if (!$result['ok']) {
             return CrudHelper::jsonError($result['message']);
         }
@@ -647,7 +637,10 @@ class Coletas extends Page
 
         $badge = SinirService::renderStatusBadge($c->sinir_status, $c->status);
         $man = $c->sinir_man_numero ? CrudHelper::e($c->sinir_man_numero) : '—';
-        $bar = $c->sinir_codigo_barras ? CrudHelper::e($c->sinir_codigo_barras) : '—';
+        $barHtml = $c->sinir_codigo_barras
+            ? '<p class="mb-1"><strong>Cód. barras:</strong> '
+                .CrudHelper::e($c->sinir_codigo_barras).'</p>'
+            : '';
         $enviado = $c->sinir_enviado_em
             ? date('d/m/Y H:i', strtotime($c->sinir_enviado_em))
             : '—';
@@ -690,7 +683,7 @@ class Coletas extends Page
         return '
             <p class="mb-1"><strong>Status:</strong> '.$badge.'</p>
             <p class="mb-1"><strong>MTR SINIR:</strong> '.$man.'</p>
-            <p class="mb-1"><strong>Cód. barras:</strong> '.$bar.'</p>
+            '.$barHtml.'
             <p class="mb-1"><strong>Enviado em:</strong> '.$enviado.'</p>
             <p class="mb-1"><strong>Recebido SINIR:</strong> '.$recebidoSinir.'</p>
             <p class="mb-1"><strong>CDF SINIR nº:</strong> '.$cdfCod.'</p>

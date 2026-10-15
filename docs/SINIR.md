@@ -131,6 +131,8 @@ Header em todas (exceto troca inicial): `Authorization: Bearer {token_acesso}`
 Antes de receber, o service consulta o manifesto com o token do gerador e usa
 resíduo, tratamento, unidade e quantidade **canônicos do SINIR**. A API pode
 normalizar `1 kg` para `0,001 TON`; repetir a quantidade local causaria rejeição.
+O nome do responsável vem de `destinadores.responsavel` (com snapshot da coleta
+como fallback); recebimento e CDF não solicitam digitação manual no modal.
 
 ---
 
