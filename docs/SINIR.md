@@ -133,6 +133,9 @@ resíduo, tratamento, unidade e quantidade **canônicos do SINIR**. A API pode
 normalizar `1 kg` para `0,001 TON`; repetir a quantidade local causaria rejeição.
 O nome do responsável vem de `destinadores.responsavel` (com snapshot da coleta
 como fallback); recebimento e CDF não solicitam digitação manual no modal.
+Esse nome deve existir na lista **Responsável pelo Recebimento** da unidade
+destinadora no portal SINIR; nome abreviado ou apenas cadastrado no Well retorna
+`Responsável pelo recebimento não encontrado`.
 
 ---
 

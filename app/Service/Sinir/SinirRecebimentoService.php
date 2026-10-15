@@ -366,9 +366,12 @@ class SinirRecebimentoService
             }
 
             $detalhes = self::extrairMensagemRecursiva($body);
-            $mensagemBase = $msgNacional !== '' ? $msgNacional : $retorno;
-            if ($detalhes !== '' && ($mensagemBase === '' || !str_contains($detalhes, $mensagemBase))) {
-                $mensagemBase = trim($mensagemBase.' · '.$detalhes, ' ·');
+            $mensagemBase = $detalhes !== ''
+                ? $detalhes
+                : ($msgNacional !== '' ? $msgNacional : $retorno);
+            if (stripos($mensagemBase, 'Responsável pelo recebimento não encontrado') !== false) {
+                $mensagemBase .= ' Confira no portal SINIR, na unidade destinadora, o nome exato '
+                    .'selecionável como Responsável pelo Recebimento e atualize o cadastro do destinador no Well.';
             }
 
             return [
@@ -461,7 +464,10 @@ class SinirRecebimentoService
                     continue;
                 }
                 $texto = trim((string)$node[$key]);
-                if ($texto !== '' && !in_array(mb_strtolower($texto), ['true', 'false'], true)) {
+                $textoNormalizado = mb_strtoupper($texto, 'UTF-8');
+                if ($texto !== ''
+                    && !in_array(mb_strtolower($texto), ['true', 'false'], true)
+                    && !in_array($textoNormalizado, ['OK', 'OK!', 'VALIDAÇÃO OK', 'VALIDAÇÃO OK!'], true)) {
                     $mensagens[] = ($codigo !== null && $codigo !== '' ? '['.$codigo.'] ' : '').$texto;
                 }
             }

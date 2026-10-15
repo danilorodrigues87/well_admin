@@ -340,6 +340,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR PDF MTR: `Accept` próprio para PDF/octet-stream corrige Tomcat 406; botão renomeado para distinguir finalização operacional de recebimento pelo destinador |
 | 2026-10-15 | SINIR detalhe: código de barras só é exibido quando a API o fornece; MTR nacional usa `manNumero` e baixa PDF sem depender desse campo |
 | 2026-10-15 | SINIR responsável: recebimento e CDF usam automaticamente `destinadores.responsavel`; modais viraram confirmação sem campo manual e bloqueiam cadastro vazio |
+| 2026-10-15 | SINIR erro de recebimento: preserva mensagens aninhadas de `objetoResposta` e orienta conferir o responsável selecionável da unidade destinadora no portal |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |
