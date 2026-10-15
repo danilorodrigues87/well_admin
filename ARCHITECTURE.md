@@ -155,7 +155,7 @@ app/Service/Sinir/
 app/Common/SinirConfig.php          — operadoras.sinir_* + fallback .env (flags globais no .env)
   SinirRecebimentoService.php       — receberManifestoLote (MMA array) + PDF MTR (CDF light)
   SinirConsultaParser.php           — normaliza resposta retornaManifesto (legado + nacional)
-  SinirTokenInspector.php           — extrai unidadeId do claim sub do JWT apiws
+  SinirTokenInspector.php           — extrai contexto interno do claim sub do JWT apiws (não é parCodigo)
   SinirCdfService.php               — emiteCDF + buscaPdfCdf (CDF oficial)
   ColetaCdfService.php              — storage PDF portal gerador
   DmrService.php                    — agregação DMR por competência (`/painel/dmr`)
@@ -342,7 +342,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR detalhe: código de barras só é exibido quando a API o fornece; MTR nacional usa `manNumero` e baixa PDF sem depender desse campo |
 | 2026-10-15 | SINIR responsável: recebimento e CDF usam automaticamente `destinadores.responsavel`; modais viraram confirmação sem campo manual e bloqueiam cadastro vazio |
 | 2026-10-15 | SINIR erro de recebimento: preserva mensagens aninhadas de `objetoResposta` e orienta conferir o responsável selecionável da unidade destinadora no portal |
-| 2026-10-15 | SINIR token destinador: recebimento/CDF bloqueiam JWT cuja unidade diverge de `destinadores.sinir_cod_unidade`; diagnóstico imprime ambas |
+| 2026-10-15 | SINIR token destinador: contexto interno do JWT (ex. 728407) não é o `parCodigo` público (135551); removida comparação/bloqueio incorretos |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |

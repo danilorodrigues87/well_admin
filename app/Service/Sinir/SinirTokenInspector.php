@@ -4,11 +4,15 @@ namespace App\Service\Sinir;
 
 /**
  * Lê metadados não sensíveis do JWT de acesso retornado pelo SINIR.
+ *
+ * Atenção: o segundo valor de sub é um identificador interno do contexto
+ * autenticado. Ele não é o parCodigo público usado no payload dos parceiros.
  */
 final class SinirTokenInspector
 {
     /**
-     * O claim sub do apiws usa o formato "pessoaId,unidadeId".
+     * Extrai o segundo identificador interno do claim sub ("id,id").
+     * Não comparar com transportadoras/destinadores.sinir_cod_unidade.
      */
     public static function unidade(string $jwt): ?int
     {

@@ -93,16 +93,6 @@ class SinirCdfService
             return ['ok' => false, 'message' => 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha')];
         }
 
-        $unidadeToken = SinirTokenInspector::unidade((string)$tokenResult['token']);
-        $unidadeDestinador = (int)($credentials['destinador_unidade'] ?? 0);
-        if ($unidadeToken !== null && $unidadeDestinador > 0 && $unidadeToken !== $unidadeDestinador) {
-            return [
-                'ok' => false,
-                'message' => 'Token do destinador pertence à unidade '.$unidadeToken
-                    .'; o manifesto usa a unidade '.$unidadeDestinador.'. Gere o token na unidade correta.',
-            ];
-        }
-
         $response = $this->gateway->post('emiteCDF', $payload, $tokenResult['token']);
         $body = $response['body'] ?? [];
         if (!is_array($body)) {

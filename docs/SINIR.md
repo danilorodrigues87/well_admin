@@ -81,7 +81,8 @@ Erro se faltar token de integração:
 | Campo | Valor |
 |-------|-------|
 | CNPJ | 18.675.233/0001-50 |
-| Código unidade | deve bater com o `sub` do JWT (`pessoaId,unidadeId`) — ex.: token atual usa **728559** (não 135551) |
+| Código público da unidade Well | **135551** (`parCodigo`, usado como transportador/destinador no manifesto) |
+| Contexto interno do JWT | segundo ID do claim `sub` (ex.: 728407); **não é** o código público 135551 e não deve ser comparado com ele |
 | Empresa | WIDMER TRINDADE DE BEM - ME |
 | CPF usuário | 027.506.321-61 |
 
@@ -136,10 +137,10 @@ como fallback); recebimento e CDF não solicitam digitação manual no modal.
 Esse nome deve existir na lista **Responsável pelo Recebimento** da unidade
 destinadora no portal SINIR; nome abreviado ou apenas cadastrado no Well retorna
 `Responsável pelo recebimento não encontrado`.
-Além do nome, o `unidadeId` do JWT obtido com o token do destinador deve ser
-igual a `destinadores.sinir_cod_unidade`. Um responsável existente na unidade
-135551 continuará “não encontrado” se o Token API WS tiver sido gerado em outra
-unidade (ex.: 728559).
+O segundo identificador do claim `sub` do JWT é interno ao contexto de
+autenticação e pode ser diferente do `parCodigo` público do destinador. A
+seleção da unidade correta deve ser feita no portal ao gerar o Token API WS;
+não validar essa seleção comparando numericamente os dois identificadores.
 
 ---
 

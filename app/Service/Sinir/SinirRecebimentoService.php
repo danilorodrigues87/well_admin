@@ -93,22 +93,6 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha desconhecida')];
         }
 
-        $unidadeToken = SinirTokenInspector::unidade((string)$tokenResult['token']);
-        $unidadeDestinador = (int)($credentials['destinador_unidade'] ?? 0);
-        if ($unidadeToken !== null && $unidadeDestinador > 0 && $unidadeToken !== $unidadeDestinador) {
-            return [
-                'ok' => false,
-                'message' => 'O Token API WS do destinador pertence à unidade SINIR '.$unidadeToken
-                    .', mas este manifesto foi destinado à unidade '.$unidadeDestinador
-                    .'. No portal SINIR, selecione a unidade '.$unidadeDestinador
-                    .', gere um novo Token API WS e atualize o cadastro do destinador no Well.',
-                'details' => [
-                    'token_unidade' => $unidadeToken,
-                    'destinador_unidade' => $unidadeDestinador,
-                ],
-            ];
-        }
-
         $response = $this->gateway->post('receberManifestoLote', $payload, $tokenResult['token']);
 
         return $this->processarResposta(

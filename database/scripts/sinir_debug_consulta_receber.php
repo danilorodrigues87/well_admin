@@ -60,13 +60,14 @@ if (is_string($rawConsulta) && $rawConsulta !== '') {
 
 $cReceb = (new SinirCredentialsResolver())->forRecebimento($coletaId);
 echo "\nrecebimento_token_source=".($cReceb['token_source'] ?? 'null').PHP_EOL;
-echo 'recebimento_destinador_unidade='.($cReceb['destinador_unidade'] ?? 'null').PHP_EOL;
+echo 'recebimento_destinador_codigo_publico='.($cReceb['destinador_unidade'] ?? 'null').PHP_EOL;
 if ($cReceb['ok'] && !empty($cReceb['integration_token'])) {
     $tokenReceb = (new SinirAuthService())->obtainAccessToken(false, $cReceb['integration_token']);
     $tokenUnidade = !empty($tokenReceb['token'])
         ? SinirTokenInspector::unidade((string)$tokenReceb['token'])
         : null;
-    echo 'recebimento_token_unidade='.($tokenUnidade ?? 'null').PHP_EOL;
+    echo 'recebimento_token_contexto_interno='.($tokenUnidade ?? 'null')
+        .' (nao comparar com codigo publico)'.PHP_EOL;
 }
 
 $recebimentoService = new SinirRecebimentoService();
