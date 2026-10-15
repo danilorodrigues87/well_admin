@@ -8,6 +8,7 @@ require dirname(__DIR__, 2).'/includes/app.php';
 
 use App\Service\Sinir\SinirAuthService;
 use App\Service\Sinir\SinirCredentialsResolver;
+use App\Service\Sinir\SinirGateway;
 use App\Service\Sinir\SinirManifestoService;
 use App\Service\Sinir\SinirRecebimentoService;
 use App\Service\Sinir\SinirTokenInspector;
@@ -61,13 +62,37 @@ if (is_string($rawConsulta) && $rawConsulta !== '') {
 $cReceb = (new SinirCredentialsResolver())->forRecebimento($coletaId);
 echo "\nrecebimento_token_source=".($cReceb['token_source'] ?? 'null').PHP_EOL;
 echo 'recebimento_destinador_codigo_publico='.($cReceb['destinador_unidade'] ?? 'null').PHP_EOL;
+$accessTokenReceb = null;
 if ($cReceb['ok'] && !empty($cReceb['integration_token'])) {
     $tokenReceb = (new SinirAuthService())->obtainAccessToken(false, $cReceb['integration_token']);
+    $accessTokenReceb = !empty($tokenReceb['token']) ? (string)$tokenReceb['token'] : null;
     $tokenUnidade = !empty($tokenReceb['token'])
         ? SinirTokenInspector::unidade((string)$tokenReceb['token'])
         : null;
     echo 'recebimento_token_contexto_interno='.($tokenUnidade ?? 'null')
         .' (nao comparar com codigo publico)'.PHP_EOL;
+    echo 'recebimento_token_claims='.json_encode(
+        $accessTokenReceb ? SinirTokenInspector::claimsPublicos($accessTokenReceb) : [],
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    ).PHP_EOL;
+
+    if ($accessTokenReceb && !empty($coleta->sinir_man_numero)) {
+        $consultaDest = (new SinirGateway())->get(
+            'retornaManifesto/'.rawurlencode((string)$coleta->sinir_man_numero),
+            $accessTokenReceb
+        );
+        $objDest = is_array($consultaDest['body']['objetoResposta'] ?? null)
+            ? $consultaDest['body']['objetoResposta']
+            : [];
+        echo 'consulta_com_token_destinador='.json_encode([
+            'ok' => $consultaDest['ok'],
+            'http_status' => $consultaDest['status'],
+            'erro' => $consultaDest['error'],
+            'manifesto' => $objDest['manNumero'] ?? null,
+            'destinador_codigo' => $objDest['parceiroDestinador']['parCodigo'] ?? null,
+            'destinador_cnpj' => $objDest['parceiroDestinador']['parCnpj'] ?? null,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).PHP_EOL;
+    }
 }
 
 $recebimentoService = new SinirRecebimentoService();

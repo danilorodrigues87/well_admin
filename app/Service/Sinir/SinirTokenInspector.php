@@ -10,11 +10,57 @@ namespace App\Service\Sinir;
  */
 final class SinirTokenInspector
 {
+    /** @return array<string,mixed> */
+    public static function claimsPublicos(string $jwt): array
+    {
+        $data = self::payload($jwt);
+        if ($data === null) {
+            return [];
+        }
+
+        $permitidos = [
+            'sub',
+            'role',
+            'roles',
+            'authorities',
+            'parCodigo',
+            'pessoaCodigo',
+            'unidade',
+            'unidadeId',
+            'iss',
+            'exp',
+        ];
+        $out = [];
+        foreach ($permitidos as $key) {
+            if (array_key_exists($key, $data)) {
+                $out[$key] = $data[$key];
+            }
+        }
+
+        return $out;
+    }
+
     /**
      * Extrai o segundo identificador interno do claim sub ("id,id").
      * Não comparar com transportadoras/destinadores.sinir_cod_unidade.
      */
     public static function unidade(string $jwt): ?int
+    {
+        $data = self::payload($jwt);
+        if ($data === null || !is_string($data['sub'] ?? null)) {
+            return null;
+        }
+        if (!preg_match('/^\d+,(\d+)$/', $data['sub'], $matches)) {
+            return null;
+        }
+
+        $unidade = (int)$matches[1];
+
+        return $unidade > 0 ? $unidade : null;
+    }
+
+    /** @return array<string,mixed>|null */
+    private static function payload(string $jwt): ?array
     {
         $parts = explode('.', $jwt);
         if (count($parts) < 2) {
@@ -29,15 +75,7 @@ final class SinirTokenInspector
 
         $json = base64_decode($b64, true);
         $data = is_string($json) ? json_decode($json, true) : null;
-        if (!is_array($data) || !is_string($data['sub'] ?? null)) {
-            return null;
-        }
-        if (!preg_match('/^\d+,(\d+)$/', $data['sub'], $matches)) {
-            return null;
-        }
 
-        $unidade = (int)$matches[1];
-
-        return $unidade > 0 ? $unidade : null;
+        return is_array($data) ? $data : null;
     }
 }
