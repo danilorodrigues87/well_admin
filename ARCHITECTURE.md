@@ -334,3 +334,4 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR multitenancy: `destinadores.sinir_integration_token` (053); `forRecebimento`; `SinirConfig` lê `operadoras` com fallback `.env` |
 | 2026-10-13 | SINIR UI: remove token da transportadora; tokens só em cliente/gerador e destinador; textos sem menção a `.env` |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
+| 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |

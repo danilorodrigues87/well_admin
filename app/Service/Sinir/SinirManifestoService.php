@@ -400,14 +400,17 @@ class SinirManifestoService
         $manifestos = is_array($body['manifestoJSONDtos'] ?? null) ? $body['manifestoJSONDtos'] : [];
         $primeiro = is_array($manifestos[0] ?? null) ? $manifestos[0] : null;
 
-        if ($response['ok'] && $primeiro !== null && (int)($primeiro['retornoCodigo'] ?? -1) === 0) {
+        $manLegado = (string)($primeiro['manifestoCodigo'] ?? '');
+        $retLegado = trim((string)($primeiro['retorno'] ?? ''));
+        if ($response['ok'] && $primeiro !== null && (int)($primeiro['retornoCodigo'] ?? -1) === 0
+            && self::manifestoCodigoValido($manLegado) && !self::retornoSinirIndicaErro($retLegado)) {
             return $this->registrarSucessoManifesto(
                 $coletaId,
                 $payload,
                 $body,
-                (string)($primeiro['manifestoCodigo'] ?? ''),
+                $manLegado,
                 (string)($primeiro['codigoBarra'] ?? $primeiro['codigoBarras'] ?? ''),
-                (string)($primeiro['retorno'] ?? 'MTR enviado ao SINIR.')
+                $retLegado !== '' ? $retLegado : 'MTR enviado ao SINIR.'
             );
         }
 
@@ -472,15 +475,15 @@ class SinirManifestoService
                 ?? ''))
             : '';
 
-        $restOk = is_array($primeiro) && (
-            ($primeiro['restResponseValido'] ?? null) === true
-            || ($manNumero !== '' && trim((string)($primeiro['mensagemErroNacional'] ?? '')) === '')
-        );
+        $manifestoValido = self::manifestoCodigoValido($manNumero);
+        $retornoIndicaErro = self::retornoSinirIndicaErro($retorno);
 
-        $sucesso = $response['ok'] && !$erroNacional && (
+        $restOk = is_array($primeiro) && $manifestoValido && !$retornoIndicaErro
+            && ($primeiro['restResponseValido'] ?? null) === true;
+
+        $sucesso = $response['ok'] && !$erroNacional && !$retornoIndicaErro && $manifestoValido && (
             ($primeiro !== null && $retornoCodigo === 0)
             || $restOk
-            || ($manNumero !== '' && $msgNacional === '' && $retornoCodigo <= 0)
         );
 
         if ($sucesso) {
@@ -534,9 +537,19 @@ class SinirManifestoService
         string $codigoBarras,
         string $message
     ): array {
+        if (!self::manifestoCodigoValido($manNumero) || self::retornoSinirIndicaErro($message)) {
+            $msg = trim($message) !== '' ? $message : 'SINIR não retornou número de manifesto válido.';
+            $this->registrarFalha($coletaId, $payload, $body, $msg);
+
+            return [
+                'ok' => false,
+                'message' => $msg,
+            ];
+        }
+
         $numeroMtr = self::manifestoParaNumeroMtr($manNumero);
         $update = [
-            'sinir_man_numero' => $manNumero !== '' ? $manNumero : null,
+            'sinir_man_numero' => $manNumero,
             'sinir_codigo_barras' => $codigoBarras !== '' ? $codigoBarras : null,
             'sinir_status' => 'enviado',
             'sinir_enviado_em' => date('Y-m-d H:i:s'),
@@ -584,15 +597,49 @@ class SinirManifestoService
     private static function manifestoParaNumeroMtr(string $manifestoCodigo): ?int
     {
         $manifestoCodigo = trim($manifestoCodigo);
-        if ($manifestoCodigo === '') {
+        if ($manifestoCodigo === '' || !self::manifestoCodigoValido($manifestoCodigo)) {
             return null;
         }
         if (ctype_digit($manifestoCodigo)) {
-            return (int)$manifestoCodigo;
+            $n = (int)$manifestoCodigo;
+
+            return $n > 0 ? $n : null;
         }
         $digits = preg_replace('/\D/', '', $manifestoCodigo);
+        if ($digits === '') {
+            return null;
+        }
+        $n = (int)$digits;
 
-        return $digits !== '' ? (int)$digits : null;
+        return $n > 0 ? $n : null;
+    }
+
+    /** Código "0" ou vazio = rejeição SINIR, não MTR emitido. */
+    private static function manifestoCodigoValido(string $codigo): bool
+    {
+        $codigo = trim($codigo);
+        if ($codigo === '' || $codigo === '0') {
+            return false;
+        }
+        if (ctype_digit($codigo)) {
+            return (int)$codigo > 0;
+        }
+
+        return true;
+    }
+
+    private static function retornoSinirIndicaErro(string $retorno): bool
+    {
+        $retorno = trim($retorno);
+        if ($retorno === '') {
+            return false;
+        }
+        $u = mb_strtoupper($retorno, 'UTF-8');
+
+        return str_starts_with($u, 'ERRO')
+            || str_contains($u, 'ERRO:')
+            || str_contains($u, 'FALHA')
+            || str_contains($u, 'REJEIT');
     }
 
     /** @param array<string,mixed>|null $primeiro */
