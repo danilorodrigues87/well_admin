@@ -56,6 +56,11 @@ class GeradorApiPresenter
         $base['coleta']['mtr_url'] = ColetaMtrHelper::temMtr($c)
             ? URL.'/gerador/coletas/'.$c->id.'/mtr'
             : null;
+        $temMtrOficial = trim((string)($c->sinir_man_numero ?? '')) !== '';
+        $base['coleta']['mtr_oficial_disponivel'] = $temMtrOficial;
+        $base['coleta']['mtr_oficial_url'] = $temMtrOficial
+            ? URL.'/gerador/coletas/'.$c->id.'/mtr-oficial'
+            : null;
         $base['coleta']['cdf_disponivel'] = ColetaCdfService::temCdf($c);
         $base['coleta']['cdf_url'] = ColetaCdfService::temCdf($c)
             ? URL.'/gerador/coletas/'.$c->id.'/cdf'

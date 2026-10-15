@@ -121,7 +121,7 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Emitir MTR | POST | `/salvarManifestoLote` — body = **array JSON** no schema **MMA/SIGOR** (`transportador`/`destinador`/`listaManifestoResiduos`). Wrapper `{manifestoJSONDtos:[…]}` → Tomcat 400. **Token deve ser de Gerador** (unidade JWT = `clientes.sinir_cod_unidade`). Data de expedição ≥ hoje. |
 | Consultar MTR | GET | `/retornaManifesto/{manNumero}` — número nacional (12 dígitos); token **gerador** (fallback destinador/operadora). Persiste `sinir_codigo_barras` quando a API devolve. |
 | Consultar (legado) | POST | `/retornaManifestoPorNumero/{num}` — ~10 dígitos (estadual) |
-| PDF MTR | POST | `/downloadManifesto/{manNumero}` — `Accept: application/pdf, application/octet-stream, */*`; fallback `/buscaPdfManifestoPorCodigoBarras/{cod}` |
+| PDF MTR | POST | `/downloadManifesto/{manNumero}` — `Accept: application/pdf, application/octet-stream, */*`; fallback `/buscaPdfManifestoPorCodigoBarras/{cod}`. Portal gerador: **MTR oficial** em `/gerador/coletas/{id}/mtr-oficial` |
 | Cancelar | POST | `/cancelarManifesto` — token **gerador** |
 | Receber (destinador) | POST | `/receberManifestoLote` — body = **array raiz** MMA. Sem substituição, cada item leva apenas `resCodigoIbama`, `marQuantidade`, `marQuantidadeRecebida`, `traCodigo`. Wrapper `manifestoRecebimentoJSONs` → Tomcat 400. Token **destinador**. |
 | Emitir CDF | POST | `/emiteCDF` — MTR nacional: `cerDataInicial`/`cerDataFinal` (epoch ms), `parceiroDestinador`, `cnpjDestinador`, `tipoCertificadoDestinacao` 1, `listaManifesto[{manNumero}]`, `nomeResponsavel`. Legado (~10 dígitos) mantém `dataInicial`/`listaMtr`. Token **destinador**. |

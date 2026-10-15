@@ -89,6 +89,13 @@ $obRouter->get('/gerador/coletas/{id}/evidencias/{ordem}', [
     },
 ]);
 
+$obRouter->get('/gerador/coletas/{id}/mtr-oficial', [
+    'middlewares' => $geradorAuth,
+    function ($request, int $id) {
+        return Gerador\Coletas::mtrOficial($request, $id);
+    },
+]);
+
 $obRouter->get('/gerador/coletas/{id}/mtr', [
     'middlewares' => $geradorAuth,
     function ($request, int $id) {

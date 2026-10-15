@@ -9,9 +9,11 @@ use App\Common\Helpers\FormatHelper;
 use App\Http\Response;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
+use App\Common\SinirConfig;
 use App\Service\ColetaCdfService;
 use App\Service\ColetaService;
 use App\Service\GeradorPortalService;
+use App\Service\Sinir\SinirRecebimentoService;
 use App\Utils\View;
 
 class Coletas extends Page
@@ -83,8 +85,11 @@ class Coletas extends Page
         }
 
         $mtrLink = !empty($coleta['mtr_disponivel'])
-            ? '<a class="btn btn-primary" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/mtr"><i class="fas fa-print me-1"></i> Imprimir MTR</a>'
-            : '<span class="text-muted small">MTR disponível após registro no SINIR.</span>';
+            ? '<a class="btn btn-primary" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/mtr"><i class="fas fa-print me-1"></i> Relatório da coleta</a>'
+            : '<span class="text-muted small">Relatório disponível após a coleta.</span>';
+        if (trim((string)($coleta['sinir_man_numero'] ?? '')) !== '') {
+            $mtrLink .= ' <a class="btn btn-outline-primary" href="'.URL.'/gerador/coletas/'.$id.'/mtr-oficial"><i class="fas fa-file-pdf me-1"></i> MTR oficial</a>';
+        }
         $cdfRotulo = !empty($coleta['cdf_rotulo']) ? (string)$coleta['cdf_rotulo'] : 'Documento PDF';
         $cdfLink = !empty($coleta['cdf_disponivel'])
             ? ' <a class="btn btn-outline-success" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/cdf"><i class="fas fa-file-pdf me-1"></i> '
@@ -186,6 +191,44 @@ class Coletas extends Page
         }
 
         return new Response(200, $bytes, 'application/pdf');
+    }
+
+    public static function mtrOficial($request, int $id): Response
+    {
+        if (!GeradorScope::pertenceColeta($id)) {
+            return new Response(404, View::render('erros/404', ['URL' => URL]));
+        }
+
+        $c = EntityColeta::getById($id);
+        $manNumero = $c ? trim((string)($c->sinir_man_numero ?? '')) : '';
+        if (!$c || $manNumero === '') {
+            return new Response(404, View::render('erros/404', ['URL' => URL]));
+        }
+
+        $path = ColetaCdfService::absoluteMtrOficial($id);
+        if ($path === null && SinirConfig::isEnabled()) {
+            $baixado = (new SinirRecebimentoService())->baixarPdfManifesto($id);
+            if (!$baixado['ok']) {
+                $msg = htmlspecialchars((string)$baixado['message'], ENT_QUOTES, 'UTF-8');
+
+                return new Response(200, '<p>Não foi possível obter o MTR oficial no SINIR: '.$msg.'</p>');
+            }
+            $path = ColetaCdfService::absoluteMtrOficial($id);
+        }
+        if ($path === null) {
+            return new Response(404, View::render('erros/404', ['URL' => URL]));
+        }
+
+        $bytes = file_get_contents($path);
+        if ($bytes === false) {
+            return new Response(404, View::render('erros/404', ['URL' => URL]));
+        }
+
+        $nome = 'mtr_'.preg_replace('/\D/', '', $manNumero).'.pdf';
+        $resp = new Response(200, $bytes, 'application/pdf');
+        $resp->addHeader('Content-Disposition', 'attachment; filename="'.$nome.'"');
+
+        return $resp;
     }
 
     public static function mtr($request, int $id): string

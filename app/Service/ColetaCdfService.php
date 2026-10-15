@@ -36,6 +36,44 @@ class ColetaCdfService
         return self::absolutePath($c) !== null;
     }
 
+    public static function absoluteMtrOficial(int $coletaId): ?string
+    {
+        $path = StoragePath::join(self::relativePath($coletaId, 'mtr_sinir.pdf'));
+
+        return is_readable($path) ? $path : null;
+    }
+
+    /**
+     * Grava o PDF oficial do manifesto sem substituir um CDF já vinculado ao portal.
+     *
+     * @return array{ok:bool,message:string,path?:string}
+     */
+    public static function gravarMtrOficial(int $coletaId, string $binary): array
+    {
+        if ($binary === '' || !str_starts_with($binary, '%PDF')) {
+            return ['ok' => false, 'message' => 'Resposta não é um PDF válido.'];
+        }
+
+        $dir = self::dirForColeta($coletaId);
+        $full = $dir.'/mtr_sinir.pdf';
+        if (file_put_contents($full, $binary) === false) {
+            return ['ok' => false, 'message' => 'Não foi possível gravar o PDF em storage.'];
+        }
+
+        $rel = self::relativePath($coletaId, 'mtr_sinir.pdf');
+        $coleta = EntityColeta::getById($coletaId);
+        $tipo = (string)($coleta->cdf_tipo ?? '');
+        if ($coleta && !in_array($tipo, ['sinir_cdf', 'manual'], true)) {
+            EntityColeta::update($coletaId, [
+                'cdf_path' => $rel,
+                'cdf_obtido_em' => date('Y-m-d H:i:s'),
+                'cdf_tipo' => 'mtr_pdf',
+            ]);
+        }
+
+        return ['ok' => true, 'message' => 'PDF salvo.', 'path' => $rel];
+    }
+
     public static function rotuloTipo(?string $cdfTipo, ?string $sinirCdfCodigo): string
     {
         return match ($cdfTipo) {

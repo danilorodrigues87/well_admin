@@ -268,7 +268,7 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => $msg];
         }
 
-        $saved = ColetaCdfService::gravarPdf($coletaId, $pdfResponse['pdf'], 'mtr_sinir.pdf', 'mtr_pdf');
+        $saved = ColetaCdfService::gravarMtrOficial($coletaId, $pdfResponse['pdf']);
 
         return ['ok' => $saved['ok'], 'message' => $saved['message']];
     }
