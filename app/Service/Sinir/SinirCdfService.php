@@ -117,6 +117,19 @@ class SinirCdfService
             return ['ok' => false, 'message' => 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha')];
         }
 
+        if ($nacional) {
+            $jaEmitido = $this->codigoCdfNoManifesto($manifesto, $tokenResult['token']);
+            if ($jaEmitido !== null) {
+                return $this->concluirEmissaoCdf(
+                    $coletaId,
+                    $payload,
+                    ['mensagem' => 'CDF já constava no manifesto SINIR.'],
+                    $jaEmitido,
+                    $tokenResult['token']
+                );
+            }
+        }
+
         $response = $this->gateway->post('emiteCDF', $payload, $tokenResult['token']);
         $body = $response['body'] ?? [];
         if (!is_array($body)) {
@@ -126,10 +139,20 @@ class SinirCdfService
         $certCodigo = $nacional
             ? self::extrairCodigoCertificadoNacional($body)
             : self::extrairCodigoCertificado($body, $geradorCnpj);
+        $criado = self::corpoIndicaCdfCriado($body);
+        if ($certCodigo === null && $nacional && ($criado || $response['ok'])) {
+            $certCodigo = $this->codigoCdfNoManifesto($manifesto, $tokenResult['token']);
+        }
         $retornoCodigo = (int)($body['retornoCodigo'] ?? -1);
         $sucessoLegado = !$nacional && $response['ok'] && $retornoCodigo === 0 && $certCodigo !== null;
-        $sucessoNacional = $nacional && $response['ok'] && $certCodigo !== null && empty($body['erro']);
+        $sucessoNacional = $nacional && $certCodigo !== null && ($criado || ($response['ok'] && empty($body['erro'])));
         if (!$sucessoLegado && !$sucessoNacional) {
+            if ($criado) {
+                return [
+                    'ok' => true,
+                    'message' => 'Certificado criado no SINIR. O número ainda não voltou na consulta do MTR. Clique em Emitir CDF SINIR de novo para vincular o PDF.',
+                ];
+            }
             $msg = self::mensagemFalhaCdf($body, (string)($response['error'] ?? ''));
             if (stripos($msg, 'Responsável não encontrado') !== false) {
                 $msg .= ' Nome enviado: '.$resp.'. O CDF usa o Responsável Técnico, lista diferente da de recebimento. Ajuste o campo no cadastro do destinador.';
@@ -146,6 +169,21 @@ class SinirCdfService
             return ['ok' => false, 'message' => $msg];
         }
 
+        return $this->concluirEmissaoCdf($coletaId, $payload, $body, $certCodigo, $tokenResult['token']);
+    }
+
+    /**
+     * @param array<string,mixed>|array<int,mixed> $payload
+     * @param array<string,mixed> $body
+     * @return array{ok:bool,message:string,details?:array<string,mixed>}
+     */
+    private function concluirEmissaoCdf(
+        int $coletaId,
+        array $payload,
+        array $body,
+        int|string $certCodigo,
+        string $accessToken
+    ): array {
         EntityColeta::update($coletaId, ['sinir_cdf_codigo' => (string)$certCodigo]);
 
         EntitySinirEnvio::registrar(
@@ -157,18 +195,18 @@ class SinirCdfService
             'CDF emitido · código '.$certCodigo
         );
 
-        $pdf = $this->baixarPdfCdf($coletaId, (string)$certCodigo, $tokenResult['token']);
+        $pdf = $this->baixarPdfCdf($coletaId, (string)$certCodigo, $accessToken);
         if (!$pdf['ok']) {
             return [
                 'ok' => true,
-                'message' => 'CDF emitido (#'.$certCodigo.'), mas falha ao baixar PDF: '.$pdf['message'],
+                'message' => 'CDF emitido (#'.$certCodigo.'). O botão Baixar PDF CDF está na coleta. Falha ao gravar agora: '.$pdf['message'],
                 'details' => ['sinir_cdf_codigo' => $certCodigo],
             ];
         }
 
         return [
             'ok' => true,
-            'message' => 'CDF SINIR emitido e PDF disponível no portal gerador.',
+            'message' => 'CDF SINIR #'.$certCodigo.' emitido. Use Baixar PDF CDF na coleta.',
             'details' => ['sinir_cdf_codigo' => $certCodigo],
         ];
     }
@@ -245,48 +283,90 @@ class SinirCdfService
         return [(int)$inicio->format('U') * 1000, ((int)$fim->format('U') * 1000) + 999];
     }
 
+    private function codigoCdfNoManifesto(string $manifesto, string $accessToken): int|string|null
+    {
+        $digitos = preg_replace('/\D/', '', $manifesto);
+        if (strlen($digitos) <= 10) {
+            return null;
+        }
+        $response = $this->gateway->get('retornaManifesto/'.rawurlencode($manifesto), $accessToken);
+        $body = $response['body'] ?? null;
+        if (!is_array($body)) {
+            return null;
+        }
+
+        return self::extrairCodigoCertificadoNacional($body);
+    }
+
     /** @param array<string,mixed> $body */
     private static function extrairCodigoCertificadoNacional(array $body): int|string|null
     {
-        $objeto = is_array($body['objetoResposta'] ?? null) ? $body['objetoResposta'] : $body;
-        $lista = $objeto['listaParceiroGerador'] ?? null;
-        if (is_array($lista)) {
-            foreach ($lista as $item) {
-                if (!is_array($item) || self::itemCdfInvalido($item)) {
+        $objeto = $body['objetoResposta'] ?? null;
+        if (is_string($objeto)) {
+            $decoded = json_decode($objeto, true);
+            if (is_array($decoded)) {
+                $body['objetoResposta'] = $decoded;
+            }
+        }
+
+        $chaves = ['numeroCDF', 'cdfCodigo', 'cerCodigo', 'codigoGerado', 'numeroCertificado', 'codigoCertificado'];
+        $encontrado = null;
+        $walk = static function (array $node) use (&$walk, &$encontrado, $chaves): void {
+            if ($encontrado !== null) {
+                return;
+            }
+            foreach ($chaves as $chave) {
+                if (!array_key_exists($chave, $node) || !is_scalar($node[$chave])) {
                     continue;
                 }
-                $codigo = $item['numeroCDF'] ?? $item['codigo'] ?? null;
-                if ($codigo !== null && $codigo !== '' && (string)$codigo !== '0') {
-                    return $codigo;
+                $codigo = trim((string)$node[$chave]);
+                if ($codigo !== '' && $codigo !== '0') {
+                    $encontrado = $node[$chave];
+
+                    return;
                 }
             }
-        }
+            foreach ($node as $value) {
+                if (is_array($value)) {
+                    $walk($value);
+                }
+            }
+        };
+        $walk($body);
 
-        $direto = $objeto['codigoGerado'] ?? $objeto['numeroCDF'] ?? null;
-        if ($direto !== null && $direto !== '' && (string)$direto !== '0') {
-            return $direto;
-        }
-
-        return null;
+        return $encontrado;
     }
 
-    /** @param array<string,mixed> $item */
-    private static function itemCdfInvalido(array $item): bool
+    /** @param array<string,mixed> $body */
+    private static function corpoIndicaCdfCriado(array $body): bool
     {
-        if (array_key_exists('restResponseValido', $item) && $item['restResponseValido'] === false) {
-            return true;
-        }
-        $manifestos = $item['listaManifesto'] ?? [];
-        if (!is_array($manifestos)) {
-            return false;
-        }
-        foreach ($manifestos as $man) {
-            if (is_array($man) && array_key_exists('restResponseValido', $man) && $man['restResponseValido'] === false) {
-                return true;
+        $achou = false;
+        $walk = static function (array $node) use (&$walk, &$achou): void {
+            if ($achou) {
+                return;
             }
-        }
+            foreach (['restResponseMensagem', 'retorno', 'mensagem'] as $key) {
+                if (!isset($node[$key]) || !is_scalar($node[$key])) {
+                    continue;
+                }
+                $texto = mb_strtoupper(trim((string)$node[$key]), 'UTF-8');
+                if (str_contains($texto, 'CERTIFICADO CRIADO')
+                    || str_contains($texto, 'CDF GERADO')
+                    || str_contains($texto, 'CDF EMITIDO')) {
+                    $achou = true;
 
-        return false;
+                    return;
+                }
+            }
+            foreach ($node as $value) {
+                if (is_array($value)) {
+                    $walk($value);
+                }
+            }
+        };
+        $walk($body);
+
+        return $achou;
     }
 
     /** @param array<string,mixed> $body */
@@ -300,7 +380,8 @@ class SinirCdfService
                 }
                 $texto = trim((string)$node[$key]);
                 $normalizado = mb_strtoupper($texto, 'UTF-8');
-                if ($texto === '' || in_array($normalizado, ['OK', 'OK!', 'VALIDAÇÃO OK', 'VALIDAÇÃO OK!', 'SUCESSO'], true)) {
+                if ($texto === '' || in_array($normalizado, ['OK', 'OK!', 'VALIDAÇÃO OK', 'VALIDAÇÃO OK!', 'SUCESSO'], true)
+                    || str_contains($normalizado, 'CERTIFICADO CRIADO')) {
                     continue;
                 }
                 $aninhadas[] = $texto;

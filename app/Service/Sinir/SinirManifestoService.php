@@ -392,6 +392,12 @@ class SinirManifestoService
                 $update['situacao_recebimento'] = 'recebido';
             }
         }
+        if (!empty($parsed['cdf_codigo'])) {
+            $coletaCdf = EntityColeta::getById($coletaId);
+            if ($coletaCdf && empty($coletaCdf->sinir_cdf_codigo)) {
+                $update['sinir_cdf_codigo'] = (string)$parsed['cdf_codigo'];
+            }
+        }
         if ($update !== []) {
             EntityColeta::update($coletaId, $update);
         }
@@ -408,6 +414,9 @@ class SinirManifestoService
         $msg = 'Situação no SINIR: '.$situacaoLabel;
         if (!empty($parsed['codigo_barras'])) {
             $msg .= ' · código de barras atualizado.';
+        }
+        if (!empty($update['sinir_cdf_codigo'])) {
+            $msg .= ' · CDF #'.$update['sinir_cdf_codigo'].' vinculado. Use Baixar PDF CDF.';
         }
 
         return [

@@ -14,6 +14,7 @@ final class SinirConsultaParser
      *   situacao_codigo:?int,
      *   manifesto_codigo:?string,
      *   codigo_barras:?string,
+     *   cdf_codigo:?string,
      *   mensagem:?string
      * }
      */
@@ -34,6 +35,7 @@ final class SinirConsultaParser
         $situacao = self::extrairSituacao($body);
         $man = self::extrairManifestoNumero($body);
         $barcode = self::extrairCodigoBarras($body);
+        $cdf = self::extrairCodigoCdf($body);
 
         $ok = $httpOk && !$erroFlag && (
             ($retornoCodigo === 0)
@@ -50,6 +52,7 @@ final class SinirConsultaParser
             'situacao_codigo' => $situacao,
             'manifesto_codigo' => $man,
             'codigo_barras' => $barcode !== '' ? $barcode : null,
+            'cdf_codigo' => $cdf,
             'mensagem' => $msg !== '' ? $msg : null,
         ];
     }
@@ -142,6 +145,24 @@ final class SinirConsultaParser
         }
 
         return '';
+    }
+
+    /** @param array<string,mixed> $flat */
+    private static function extrairCodigoCdf(array $flat): ?string
+    {
+        $valor = self::primeiroValor($flat, [
+            'cdfCodigo',
+            'numeroCDF',
+            'cerCodigo',
+            'codigoGerado',
+            'numeroCertificado',
+        ]);
+        if (!is_scalar($valor)) {
+            return null;
+        }
+        $codigo = trim((string)$valor);
+
+        return ($codigo !== '' && $codigo !== '0') ? $codigo : null;
     }
 
     /**
