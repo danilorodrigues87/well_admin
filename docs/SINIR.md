@@ -128,6 +128,10 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 
 Header em todas (exceto troca inicial): `Authorization: Bearer {token_acesso}`
 
+Antes de receber, o service consulta o manifesto com o token do gerador e usa
+resíduo, tratamento, unidade e quantidade **canônicos do SINIR**. A API pode
+normalizar `1 kg` para `0,001 TON`; repetir a quantidade local causaria rejeição.
+
 ---
 
 ## Manual correto vs MTR-LR

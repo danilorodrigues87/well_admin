@@ -9,7 +9,6 @@ require dirname(__DIR__, 2).'/includes/app.php';
 use App\Service\Sinir\SinirAuthService;
 use App\Service\Sinir\SinirCredentialsResolver;
 use App\Service\Sinir\SinirManifestoService;
-use App\Service\Sinir\SinirPayloadBuilder;
 use App\Service\Sinir\SinirRecebimentoService;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Db\Database;
@@ -61,7 +60,8 @@ if (is_string($rawConsulta) && $rawConsulta !== '') {
 $cReceb = (new SinirCredentialsResolver())->forRecebimento($coletaId);
 echo "\nrecebimento_token_source=".($cReceb['token_source'] ?? 'null').PHP_EOL;
 
-$built = (new SinirPayloadBuilder())->buildRecebimentoLote($coletaId);
+$recebimentoService = new SinirRecebimentoService();
+$built = $recebimentoService->prepararPayloadRecebimento($coletaId);
 echo 'recebimento_payload_format='.($built['format'] ?? '?').PHP_EOL;
 if (!$built['ok']) {
     echo implode("\n", $built['errors']).PHP_EOL;
@@ -72,7 +72,7 @@ echo json_encode($built['payload'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).
 if ($sendReceber) {
     echo "\n=== receberColeta (envio real) ===\n";
     SinirAuthService::clearCache();
-    $resultRec = (new SinirRecebimentoService())->receberColeta($coletaId, false);
+    $resultRec = $recebimentoService->receberColeta($coletaId, false);
     echo json_encode($resultRec, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
     exit(!empty($resultRec['ok']) ? 0 : 3);
 }

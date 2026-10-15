@@ -34,7 +34,7 @@ class Coletas extends Page
             'Coletas',
             $content,
             'coletas',
-            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261015b"></script>'
+            self::crudScripts('/painel/coletas').'<script src="'.URL.'/resources/js/coletas-sinir.js?v=20261015c"></script>'
         );
     }
 

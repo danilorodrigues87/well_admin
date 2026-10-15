@@ -204,8 +204,8 @@
       Swal.fire({
         title: 'Receber MTR no SINIR (destinador)',
         html: '<p class="small text-muted text-start mb-2">Confirma o recebimento no portal nacional usando os dados da coleta (data de recebimento, itens e responsável).</p>'
-          + '<label for="sinir-receb-resp" class="form-label small text-start w-100 mb-1">Responsável no destinador (opcional)</label>'
-          + '<input id="sinir-receb-resp" type="text" class="form-control swal2-input" placeholder="Nome do balanceiro / responsável" autocomplete="name">',
+          + '<label for="sinir-receb-resp" class="form-label small text-start w-100 mb-1">Responsável cadastrado no destinador</label>'
+          + '<input id="sinir-receb-resp" type="text" class="form-control swal2-input" placeholder="Nome exatamente como cadastrado no SINIR" autocomplete="name">',
         showCancelButton: true,
         confirmButtonText: 'Registrar recebimento',
         focusConfirm: false,
@@ -218,6 +218,10 @@
         preConfirm: function () {
           var el = document.getElementById('sinir-receb-resp');
           var v = el ? String(el.value || '').trim() : '';
+          if (!v) {
+            Swal.showValidationMessage('Informe o responsável cadastrado no SINIR.');
+            return false;
+          }
           return { responsavel: v };
         }
       }).then(function (r) {

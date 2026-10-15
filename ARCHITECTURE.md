@@ -336,6 +336,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR UI: remove token da transportadora; tokens só em cliente/gerador e destinador; textos sem menção a `.env` |
 | 2026-10-15 | SINIR pós-emissão: consulta `GET retornaManifesto/{nacional}` + `SinirConsultaParser`; recebimento array MMA; PDF `downloadManifesto` + consulta automática; `forConsulta`; modal receber editável; `sinir_debug_consulta_receber.php` |
 | 2026-10-15 | SINIR pós-teste 11803: parser recursivo de situação; recebimento nacional usa DTO mínimo do manual; erros aninhados são exibidos; PDF somente `POST downloadManifesto`; cache-bust do JS do modal |
+| 2026-10-15 | SINIR recebimento 11803: sincroniza itens com `GET retornaManifesto` antes do POST (ex.: `1 kg` normalizado pelo SINIR para `0,001 TON`); responsável do destinador obrigatório no modal |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |

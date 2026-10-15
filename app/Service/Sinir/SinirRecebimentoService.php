@@ -24,6 +24,37 @@ class SinirRecebimentoService
     }
 
     /**
+     * Monta o payload efetivamente enviado, já sincronizado com as unidades e
+     * quantidades canônicas retornadas pelo manifesto nacional.
+     *
+     * @return array{ok:bool,payload:?array,errors:string[],format?:string}
+     */
+    public function prepararPayloadRecebimento(
+        int $coletaId,
+        ?string $responsavel = null,
+        ?string $cargo = null
+    ): array {
+        $built = $this->builder->buildRecebimentoLote($coletaId, $responsavel, $cargo);
+        if (!$built['ok'] || ($built['format'] ?? '') !== 'nacional') {
+            return $built;
+        }
+
+        $canonical = $this->sincronizarItensComManifestoSinir($coletaId, $built['payload']);
+        if (!$canonical['ok']) {
+            return [
+                'ok' => false,
+                'payload' => null,
+                'errors' => [$canonical['message']],
+                'format' => 'nacional',
+            ];
+        }
+
+        $built['payload'] = $canonical['payload'];
+
+        return $built;
+    }
+
+    /**
      * Registra recebimento do MTR no SINIR (destinador) e atualiza coleta local.
      *
      * @return array{ok:bool,message:string,details?:array<string,mixed>}
@@ -45,10 +76,12 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => 'Recebimento SINIR já registrado para esta coleta.'];
         }
 
-        $built = $this->builder->buildRecebimentoLote($coletaId, $responsavel, $cargo);
+        $built = $this->prepararPayloadRecebimento($coletaId, $responsavel, $cargo);
         if (!$built['ok']) {
             return ['ok' => false, 'message' => implode(' ', $built['errors'])];
         }
+
+        $payload = $built['payload'];
 
         $credentials = (new SinirCredentialsResolver())->forRecebimento($coletaId);
         if (!$credentials['ok']) {
@@ -60,7 +93,6 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha desconhecida')];
         }
 
-        $payload = $built['payload'];
         $response = $this->gateway->post('receberManifestoLote', $payload, $tokenResult['token']);
 
         return $this->processarResposta(
@@ -71,6 +103,93 @@ class SinirRecebimentoService
             $tokenResult['token'],
             ($built['format'] ?? '') === 'nacional'
         );
+    }
+
+    /**
+     * O GET do manifesto normaliza kg para tonelada (ex.: 1 kg → 0,001 TON).
+     * O recebimento deve repetir exatamente quantidade/resíduo/tratamento salvos no SINIR.
+     *
+     * @param array<int,array<string,mixed>> $payload
+     * @return array{ok:bool,message:string,payload:array<int,array<string,mixed>>}
+     */
+    private function sincronizarItensComManifestoSinir(int $coletaId, array $payload): array
+    {
+        $manNumero = trim((string)($payload[0]['manNumero'] ?? ''));
+        if ($manNumero === '') {
+            return ['ok' => false, 'message' => 'Número nacional ausente no payload de recebimento.', 'payload' => $payload];
+        }
+
+        $credentials = (new SinirCredentialsResolver())->forConsulta($coletaId);
+        if (!$credentials['ok'] || empty($credentials['integration_token'])) {
+            return [
+                'ok' => false,
+                'message' => 'Não foi possível consultar o manifesto antes do recebimento: '
+                    .implode(' ', $credentials['errors']),
+                'payload' => $payload,
+            ];
+        }
+
+        $tokenResult = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
+        if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
+            return [
+                'ok' => false,
+                'message' => 'Autenticação do gerador para validar o recebimento: '
+                    .($tokenResult['error'] ?? 'falha desconhecida'),
+                'payload' => $payload,
+            ];
+        }
+
+        $response = $this->gateway->get(
+            'retornaManifesto/'.rawurlencode($manNumero),
+            $tokenResult['token']
+        );
+        $body = is_array($response['body'] ?? null) ? $response['body'] : [];
+        $manifesto = is_array($body['objetoResposta'] ?? null) ? $body['objetoResposta'] : [];
+        $itens = $manifesto['listaManifestoResiduo'] ?? $manifesto['listaManifestoResiduos'] ?? null;
+
+        if (!$response['ok'] || !is_array($itens) || $itens === []) {
+            return [
+                'ok' => false,
+                'message' => 'O SINIR não devolveu os itens do manifesto para validar o recebimento. '
+                    .($response['error'] ?? ''),
+                'payload' => $payload,
+            ];
+        }
+
+        $itensRecebimento = [];
+        foreach ($itens as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $residuo = is_array($item['residuo'] ?? null) ? $item['residuo'] : [];
+            $tratamento = is_array($item['tratamento'] ?? null) ? $item['tratamento'] : [];
+            $codigo = trim((string)($residuo['resCodigoIbama'] ?? $item['resCodigoIbama'] ?? ''));
+            $quantidade = isset($item['marQuantidade']) ? (float)$item['marQuantidade'] : 0.0;
+            $traCodigo = (int)($tratamento['traCodigo'] ?? $item['traCodigo'] ?? 0);
+
+            if ($codigo === '' || $quantidade <= 0 || $traCodigo <= 0) {
+                return [
+                    'ok' => false,
+                    'message' => 'O SINIR retornou item incompleto no manifesto '.$manNumero.'.',
+                    'payload' => $payload,
+                ];
+            }
+
+            $itensRecebimento[] = [
+                'resCodigoIbama' => $codigo,
+                'marQuantidade' => $quantidade,
+                'marQuantidadeRecebida' => $quantidade,
+                'traCodigo' => $traCodigo,
+            ];
+        }
+
+        if ($itensRecebimento === []) {
+            return ['ok' => false, 'message' => 'Manifesto SINIR sem itens válidos.', 'payload' => $payload];
+        }
+
+        $payload[0]['listaManifestoResiduos'] = $itensRecebimento;
+
+        return ['ok' => true, 'message' => 'Payload sincronizado com o manifesto.', 'payload' => $payload];
     }
 
     /**
@@ -89,7 +208,7 @@ class SinirRecebimentoService
             return ['ok' => false, 'message' => 'Coleta não encontrada.'];
         }
 
-        $credentials = (new SinirCredentialsResolver())->forRecebimento($coletaId);
+        $credentials = (new SinirCredentialsResolver())->forConsulta($coletaId);
         if (!$credentials['ok']) {
             return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
         }
@@ -118,6 +237,15 @@ class SinirRecebimentoService
         if ($manNumero !== '') {
             $path = 'downloadManifesto/'.rawurlencode($manNumero);
             $pdfResponse = $this->gateway->postForPdf($path, $token);
+            // Após receber, o token disponível é o do destinador. Se ele não
+            // puder baixar o documento emitido pelo gerador, repete com o
+            // token do gerador resolvido por forConsulta().
+            if (empty($pdfResponse['pdf']) && $accessToken !== null && $accessToken !== '') {
+                $geradorToken = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
+                if ($geradorToken['ok'] && !empty($geradorToken['token'])) {
+                    $pdfResponse = $this->gateway->postForPdf($path, $geradorToken['token']);
+                }
+            }
         }
 
         if (($pdfResponse === null || empty($pdfResponse['pdf'])) && $barcode !== '') {
