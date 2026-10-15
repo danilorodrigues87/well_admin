@@ -124,8 +124,8 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | PDF MTR | POST | `/downloadManifesto/{manNumero}` — `Accept: application/pdf, application/octet-stream, */*`; fallback `/buscaPdfManifestoPorCodigoBarras/{cod}` |
 | Cancelar | POST | `/cancelarManifesto` — token **gerador** |
 | Receber (destinador) | POST | `/receberManifestoLote` — body = **array raiz** MMA. Sem substituição, cada item leva apenas `resCodigoIbama`, `marQuantidade`, `marQuantidadeRecebida`, `traCodigo`. Wrapper `manifestoRecebimentoJSONs` → Tomcat 400. Token **destinador**. |
-| Emitir CDF | POST | `/emiteCDF` — **Emitir CDF SINIR** (`SinirCdfService`) após recebimento |
-| PDF CDF | POST | `/buscaPdfCdf/{codigo}` — cache em `storage/coletas/{id}/` |
+| Emitir CDF | POST | `/emiteCDF` — MTR nacional: `cerDataInicial`/`cerDataFinal` (epoch ms), `parceiroDestinador`, `cnpjDestinador`, `tipoCertificadoDestinacao` 1, `listaManifesto[{manNumero}]`, `nomeResponsavel`. Legado (~10 dígitos) mantém `dataInicial`/`listaMtr`. Token **destinador**. |
+| PDF CDF | POST | `/downloadCertificado/{numeroCDF}` (nacional); fallback `/buscaPdfCdf/{codigo}` — cache em `storage/coletas/{id}/` |
 
 Header em todas (exceto troca inicial): `Authorization: Bearer {token_acesso}`
 
@@ -136,7 +136,9 @@ O nome do responsável vem de `destinadores.responsavel` (com snapshot da coleta
 como fallback); recebimento e CDF não solicitam digitação manual no modal.
 Esse nome deve existir na lista **Responsável pelo Recebimento** da unidade
 destinadora no portal SINIR; nome abreviado ou apenas cadastrado no Well retorna
-`Responsável pelo recebimento não encontrado`.
+`Responsável pelo recebimento não encontrado`. Na emissão do CDF o mesmo nome
+precisa constar na lista de responsáveis da unidade destinadora. O período do
+CDF nacional é o dia do recebimento (meia-noite a 23:59, horário de São Paulo).
 O segundo identificador do claim `sub` do JWT é interno ao contexto de
 autenticação e pode ser diferente do `parCodigo` público do destinador. A
 seleção da unidade correta deve ser feita no portal ao gerar o Token API WS;
