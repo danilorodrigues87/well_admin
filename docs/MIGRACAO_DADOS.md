@@ -439,6 +439,7 @@ SELECT COALESCE(MAX(numero_mtr), 0) AS max_mtr FROM coletas WHERE operadora_id =
 | `proxima_coleta` após import | `repair_proxima_coleta.php` |
 | Agendamento portal | migrations `038` / `039` |
 | Botão Coletar falha em prod (`client_uuid`) | migration `051` + `apply_migration_051.php` / `diagnose_coleta_iniciar.php` |
+| Responsável técnico do CDF ≠ recebimento | migration `054` + `apply_migration_054.php` (unidade 135551) |
 
 ### Novos repairs
 
@@ -454,6 +455,7 @@ Ao criar script:
 
 | Data | Alteração |
 |------|-----------|
+| 2026-10-15 | §15: migration `054` — responsável técnico do CDF na unidade 135551 |
 | 2026-10-08 | §15: migration `051` (`coletas.client_uuid`) — botão Coletar / `iniciarRascunho` em produção |
 | 2026-09-21 | Cutover concluído em produção; §15 operação pós-cutover; política de correção in-place no `well_admin` |
 | 2026-09-21 | Script `repair_proxima_coleta.php`; migrations `038`/`039` agendamento portal gerador |

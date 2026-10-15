@@ -82,6 +82,7 @@ class Destinadores extends Page
             'endereco' => $d->endereco,
             'telefone' => $d->telefone,
             'responsavel' => $d->responsavel,
+            'sinir_responsavel_cdf' => $d->sinir_responsavel_cdf,
             'sinir_cod_unidade' => $d->sinir_cod_unidade ?? '',
             'sinir_integration_token' => '',
             'sinir_token_status' => $temToken
@@ -106,6 +107,7 @@ class Destinadores extends Page
             'endereco' => trim((string)($post['endereco'] ?? '')),
             'telefone' => trim((string)($post['telefone'] ?? '')),
             'responsavel' => trim((string)($post['responsavel'] ?? '')),
+            'sinir_responsavel_cdf' => trim((string)($post['sinir_responsavel_cdf'] ?? '')),
             'sinir_cod_unidade' => ($post['sinir_cod_unidade'] ?? '') !== '' ? (int)$post['sinir_cod_unidade'] : null,
             'ativo' => CrudHelper::parseAtivo($post, $id <= 0),
         ];

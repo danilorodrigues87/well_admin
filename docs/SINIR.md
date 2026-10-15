@@ -132,13 +132,13 @@ Header em todas (exceto troca inicial): `Authorization: Bearer {token_acesso}`
 Antes de receber, o service consulta o manifesto com o token do gerador e usa
 resíduo, tratamento, unidade e quantidade **canônicos do SINIR**. A API pode
 normalizar `1 kg` para `0,001 TON`; repetir a quantidade local causaria rejeição.
-O nome do responsável vem de `destinadores.responsavel` (com snapshot da coleta
-como fallback); recebimento e CDF não solicitam digitação manual no modal.
+O recebimento usa `destinadores.responsavel` (fallback: snapshot da coleta).
 Esse nome deve existir na lista **Responsável pelo Recebimento** da unidade
-destinadora no portal SINIR; nome abreviado ou apenas cadastrado no Well retorna
-`Responsável pelo recebimento não encontrado`. Na emissão do CDF o mesmo nome
-precisa constar na lista de responsáveis da unidade destinadora. O período do
-CDF nacional é o dia do recebimento (meia-noite a 23:59, horário de São Paulo).
+destinadora. O CDF usa `destinadores.sinir_responsavel_cdf` quando preenchido;
+senão repete o nome do recebimento. As duas listas do portal são independentes:
+na unidade 135551 o recebimento aceita `WIDMER TRINDADE` e o CDF exige
+`WIDMER TRINDADE DE BEM`. O período do CDF nacional é o dia do recebimento
+(meia-noite a 23:59, horário de São Paulo).
 O segundo identificador do claim `sub` do JWT é interno ao contexto de
 autenticação e pode ser diferente do `parCodigo` público do destinador. A
 seleção da unidade correta deve ser feita no portal ao gerar o Token API WS;

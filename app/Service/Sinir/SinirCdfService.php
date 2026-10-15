@@ -64,12 +64,14 @@ class SinirCdfService
         $destinador = $coleta->destinador_id
             ? EntityDestinador::getById((int)$coleta->destinador_id)
             : EntityDestinador::getPadrao();
+        $respRecebimento = trim((string)($destinador?->responsavel ?? $snapshot->destinador_responsavel ?? ''));
+        $respCdf = trim((string)($destinador?->sinir_responsavel_cdf ?? ''));
         $resp = trim((string)($responsavel ?? ''));
         if ($resp === '') {
-            $resp = trim((string)($destinador?->responsavel ?? $snapshot->destinador_responsavel ?? ''));
+            $resp = $respCdf !== '' ? $respCdf : $respRecebimento;
         }
         if ($resp === '') {
-            return ['ok' => false, 'message' => 'Destinador sem responsável cadastrado. Atualize o cadastro antes de emitir o CDF.'];
+            return ['ok' => false, 'message' => 'Destinador sem responsável técnico do CDF. Preencha esse nome no cadastro do destinador.'];
         }
 
         $refDate = $coleta->data_recebimento ?: $coleta->data_coleta ?: date('Y-m-d');
@@ -129,6 +131,9 @@ class SinirCdfService
         $sucessoNacional = $nacional && $response['ok'] && $certCodigo !== null && empty($body['erro']);
         if (!$sucessoLegado && !$sucessoNacional) {
             $msg = self::mensagemFalhaCdf($body, (string)($response['error'] ?? ''));
+            if (stripos($msg, 'Responsável não encontrado') !== false) {
+                $msg .= ' Nome enviado: '.$resp.'. O CDF usa o Responsável Técnico, lista diferente da de recebimento. Ajuste o campo no cadastro do destinador.';
+            }
             EntitySinirEnvio::registrar(
                 $coletaId,
                 EntitySinirEnvio::proximaTentativa($coletaId),

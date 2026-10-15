@@ -17,6 +17,8 @@ class Destinador
     public string $endereco = '';
     public string $telefone = '';
     public string $responsavel = '';
+    /** Nome exato na lista de Responsável Técnico do CDF (pode diferir do recebimento). */
+    public string $sinir_responsavel_cdf = '';
     public ?int $sinir_cod_unidade = null;
     /** Token API WS do destinador (receber MTR / CDF). */
     public ?string $sinir_integration_token = null;
@@ -108,6 +110,7 @@ class Destinador
         $d->endereco = (string)($row['endereco'] ?? '');
         $d->telefone = (string)($row['telefone'] ?? '');
         $d->responsavel = (string)($row['responsavel'] ?? '');
+        $d->sinir_responsavel_cdf = (string)($row['sinir_responsavel_cdf'] ?? '');
         $d->sinir_cod_unidade = isset($row['sinir_cod_unidade']) && $row['sinir_cod_unidade'] !== null
             ? (int)$row['sinir_cod_unidade'] : null;
         $tok = isset($row['sinir_integration_token']) ? trim((string)$row['sinir_integration_token']) : '';

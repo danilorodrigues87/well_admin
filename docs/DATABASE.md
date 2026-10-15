@@ -100,6 +100,7 @@ Legado para ETL: banco `well_antigo` (dump `wellec99_app.sql`).
 | `clientes.sinir_cod_unidade` | Código unidade do gerador no portal MTR (`010_clientes_sinir_unidade.sql`) |
 | `clientes.sinir_integration_token` | Token API WS do gerador para emitir MTR (`052_clientes_sinir_token.sql`) |
 | `destinadores.sinir_integration_token` | Token API WS do destinador para receber/CDF (`053_destinadores_sinir_token.sql`) |
+| `destinadores.sinir_responsavel_cdf` | Nome do responsável técnico na lista de CDF (`054`) |
 | `operadoras.sinir_*` | Token/unidade/CNPJ da operadora (fallback listas + destinador padrão) |
 | `clientes.latitude`, `longitude`, `maps_link`, `geocode_status` | Geolocalização para rotas Google Maps (`018_clientes_geolocalizacao.sql`) |
 | `frota_posicoes` | Histórico de GPS (web/app) por coletor (`035_frota_rastreamento.sql`) |
