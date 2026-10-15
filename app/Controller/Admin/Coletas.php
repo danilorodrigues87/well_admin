@@ -287,7 +287,10 @@ class Coletas extends Page
                 .' <button type="button" class="btn btn-sm btn-outline-danger" onclick="sinirCancelar('.$c->id.')"><i class="fas fa-ban me-1"></i> Cancelar no SINIR</button>';
         }
         if (ColetaMtrHelper::podeRegistrarRecebimentoSinir($c)) {
-            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-success" onclick="sinirReceber('.$c->id.')"><i class="fas fa-warehouse me-1"></i> Receber no SINIR</button>';
+            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-success"'
+                .' onclick="sinirReceber('.$c->id.')"'
+                .' title="Etapa do destinador após a coleta operacional ter sido finalizada">'
+                .'<i class="fas fa-warehouse me-1"></i> Confirmar recebimento no portal SINIR</button>';
         }
         if ($sinirJaEnviado && SinirConfig::isEnabled() && !ColetaCdfService::temCdf($c)) {
             $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-info" onclick="sinirBaixarPdf('.$c->id.')"><i class="fas fa-file-pdf me-1"></i> Baixar PDF MTR</button>';

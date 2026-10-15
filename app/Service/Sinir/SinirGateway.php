@@ -50,7 +50,13 @@ class SinirGateway
      */
     private function requestForPdf(string $method, string $path, ?string $bearerToken): array
     {
-        $result = $this->request($method, $path, [], $bearerToken);
+        $result = $this->request(
+            $method,
+            $path,
+            [],
+            $bearerToken,
+            'application/pdf, application/octet-stream, */*'
+        );
         $raw = $result['raw'];
         if ($raw !== '' && str_starts_with($raw, '%PDF')) {
             return [
@@ -80,7 +86,13 @@ class SinirGateway
      *   response_headers?:string,request_headers?:?string,request_bytes?:int,hint?:?string
      * }
      */
-    private function request(string $method, string $path, array $body, ?string $bearerToken): array
+    private function request(
+        string $method,
+        string $path,
+        array $body,
+        ?string $bearerToken,
+        string $accept = 'application/json'
+    ): array
     {
         $url = rtrim(SinirConfig::baseUrl(), '/').'/'.ltrim($path, '/');
 
@@ -88,7 +100,7 @@ class SinirGateway
         // Corpos <1MB não disparam 100-continue no curl moderno.
         $headers = [
             'Content-Type: application/json',
-            'Accept: application/json',
+            'Accept: '.$accept,
         ];
         if ($bearerToken !== null && $bearerToken !== '') {
             $token = trim($bearerToken);
