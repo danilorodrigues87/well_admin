@@ -78,7 +78,7 @@ class SinirManifestoService
         if (($credentials['token_source'] ?? '') !== 'cliente') {
             $payload = self::alinharUnidadesComJwt($payload, (string)$tokenResult['token']);
         }
-        $unidadeJwt = self::unidadeFromJwt((string)$tokenResult['token']);
+        $unidadeJwt = SinirTokenInspector::unidade((string)$tokenResult['token']);
         $geradorUnidadeCadastro = (int)($credentials['gerador_unidade'] ?? $built['gerador_unidade'] ?? 0);
 
         // Token do cliente deve ter sido gerado na unidade geradora cadastrada.
@@ -127,7 +127,7 @@ class SinirManifestoService
      */
     private static function alinharUnidadesComJwt(array $payload, string $accessToken): array
     {
-        $unidadeJwt = self::unidadeFromJwt($accessToken);
+        $unidadeJwt = SinirTokenInspector::unidade($accessToken);
         if ($unidadeJwt === null || $unidadeJwt <= 0) {
             return $payload;
         }
@@ -161,29 +161,6 @@ class SinirManifestoService
         }
 
         return $lista;
-    }
-
-    private static function unidadeFromJwt(string $jwt): ?int
-    {
-        $parts = explode('.', $jwt);
-        if (count($parts) < 2) {
-            return null;
-        }
-        $b64 = strtr($parts[1], '-_', '+/');
-        $pad = strlen($b64) % 4;
-        if ($pad > 0) {
-            $b64 .= str_repeat('=', 4 - $pad);
-        }
-        $json = base64_decode($b64, true);
-        $data = is_string($json) ? json_decode($json, true) : null;
-        if (!is_array($data) || !is_string($data['sub'] ?? null)) {
-            return null;
-        }
-        if (!preg_match('/^(\d+),(\d+)$/', $data['sub'], $m)) {
-            return null;
-        }
-
-        return (int)$m[2];
     }
 
     /**

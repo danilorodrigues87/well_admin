@@ -136,6 +136,10 @@ como fallback); recebimento e CDF não solicitam digitação manual no modal.
 Esse nome deve existir na lista **Responsável pelo Recebimento** da unidade
 destinadora no portal SINIR; nome abreviado ou apenas cadastrado no Well retorna
 `Responsável pelo recebimento não encontrado`.
+Além do nome, o `unidadeId` do JWT obtido com o token do destinador deve ser
+igual a `destinadores.sinir_cod_unidade`. Um responsável existente na unidade
+135551 continuará “não encontrado” se o Token API WS tiver sido gerado em outra
+unidade (ex.: 728559).
 
 ---
 
