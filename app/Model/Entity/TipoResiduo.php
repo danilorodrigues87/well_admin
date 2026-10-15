@@ -20,6 +20,9 @@ class TipoResiduo
     public ?int $uni_codigo = null;
     /** Grupo embalagem ONU SINIR (1–4); futuro campo em tipos_residuos. */
     public ?int $sinir_gre_codigo = null;
+    public ?string $sinir_mar_numero_onu = null;
+    public ?string $sinir_mar_classe_risco = null;
+    public ?string $sinir_mar_nome_embarque = null;
     public string $classe_nome = '';
     public string $grupo_codigo = '';
     public int $ativo = 1;

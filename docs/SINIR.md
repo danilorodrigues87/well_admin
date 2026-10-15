@@ -218,7 +218,7 @@ O pré-check do painel só valida unidades/token/itens. Um **400** vem da API ap
 
 O campo `residuo` no JSON vai como **6 dígitos** (ex.: `150203`) e **com `(*)`** quando o cadastro indica perigoso (ex.: `200121(*)`).
 
-**Grupo de embalagem (`greCodigo`)** — obrigatório na API nacional quando o IBAMA tem `(*)`, é RSS (grupos A–E / A1–A5) ou código especial `200132`. Valores: **1=I, 2=II, 3=III, 4=N/A**. O `SinirPayloadBuilder` envia **4 (N/A)** por padrão quando exigido; resíduos com transporte ONU completo podem precisar 1–3 + `marNumeroONU` / `marClasseRisco` / `marNomeEmbarque` (evolução futura no cadastro).
+**Grupo de embalagem (`greCodigo`)** — obrigatório na API nacional quando o IBAMA tem `(*)`, é RSS (grupos A–E / A1–A5) ou código especial `200132`. Valores: **1=I, 2=II, 3=III, 4=N/A**. Com perigoso, o SINIR também exige **`marNumeroONU`**, **`marClasseRisco`** e **`marNomeEmbarque`**. Padrão Well quando `greCodigo=4`: os três campos vão como **`NAO SE APLICA`**. Se usar gre 1–3, cadastre ONU/risco/embarque no tipo de resíduo (campos previstos na entidade; UI admin em evolução).
 
 ### Timeout / `http_status: 0`
 

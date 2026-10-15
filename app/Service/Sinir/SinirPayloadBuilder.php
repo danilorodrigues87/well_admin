@@ -18,6 +18,9 @@ use App\Model\Entity\TipoResiduo as EntityTipoResiduo;
  */
 class SinirPayloadBuilder
 {
+    /** Texto aceito pelo SINIR quando greCodigo=4 (sem classificação ONU de transporte). */
+    private const PERIGOSO_ONU_NAO_APLICA = 'NAO SE APLICA';
+
     /** @return array{ok:bool,payload:?array,errors:string[],gerador_unidade?:int} */
     public function buildManifestoLote(int $coletaId): array
     {
@@ -79,8 +82,11 @@ class SinirPayloadBuilder
                 'tiaCodigo' => (int)$tipo->tia_codigo,
                 'claCodigo' => (int)$tipo->cla_codigo,
             ];
-            if (self::itemExigeGrupoEmbalagem($codIbama, (int)$tipo->cla_codigo)) {
-                $residuo['greCodigo'] = self::greCodigoParaItem($tipo);
+            $residuo = self::anexarCamposTransportePerigoso($residuo, $tipo, $codIbama, (int)$tipo->cla_codigo);
+            if (!empty($residuo['_sinir_erro'])) {
+                $errors[] = (string)$residuo['_sinir_erro'];
+                unset($residuo['_sinir_erro']);
+                continue;
             }
             // Densidade só para Litro / m³ (manual SIGOR).
             if (in_array(strtolower(trim((string)$item->unidade)), ['l', 'm3', 'm³'], true)) {
@@ -352,5 +358,50 @@ class SinirPayloadBuilder
         }
 
         return 4;
+    }
+
+    /**
+     * greCodigo + campos ONU exigidos para perigosos (*) / RSS (manual API nacional).
+     *
+     * @param array<string,mixed> $residuo
+     * @return array<string,mixed>
+     */
+    public static function anexarCamposTransportePerigoso(
+        array $residuo,
+        EntityTipoResiduo $tipo,
+        string $codIbamaSinir,
+        int $claCodigo
+    ): array {
+        if (!self::itemExigeGrupoEmbalagem($codIbamaSinir, $claCodigo)) {
+            return $residuo;
+        }
+
+        $gre = self::greCodigoParaItem($tipo);
+        $residuo['greCodigo'] = $gre;
+
+        $onu = trim((string)($tipo->sinir_mar_numero_onu ?? ''));
+        $risco = trim((string)($tipo->sinir_mar_classe_risco ?? ''));
+        $embarque = trim((string)($tipo->sinir_mar_nome_embarque ?? ''));
+
+        if ($gre === 4 && $onu === '' && $risco === '' && $embarque === '') {
+            $residuo['marNumeroONU'] = self::PERIGOSO_ONU_NAO_APLICA;
+            $residuo['marClasseRisco'] = self::PERIGOSO_ONU_NAO_APLICA;
+            $residuo['marNomeEmbarque'] = self::PERIGOSO_ONU_NAO_APLICA;
+
+            return $residuo;
+        }
+
+        if ($gre !== 4 && ($onu === '' || $risco === '' || $embarque === '')) {
+            $residuo['_sinir_erro'] = 'Item "'.($tipo->nome ?: ('#'.$tipo->id))
+                .'" perigoso (greCodigo '.$gre.'): cadastre Nº ONU, classe de risco e nome de embarque no tipo de resíduo.';
+
+            return $residuo;
+        }
+
+        $residuo['marNumeroONU'] = mb_substr($onu, 0, 20);
+        $residuo['marClasseRisco'] = mb_substr($risco, 0, 20);
+        $residuo['marNomeEmbarque'] = mb_substr($embarque, 0, 300);
+
+        return $residuo;
     }
 }
