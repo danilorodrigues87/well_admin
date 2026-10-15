@@ -118,9 +118,11 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Listar estados físicos | GET | `/retornaListaEstadoFisico` |
 | Listar acondicionamentos | GET | `/retornaListaAcondicionamento` |
 | Emitir MTR | POST | `/salvarManifestoLote` — body = **array JSON** no schema **MMA/SIGOR** (`transportador`/`destinador`/`listaManifestoResiduos`). Wrapper `{manifestoJSONDtos:[…]}` → Tomcat 400. **Token deve ser de Gerador** (unidade JWT = `clientes.sinir_cod_unidade`). Data de expedição ≥ hoje. |
-| PDF MTR | POST | `/buscaPdfManifestoPorCodigoBarras/{cod}` — cache em `storage/coletas/{id}/` (`ColetaCdfService`, portal gerador) |
-| Cancelar | POST | `/cancelarManifesto` |
-| Receber (destinador) | POST | `/receberManifestoLote` — painel Coletas → **Receber no SINIR** (`SinirRecebimentoService`) |
+| Consultar MTR | GET | `/retornaManifesto/{manNumero}` — número nacional (12 dígitos); token **gerador** (fallback destinador/operadora). Persiste `sinir_codigo_barras` quando a API devolve. |
+| Consultar (legado) | POST | `/retornaManifestoPorNumero/{num}` — ~10 dígitos (estadual) |
+| PDF MTR | POST/GET | `/downloadManifesto/{manNumero}` — preferencial nacional; fallback `/buscaPdfManifestoPorCodigoBarras/{cod}` |
+| Cancelar | POST | `/cancelarManifesto` — token **gerador** |
+| Receber (destinador) | POST | `/receberManifestoLote` — body = **array raiz** MMA (`manNumero`, `dataRecebimento`, `listaManifestoResiduos`). Wrapper `manifestoRecebimentoJSONs` → Tomcat 400. Token **destinador**. |
 | Emitir CDF | POST | `/emiteCDF` — **Emitir CDF SINIR** (`SinirCdfService`) após recebimento |
 | PDF CDF | POST | `/buscaPdfCdf/{codigo}` — cache em `storage/coletas/{id}/` |
 
@@ -151,7 +153,7 @@ PDF Regular: https://portal-api.sinir.gov.br/wp-content/uploads/2026/07/MANIFEST
 | Hook finalizar | `ColetaService::finalizar()` → `salvarManifestoLote` |
 | Reenvio manual | Coletas → detalhe → **Registrar / reenviar SINIR** |
 | Cancelamento | Coletas → detalhe → **Cancelar no SINIR** (`POST /cancelarManifesto`) |
-| Consulta situação | Coletas → detalhe → **Consultar SINIR** (`POST /retornaManifesto/…` ou `retornaManifestoPorNumero/…`) |
+| Consulta situação | Coletas → detalhe → **Consultar SINIR** (`GET /retornaManifesto/{nacional}` ou `POST retornaManifestoPorNumero/{legado}`) |
 
 ### Pré-requisitos antes do envio
 
@@ -217,6 +219,8 @@ O pré-check do painel só valida unidades/token/itens. Um **400** vem da API ap
 4. Causas frequentes: código IBAMA inválido ou sem `(*)` em perigoso; **`greCodigo` ausente** em resíduo perigoso/RSS; CNPJ/unidade do gerador não batem no portal; quantidade &lt; 0,1 kg; token da transportadora sem permissão sobre a unidade geradora.
 
 O campo `residuo` no JSON vai como **6 dígitos** (ex.: `150203`) e **com `(*)`** quando o cadastro indica perigoso (ex.: `200121(*)`).
+
+**Número do manifesto nacional** (ex. 12 dígitos) persiste em `coletas.sinir_man_numero`; `numero_mtr` (int) só recebe códigos que cabem em `int unsigned` (legado/estadual curto). Exibição e PDF usam `ColetaMtrHelper::numeroExibicao()` (prioriza `sinir_man_numero`).
 
 **Grupo de embalagem (`greCodigo`)** — obrigatório na API nacional quando o IBAMA tem `(*)`, é RSS (grupos A–E / A1–A5) ou código especial `200132`. Valores: **1=I, 2=II, 3=III, 4=N/A**. Com perigoso, o SINIR também exige **`marNumeroONU`**, **`marClasseRisco`** e **`marNomeEmbarque`**. Padrão Well quando `greCodigo=4`: os três campos vão como **`NAO SE APLICA`**. Se usar gre 1–3, cadastre ONU/risco/embarque no tipo de resíduo (campos previstos na entidade; UI admin em evolução).
 

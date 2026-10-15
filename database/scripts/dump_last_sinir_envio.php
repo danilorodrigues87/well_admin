@@ -56,10 +56,17 @@ function selfPretty(?string $json, bool $compact = false): string
     } elseif ($compact && array_is_list($data) && is_array($data[0] ?? null)) {
         $m = $data[0];
     }
+    if ($compact && isset($data['manifestoRecebimentoJSONs'][0]) && is_array($data['manifestoRecebimentoJSONs'][0])) {
+        $m = $data['manifestoRecebimentoJSONs'][0];
+    }
     if ($compact && is_array($m)) {
-        $itens = $m['itemManifestoJSONs'] ?? $m['listaManifestoResiduos'] ?? [];
+        $itens = $m['itemManifestoJSONs']
+            ?? $m['itemManifestoRecebimentoJSONs']
+            ?? $m['listaManifestoResiduos']
+            ?? [];
         $resumo = [
-            'schema' => isset($m['listaManifestoResiduos']) ? 'sigor' : 'feam',
+            'schema' => isset($m['listaManifestoResiduos']) || isset($m['manNumero']) ? 'sigor' : 'feam',
+            'manNumero' => $m['manNumero'] ?? $m['manifestoCodigo'] ?? null,
             'cnpGerador' => $m['cnpGerador'] ?? null,
             'codUnidadeGerador' => $m['codUnidadeGerador'] ?? null,
             'cnpTransportador' => $m['cnpTransportador'] ?? ($m['transportador']['cpfCnpj'] ?? null),

@@ -153,7 +153,8 @@ app/Service/Sinir/
   SinirManifestoService.php         — emissão com token do **cliente gerador**
   SinirCredentialsResolver.php      — emissão→cliente; recebimento→destinador→operadora/.env
 app/Common/SinirConfig.php          — operadoras.sinir_* + fallback .env (flags globais no .env)
-  SinirRecebimentoService.php       — receberManifestoLote + PDF MTR (CDF light)
+  SinirRecebimentoService.php       — receberManifestoLote (MMA array) + PDF MTR (CDF light)
+  SinirConsultaParser.php           — normaliza resposta retornaManifesto (legado + nacional)
   SinirCdfService.php               — emiteCDF + buscaPdfCdf (CDF oficial)
   ColetaCdfService.php              — storage PDF portal gerador
   DmrService.php                    — agregação DMR por competência (`/painel/dmr`)
@@ -333,6 +334,8 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-13 | SINIR: `clientes.sinir_integration_token` (052); emissão usa token do gerador; Well `.env` só recebimento/CDF; cadastro admin + portal gerador |
 | 2026-10-13 | SINIR multitenancy: `destinadores.sinir_integration_token` (053); `forRecebimento`; `SinirConfig` lê `operadoras` com fallback `.env` |
 | 2026-10-13 | SINIR UI: remove token da transportadora; tokens só em cliente/gerador e destinador; textos sem menção a `.env` |
+| 2026-10-15 | SINIR pós-emissão: consulta `GET retornaManifesto/{nacional}` + `SinirConsultaParser`; recebimento array MMA; PDF `downloadManifesto` + consulta automática; `forConsulta`; modal receber editável; `sinir_debug_consulta_receber.php` |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |
+| 2026-10-15 | MTR nacional (12 dígitos): gravar em `sinir_man_numero` apenas; não preencher `numero_mtr` int — evita overflow MySQL |

@@ -75,11 +75,11 @@ class ColetaMtrHelper
         if (!self::temMtr($c)) {
             return null;
         }
-        if ($c->numero_mtr) {
-            return (string)(int)$c->numero_mtr;
-        }
         if (!empty($c->sinir_man_numero)) {
             return (string)$c->sinir_man_numero;
+        }
+        if ($c->numero_mtr) {
+            return (string)(int)$c->numero_mtr;
         }
 
         return null;

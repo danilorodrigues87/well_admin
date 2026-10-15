@@ -73,6 +73,60 @@ class SinirCredentialsResolver
     }
 
     /**
+     * Token para consultar manifesto (gerador → destinador → operadora).
+     *
+     * @return array{
+     *   ok:bool,
+     *   integration_token:?string,
+     *   token_source:?string,
+     *   errors:string[]
+     * }
+     */
+    public function forConsulta(int $coletaId): array
+    {
+        $emissao = $this->forEmissaoManifesto($coletaId);
+        $token = trim((string)($emissao['integration_token'] ?? ''));
+        if ($token !== '') {
+            return [
+                'ok' => true,
+                'integration_token' => $token,
+                'token_source' => 'cliente',
+                'errors' => [],
+            ];
+        }
+
+        $receb = $this->forRecebimento($coletaId);
+        if ($receb['ok'] && !empty($receb['integration_token'])) {
+            return [
+                'ok' => true,
+                'integration_token' => $receb['integration_token'],
+                'token_source' => $receb['token_source'] ?? 'destinador',
+                'errors' => [],
+            ];
+        }
+
+        $opToken = SinirConfig::integrationToken();
+        if ($opToken !== '') {
+            return [
+                'ok' => true,
+                'integration_token' => $opToken,
+                'token_source' => 'operadora',
+                'errors' => [],
+            ];
+        }
+
+        return [
+            'ok' => false,
+            'integration_token' => null,
+            'token_source' => null,
+            'errors' => array_values(array_unique(array_merge(
+                $emissao['errors'] ?? [],
+                $receb['errors'] ?? ['Token SINIR indisponível para consulta.']
+            ))),
+        ];
+    }
+
+    /**
      * Token do destinador para receber MTR / emitir CDF.
      *
      * @return array{

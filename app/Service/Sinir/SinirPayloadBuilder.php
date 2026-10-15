@@ -177,9 +177,9 @@ class SinirPayloadBuilder
     }
 
     /**
-     * Payload POST /receberManifestoLote (manifestoRecebimentoJSONs).
+     * Payload POST /receberManifestoLote — array raiz MMA/SIGOR (nacional) ou FEAM legado.
      *
-     * @return array{ok:bool,payload:?array,errors:string[]}
+     * @return array{ok:bool,payload:?array,errors:string[],format?:string}
      */
     public function buildRecebimentoLote(int $coletaId, ?string $responsavel = null, ?string $cargo = null): array
     {
@@ -199,15 +199,140 @@ class SinirPayloadBuilder
             return ['ok' => false, 'payload' => null, 'errors' => ['Código do manifesto SINIR ausente.']];
         }
 
+        $digits = preg_replace('/\D/', '', $manifestoCodigo) ?? '';
+        if (strlen($digits) > 10) {
+            return $this->buildRecebimentoLoteNacional($coletaId, $coleta, $manifestoCodigo, $responsavel, $cargo);
+        }
+
+        return $this->buildRecebimentoLoteLegado($coletaId, $coleta, $manifestoCodigo, $responsavel, $cargo);
+    }
+
+    /**
+     * @return array{ok:bool,payload:?array,errors:string[],format:string}
+     */
+    private function buildRecebimentoLoteNacional(
+        int $coletaId,
+        EntityColeta $coleta,
+        string $manNumero,
+        ?string $responsavel,
+        ?string $cargo
+    ): array {
         $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
         if (!$snapshot) {
-            return ['ok' => false, 'payload' => null, 'errors' => ['Snapshot da coleta ausente.']];
+            return ['ok' => false, 'payload' => null, 'errors' => ['Snapshot da coleta ausente.'], 'format' => 'nacional'];
+        }
+
+        $resp = trim((string)($responsavel ?? ''));
+        if ($resp === '') {
+            $destinador = $coleta->destinador_id
+                ? EntityDestinador::getById((int)$coleta->destinador_id)
+                : EntityDestinador::getPadrao();
+            $resp = trim((string)($destinador->responsavel ?? $snapshot->destinador_responsavel ?? 'Responsável'));
+        }
+
+        $itens = EntityColetaItem::getByColetaId($coletaId);
+        if ($itens === []) {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Coleta sem itens de resíduo.'], 'format' => 'nacional'];
+        }
+
+        $errors = [];
+        $listaResiduos = [];
+        foreach ($itens as $item) {
+            $tipo = $item->tipo_residuo_id ? EntityTipoResiduo::getById($item->tipo_residuo_id) : null;
+            if (!$tipo || !$this->tipoTemCodigosSinir($tipo)) {
+                $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem mapeamento SINIR.';
+                continue;
+            }
+            $codIbama = self::residuoCodigoSinir(
+                (string)($item->cod_ibama ?: $tipo->cod_ibama),
+                (int)($tipo->cla_codigo ?? 0)
+            );
+            if ($codIbama === '') {
+                $errors[] = 'Item "'.($item->nome ?: ('#'.$item->id)).'" sem código IBAMA.';
+                continue;
+            }
+
+            $qtd = round((float)$item->quantidade, 4);
+            $residuo = [
+                'resCodigoIbama' => $codIbama,
+                'marQuantidade' => $qtd,
+                'marQuantidadeRecebida' => $qtd,
+                'traCodigo' => (int)$tipo->tra_codigo,
+                'uniCodigo' => (int)$tipo->uni_codigo,
+                'tieCodigo' => (int)$tipo->tie_codigo,
+                'tiaCodigo' => (int)$tipo->tia_codigo,
+                'claCodigo' => (int)$tipo->cla_codigo,
+            ];
+            $residuo = self::anexarCamposTransportePerigoso($residuo, $tipo, $codIbama, (int)$tipo->cla_codigo);
+            if (!empty($residuo['_sinir_erro'])) {
+                $errors[] = (string)$residuo['_sinir_erro'];
+                unset($residuo['_sinir_erro']);
+                continue;
+            }
+            $listaResiduos[] = $residuo;
+        }
+        if ($errors !== []) {
+            return ['ok' => false, 'payload' => null, 'errors' => $errors, 'format' => 'nacional'];
+        }
+
+        $motorista = trim((string)$snapshot->motorista_nome);
+        $placa = preg_replace('/[^A-Za-z0-9]/', '', (string)($snapshot->veiculo_placa ?? '')) ?: 'AAA0A00';
+        $placa = mb_substr($placa, 0, 7);
+
+        $refDate = $coleta->data_recebimento ?: $coleta->data_coleta ?: date('Y-m-d');
+        $dataRecebMs = self::dataRecebimentoEpochMs($refDate);
+
+        $recebimento = [
+            'manNumero' => $manNumero,
+            'dataRecebimento' => $dataRecebMs,
+            'nomeMotorista' => mb_substr($motorista !== '' ? $motorista : 'Motorista', 0, 300),
+            'placaVeiculo' => $placa,
+            'nomeResponsavelRecebimento' => mb_substr($resp, 0, 300),
+            'observacoes' => mb_substr(trim((string)($coleta->relatorio ?? '')), 0, 4000),
+            'listaManifestoResiduos' => $listaResiduos,
+        ];
+
+        return ['ok' => true, 'payload' => [$recebimento], 'errors' => [], 'format' => 'nacional'];
+    }
+
+    /** Epoch ms (meio-dia SP) para dataRecebimento nacional. */
+    public static function dataRecebimentoEpochMs(?string $dataYmd): int
+    {
+        $tz = new \DateTimeZone('America/Sao_Paulo');
+        $base = new \DateTimeImmutable('today', $tz);
+        if ($dataYmd) {
+            $ts = strtotime($dataYmd);
+            if ($ts !== false) {
+                $base = (new \DateTimeImmutable('@'.$ts))->setTimezone($tz)->setTime(12, 0);
+            } else {
+                $base = $base->setTime(12, 0);
+            }
+        } else {
+            $base = $base->setTime(12, 0);
+        }
+
+        return (int)$base->format('U') * 1000;
+    }
+
+    /**
+     * @return array{ok:bool,payload:?array,errors:string[],format:string}
+     */
+    private function buildRecebimentoLoteLegado(
+        int $coletaId,
+        EntityColeta $coleta,
+        string $manifestoCodigo,
+        ?string $responsavel,
+        ?string $cargo
+    ): array {
+        $snapshot = EntityColetaSnapshot::getByColetaId($coletaId);
+        if (!$snapshot) {
+            return ['ok' => false, 'payload' => null, 'errors' => ['Snapshot da coleta ausente.'], 'format' => 'legado'];
         }
 
         $geradorCnpj = preg_replace('/\D/', '', (string)$snapshot->gerador_cnpj);
         $transportadorCnpj = preg_replace('/\D/', '', (string)$snapshot->transportador_cnpj);
         if ($geradorCnpj === '' || $transportadorCnpj === '') {
-            return ['ok' => false, 'payload' => null, 'errors' => ['CNPJ gerador/transportador ausente no snapshot.']];
+            return ['ok' => false, 'payload' => null, 'errors' => ['CNPJ gerador/transportador ausente no snapshot.'], 'format' => 'legado'];
         }
 
         $dataReceb = $coleta->data_recebimento
@@ -228,7 +353,7 @@ class SinirPayloadBuilder
 
         $itens = EntityColetaItem::getByColetaId($coletaId);
         if ($itens === []) {
-            return ['ok' => false, 'payload' => null, 'errors' => ['Coleta sem itens de resíduo.']];
+            return ['ok' => false, 'payload' => null, 'errors' => ['Coleta sem itens de resíduo.'], 'format' => 'legado'];
         }
 
         $errors = [];
@@ -260,7 +385,7 @@ class SinirPayloadBuilder
             ++$seq;
         }
         if ($errors !== []) {
-            return ['ok' => false, 'payload' => null, 'errors' => $errors];
+            return ['ok' => false, 'payload' => null, 'errors' => $errors, 'format' => 'legado'];
         }
 
         $motorista = mb_substr(trim((string)$snapshot->motorista_nome), 0, 100);
@@ -284,7 +409,7 @@ class SinirPayloadBuilder
             ],
         ];
 
-        return ['ok' => true, 'payload' => $payload, 'errors' => []];
+        return ['ok' => true, 'payload' => $payload, 'errors' => [], 'format' => 'legado'];
     }
 
     /**

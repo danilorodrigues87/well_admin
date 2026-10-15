@@ -203,14 +203,22 @@
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: 'Receber MTR no SINIR (destinador)',
-        html: '<p class="small text-muted text-start mb-2">Confirma o recebimento no portal nacional usando os dados da coleta (data de recebimento, itens e responsável).</p>',
-        input: 'text',
-        inputLabel: 'Responsável no destinador (opcional)',
-        inputPlaceholder: 'Nome do balanceiro / responsável',
+        html: '<p class="small text-muted text-start mb-2">Confirma o recebimento no portal nacional usando os dados da coleta (data de recebimento, itens e responsável).</p>'
+          + '<label for="sinir-receb-resp" class="form-label small text-start w-100 mb-1">Responsável no destinador (opcional)</label>'
+          + '<input id="sinir-receb-resp" type="text" class="form-control swal2-input" placeholder="Nome do balanceiro / responsável" autocomplete="name">',
         showCancelButton: true,
         confirmButtonText: 'Registrar recebimento',
-        preConfirm: function (value) {
-          return { responsavel: value ? String(value).trim() : '' };
+        focusConfirm: false,
+        didOpen: function () {
+          var el = document.getElementById('sinir-receb-resp');
+          if (el) {
+            el.focus();
+          }
+        },
+        preConfirm: function () {
+          var el = document.getElementById('sinir-receb-resp');
+          var v = el ? String(el.value || '').trim() : '';
+          return { responsavel: v };
         }
       }).then(function (r) {
         if (r.isConfirmed) {
@@ -245,11 +253,22 @@
     if (typeof Swal !== 'undefined') {
       Swal.fire({
         title: 'Emitir CDF no SINIR',
-        text: 'Emite o certificado de destinação para este MTR (destinador). Requer recebimento já registrado.',
-        input: 'text',
-        inputLabel: 'Responsável técnico (opcional)',
+        html: '<p class="small text-muted text-start mb-2">Emite o certificado de destinação para este MTR (destinador). Requer recebimento já registrado.</p>'
+          + '<label for="sinir-cdf-resp" class="form-label small text-start w-100 mb-1">Responsável técnico (opcional)</label>'
+          + '<input id="sinir-cdf-resp" type="text" class="form-control swal2-input" placeholder="Nome do responsável técnico" autocomplete="name">',
         showCancelButton: true,
-        confirmButtonText: 'Emitir CDF'
+        confirmButtonText: 'Emitir CDF',
+        focusConfirm: false,
+        didOpen: function () {
+          var el = document.getElementById('sinir-cdf-resp');
+          if (el) {
+            el.focus();
+          }
+        },
+        preConfirm: function () {
+          var el = document.getElementById('sinir-cdf-resp');
+          return el ? String(el.value || '').trim() : '';
+        }
       }).then(function (r) {
         if (r.isConfirmed) {
           Swal.fire({ title: 'Processando…', allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });

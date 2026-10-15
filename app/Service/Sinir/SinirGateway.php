@@ -36,7 +36,21 @@ class SinirGateway
      */
     public function postForPdf(string $path, ?string $bearerToken = null): array
     {
-        $result = $this->request('POST', $path, [], $bearerToken);
+        return $this->requestForPdf('POST', $path, $bearerToken);
+    }
+
+    /** @return array{ok:bool,status:int,pdf:?string,body:?array,raw:string,error:?string} */
+    public function getForPdf(string $path, ?string $bearerToken = null): array
+    {
+        return $this->requestForPdf('GET', $path, $bearerToken);
+    }
+
+    /**
+     * @return array{ok:bool,status:int,pdf:?string,body:?array,raw:string,error:?string}
+     */
+    private function requestForPdf(string $method, string $path, ?string $bearerToken): array
+    {
+        $result = $this->request($method, $path, [], $bearerToken);
         $raw = $result['raw'];
         if ($raw !== '' && str_starts_with($raw, '%PDF')) {
             return [

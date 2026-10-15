@@ -205,7 +205,7 @@ class SinirManifestoService
             return ['ok' => false, 'message' => 'Somente MTRs registrados no SINIR podem ser cancelados.'];
         }
 
-        $manifestoCodigo = self::manifestoCodigoParaApi($coleta);
+        $manifestoCodigo = self::manifestoNumeroString($coleta);
         if ($manifestoCodigo === null) {
             return ['ok' => false, 'message' => 'Código do manifesto SINIR ausente nesta coleta.'];
         }
@@ -220,9 +220,14 @@ class SinirManifestoService
             'justificativa' => mb_substr($justificativa, 0, 500),
         ];
 
-        $tokenResult = $this->auth->obtainAccessToken();
+        $credentials = (new SinirCredentialsResolver())->forEmissaoManifesto($coletaId);
+        if (!$credentials['ok'] || empty($credentials['integration_token'])) {
+            return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
+        }
+
+        $tokenResult = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
         if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
-            $msg = 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha desconhecida');
+            $msg = 'Autenticação SINIR (gerador): '.($tokenResult['error'] ?? 'falha desconhecida');
 
             return ['ok' => false, 'message' => $msg];
         }
@@ -249,39 +254,77 @@ class SinirManifestoService
         }
 
         $barcode = trim((string)($coleta->sinir_codigo_barras ?? ''));
-        $manifestoCodigo = self::manifestoCodigoParaApi($coleta);
+        $manifestoNumero = self::manifestoNumeroString($coleta);
 
-        if ($barcode === '' && $manifestoCodigo === null) {
+        if ($barcode === '' && $manifestoNumero === null) {
             return ['ok' => false, 'message' => 'Coleta sem número/código de barras SINIR para consulta.'];
         }
 
-        $tokenResult = $this->auth->obtainAccessToken();
+        $credentials = (new SinirCredentialsResolver())->forConsulta($coletaId);
+        if (!$credentials['ok'] || empty($credentials['integration_token'])) {
+            return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
+        }
+
+        $tokenResult = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
         if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
             return ['ok' => false, 'message' => 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha desconhecida')];
         }
 
-        if ($barcode !== '') {
-            $path = 'retornaManifesto/'.rawurlencode($barcode);
-        } else {
-            $path = 'retornaManifestoPorNumero/'.rawurlencode((string)$manifestoCodigo);
-        }
+        $token = $tokenResult['token'];
+        $response = null;
 
-        $response = $this->gateway->post($path, [], $tokenResult['token']);
+        if ($manifestoNumero !== null && self::isNumeroManifestoNacional($manifestoNumero)) {
+            $response = $this->gateway->get(
+                'retornaManifesto/'.rawurlencode($manifestoNumero),
+                $token
+            );
+        } elseif ($manifestoNumero !== null) {
+            $response = $this->gateway->post(
+                'retornaManifestoPorNumero/'.rawurlencode($manifestoNumero),
+                [],
+                $token
+            );
+        } else {
+            $response = $this->gateway->get(
+                'retornaManifesto/'.rawurlencode($barcode),
+                $token
+            );
+            if (($response['status'] ?? 0) === 404 || !($response['body'] ?? null)) {
+                $response = $this->gateway->post(
+                    'retornaManifesto/'.rawurlencode($barcode),
+                    [],
+                    $token
+                );
+            }
+        }
 
         return $this->processarConsulta($coletaId, $response);
     }
 
-    private static function manifestoCodigoParaApi(EntityColeta $coleta): int|string|null
+    private static function manifestoNumeroString(EntityColeta $coleta): ?string
     {
         $man = trim((string)($coleta->sinir_man_numero ?? ''));
         if ($man !== '') {
-            return ctype_digit($man) ? (int)$man : $man;
+            return $man;
         }
         if ($coleta->numero_mtr) {
-            return (int)$coleta->numero_mtr;
+            return (string)(int)$coleta->numero_mtr;
         }
 
         return null;
+    }
+
+    /** @deprecated Use manifestoNumeroString() */
+    private static function manifestoCodigoParaApi(EntityColeta $coleta): int|string|null
+    {
+        return self::manifestoNumeroString($coleta);
+    }
+
+    private static function isNumeroManifestoNacional(string $numero): bool
+    {
+        $digits = preg_replace('/\D/', '', $numero) ?? '';
+
+        return strlen($digits) > 10;
     }
 
     /** @param array<string,mixed> $payload */
@@ -336,21 +379,44 @@ class SinirManifestoService
             return ['ok' => false, 'message' => $this->extrairMensagemErro($response, null)];
         }
 
-        $retornoCodigo = (int)($body['retornoCodigo'] ?? -1);
-        if (!$response['ok'] || $retornoCodigo !== 0) {
-            $msg = trim((string)($body['retorno'] ?? ''));
+        $parsed = SinirConsultaParser::interpretar($body, (bool)($response['ok'] ?? false));
+        if (!$parsed['ok']) {
+            $msg = $parsed['mensagem'] ?? '';
             if ($msg === '') {
                 $msg = $this->extrairMensagemErro($response, $body);
             }
 
+            EntitySinirEnvio::registrar(
+                $coletaId,
+                EntitySinirEnvio::proximaTentativa($coletaId),
+                'erro',
+                null,
+                $body,
+                mb_substr($msg, 0, 500)
+            );
+
             return ['ok' => false, 'message' => $msg];
         }
 
-        $situacaoCod = isset($body['situacaoManifestoCodigo']) ? (int)$body['situacaoManifestoCodigo'] : null;
+        $situacaoCod = $parsed['situacao_codigo'];
         $situacaoLabel = self::labelSituacaoManifesto($situacaoCod);
 
-        if ($situacaoCod === 4 && ($body['manifestoCodigo'] ?? null) !== null) {
-            EntityColeta::update($coletaId, ['sinir_status' => 'cancelado']);
+        $update = [];
+        if (!empty($parsed['codigo_barras'])) {
+            $update['sinir_codigo_barras'] = $parsed['codigo_barras'];
+        }
+        if ($situacaoCod === 4) {
+            $update['sinir_status'] = 'cancelado';
+        }
+        if ($situacaoCod === 3) {
+            $coleta = EntityColeta::getById($coletaId);
+            if ($coleta && empty($coleta->sinir_recebido_em)) {
+                $update['sinir_recebido_em'] = date('Y-m-d H:i:s');
+                $update['situacao_recebimento'] = 'recebido';
+            }
+        }
+        if ($update !== []) {
+            EntityColeta::update($coletaId, $update);
         }
 
         EntitySinirEnvio::registrar(
@@ -362,13 +428,19 @@ class SinirManifestoService
             $situacaoLabel
         );
 
+        $msg = 'Situação no SINIR: '.$situacaoLabel;
+        if (!empty($parsed['codigo_barras'])) {
+            $msg .= ' · código de barras atualizado.';
+        }
+
         return [
             'ok' => true,
-            'message' => 'Situação no SINIR: '.$situacaoLabel,
+            'message' => $msg,
             'details' => [
                 'situacao_codigo' => $situacaoCod,
                 'situacao_label' => $situacaoLabel,
-                'manifesto_codigo' => $body['manifestoCodigo'] ?? null,
+                'manifesto_codigo' => $parsed['manifesto_codigo'],
+                'codigo_barras' => $parsed['codigo_barras'],
             ],
         ];
     }
@@ -594,24 +666,39 @@ class SinirManifestoService
         $this->registrarFalha($coletaId, $payload, $audit, $msg);
     }
 
+    /** Limite `coletas.numero_mtr` (int unsigned). MTR nacional (12 dígitos) fica só em `sinir_man_numero`. */
+    private const MYSQL_UINT_MAX = 4294967295;
+
     private static function manifestoParaNumeroMtr(string $manifestoCodigo): ?int
     {
         $manifestoCodigo = trim($manifestoCodigo);
         if ($manifestoCodigo === '' || !self::manifestoCodigoValido($manifestoCodigo)) {
             return null;
         }
-        if (ctype_digit($manifestoCodigo)) {
-            $n = (int)$manifestoCodigo;
-
-            return $n > 0 ? $n : null;
-        }
-        $digits = preg_replace('/\D/', '', $manifestoCodigo);
-        if ($digits === '') {
+        $digits = ctype_digit($manifestoCodigo)
+            ? $manifestoCodigo
+            : (preg_replace('/\D/', '', $manifestoCodigo) ?? '');
+        if ($digits === '' || !self::digitosCabemNumeroMtr($digits)) {
             return null;
         }
-        $n = (int)$digits;
 
-        return $n > 0 ? $n : null;
+        return (int)$digits;
+    }
+
+    private static function digitosCabemNumeroMtr(string $digits): bool
+    {
+        $digits = ltrim($digits, '0');
+        if ($digits === '') {
+            return false;
+        }
+        if (strlen($digits) > 10) {
+            return false;
+        }
+        if (strlen($digits) === 10 && strcmp($digits, (string)self::MYSQL_UINT_MAX) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /** Código "0" ou vazio = rejeição SINIR, não MTR emitido. */
