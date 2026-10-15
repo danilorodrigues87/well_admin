@@ -151,8 +151,9 @@ final class SinirConsultaParser
     private static function extrairCodigoCdf(array $flat): ?string
     {
         $valor = self::primeiroValor($flat, [
-            'cdfCodigo',
+            'cdfNumero',
             'numeroCDF',
+            'cdfCodigo',
             'cerCodigo',
             'codigoGerado',
             'numeroCertificado',
@@ -174,7 +175,7 @@ final class SinirConsultaParser
     private static function primeiroValor(array $data, array $keys): mixed
     {
         foreach ($keys as $key) {
-            if (array_key_exists($key, $data)) {
+            if (array_key_exists($key, $data) && $data[$key] !== null && $data[$key] !== '') {
                 return $data[$key];
             }
         }

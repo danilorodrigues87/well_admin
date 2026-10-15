@@ -346,6 +346,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF nacional: `emiteCDF` com `listaManifesto`/`nomeResponsavel`/`parceiroDestinador` e PDF em `downloadCertificado`; o schema estadual (`listaMtr`) era rejeitado com mensagem genérica |
 | 2026-10-15 | SINIR CDF: responsável técnico em `destinadores.sinir_responsavel_cdf` (`054`); na unidade 135551 o CDF usa `WIDMER TRINDADE DE BEM` e o recebimento continua `WIDMER TRINDADE` |
 | 2026-10-15 | SINIR CDF: "Certificado criado com sucesso" grava o número (resposta ou consulta do MTR) e libera Baixar PDF CDF |
+| 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |

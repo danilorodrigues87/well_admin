@@ -126,6 +126,7 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Receber (destinador) | POST | `/receberManifestoLote` — body = **array raiz** MMA. Sem substituição, cada item leva apenas `resCodigoIbama`, `marQuantidade`, `marQuantidadeRecebida`, `traCodigo`. Wrapper `manifestoRecebimentoJSONs` → Tomcat 400. Token **destinador**. |
 | Emitir CDF | POST | `/emiteCDF` — MTR nacional: `cerDataInicial`/`cerDataFinal` (epoch ms), `parceiroDestinador`, `cnpjDestinador`, `tipoCertificadoDestinacao` 1, `listaManifesto[{manNumero}]`, `nomeResponsavel`. Legado (~10 dígitos) mantém `dataInicial`/`listaMtr`. Token **destinador**. |
 | PDF CDF | POST | `/downloadCertificado/{numeroCDF}` (nacional); fallback `/buscaPdfCdf/{codigo}` — cache em `storage/coletas/{id}/` |
+| Listar CDF | POST | `/consultaListaCdf` — recupera o certificado quando o MTR já pertence a um CDF |
 
 Header em todas (exceto troca inicial): `Authorization: Bearer {token_acesso}`
 

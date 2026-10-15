@@ -118,12 +118,12 @@ class SinirCdfService
         }
 
         if ($nacional) {
-            $jaEmitido = $this->codigoCdfNoManifesto($manifesto, $tokenResult['token']);
+            $jaEmitido = $this->localizarCdfExistente($coletaId, $manifesto, $tokenResult['token']);
             if ($jaEmitido !== null) {
                 return $this->concluirEmissaoCdf(
                     $coletaId,
                     $payload,
-                    ['mensagem' => 'CDF já constava no manifesto SINIR.'],
+                    ['mensagem' => 'CDF já constava no SINIR.'],
                     $jaEmitido,
                     $tokenResult['token']
                 );
@@ -141,7 +141,7 @@ class SinirCdfService
             : self::extrairCodigoCertificado($body, $geradorCnpj);
         $criado = self::corpoIndicaCdfCriado($body);
         if ($certCodigo === null && $nacional && ($criado || $response['ok'])) {
-            $certCodigo = $this->codigoCdfNoManifesto($manifesto, $tokenResult['token']);
+            $certCodigo = $this->localizarCdfExistente($coletaId, $manifesto, $tokenResult['token']);
         }
         $retornoCodigo = (int)($body['retornoCodigo'] ?? -1);
         $sucessoLegado = !$nacional && $response['ok'] && $retornoCodigo === 0 && $certCodigo !== null;
@@ -154,6 +154,12 @@ class SinirCdfService
                 ];
             }
             $msg = self::mensagemFalhaCdf($body, (string)($response['error'] ?? ''));
+            if ($nacional && stripos($msg, 'pertence a outro CDF') !== false) {
+                $existente = $this->localizarCdfExistente($coletaId, $manifesto, $tokenResult['token']);
+                if ($existente !== null) {
+                    return $this->concluirEmissaoCdf($coletaId, $payload, $body, $existente, $tokenResult['token']);
+                }
+            }
             if (stripos($msg, 'Responsável não encontrado') !== false) {
                 $msg .= ' Nome enviado: '.$resp.'. O CDF usa o Responsável Técnico, lista diferente da de recebimento. Ajuste o campo no cadastro do destinador.';
             }
@@ -298,6 +304,130 @@ class SinirCdfService
         return self::extrairCodigoCertificadoNacional($body);
     }
 
+    private function localizarCdfExistente(int $coletaId, string $manifesto, string $tokenDestinador): int|string|null
+    {
+        $codigo = $this->codigoCdfNoManifesto($manifesto, $tokenDestinador);
+        if ($codigo !== null) {
+            return $codigo;
+        }
+
+        $tokens = [$tokenDestinador];
+        $consulta = (new SinirCredentialsResolver())->forConsulta($coletaId);
+        if ($consulta['ok'] && !empty($consulta['integration_token'])) {
+            $gerador = $this->auth->obtainAccessToken(false, $consulta['integration_token']);
+            if ($gerador['ok'] && !empty($gerador['token']) && $gerador['token'] !== $tokenDestinador) {
+                $codigo = $this->codigoCdfNoManifesto($manifesto, $gerador['token']);
+                if ($codigo !== null) {
+                    return $codigo;
+                }
+                $tokens[] = $gerador['token'];
+            }
+        }
+
+        foreach ($tokens as $token) {
+            $codigo = $this->codigoCdfNaLista($manifesto, $token);
+            if ($codigo !== null) {
+                return $codigo;
+            }
+        }
+
+        return null;
+    }
+
+    private function codigoCdfNaLista(string $manifesto, string $accessToken): int|string|null
+    {
+        $tz = new \DateTimeZone('America/Sao_Paulo');
+        $fim = new \DateTimeImmutable('today', $tz);
+        $inicio = $fim->modify('-29 days');
+        $inicioMs = (int)$inicio->setTime(0, 0, 0)->format('U') * 1000;
+        $fimMs = ((int)$fim->setTime(23, 59, 59)->format('U') * 1000) + 999;
+        $payloads = [
+            [
+                'cdfDataInicial' => $inicio->format('d/m/Y'),
+                'cdfDataFinal' => $fim->format('d/m/Y'),
+                'cdfGeradorCodigo' => null,
+                'cdfDestinadorCodigo' => null,
+            ],
+            [
+                'cdfDataInicial' => $inicioMs,
+                'cdfDataFinal' => $fimMs,
+            ],
+            [
+                'cerDataInicial' => $inicioMs,
+                'cerDataFinal' => $fimMs,
+            ],
+        ];
+
+        foreach ($payloads as $payload) {
+            $response = $this->gateway->post('consultaListaCdf', $payload, $accessToken);
+            $body = $response['body'] ?? null;
+            if (!is_array($body)) {
+                continue;
+            }
+            $codigo = self::codigoCdfDaLista($body, $manifesto);
+            if ($codigo !== null) {
+                return $codigo;
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<string,mixed> $body */
+    private static function codigoCdfDaLista(array $body, string $manifesto): int|string|null
+    {
+        $alvo = preg_replace('/\D/', '', $manifesto);
+        $achado = null;
+        $walk = static function (array $node) use (&$walk, &$achado, $alvo): void {
+            if ($achado !== null) {
+                return;
+            }
+            $codigo = null;
+            foreach (['numeroCDF', 'cdfNumero', 'cdfCodigo', 'cerCodigo'] as $chave) {
+                if (!isset($node[$chave]) || !is_scalar($node[$chave])) {
+                    continue;
+                }
+                $texto = trim((string)$node[$chave]);
+                if ($texto !== '' && $texto !== '0') {
+                    $codigo = $node[$chave];
+                    break;
+                }
+            }
+            $mtrs = $node['listaMtr'] ?? $node['listaManifesto'] ?? null;
+            if ($codigo !== null && is_array($mtrs) && self::listaContemManifesto($mtrs, $alvo)) {
+                $achado = $codigo;
+
+                return;
+            }
+            foreach ($node as $value) {
+                if (is_array($value)) {
+                    $walk($value);
+                }
+            }
+        };
+        $walk($body);
+
+        return $achado;
+    }
+
+    /** @param array<int|string,mixed> $lista */
+    private static function listaContemManifesto(array $lista, string $manifestoDigitos): bool
+    {
+        foreach ($lista as $item) {
+            $valor = is_array($item)
+                ? ($item['manNumero'] ?? $item['manifestoCodigo'] ?? $item['numero'] ?? null)
+                : $item;
+            if (!is_scalar($valor)) {
+                continue;
+            }
+            if (preg_replace('/\D/', '', (string)$valor) === $manifestoDigitos) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @param array<string,mixed> $body */
     private static function extrairCodigoCertificadoNacional(array $body): int|string|null
     {
@@ -309,7 +439,7 @@ class SinirCdfService
             }
         }
 
-        $chaves = ['numeroCDF', 'cdfCodigo', 'cerCodigo', 'codigoGerado', 'numeroCertificado', 'codigoCertificado'];
+        $chaves = ['numeroCDF', 'cdfNumero', 'cdfCodigo', 'cerCodigo', 'codigoGerado', 'numeroCertificado', 'codigoCertificado'];
         $encontrado = null;
         $walk = static function (array $node) use (&$walk, &$encontrado, $chaves): void {
             if ($encontrado !== null) {
