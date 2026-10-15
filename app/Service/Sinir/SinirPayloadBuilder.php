@@ -79,6 +79,9 @@ class SinirPayloadBuilder
                 'tiaCodigo' => (int)$tipo->tia_codigo,
                 'claCodigo' => (int)$tipo->cla_codigo,
             ];
+            if (self::itemExigeGrupoEmbalagem($codIbama, (int)$tipo->cla_codigo)) {
+                $residuo['greCodigo'] = self::greCodigoParaItem($tipo);
+            }
             // Densidade só para Litro / m³ (manual SIGOR).
             if (in_array(strtolower(trim((string)$item->unidade)), ['l', 'm3', 'm³'], true)) {
                 $residuo['marDensidade'] = 1;
@@ -321,5 +324,33 @@ class SinirPayloadBuilder
             && (int)($tipo->tia_codigo ?? 0) > 0
             && (int)($tipo->cla_codigo ?? 0) > 0
             && (int)($tipo->uni_codigo ?? 0) > 0;
+    }
+
+    /**
+     * Grupo de embalagem ONU (greCodigo): obrigatório para perigosos (*) e grupos RSS/RDC.
+     * Valores SINIR: 1=I, 2=II, 3=III, 4=N/A.
+     */
+    public static function itemExigeGrupoEmbalagem(string $codIbamaSinir, int $claCodigo): bool
+    {
+        $raw = strtoupper(trim($codIbamaSinir));
+        if (str_contains($raw, '(*)')) {
+            return true;
+        }
+        if ($raw === '200132' || str_starts_with($raw, 'GRUPO ')) {
+            return true;
+        }
+
+        return in_array($claCodigo, [21, 22, 23, 24, 25, 41, 32, 33, 34, 35], true);
+    }
+
+    /** @return int 1–4 */
+    public static function greCodigoParaItem(EntityTipoResiduo $tipo): int
+    {
+        $gre = (int)($tipo->sinir_gre_codigo ?? 0);
+        if ($gre >= 1 && $gre <= 4) {
+            return $gre;
+        }
+
+        return 4;
     }
 }

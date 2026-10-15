@@ -77,6 +77,7 @@ function selfPretty(?string $json, bool $compact = false): string
                 'tie' => $i['codigoTipoEstado'] ?? ($i['tieCodigo'] ?? null),
                 'tia' => $i['codigoAcondicionamento'] ?? ($i['tiaCodigo'] ?? null),
                 'uni' => $i['codigoUnidade'] ?? ($i['uniCodigo'] ?? null),
+                'gre' => $i['greCodigo'] ?? null,
             ], is_array($itens) ? $itens : []),
         ];
 

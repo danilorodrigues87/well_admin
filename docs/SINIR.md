@@ -214,9 +214,11 @@ O pré-check do painel só valida unidades/token/itens. Um **400** vem da API ap
    php database/scripts/sinir_debug_salvar_manifesto.php {coleta_id}
    php database/scripts/dump_last_sinir_envio.php {coleta_id}
    ```
-4. Causas frequentes: código IBAMA inválido ou sem `(*)` em perigoso; CNPJ/unidade do gerador não batem no portal; quantidade &lt; 0,1 kg; token da transportadora sem permissão sobre a unidade geradora.
+4. Causas frequentes: código IBAMA inválido ou sem `(*)` em perigoso; **`greCodigo` ausente** em resíduo perigoso/RSS; CNPJ/unidade do gerador não batem no portal; quantidade &lt; 0,1 kg; token da transportadora sem permissão sobre a unidade geradora.
 
 O campo `residuo` no JSON vai como **6 dígitos** (ex.: `150203`) e **com `(*)`** quando o cadastro indica perigoso (ex.: `200121(*)`).
+
+**Grupo de embalagem (`greCodigo`)** — obrigatório na API nacional quando o IBAMA tem `(*)`, é RSS (grupos A–E / A1–A5) ou código especial `200132`. Valores: **1=I, 2=II, 3=III, 4=N/A**. O `SinirPayloadBuilder` envia **4 (N/A)** por padrão quando exigido; resíduos com transporte ONU completo podem precisar 1–3 + `marNumeroONU` / `marClasseRisco` / `marNomeEmbarque` (evolução futura no cadastro).
 
 ### Timeout / `http_status: 0`
 
