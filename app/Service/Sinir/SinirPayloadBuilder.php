@@ -253,23 +253,15 @@ class SinirPayloadBuilder
             }
 
             $qtd = round((float)$item->quantidade, 4);
-            $residuo = [
+            // Recebimento sem substituição: o manual MMA aceita somente estes
+            // quatro campos. Campos de emissão (classe, ONU, acondicionamento)
+            // fazem o DTO de recebimento responder código 999 sem detalhes.
+            $listaResiduos[] = [
                 'resCodigoIbama' => $codIbama,
                 'marQuantidade' => $qtd,
                 'marQuantidadeRecebida' => $qtd,
                 'traCodigo' => (int)$tipo->tra_codigo,
-                'uniCodigo' => (int)$tipo->uni_codigo,
-                'tieCodigo' => (int)$tipo->tie_codigo,
-                'tiaCodigo' => (int)$tipo->tia_codigo,
-                'claCodigo' => (int)$tipo->cla_codigo,
             ];
-            $residuo = self::anexarCamposTransportePerigoso($residuo, $tipo, $codIbama, (int)$tipo->cla_codigo);
-            if (!empty($residuo['_sinir_erro'])) {
-                $errors[] = (string)$residuo['_sinir_erro'];
-                unset($residuo['_sinir_erro']);
-                continue;
-            }
-            $listaResiduos[] = $residuo;
         }
         if ($errors !== []) {
             return ['ok' => false, 'payload' => null, 'errors' => $errors, 'format' => 'nacional'];

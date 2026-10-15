@@ -118,9 +118,6 @@ class SinirRecebimentoService
         if ($manNumero !== '') {
             $path = 'downloadManifesto/'.rawurlencode($manNumero);
             $pdfResponse = $this->gateway->postForPdf($path, $token);
-            if (empty($pdfResponse['pdf'])) {
-                $pdfResponse = $this->gateway->getForPdf($path, $token);
-            }
         }
 
         if (($pdfResponse === null || empty($pdfResponse['pdf'])) && $barcode !== '') {
@@ -211,18 +208,28 @@ class SinirRecebimentoService
      */
     private function interpretarRespostaRecebimentoNacional(array $body, array $response): array
     {
-        if (array_key_exists('erroNacional', $body) || array_key_exists('respostaApiwsManifestoDTO', $body)) {
-            $erroNacional = !empty($body['erroNacional']);
-            $msgNacional = trim((string)($body['mensagemErroNacional'] ?? ''));
+        if (array_key_exists('erroNacional', $body)
+            || array_key_exists('respostaApiwsManifestoDTO', $body)
+            || array_key_exists('objetoResposta', $body)) {
+            $erroNacional = !empty($body['erroNacional']) || !empty($body['erro']);
+            $msgNacional = trim((string)($body['mensagemErroNacional'] ?? $body['mensagem'] ?? ''));
             $dto = $body['respostaApiwsManifestoDTO'] ?? $body['objetoResposta'] ?? null;
             $primeiro = self::primeiroItemDto($dto);
-            $retorno = is_array($primeiro) ? trim((string)($primeiro['retorno'] ?? $primeiro['mensagem'] ?? '')) : '';
+            $retorno = is_array($primeiro)
+                ? trim((string)($primeiro['retorno']
+                    ?? $primeiro['restResponseMensagem']
+                    ?? $primeiro['mensagem']
+                    ?? ''))
+                : '';
             $retornoCodigo = is_array($primeiro) ? (int)($primeiro['retornoCodigo'] ?? -1) : -1;
+            $restValido = is_array($primeiro) ? ($primeiro['restResponseValido'] ?? null) : null;
             $man = is_array($primeiro)
                 ? (string)($primeiro['manNumero'] ?? $primeiro['manifestoCodigo'] ?? '')
                 : '';
 
-            if ($response['ok'] && !$erroNacional && ($retornoCodigo === 0 || ($retorno !== '' && !str_starts_with(mb_strtoupper($retorno), 'ERRO')))) {
+            if ($response['ok'] && !$erroNacional && $restValido !== false
+                && ($retornoCodigo === 0 || $restValido === true
+                    || ($retorno !== '' && !self::textoIndicaErro($retorno)))) {
                 return [
                     'sucesso' => true,
                     'mensagem' => $retorno !== '' ? $retorno : 'MTR recebido no SINIR.',
@@ -230,9 +237,15 @@ class SinirRecebimentoService
                 ];
             }
 
+            $detalhes = self::extrairMensagemRecursiva($body);
+            $mensagemBase = $msgNacional !== '' ? $msgNacional : $retorno;
+            if ($detalhes !== '' && ($mensagemBase === '' || !str_contains($detalhes, $mensagemBase))) {
+                $mensagemBase = trim($mensagemBase.' · '.$detalhes, ' ·');
+            }
+
             return [
                 'sucesso' => false,
-                'mensagem' => $msgNacional !== '' ? $msgNacional : ($retorno !== '' ? $retorno : ''),
+                'mensagem' => $mensagemBase,
                 'manifesto_codigo' => null,
             ];
         }
@@ -258,9 +271,13 @@ class SinirRecebimentoService
             return ['sucesso' => true, 'mensagem' => 'MTR recebido no SINIR.', 'manifesto_codigo' => null];
         }
 
+        $mensagem = self::extrairMensagemRecursiva($body);
+
         return [
             'sucesso' => false,
-            'mensagem' => trim((string)($body['mensagem'] ?? $response['error'] ?? '')),
+            'mensagem' => $mensagem !== ''
+                ? $mensagem
+                : trim((string)($response['error'] ?? 'Falha ao registrar recebimento no SINIR.')),
             'manifesto_codigo' => null,
         ];
     }
@@ -279,6 +296,56 @@ class SinirRecebimentoService
         }
 
         return null;
+    }
+
+    private static function textoIndicaErro(string $texto): bool
+    {
+        $normalizado = mb_strtoupper(trim($texto), 'UTF-8');
+
+        return str_contains($normalizado, 'ERRO')
+            || str_contains($normalizado, 'FALHA')
+            || str_contains($normalizado, 'INVÁLID')
+            || str_contains($normalizado, 'INVALID')
+            || str_contains($normalizado, 'ENCONTRADO');
+    }
+
+    /** Coleta mensagens/códigos mesmo quando o conector os aninha por manifesto/item. */
+    private static function extrairMensagemRecursiva(array $data): string
+    {
+        $mensagens = [];
+        $walk = static function (array $node) use (&$walk, &$mensagens): void {
+            $codigo = null;
+            foreach (['retornoCodigo', 'restResponseCodigo', 'codigoErro'] as $key) {
+                if (isset($node[$key]) && is_scalar($node[$key])) {
+                    $codigo = trim((string)$node[$key]);
+                    break;
+                }
+            }
+            foreach ([
+                'retorno',
+                'restResponseMensagem',
+                'mensagemErroNacional',
+                'mensagem',
+                'descricao',
+                'erroMensagem',
+            ] as $key) {
+                if (!isset($node[$key]) || !is_scalar($node[$key])) {
+                    continue;
+                }
+                $texto = trim((string)$node[$key]);
+                if ($texto !== '' && !in_array(mb_strtolower($texto), ['true', 'false'], true)) {
+                    $mensagens[] = ($codigo !== null && $codigo !== '' ? '['.$codigo.'] ' : '').$texto;
+                }
+            }
+            foreach ($node as $value) {
+                if (is_array($value)) {
+                    $walk($value);
+                }
+            }
+        };
+        $walk($data);
+
+        return implode(' · ', array_values(array_unique($mensagens)));
     }
 
     /** @param array<string,mixed>|array<int,array<string,mixed>> $payload */

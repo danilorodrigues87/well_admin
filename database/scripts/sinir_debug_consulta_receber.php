@@ -12,6 +12,7 @@ use App\Service\Sinir\SinirManifestoService;
 use App\Service\Sinir\SinirPayloadBuilder;
 use App\Service\Sinir\SinirRecebimentoService;
 use App\Model\Entity\Coleta as EntityColeta;
+use App\Model\Db\Database;
 
 $coletaId = (int)($argv[1] ?? 0);
 $sendReceber = in_array('--send-receber', $argv, true);
@@ -41,6 +42,21 @@ echo "\n=== consultarColeta (service) ===\n";
 SinirAuthService::clearCache();
 $resultConsulta = (new SinirManifestoService())->consultarColeta($coletaId);
 echo json_encode($resultConsulta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
+
+$stmt = (new Database())->execute(
+    'SELECT response_payload FROM sinir_envios
+     WHERE coleta_id = ? AND status = ? ORDER BY id DESC LIMIT 1',
+    [$coletaId, 'consulta']
+);
+$rawConsulta = $stmt->fetchColumn();
+if (is_string($rawConsulta) && $rawConsulta !== '') {
+    $decoded = json_decode($rawConsulta, true);
+    echo "\n=== resposta bruta da consulta ===\n";
+    echo json_encode(
+        is_array($decoded) ? $decoded : $rawConsulta,
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    ).PHP_EOL;
+}
 
 $cReceb = (new SinirCredentialsResolver())->forRecebimento($coletaId);
 echo "\nrecebimento_token_source=".($cReceb['token_source'] ?? 'null').PHP_EOL;

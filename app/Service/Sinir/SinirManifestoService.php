@@ -216,7 +216,7 @@ class SinirManifestoService
         }
 
         $payload = [
-            'manifestoCodigo' => $manifestoCodigo,
+            self::isNumeroManifestoNacional($manifestoCodigo) ? 'manNumero' : 'manifestoCodigo' => $manifestoCodigo,
             'justificativa' => mb_substr($justificativa, 0, 500),
         ];
 

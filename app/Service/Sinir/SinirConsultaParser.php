@@ -19,15 +19,21 @@ final class SinirConsultaParser
      */
     public static function interpretar(array $body, bool $httpOk): array
     {
-        $flat = self::achatar($body);
+        $retornoRaw = self::primeiroValor($body, ['retornoCodigo', 'restResponseCodigo']);
+        $retornoCodigo = $retornoRaw !== null && $retornoRaw !== '' ? (int)$retornoRaw : null;
+        $erroRaw = self::primeiroValor($body, ['erro', 'erroNacional']);
+        $erroFlag = $erroRaw === true || $erroRaw === 1 || $erroRaw === 'true' || $erroRaw === '1';
+        $msgRaw = self::primeiroValor($body, [
+            'retorno',
+            'mensagem',
+            'restResponseMensagem',
+            'mensagemErroNacional',
+        ]);
+        $msg = trim(is_scalar($msgRaw) ? (string)$msgRaw : '');
 
-        $retornoCodigo = isset($flat['retornoCodigo']) ? (int)$flat['retornoCodigo'] : null;
-        $erroFlag = !empty($body['erro']) || !empty($flat['erro']);
-        $msg = trim((string)($flat['retorno'] ?? $flat['mensagem'] ?? $body['mensagem'] ?? ''));
-
-        $situacao = self::extrairSituacao($flat);
-        $man = self::extrairManifestoNumero($flat);
-        $barcode = self::extrairCodigoBarras($flat);
+        $situacao = self::extrairSituacao($body);
+        $man = self::extrairManifestoNumero($body);
+        $barcode = self::extrairCodigoBarras($body);
 
         $ok = $httpOk && !$erroFlag && (
             ($retornoCodigo === 0)
@@ -48,31 +54,55 @@ final class SinirConsultaParser
         ];
     }
 
-    /** @return array<string,mixed> */
-    private static function achatar(array $body): array
-    {
-        $out = $body;
-        foreach (['objetoResposta', 'respostaApiwsManifestoDTO'] as $key) {
-            $inner = $body[$key] ?? null;
-            if (!is_array($inner)) {
-                continue;
-            }
-            if (array_is_list($inner) && is_array($inner[0] ?? null)) {
-                $out = array_merge($out, $inner[0]);
-            } elseif (!array_is_list($inner)) {
-                $out = array_merge($out, $inner);
-            }
-        }
-
-        return $out;
-    }
-
     /** @param array<string,mixed> $flat */
     private static function extrairSituacao(array $flat): ?int
     {
-        foreach (['situacaoManifestoCodigo', 'manSituacaoCodigo', 'situacaoCodigo', 'manSituacao'] as $k) {
-            if (isset($flat[$k]) && $flat[$k] !== '' && $flat[$k] !== null) {
-                return (int)$flat[$k];
+        $valor = self::primeiroValor($flat, [
+            'situacaoManifestoCodigo',
+            'manSituacaoCodigo',
+            'situacaoCodigo',
+            'simCodigo',
+        ]);
+        if ($valor !== null && $valor !== '' && is_scalar($valor)) {
+            return (int)$valor;
+        }
+
+        $situacao = self::primeiroValor($flat, [
+            'situacaoManifesto',
+            'manSituacao',
+            'situacao',
+            'situacaoDescricao',
+            'descricaoSituacao',
+            'manSituacaoDescricao',
+        ]);
+        if (is_array($situacao)) {
+            $codigo = self::primeiroValor($situacao, ['codigo', 'id', 'simCodigo']);
+            if ($codigo !== null && $codigo !== '' && is_scalar($codigo)) {
+                return (int)$codigo;
+            }
+            $situacao = self::primeiroValor($situacao, ['descricao', 'nome', 'label']);
+        } elseif (is_scalar($situacao)) {
+            // tratado abaixo
+        }
+
+        if (is_scalar($situacao)) {
+            $texto = trim((string)$situacao);
+            if (ctype_digit($texto)) {
+                return (int)$texto;
+            }
+            $normalizada = mb_strtoupper($texto, 'UTF-8');
+            if (str_contains($normalizada, 'ARMAZEN')) {
+                return 9;
+            }
+            if (str_contains($normalizada, 'CANCEL')) {
+                return 4;
+            }
+            if (str_contains($normalizada, 'RECEB')) {
+                return 3;
+            }
+            if (str_contains($normalizada, 'SALV') || str_contains($normalizada, 'ATIV')
+                || str_contains($normalizada, 'EMIT')) {
+                return 1;
             }
         }
 
@@ -82,8 +112,14 @@ final class SinirConsultaParser
     /** @param array<string,mixed> $flat */
     private static function extrairManifestoNumero(array $flat): ?string
     {
-        foreach (['manifestoCodigo', 'manNumero', 'manifestoNumeroNacional', 'numeroManifesto'] as $k) {
-            $v = trim((string)($flat[$k] ?? ''));
+        $valor = self::primeiroValor($flat, [
+            'manifestoCodigo',
+            'manNumero',
+            'manifestoNumeroNacional',
+            'numeroManifesto',
+        ]);
+        if (is_scalar($valor)) {
+            $v = trim((string)$valor);
             if ($v !== '' && $v !== '0') {
                 return $v;
             }
@@ -95,13 +131,43 @@ final class SinirConsultaParser
     /** @param array<string,mixed> $flat */
     private static function extrairCodigoBarras(array $flat): string
     {
-        foreach (['codigoBarra', 'codigoBarras', 'manCodigoBarras', 'codigoDeBarras'] as $k) {
-            $v = trim((string)($flat[$k] ?? ''));
-            if ($v !== '') {
-                return $v;
-            }
+        $valor = self::primeiroValor($flat, [
+            'codigoBarra',
+            'codigoBarras',
+            'manCodigoBarras',
+            'codigoDeBarras',
+        ]);
+        if (is_scalar($valor)) {
+            return trim((string)$valor);
         }
 
         return '';
+    }
+
+    /**
+     * Busca recursiva tolerante às diferentes camadas de objetoResposta/DTO
+     * usadas pela API nacional e pelos conectores estaduais.
+     *
+     * @param string[] $keys
+     */
+    private static function primeiroValor(array $data, array $keys): mixed
+    {
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $data)) {
+                return $data[$key];
+            }
+        }
+
+        foreach ($data as $value) {
+            if (!is_array($value)) {
+                continue;
+            }
+            $found = self::primeiroValor($value, $keys);
+            if ($found !== null) {
+                return $found;
+            }
+        }
+
+        return null;
     }
 }
