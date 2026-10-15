@@ -398,14 +398,23 @@ class Coletas extends Page
             return CrudHelper::jsonError(implode(' ', $precheck['errors']));
         }
 
-        $result = ColetaService::gerarMtrSinir($id, true);
+        try {
+            $result = ColetaService::gerarMtrSinir($id, true);
+        } catch (\InvalidArgumentException $e) {
+            return CrudHelper::jsonError($e->getMessage());
+        } catch (\Throwable $e) {
+            error_log('[sinir_reenviar coleta '.$id.'] '.$e->getMessage());
+
+            return CrudHelper::jsonError('Erro ao emitir MTR: '.$e->getMessage());
+        }
+
         if (!empty($result['skipped'])) {
             return CrudHelper::jsonOk(['message' => $result['message']]);
         }
         if (!$result['ok']) {
-            $payload = ['success' => false, 'message' => $result['message']];
-            if (!empty($result['details'])) {
-                $payload['details'] = $result['details'];
+            $payload = ['success' => false, 'message' => (string)($result['message'] ?? 'Falha ao enviar ao SINIR.')];
+            if (!empty($result['details']) && is_array($result['details'])) {
+                $payload['details'] = self::compactSinirDetailsForApi($result['details']);
             }
             $ultimos = \App\Model\Entity\SinirEnvio::listByColeta($id, 1);
             if ($ultimos !== []) {
@@ -415,20 +424,35 @@ class Coletas extends Page
                 }
                 if (($u->response_payload ?? '') !== '') {
                     $payload['sinir_response'] = mb_substr($u->response_payload, 0, 1500);
-                    if (empty($payload['message']) || str_contains((string)$payload['message'], 'sem corpo')
-                        || preg_match('/HTTP\s+400\)\s*:?\s*$/', (string)$payload['message'])) {
-                        $payload['message'] = trim((string)$payload['message']."\n\n".$payload['sinir_response']);
+                    if ($payload['message'] === '' || str_contains($payload['message'], 'sem corpo')
+                        || preg_match('/HTTP\s+400\)\s*:?\s*$/', $payload['message'])) {
+                        $payload['message'] = trim($payload['message']."\n\n".$payload['sinir_response']);
                     }
                 }
             }
 
-            return json_encode($payload, JSON_UNESCAPED_UNICODE);
+            return CrudHelper::jsonEncode($payload);
         }
 
         return CrudHelper::jsonOk([
             'message' => $result['message'],
             'details' => $result['details'] ?? [],
         ]);
+    }
+
+    /** Evita resposta JSON gigante/inválida quando o SINIR devolve HTML ou corpo enorme. */
+    private static function compactSinirDetailsForApi(array $details): array
+    {
+        if (isset($details['sinir_body']) && is_array($details['sinir_body'])) {
+            $encoded = json_encode($details['sinir_body'], JSON_UNESCAPED_UNICODE);
+            if ($encoded === false || strlen($encoded) > 2500) {
+                unset($details['sinir_body']);
+                $details['sinir_body_resumo'] = 'Resposta SINIR extensa — veja o histórico em sinir_envios ou '
+                    .'php database/scripts/dump_last_sinir_envio.php {coleta_id}';
+            }
+        }
+
+        return $details;
     }
 
     public static function sinirCancelar($request): string

@@ -72,16 +72,54 @@
     return html;
   }
 
+  function failMessageFromXhr(xhr, fallback) {
+    var msg = fallback || 'Falha de rede.';
+    if (!xhr) {
+      return msg;
+    }
+    if (xhr.status === 0) {
+      return 'Sem resposta do servidor (timeout, conexão ou PHP interrompido). '
+        + 'Se demorou muito, tente de novo; confira também sinir_envios / dump_last_sinir_envio.php.';
+    }
+    var text = xhr.responseText || '';
+    if (text !== '') {
+      try {
+        var d = parseResp(JSON.parse(text));
+        if (d && d.message) {
+          return d.message;
+        }
+        if (d && d.sinir_hint) {
+          return d.sinir_hint;
+        }
+      } catch (e) {
+        var snippet = text.replace(/\s+/g, ' ').trim().substring(0, 500);
+        if (snippet) {
+          return 'HTTP ' + xhr.status + ': ' + snippet;
+        }
+      }
+    }
+    if (xhr.status) {
+      return 'HTTP ' + xhr.status + ' — ' + msg;
+    }
+    return msg;
+  }
+
   function doEnviarSinir(id) {
-    $.post(postUrl(), { acao: 'sinir_reenviar', id: id, _csrf: csrf() }, function (d) {
+    $.ajax({
+      url: postUrl(),
+      method: 'POST',
+      data: { acao: 'sinir_reenviar', id: id, _csrf: csrf() },
+      dataType: 'json',
+      timeout: 120000
+    }).done(function (d) {
       d = parseResp(d);
       if (d.success) {
         afterOk(id, d.message);
       } else {
         afterErr(d.message || d.sinir_hint || 'Erro ao emitir MTR.');
       }
-    }, 'json').fail(function () {
-      afterErr('Falha de rede.');
+    }).fail(function (xhr) {
+      afterErr(failMessageFromXhr(xhr, 'Falha de rede ao emitir MTR.'));
     });
   }
 

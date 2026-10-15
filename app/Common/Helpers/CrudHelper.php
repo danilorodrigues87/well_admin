@@ -6,12 +6,26 @@ class CrudHelper
 {
     public static function jsonOk(array $data = []): string
     {
-        return json_encode(array_merge(['success' => true], $data), JSON_UNESCAPED_UNICODE);
+        return self::jsonEncode(array_merge(['success' => true], $data));
     }
 
     public static function jsonError(string $message): string
     {
-        return json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
+        return self::jsonEncode(['success' => false, 'message' => $message]);
+    }
+
+    /** @param array<string,mixed> $data */
+    public static function jsonEncode(array $data): string
+    {
+        $flags = JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
+        if (defined('JSON_PARTIAL_OUTPUT_ON_ERROR')) {
+            $flags |= JSON_PARTIAL_OUTPUT_ON_ERROR;
+        }
+        $json = json_encode($data, $flags);
+
+        return is_string($json)
+            ? $json
+            : '{"success":false,"message":"Erro ao serializar resposta JSON."}';
     }
 
     public static function requireCsrf(array $post): ?string
