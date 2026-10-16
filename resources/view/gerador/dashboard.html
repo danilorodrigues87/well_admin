@@ -12,8 +12,8 @@
 
 {{agendamento_alert}}
 
-<div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-5 g-3 mb-4">
+    <div class="col">
         <div class="card border-start border-primary border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <div class="col">
         <div class="card border-start border-success border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -40,7 +40,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6 d-none d-xl-block">
+    <div class="col">
         <div class="card border-start border-secondary border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -53,7 +53,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <div class="col">
         <div class="card border-start border-warning border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -67,7 +67,7 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <div class="col">
         <div class="card border-start border-info border-4 h-100 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -99,20 +99,7 @@
             <div class="card-header bg-transparent"><i class="fas fa-chart-pie me-1 text-primary"></i> Boletos por status</div>
             <div class="card-body d-flex align-items-center justify-content-center">
                 <div style="height:280px;width:100%">
-                    <canvas id="chartBoletosStatus" data-well-chart="doughnut" data-labels='{{chart_boletos_labels}}' data-values='{{chart_boletos_values}}'></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-transparent"><i class="fas fa-chart-column me-1 text-primary"></i> Faturamento emitido (6 meses)</div>
-            <div class="card-body">
-                <div style="height:240px">
-                    <canvas id="chartFaturamento" data-well-chart="bar" data-labels='{{chart_faturamento_labels}}' data-values='{{chart_faturamento_values}}' data-label="Valor emitido" data-currency="1"></canvas>
+                    <canvas id="chartBoletosStatus" data-well-chart="doughnut" data-labels='{{chart_boletos_labels}}' data-values='{{chart_boletos_values}}' data-colors='{{chart_boletos_colors}}' data-empty="Nenhum boleto emitido."></canvas>
                 </div>
             </div>
         </div>

@@ -24,7 +24,6 @@ class Dashboard extends Page
         $agendamento = GeradorAgendamentoVisivelService::resumo($clienteId);
         $agendamentoHtml = self::renderAgendamentoAlert($agendamento);
         $coletasChart = GeradorDashboardService::coletasPorMes();
-        $faturamentoChart = GeradorDashboardService::faturamentoPorMes();
         $boletosChart = GeradorDashboardService::boletosPorStatus();
 
         $coletas = GeradorPortalService::listColetas(1, 5);
@@ -82,14 +81,13 @@ class Dashboard extends Page
             'boletos_rows' => $boletosHtml,
             'chart_coletas_labels' => json_encode($coletasChart['labels'], JSON_UNESCAPED_UNICODE),
             'chart_coletas_values' => json_encode($coletasChart['values']),
-            'chart_faturamento_labels' => json_encode($faturamentoChart['labels'], JSON_UNESCAPED_UNICODE),
-            'chart_faturamento_values' => json_encode($faturamentoChart['values']),
             'chart_boletos_labels' => json_encode($boletosChart['labels'], JSON_UNESCAPED_UNICODE),
             'chart_boletos_values' => json_encode($boletosChart['values']),
+            'chart_boletos_colors' => json_encode($boletosChart['colors']),
         ]);
 
         $scripts = '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>'
-            .'<script src="'.URL.'/resources/js/dashboard-charts.js?v=20260916i"></script>';
+            .'<script src="'.URL.'/resources/js/dashboard-charts.js?v=20261016a"></script>';
 
         return self::render('Início', $content, 'dashboard', $scripts);
     }

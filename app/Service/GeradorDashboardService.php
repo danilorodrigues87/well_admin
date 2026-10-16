@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Common\GeradorScope;
+use App\Common\Helpers\FormatHelper;
 use App\Model\Db\Database;
 use App\Model\Entity\Coleta as EntityColeta;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
@@ -81,30 +82,12 @@ class GeradorDashboardService
         return ['labels' => $labels, 'values' => $values];
     }
 
-    /** @return array{labels:list<string>,values:list<float>} */
-    public static function faturamentoPorMes(int $meses = 6): array
-    {
-        $clienteId = GeradorScope::getClienteId();
-        $opId = GeradorScope::getOperadoraId();
-        $db = new Database();
-        $labels = [];
-        $values = [];
-
-        for ($i = $meses - 1; $i >= 0; $i--) {
-            $ref = strtotime('-'.$i.' months');
-            $comp = date('Y-m', $ref);
-            $labels[] = self::mesLabel($ref);
-            $values[] = (float)$db->execute(
-                'SELECT COALESCE(SUM(valor_nominal), 0) AS total FROM inter_cobrancas
-                 WHERE cliente_id = ? AND operadora_id = ? AND competencia = ?',
-                [$clienteId, $opId, $comp]
-            )->fetch(\PDO::FETCH_ASSOC)['total'];
-        }
-
-        return ['labels' => $labels, 'values' => $values];
-    }
-
-    /** @return array{labels:list<string>,values:list<int>} */
+    /**
+     * Agrupa pelo rótulo do portal (Pago, Em aberto, Vencido, Cancelado).
+     * O status cru do Inter, como A_RECEBER, não aparece na legenda.
+     *
+     * @return array{labels:list<string>,values:list<int>,colors:list<string>}
+     */
     public static function boletosPorStatus(): array
     {
         $clienteId = GeradorScope::getClienteId();
@@ -113,18 +96,42 @@ class GeradorDashboardService
         $stmt = $db->execute(
             'SELECT status, COUNT(*) AS qtd FROM inter_cobrancas
              WHERE cliente_id = ? AND operadora_id = ?
-             GROUP BY status ORDER BY qtd DESC',
+             GROUP BY status',
             [$clienteId, $opId]
         );
 
-        $labels = [];
-        $values = [];
+        $agregado = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $labels[] = (string)$row['status'];
-            $values[] = (int)$row['qtd'];
+            $label = FormatHelper::statusBoleto((string)$row['status'])['label'];
+            $agregado[$label] = ($agregado[$label] ?? 0) + (int)$row['qtd'];
         }
 
-        return ['labels' => $labels, 'values' => $values];
+        $ordem = ['Em aberto', 'Vencido', 'Pago', 'Cancelado'];
+        $labels = [];
+        $values = [];
+        $colors = [];
+        $cor = [
+            'Em aberto' => '#0288D1',
+            'Vencido' => '#D32F2F',
+            'Pago' => '#2E7D32',
+            'Cancelado' => '#6c757d',
+        ];
+        foreach ($ordem as $label) {
+            if (!isset($agregado[$label])) {
+                continue;
+            }
+            $labels[] = $label;
+            $values[] = $agregado[$label];
+            $colors[] = $cor[$label];
+            unset($agregado[$label]);
+        }
+        foreach ($agregado as $label => $qtd) {
+            $labels[] = $label;
+            $values[] = $qtd;
+            $colors[] = '#00897B';
+        }
+
+        return ['labels' => $labels, 'values' => $values, 'colors' => $colors];
     }
 
     private static function mesLabel(int $timestamp): string

@@ -171,12 +171,17 @@
     });
   }
 
-  function renderDoughnut(id, labels, values) {
+  function renderDoughnut(id, labels, values, colors) {
     if (typeof Chart === 'undefined') return;
     destroy(id);
     var canvas = document.getElementById(id);
     if (!canvas) return;
-    if (!labels.length || !values.length) {
+    var total = (values || []).reduce(function (sum, n) { return sum + Number(n || 0); }, 0);
+    if (!labels.length || !values.length || total <= 0) {
+      var vazio = document.createElement('p');
+      vazio.className = 'text-muted text-center mb-0';
+      vazio.textContent = canvas.getAttribute('data-empty') || 'Sem dados para exibir.';
+      canvas.replaceWith(vazio);
       return;
     }
     var c = themeColors();
@@ -186,7 +191,7 @@
         labels: labels,
         datasets: [{
           data: values,
-          backgroundColor: c.palette.slice(0, labels.length),
+          backgroundColor: (colors && colors.length) ? colors : c.palette.slice(0, labels.length),
           borderWidth: 0,
         }],
       },
@@ -206,13 +211,14 @@
       var values = JSON.parse(el.getAttribute('data-values') || '[]');
       var label = el.getAttribute('data-label') || '';
       var currency = el.getAttribute('data-currency') === '1';
+      var colors = el.getAttribute('data-colors');
       if (type === 'bar-dual') {
         var values2 = JSON.parse(el.getAttribute('data-values2') || '[]');
         var label2 = el.getAttribute('data-label2') || '';
         renderBarDual(id, labels, values, values2, label, label2, currency);
       } else if (type === 'bar') renderBar(id, labels, values, label, currency);
       else if (type === 'line') renderLine(id, labels, values, label, currency);
-      else if (type === 'doughnut') renderDoughnut(id, labels, values);
+      else if (type === 'doughnut') renderDoughnut(id, labels, values, colors ? JSON.parse(colors) : null);
     });
   }
 

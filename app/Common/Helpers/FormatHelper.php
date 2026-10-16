@@ -69,7 +69,7 @@ class FormatHelper
     {
         return match (strtoupper($status)) {
             'PAGO', 'RECEBIDO' => ['label' => 'Pago', 'class' => 'success'],
-            'EMITIDA', 'A_RECEBER' => ['label' => 'Em aberto', 'class' => 'primary'],
+            'EMITIDA', 'A_RECEBER', 'A RECEBER' => ['label' => 'Em aberto', 'class' => 'primary'],
             'VENCIDA', 'ATRASADO' => ['label' => 'Vencido', 'class' => 'danger'],
             'CANCELADA', 'CANCELADO' => ['label' => 'Cancelado', 'class' => 'secondary'],
             default => ['label' => $status, 'class' => 'secondary'],
