@@ -1,0 +1,129 @@
+<h1 class="mt-2">Certificados</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item active">Certificados</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-certificate me-1"></i> CDF e MTR oficial</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">Um CDF do SINIR reúne os MTRs recebidos do gerador no período. O PDF fica disponível aqui na hora. No portal do cliente, MTR oficial e CDF só aparecem depois de Liberar. O relatório da coleta continua disponível assim que a coleta é finalizada.</p>
+        <form id="crud-form">{{csrf_field}}</form>
+        <div id="barra-filtros-lista" class="row g-2 align-items-end mb-3">
+            <div class="col-md-4">
+                <label class="form-label small mb-0">Gerador (cliente)</label>
+                <select name="cliente_id" class="form-select">{{clientes_options}}</select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-0">De</label>
+                <input type="date" name="data_inicio" class="form-control" value="{{data_inicio}}"/>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small mb-0">Até</label>
+                <input type="date" name="data_fim" class="form-control" value="{{data_fim}}"/>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100" onclick="listar(null, 1)"><i class="fas fa-search me-1"></i> Filtrar</button>
+            </div>
+        </div>
+        <div id="cdf-aviso"></div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="button" class="btn btn-sm btn-primary" onclick="cdfGerar()"><i class="fas fa-certificate me-1"></i> Gerar CDF</button>
+            <button type="button" class="btn btn-sm btn-outline-success" onclick="cdfLiberacao('liberar', 'mtr')">Liberar MTR</button>
+            <button type="button" class="btn btn-sm btn-outline-warning" onclick="cdfLiberacao('reter', 'mtr')">Reter MTR</button>
+            <button type="button" class="btn btn-sm btn-outline-success" onclick="cdfLiberacao('liberar', 'cdf')">Liberar CDF</button>
+            <button type="button" class="btn btn-sm btn-outline-warning" onclick="cdfLiberacao('reter', 'cdf')">Reter CDF</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:2rem"><input class="form-check-input" type="checkbox" id="cdf-check-all" onclick="cdfMarcarTodos(this)"></th>
+                        <th>Coleta</th>
+                        <th>MTR</th>
+                        <th>Recebimento SINIR</th>
+                        <th>CDF</th>
+                        <th>MTR no portal</th>
+                        <th>CDF no portal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="crud-tbody"></tbody>
+            </table>
+        </div>
+        <div id="crud-pagination"></div>
+    </div>
+</div>
+
+<script>
+function cdfCsrf() {
+  var el = document.querySelector('#crud-form input[name=_csrf]');
+  return el ? el.value : '';
+}
+function cdfIds() {
+  var ids = [];
+  document.querySelectorAll('.cdf-check:checked').forEach(function (el) { ids.push(el.value); });
+  return ids;
+}
+function cdfMarcarTodos(master) {
+  document.querySelectorAll('.cdf-check').forEach(function (el) { el.checked = master.checked; });
+}
+function cdfAvisar(ok, mensagem) {
+  if (typeof Swal === 'undefined') {
+    alert(mensagem);
+    return;
+  }
+  Swal.fire(ok ? 'Certificados' : 'Erro', mensagem, ok ? 'success' : 'error');
+}
+function cdfPost(acao, extra) {
+  var ids = cdfIds();
+  if (!ids.length) {
+    cdfAvisar(false, 'Selecione ao menos uma coleta.');
+    return;
+  }
+  var data = { acao: acao, _csrf: cdfCsrf(), ids: ids };
+  if (extra) {
+    Object.keys(extra).forEach(function (k) { data[k] = extra[k]; });
+  }
+  $.ajax({ url: window.CRUD.baseUrl, method: 'POST', data: data, dataType: 'json' })
+    .done(function (d) {
+      d = typeof d === 'object' ? d : JSON.parse(d);
+      cdfAvisar(!!d.success, d.message || (d.success ? 'Concluído.' : 'Não foi possível concluir.'));
+      if (d.success && typeof listar === 'function') listar(null, 1);
+    })
+    .fail(function () { cdfAvisar(false, 'Falha ao falar com o servidor.'); });
+}
+function cdfGerar() {
+  var n = cdfIds().length;
+  if (!n) {
+    cdfAvisar(false, 'Selecione as coletas recebidas que ainda não têm CDF.');
+    return;
+  }
+  var seguir = function () { cdfPost('gerar'); };
+  if (typeof Swal === 'undefined') {
+    if (confirm('Gerar um CDF do SINIR para ' + n + ' coleta(s)?')) seguir();
+    return;
+  }
+  Swal.fire({
+    title: 'Gerar CDF',
+    text: 'Um certificado do SINIR para ' + n + ' coleta(s) selecionada(s). O portal do cliente continua sem o PDF até você liberar.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Gerar',
+    cancelButtonText: 'Cancelar'
+  }).then(function (r) { if (r.isConfirmed) seguir(); });
+}
+function cdfLiberacao(acao, documento) {
+  cdfPost(acao, { documento: documento });
+}
+$(document).ajaxSuccess(function (_e, xhr, settings) {
+  if (!settings.url || String(settings.url).indexOf('/painel/cdf') === -1) return;
+  var d = xhr.responseJSON;
+  if (d && d.aviso !== undefined) {
+    var alvo = document.getElementById('cdf-aviso');
+    if (alvo) alvo.innerHTML = d.aviso;
+  }
+  var master = document.getElementById('cdf-check-all');
+  if (master) master.checked = false;
+});
+</script>

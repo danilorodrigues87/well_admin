@@ -35,7 +35,7 @@ class Coletas extends Page
                 <td>'.FormatHelper::dateBr((string)($c['data_coleta'] ?? '')).'</td>
                 <td>'.FormatHelper::horaBr((string)($c['hora'] ?? '')).'</td>
                 <td>'.FormatHelper::statusColetaBadge((string)($c['status'] ?? '')).'</td>
-                <td>'.FormatHelper::situacaoRecebimentoBadge((string)($c['situacao_recebimento'] ?? 'pendente')).'</td>
+                <td>'.FormatHelper::recebimentoSinirBadge(!empty($c['sinir_recebido_em'])).'</td>
                 <td class="text-end">
                     <a class="btn btn-sm btn-outline-primary" href="'.URL.'/gerador/coletas/'.(int)$c['id'].'">
                         <i class="fas fa-eye me-1"></i> Detalhes
@@ -87,12 +87,12 @@ class Coletas extends Page
         $mtrLink = !empty($coleta['mtr_disponivel'])
             ? '<a class="btn btn-primary" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/mtr"><i class="fas fa-print me-1"></i> Relatório da coleta</a>'
             : '<span class="text-muted small">Relatório disponível após a coleta.</span>';
-        if (trim((string)($coleta['sinir_man_numero'] ?? '')) !== '') {
+        if (!empty($coleta['mtr_oficial_disponivel'])) {
             $mtrLink .= ' <a class="btn btn-outline-primary" href="'.URL.'/gerador/coletas/'.$id.'/mtr-oficial"><i class="fas fa-file-pdf me-1"></i> MTR oficial</a>';
         }
         $cdfRotulo = !empty($coleta['cdf_rotulo']) ? (string)$coleta['cdf_rotulo'] : 'Documento PDF';
         $cdfLink = !empty($coleta['cdf_disponivel'])
-            ? ' <a class="btn btn-outline-success" target="_blank" href="'.URL.'/gerador/coletas/'.$id.'/cdf"><i class="fas fa-file-pdf me-1"></i> '
+            ? ' <a class="btn btn-outline-success" href="'.URL.'/gerador/coletas/'.$id.'/cdf"><i class="fas fa-file-pdf me-1"></i> '
                 .CrudHelper::e($cdfRotulo).'</a>'
             : '';
         $mtrLink .= $cdfLink;
@@ -140,7 +140,7 @@ class Coletas extends Page
             'hora' => FormatHelper::horaBr((string)($coleta['hora'] ?? '')),
             'status_badge' => FormatHelper::statusColetaBadge((string)($coleta['status'] ?? ''))
                 .FormatHelper::sinirStatusBadge($coleta['sinir_status'] ?? null, (string)($coleta['status'] ?? '')),
-            'recebimento_badge' => FormatHelper::situacaoRecebimentoBadge((string)($coleta['situacao_recebimento'] ?? 'pendente')),
+            'recebimento_badge' => FormatHelper::recebimentoSinirBadge(!empty($coleta['sinir_recebido_em'])),
             'data_recebimento' => FormatHelper::dateBr((string)($coleta['data_recebimento'] ?? '')),
             'itens_rows' => $itensHtml,
             'mtr_link' => $mtrLink,
@@ -178,7 +178,7 @@ class Coletas extends Page
             return View::render('erros/404', ['URL' => URL]);
         }
         $c = EntityColeta::getById($id);
-        if (!$c) {
+        if (!$c || empty($c->cdf_liberado_em)) {
             return View::render('erros/404', ['URL' => URL]);
         }
         $path = ColetaCdfService::absolutePath($c);
@@ -201,7 +201,7 @@ class Coletas extends Page
 
         $c = EntityColeta::getById($id);
         $manNumero = $c ? trim((string)($c->sinir_man_numero ?? '')) : '';
-        if (!$c || $manNumero === '') {
+        if (!$c || $manNumero === '' || empty($c->mtr_oficial_liberado_em)) {
             return new Response(404, View::render('erros/404', ['URL' => URL]));
         }
 

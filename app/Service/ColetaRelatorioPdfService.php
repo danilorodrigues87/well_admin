@@ -108,7 +108,7 @@ class ColetaRelatorioPdfService
             'destinador_telefone' => CrudHelper::e($s?->destinador_telefone ?? ''),
             'destinador_responsavel' => CrudHelper::e(mb_strtoupper((string)($s?->destinador_responsavel ?? ''), 'UTF-8')),
             'data_recebimento' => $c->data_recebimento ? date('d/m/Y', strtotime($c->data_recebimento)) : '—',
-            'situacao_recebimento' => $c->situacao_recebimento === 'recebido' ? 'RECEBIDO' : 'NÃO RECEBIDO',
+            'situacao_recebimento' => !empty($c->sinir_recebido_em) ? 'RECEBIDO NO SINIR' : 'AGUARDANDO SINIR',
             'tratamento' => CrudHelper::e(mb_strtoupper((string)($c->tratamento ?? ''), 'UTF-8')),
             'itens_html' => $itensHtml,
             'total_peso' => number_format($totalKg, 3, ',', '.').' KG',

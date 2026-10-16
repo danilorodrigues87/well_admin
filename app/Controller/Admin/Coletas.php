@@ -292,23 +292,17 @@ class Coletas extends Page
                 .' title="Etapa do destinador após a coleta operacional ter sido finalizada">'
                 .'<i class="fas fa-warehouse me-1"></i> Confirmar recebimento no portal SINIR</button>';
         }
-        if ($sinirJaEnviado && SinirConfig::isEnabled() && !ColetaCdfService::temCdf($c)) {
-            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-info" onclick="sinirBaixarPdf('.$c->id.')"><i class="fas fa-file-pdf me-1"></i> Baixar PDF MTR</button>';
-        }
-        if (ColetaMtrHelper::podeEmitirCdfSinir($c)) {
-            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-primary" onclick="sinirEmitirCdf('.$c->id.')"><i class="fas fa-certificate me-1"></i> Emitir CDF SINIR</button>';
-        }
-        if (!empty($c->sinir_cdf_codigo) && SinirConfig::isEnabled()) {
-            $sinirReenviarBtn .= ' <button type="button" class="btn btn-sm btn-outline-info" onclick="sinirBaixarCdf('.$c->id.')"><i class="fas fa-download me-1"></i> Baixar PDF CDF</button>';
-        }
-        $cdfAdminHtml = '';
-        if (ColetaCdfService::temCdf($c)) {
-            $rotulo = CrudHelper::e(ColetaCdfService::rotuloTipo($c->cdf_tipo, $c->sinir_cdf_codigo));
-            $cdfAdminHtml = '<p class="small mb-1"><strong>Tipo:</strong> '.$rotulo.'</p>'
-                .'<a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/coletas/cdf/'.$c->id.'" target="_blank"><i class="fas fa-file-pdf me-1"></i> Abrir PDF</a>';
-        } else {
-            $cdfAdminHtml = '<span class="text-muted small">Sem PDF — receba no SINIR, emita CDF ou envie manualmente.</span>';
-        }
+        $cdfNumero = trim((string)($c->sinir_cdf_codigo ?? ''));
+        $cdfEstado = $cdfNumero !== ''
+            ? 'CDF #'.$cdfNumero.' · '.(!empty($c->cdf_liberado_em) ? 'liberado no portal' : 'retido no portal')
+            : 'CDF ainda não gerado';
+        $mtrEstado = trim((string)($c->sinir_man_numero ?? '')) !== ''
+            ? 'MTR oficial · '.(!empty($c->mtr_oficial_liberado_em) ? 'liberado no portal' : 'retido no portal')
+            : 'MTR oficial ainda não disponível';
+        $cdfAdminHtml = '<p class="small mb-1">'.CrudHelper::e($cdfEstado).'</p>'
+            .'<p class="small mb-2">'.CrudHelper::e($mtrEstado).'</p>'
+            .'<a class="btn btn-sm btn-outline-primary" href="'.URL.'/painel/cdf?cliente_id='.$c->cliente_id.'">'
+            .'<i class="fas fa-certificate me-1"></i> Certificados</a>';
 
         $html = View::render('admin/modules/coletas/detalhe', [
             'mtr_print_btn' => $mtrPrintBtn,
@@ -590,6 +584,11 @@ class Coletas extends Page
             return View::render('erros/404', ['URL' => URL]);
         }
         $path = ColetaCdfService::absolutePath($c);
+        if ($path === null && !empty($c->sinir_cdf_codigo) && SinirConfig::isEnabled()) {
+            (new \App\Service\Sinir\SinirCdfService())->baixarPdfCdf($id);
+            $c = EntityColeta::getById($id);
+            $path = $c ? ColetaCdfService::absolutePath($c) : null;
+        }
         if ($path === null) {
             return View::render('erros/404', ['URL' => URL]);
         }

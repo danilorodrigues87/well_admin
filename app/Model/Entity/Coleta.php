@@ -42,6 +42,8 @@ class Coleta
     public ?string $cdf_obtido_em = null;
     public ?string $sinir_cdf_codigo = null;
     public ?string $cdf_tipo = null;
+    public ?string $mtr_oficial_liberado_em = null;
+    public ?string $cdf_liberado_em = null;
     public ?string $created_at = null;
     public ?string $finalized_at = null;
 
@@ -177,6 +179,10 @@ class Coleta
         $c->cdf_obtido_em = $row['cdf_obtido_em'] ?? null;
         $c->sinir_cdf_codigo = isset($row['sinir_cdf_codigo']) ? (string)$row['sinir_cdf_codigo'] : null;
         $c->cdf_tipo = isset($row['cdf_tipo']) ? (string)$row['cdf_tipo'] : null;
+        $c->mtr_oficial_liberado_em = !empty($row['mtr_oficial_liberado_em'])
+            ? (string)$row['mtr_oficial_liberado_em'] : null;
+        $c->cdf_liberado_em = !empty($row['cdf_liberado_em'])
+            ? (string)$row['cdf_liberado_em'] : null;
         $c->created_at = isset($row['created_at']) ? (string)$row['created_at'] : null;
         $c->finalized_at = isset($row['finalized_at']) ? (string)$row['finalized_at'] : null;
 

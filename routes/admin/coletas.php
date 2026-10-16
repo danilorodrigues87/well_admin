@@ -1,6 +1,7 @@
 <?php
 
 use App\Controller\Admin\Agendamentos;
+use App\Controller\Admin\Cdf;
 use App\Controller\Admin\ColetaNova;
 use App\Controller\Admin\Coletas;
 use App\Controller\Admin\FrotaMapa;
@@ -88,6 +89,36 @@ $obRouter->get('/painel/coletas/mtr/{id}', [
     'middlewares' => ['required-admin-login', 'required-module:coletas'],
     function ($request, int $id) {
         return new Response(200, Coletas::mtrPrint($request, $id));
+    },
+]);
+
+$obRouter->get('/painel/cdf', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request) {
+        return new Response(200, Cdf::index($request));
+    },
+]);
+
+$obRouter->post('/painel/cdf', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request) {
+        $acao = $request->getPostVars()['acao'] ?? 'listar';
+        $content = match ($acao) {
+            'listar' => Cdf::list($request),
+            'gerar' => Cdf::gerar($request),
+            'liberar' => Cdf::liberar($request, true),
+            'reter' => Cdf::liberar($request, false),
+            default => json_encode(['success' => false, 'message' => 'Ação inválida']),
+        };
+
+        return new Response(200, $content, 'application/json');
+    },
+]);
+
+$obRouter->get('/painel/cdf/mtr/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request, int $id) {
+        return Cdf::baixarMtr($request, $id);
     },
 ]);
 

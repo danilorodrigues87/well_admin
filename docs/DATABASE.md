@@ -95,6 +95,8 @@ Legado para ETL: banco `well_antigo` (dump `wellec99_app.sql`).
 | `coletas.cdf_obtido_em` | Quando o PDF foi gravado |
 | `coletas.sinir_cdf_codigo` | Número do certificado retornado por `emiteCDF` (`047`) |
 | `coletas.cdf_tipo` | `mtr_pdf` / `manual` / `sinir_cdf` |
+| `coletas.mtr_oficial_liberado_em` | Quando o admin liberou o PDF oficial do MTR no portal (`055`). NULL = retido |
+| `coletas.cdf_liberado_em` | Quando o admin liberou o CDF no portal (`055`). NULL = retido. Emitir o certificado não preenche |
 | `dmr_declaracoes` | Snapshot DMR por `cliente_id` + competência `YYYY-MM` (`048`) |
 | `tipos_residuos.tra_codigo` … `uni_codigo` | Mapeamento códigos API (`codigoTecnologia`, `codigoTipoEstado`, etc.) |
 | `clientes.sinir_cod_unidade` | Código unidade do gerador no portal MTR (`010_clientes_sinir_unidade.sql`) |

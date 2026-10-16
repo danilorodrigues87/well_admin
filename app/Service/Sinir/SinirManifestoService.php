@@ -416,7 +416,7 @@ class SinirManifestoService
             $msg .= ' · código de barras atualizado.';
         }
         if (!empty($update['sinir_cdf_codigo'])) {
-            $msg .= ' · CDF #'.$update['sinir_cdf_codigo'].' vinculado. Use Baixar PDF CDF.';
+            $msg .= ' · CDF #'.$update['sinir_cdf_codigo'].' vinculado. Baixe o PDF em Certificados.';
         }
 
         return [

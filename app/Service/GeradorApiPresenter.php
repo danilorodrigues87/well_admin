@@ -36,7 +36,8 @@ class GeradorApiPresenter
             'status' => $c->status,
             'data_coleta' => $c->data_coleta,
             'hora' => $c->hora,
-            'situacao_recebimento' => $c->situacao_recebimento,
+            'situacao_recebimento' => !empty($c->sinir_recebido_em) ? 'recebido' : 'pendente',
+            'sinir_recebido_em' => $c->sinir_recebido_em,
             'sinir_status' => $c->sinir_status,
         ];
     }
@@ -56,18 +57,27 @@ class GeradorApiPresenter
         $base['coleta']['mtr_url'] = ColetaMtrHelper::temMtr($c)
             ? URL.'/gerador/coletas/'.$c->id.'/mtr'
             : null;
-        $temMtrOficial = trim((string)($c->sinir_man_numero ?? '')) !== '';
+        $temMtrOficial = trim((string)($c->sinir_man_numero ?? '')) !== '' && !empty($c->mtr_oficial_liberado_em);
+        $base['coleta']['sinir_recebido_em'] = $c->sinir_recebido_em;
+        $base['coleta']['situacao_recebimento'] = !empty($c->sinir_recebido_em) ? 'recebido' : 'pendente';
         $base['coleta']['mtr_oficial_disponivel'] = $temMtrOficial;
         $base['coleta']['mtr_oficial_url'] = $temMtrOficial
             ? URL.'/gerador/coletas/'.$c->id.'/mtr-oficial'
             : null;
-        $base['coleta']['cdf_disponivel'] = ColetaCdfService::temCdf($c);
-        $base['coleta']['cdf_url'] = ColetaCdfService::temCdf($c)
+        $cdfLiberado = !empty($c->cdf_liberado_em) && ColetaCdfService::temCdf($c);
+        $base['coleta']['cdf_disponivel'] = $cdfLiberado;
+        $base['coleta']['cdf_url'] = $cdfLiberado
             ? URL.'/gerador/coletas/'.$c->id.'/cdf'
             : null;
-        $base['coleta']['cdf_rotulo'] = ColetaCdfService::temCdf($c)
+        $base['coleta']['cdf_rotulo'] = $cdfLiberado
             ? ColetaCdfService::rotuloTipo($c->cdf_tipo, $c->sinir_cdf_codigo)
             : null;
+        $encerramento = $c->data_recebimento
+            ? date('d/m/Y', strtotime((string)$c->data_recebimento))
+            : '';
+        $base['resumo']['recebimento_label'] = !empty($c->sinir_recebido_em)
+            ? 'Recebido no SINIR'.($encerramento !== '' ? ' · encerramento '.$encerramento : '')
+            : 'Aguardando SINIR'.($encerramento !== '' ? ' · encerramento '.$encerramento : '');
         $base['coleta']['numero_relatorio'] = ColetaMtrHelper::numeroRelatorioExibicao($c);
 
         foreach ($base['evidencias'] as $i => $ev) {

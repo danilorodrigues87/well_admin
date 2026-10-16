@@ -150,7 +150,7 @@ class SinirCdfService
             if ($criado) {
                 return [
                     'ok' => true,
-                    'message' => 'Certificado criado no SINIR. O número ainda não voltou na consulta do MTR. Clique em Emitir CDF SINIR de novo para vincular o PDF.',
+                    'message' => 'Certificado criado no SINIR. O número ainda não voltou na consulta do MTR. Gere de novo em Certificados para vincular o PDF.',
                 ];
             }
             $msg = self::mensagemFalhaCdf($body, (string)($response['error'] ?? ''));
@@ -205,15 +205,259 @@ class SinirCdfService
         if (!$pdf['ok']) {
             return [
                 'ok' => true,
-                'message' => 'CDF emitido (#'.$certCodigo.'). O botão Baixar PDF CDF está na coleta. Falha ao gravar agora: '.$pdf['message'],
+                'message' => 'CDF emitido (#'.$certCodigo.'). Baixe o PDF em Certificados. Falha ao gravar agora: '.$pdf['message'],
                 'details' => ['sinir_cdf_codigo' => $certCodigo],
             ];
         }
 
         return [
             'ok' => true,
-            'message' => 'CDF SINIR #'.$certCodigo.' emitido. Use Baixar PDF CDF na coleta.',
+            'message' => 'CDF SINIR #'.$certCodigo.' emitido. O PDF fica retido no portal até liberar em Certificados.',
             'details' => ['sinir_cdf_codigo' => $certCodigo],
+        ];
+    }
+
+    /**
+     * Um certificado SINIR para vários MTRs nacionais do mesmo gerador e destinador.
+     * Não preenche cdf_liberado_em.
+     *
+     * @param list<int> $coletaIds
+     * @return array{ok:bool,message:string,details?:array<string,mixed>}
+     */
+    public function emitirCdfLote(array $coletaIds): array
+    {
+        if (!SinirConfig::isEnabled()) {
+            return ['ok' => false, 'message' => 'Integração SINIR desabilitada.'];
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map('intval', $coletaIds), static fn (int $id): bool => $id > 0)));
+        if ($ids === []) {
+            return ['ok' => false, 'message' => 'Selecione ao menos uma coleta.'];
+        }
+        if (count($ids) > 80) {
+            return ['ok' => false, 'message' => 'Selecione no máximo 80 coletas por certificado.'];
+        }
+
+        $coletas = [];
+        foreach ($ids as $id) {
+            $coleta = EntityColeta::getById($id);
+            if (!$coleta) {
+                return ['ok' => false, 'message' => 'Coleta #'.$id.' não encontrada.'];
+            }
+            $coletas[] = $coleta;
+        }
+
+        $clienteId = (int)$coletas[0]->cliente_id;
+        $destinadorId = (int)($coletas[0]->destinador_id ?? 0);
+        $manifestos = [];
+        $datas = [];
+        foreach ($coletas as $coleta) {
+            if ((int)$coleta->cliente_id !== $clienteId) {
+                return ['ok' => false, 'message' => 'O certificado em lote precisa ser do mesmo gerador.'];
+            }
+            if ((int)($coleta->destinador_id ?? 0) !== $destinadorId) {
+                return ['ok' => false, 'message' => 'Selecione coletas do mesmo destinador.'];
+            }
+            if ($coleta->status !== 'finalizada' || ($coleta->sinir_status ?? '') !== 'enviado') {
+                return ['ok' => false, 'message' => 'A coleta #'.$coleta->id.' ainda não tem MTR registrado no SINIR.'];
+            }
+            if (empty($coleta->sinir_recebido_em)) {
+                return ['ok' => false, 'message' => 'A coleta #'.$coleta->id.' ainda não foi recebida no SINIR.'];
+            }
+            if (!empty($coleta->sinir_cdf_codigo)) {
+                return ['ok' => false, 'message' => 'A coleta #'.$coleta->id.' já tem CDF #'.$coleta->sinir_cdf_codigo.'. Retire-a da seleção.'];
+            }
+            $man = trim((string)($coleta->sinir_man_numero ?? ''));
+            $digitos = preg_replace('/\D/', '', $man) ?? '';
+            if (strlen($digitos) <= 10) {
+                return ['ok' => false, 'message' => 'A coleta #'.$coleta->id.' não tem MTR nacional para entrar no CDF.'];
+            }
+            $manifestos[] = $man;
+            $ref = trim((string)($coleta->data_recebimento ?: $coleta->data_coleta ?: ''));
+            if ($ref === '') {
+                return ['ok' => false, 'message' => 'A coleta #'.$coleta->id.' está sem data de encerramento.'];
+            }
+            $datas[] = $ref;
+        }
+
+        $destinador = $destinadorId > 0
+            ? EntityDestinador::getById($destinadorId)
+            : EntityDestinador::getPadrao();
+        $respCdf = trim((string)($destinador?->sinir_responsavel_cdf ?? ''));
+        $resp = $respCdf !== '' ? $respCdf : trim((string)($destinador?->responsavel ?? ''));
+        if ($resp === '') {
+            return ['ok' => false, 'message' => 'Destinador sem responsável técnico do CDF.'];
+        }
+        $unidade = (int)($destinador?->sinir_cod_unidade ?? 0);
+        $cnpjDest = preg_replace('/\D/', '', (string)($destinador?->cnpj ?? '')) ?? '';
+        if ($unidade <= 0 || $cnpjDest === '') {
+            return ['ok' => false, 'message' => 'Destinador sem unidade SINIR ou CNPJ para emitir o CDF.'];
+        }
+
+        sort($datas);
+        [$inicioMs, $fimMs] = self::periodoEntreEpochMs($datas[0], $datas[count($datas) - 1]);
+        $lista = [];
+        foreach ($manifestos as $man) {
+            $lista[] = ['manNumero' => $man];
+        }
+        $payload = [
+            'cerDataInicial' => $inicioMs,
+            'cerDataFinal' => $fimMs,
+            'cerObservacao' => mb_substr('CDF do período · '.count($ids).' MTR', 0, 255),
+            'parceiroDestinador' => $unidade,
+            'cnpjDestinador' => $cnpjDest,
+            'tipoCertificadoDestinacao' => 1,
+            'listaManifesto' => $lista,
+            'listaParceiroGerador' => [],
+            'nomeResponsavel' => mb_substr($resp, 0, 255),
+        ];
+
+        $credentials = (new SinirCredentialsResolver())->forRecebimento((int)$ids[0]);
+        if (!$credentials['ok']) {
+            return ['ok' => false, 'message' => implode(' ', $credentials['errors'])];
+        }
+        $tokenResult = $this->auth->obtainAccessToken(false, $credentials['integration_token']);
+        if (!$tokenResult['ok'] || empty($tokenResult['token'])) {
+            return ['ok' => false, 'message' => 'Autenticação SINIR: '.($tokenResult['error'] ?? 'falha')];
+        }
+        $token = $tokenResult['token'];
+
+        $ja = $this->codigosJaEmitidos($ids, $manifestos, $token);
+        if ($ja['erro'] !== null) {
+            return ['ok' => false, 'message' => $ja['erro']];
+        }
+        if ($ja['codigo'] !== null) {
+            return $this->concluirEmissaoCdfLote($ids, $payload, ['mensagem' => 'CDF já constava no SINIR.'], $ja['codigo'], $token);
+        }
+
+        $response = $this->gateway->post('emiteCDF', $payload, $token);
+        $body = $response['body'] ?? [];
+        if (!is_array($body)) {
+            return ['ok' => false, 'message' => $response['error'] ?? 'Resposta inválida do SINIR.'];
+        }
+
+        $certCodigo = self::extrairCodigoCertificadoNacional($body);
+        $criado = self::corpoIndicaCdfCriado($body);
+        if ($certCodigo === null && ($criado || $response['ok'])) {
+            $certCodigo = $this->localizarCdfExistente((int)$ids[0], $manifestos[0], $token);
+        }
+        $sucesso = $certCodigo !== null && ($criado || ($response['ok'] && empty($body['erro'])));
+        if (!$sucesso) {
+            $msg = self::mensagemFalhaCdf($body, (string)($response['error'] ?? ''));
+            if (stripos($msg, 'pertence a outro CDF') !== false) {
+                $recuperado = $this->codigosJaEmitidos($ids, $manifestos, $token);
+                if ($recuperado['codigo'] !== null) {
+                    return $this->concluirEmissaoCdfLote($ids, $payload, $body, $recuperado['codigo'], $token);
+                }
+                if ($recuperado['erro'] !== null) {
+                    $msg = $recuperado['erro'];
+                }
+            }
+            if (stripos($msg, 'Responsável não encontrado') !== false) {
+                $msg .= ' Nome enviado: '.$resp.'.';
+            }
+            EntitySinirEnvio::registrar(
+                (int)$ids[0],
+                EntitySinirEnvio::proximaTentativa((int)$ids[0]),
+                'erro',
+                $payload,
+                $body,
+                mb_substr($msg, 0, 500)
+            );
+
+            return ['ok' => false, 'message' => $msg];
+        }
+
+        return $this->concluirEmissaoCdfLote($ids, $payload, $body, $certCodigo, $token);
+    }
+
+    /**
+     * @param list<int> $ids
+     * @param list<string> $manifestos
+     * @return array{codigo:int|string|null,erro:?string}
+     */
+    private function codigosJaEmitidos(array $ids, array $manifestos, string $token): array
+    {
+        $porMan = [];
+        foreach ($manifestos as $i => $man) {
+            $porMan[] = $this->localizarCdfExistente((int)$ids[$i], $man, $token);
+        }
+        $presentes = array_filter($porMan, static fn ($codigo) => $codigo !== null);
+        if ($presentes === []) {
+            return ['codigo' => null, 'erro' => null];
+        }
+        $unicos = [];
+        foreach ($presentes as $codigo) {
+            $unicos[(string)$codigo] = true;
+        }
+        $codigo = (string)array_key_first($unicos);
+        if (count($unicos) > 1) {
+            return [
+                'codigo' => null,
+                'erro' => 'Esses MTRs já pertencem a certificados diferentes ('.implode(', ', array_keys($unicos)).'). Não dá para reuni-los num CDF novo.',
+            ];
+        }
+        if (count($presentes) !== count($manifestos)) {
+            return [
+                'codigo' => null,
+                'erro' => 'Parte dos MTRs já está no CDF #'.$codigo.'. Retire os que já têm certificado e gere só os demais.',
+            ];
+        }
+
+        return ['codigo' => $codigo, 'erro' => null];
+    }
+
+    /**
+     * @param list<int> $ids
+     * @param array<string,mixed>|array<int,mixed> $payload
+     * @param array<string,mixed> $body
+     * @return array{ok:bool,message:string,details?:array<string,mixed>}
+     */
+    private function concluirEmissaoCdfLote(
+        array $ids,
+        array $payload,
+        array $body,
+        int|string $certCodigo,
+        string $accessToken
+    ): array {
+        $codigo = (string)$certCodigo;
+        $agora = date('Y-m-d H:i:s');
+        foreach ($ids as $id) {
+            EntityColeta::update((int)$id, ['sinir_cdf_codigo' => $codigo]);
+            EntitySinirEnvio::registrar(
+                (int)$id,
+                EntitySinirEnvio::proximaTentativa((int)$id),
+                'enviado',
+                $payload,
+                $body,
+                'CDF em lote · código '.$codigo
+            );
+        }
+
+        $pdf = $this->baixarPdfCdf((int)$ids[0], $codigo, $accessToken);
+        $primeiro = EntityColeta::getById((int)$ids[0]);
+        $path = $primeiro?->cdf_path;
+        if ($pdf['ok'] && $path) {
+            foreach ($ids as $id) {
+                EntityColeta::update((int)$id, [
+                    'sinir_cdf_codigo' => $codigo,
+                    'cdf_path' => $path,
+                    'cdf_tipo' => 'sinir_cdf',
+                    'cdf_obtido_em' => $agora,
+                ]);
+            }
+        }
+
+        $qtd = count($ids);
+        $msg = 'CDF #'.$codigo.' gerado para '.$qtd.' coleta'.($qtd === 1 ? '' : 's').'. O documento fica retido no portal até liberar.';
+        if (!$pdf['ok']) {
+            $msg .= ' Falha ao gravar o PDF agora: '.$pdf['message'];
+        }
+
+        return [
+            'ok' => true,
+            'message' => $msg,
+            'details' => ['sinir_cdf_codigo' => $codigo, 'coletas' => $ids],
         ];
     }
 
@@ -287,6 +531,30 @@ class SinirCdfService
         $fim = $dia->setTime(23, 59, 59);
 
         return [(int)$inicio->format('U') * 1000, ((int)$fim->format('U') * 1000) + 999];
+    }
+
+    /** @return array{0:int,1:int} Do início do primeiro dia ao fim do último (America/Sao_Paulo). */
+    private static function periodoEntreEpochMs(string $inicioRef, string $fimRef): array
+    {
+        $tz = new \DateTimeZone('America/Sao_Paulo');
+        try {
+            $inicio = new \DateTimeImmutable($inicioRef, $tz);
+        } catch (\Exception) {
+            $inicio = new \DateTimeImmutable('today', $tz);
+        }
+        try {
+            $fim = new \DateTimeImmutable($fimRef, $tz);
+        } catch (\Exception) {
+            $fim = $inicio;
+        }
+        if ($fim < $inicio) {
+            [$inicio, $fim] = [$fim, $inicio];
+        }
+
+        return [
+            (int)$inicio->setTime(0, 0, 0)->format('U') * 1000,
+            ((int)$fim->setTime(23, 59, 59)->format('U') * 1000) + 999,
+        ];
     }
 
     private function codigoCdfNoManifesto(string $manifesto, string $accessToken): int|string|null

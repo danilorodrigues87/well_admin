@@ -114,6 +114,13 @@ class FormatHelper
             : self::badge('Pendente', 'warning');
     }
 
+    public static function recebimentoSinirBadge(bool $recebidoNoSinir): string
+    {
+        return $recebidoNoSinir
+            ? self::badge('Recebido no SINIR', 'success')
+            : self::badge('Aguardando SINIR', 'secondary');
+    }
+
     public static function sinirStatusBadge(?string $sinirStatus, string $coletaStatus): string
     {
         if ($coletaStatus !== 'finalizada') {

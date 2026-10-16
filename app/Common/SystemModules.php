@@ -50,6 +50,7 @@ class SystemModules
             'collapse_id' => 'Layouts-operacao',
             'items' => [
                 ['slug' => 'coletas', 'label' => 'Coletas / MTR', 'link' => '/painel/coletas'],
+                ['slug' => 'coletas', 'label' => 'Certificados', 'link' => '/painel/cdf'],
                 ['slug' => 'coleta_nova', 'label' => 'Lançar Coleta', 'link' => '/painel/coleta/nova'],
                 ['slug' => 'agendamentos', 'label' => 'Agendamentos', 'link' => '/painel/agendamentos'],
                 ['slug' => 'dmr', 'label' => 'DMR Geradores', 'link' => '/painel/dmr'],

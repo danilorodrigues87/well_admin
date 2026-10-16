@@ -280,7 +280,7 @@ class ColetaService
         EntityColeta::update($coletaId, [
             'destinador_id' => $destinador->id,
             'tratamento' => trim((string)($dados['tratamento'] ?? '')),
-            'situacao_recebimento' => ($dados['situacao_recebimento'] ?? '') === 'recebido' ? 'recebido' : 'pendente',
+            'situacao_recebimento' => 'pendente',
             'data_recebimento' => ($dados['data_recebimento'] ?? '') ?: null,
         ]);
 
@@ -309,8 +309,7 @@ class ColetaService
         $hasDestinador = (int)($dados['destinador_id'] ?? 0) > 0
             || trim((string)($dados['data_recebimento'] ?? '')) !== ''
             || array_key_exists('tratamento', $dados)
-            || array_key_exists('observacao_destinador', $dados)
-            || array_key_exists('situacao_recebimento', $dados);
+            || array_key_exists('observacao_destinador', $dados);
 
         if (!$hasTransporte && !$hasDestinador) {
             throw new \InvalidArgumentException('Informe dados de transporte ou destinador.');
@@ -699,10 +698,6 @@ class ColetaService
             throw new \InvalidArgumentException(
                 'Informe a data de encerramento no destinador (etapa 4) e salve antes de concluir o relatório.'
             );
-        }
-
-        if ($coleta->situacao_recebimento !== 'recebido') {
-            EntityColeta::update($coletaId, ['situacao_recebimento' => 'recebido']);
         }
     }
 

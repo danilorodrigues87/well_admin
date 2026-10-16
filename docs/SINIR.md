@@ -121,10 +121,10 @@ Base: `https://admin.sinir.gov.br/apiws/rest`
 | Emitir MTR | POST | `/salvarManifestoLote` — body = **array JSON** no schema **MMA/SIGOR** (`transportador`/`destinador`/`listaManifestoResiduos`). Wrapper `{manifestoJSONDtos:[…]}` → Tomcat 400. **Token deve ser de Gerador** (unidade JWT = `clientes.sinir_cod_unidade`). Data de expedição ≥ hoje. |
 | Consultar MTR | GET | `/retornaManifesto/{manNumero}` — número nacional (12 dígitos); token **gerador** (fallback destinador/operadora). Persiste `sinir_codigo_barras` quando a API devolve. |
 | Consultar (legado) | POST | `/retornaManifestoPorNumero/{num}` — ~10 dígitos (estadual) |
-| PDF MTR | POST | `/downloadManifesto/{manNumero}` — `Accept: application/pdf, application/octet-stream, */*`; fallback `/buscaPdfManifestoPorCodigoBarras/{cod}`. Portal gerador: **MTR oficial** em `/gerador/coletas/{id}/mtr-oficial` |
+| PDF MTR | POST | `/downloadManifesto/{manNumero}` — `Accept: application/pdf, application/octet-stream, */*`; fallback `/buscaPdfManifestoPorCodigoBarras/{cod}`. No portal gerador o botão **MTR oficial** só aparece com `coletas.mtr_oficial_liberado_em` preenchido |
 | Cancelar | POST | `/cancelarManifesto` — token **gerador** |
 | Receber (destinador) | POST | `/receberManifestoLote` — body = **array raiz** MMA. Sem substituição, cada item leva apenas `resCodigoIbama`, `marQuantidade`, `marQuantidadeRecebida`, `traCodigo`. Wrapper `manifestoRecebimentoJSONs` → Tomcat 400. Token **destinador**. |
-| Emitir CDF | POST | `/emiteCDF` — MTR nacional: `cerDataInicial`/`cerDataFinal` (epoch ms), `parceiroDestinador`, `cnpjDestinador`, `tipoCertificadoDestinacao` 1, `listaManifesto[{manNumero}]`, `nomeResponsavel`. Legado (~10 dígitos) mantém `dataInicial`/`listaMtr`. Token **destinador**. |
+| Emitir CDF | POST | `/emiteCDF` — MTR nacional: `cerDataInicial`/`cerDataFinal` (epoch ms), `parceiroDestinador`, `cnpjDestinador`, `tipoCertificadoDestinacao` 1, `listaManifesto[{manNumero}]` (vários MTRs num único certificado), `nomeResponsavel`. Legado (~10 dígitos) mantém `dataInicial`/`listaMtr`. Token **destinador**. A tela **Certificados** (`/painel/cdf`) emite um CDF por gerador e período e grava o mesmo número em todas as coletas. O portal só baixa o PDF com `coletas.cdf_liberado_em` preenchido |
 | PDF CDF | POST | `/downloadCertificado/{numeroCDF}` (nacional); fallback `/buscaPdfCdf/{codigo}` — cache em `storage/coletas/{id}/` |
 | Listar CDF | POST | `/consultaListaCdf` — recupera o certificado quando o MTR já pertence a um CDF |
 

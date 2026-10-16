@@ -135,7 +135,6 @@ class ColetaNova extends Page
             'resumo_rascunho_html' => $rascunhoConferido
                 ? self::renderResumoRascunho($itens, $evidencias, $snapshot->motorista_nome ?? '')
                 : '',
-            'situacao_recebido' => $coleta->situacao_recebimento === 'recebido' ? 'checked' : '',
             'data_recebimento' => $coleta->data_recebimento ?? '',
             'data_coleta' => $coleta->data_coleta ?? date('Y-m-d'),
             'hora_coleta' => $coleta->hora ? substr((string)$coleta->hora, 0, 5) : date('H:i'),

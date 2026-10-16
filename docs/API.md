@@ -297,7 +297,7 @@ Autenticação: JWT com claim `tipo=gerador` (mesmo `API_JWT_SECRET` / TTL do co
 | POST | `/gerador/coleta-solicitacoes` | Body: `data_desejada`, `motivo` |
 | POST | `/gerador/coleta-solicitacoes/{id}/cancelar` | Cancela solicitação pendente |
 | GET | `/gerador/coletas` | Coletas do cliente (query `page`, `per_page`) |
-| GET | `/gerador/coletas/{id}` | Detalhe (itens, snapshot, evidências) |
+| GET | `/gerador/coletas/{id}` | Detalhe (itens, snapshot, evidências). `mtr_oficial_disponivel` e `cdf_disponivel` só ficam verdadeiros depois que o admin libera o documento |
 | GET | `/gerador/coletas/{id}/evidencias/{ordem}` | Imagem |
 | GET | `/gerador/boletos` | Cobranças Inter do cliente |
 | GET | `/gerador/boletos/{id}` | Detalhe boleto (linha digitável, PIX, `pdf_url`) |
