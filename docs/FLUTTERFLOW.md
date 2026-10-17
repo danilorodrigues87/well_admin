@@ -66,6 +66,8 @@ Scripts oficiais (`updateProjectByYaml`): `storage/ff_wizard_etapa_c|d|e|f/push_
 
 Etapa 4 (2026-10-17): sem switch “Recebido no destinador”. Salvar e concluir enviam `situacao_recebimento` vazio. A data de encerramento abre o seletor e grava `dataRecebimento`. O detalhe mostra o rótulo Encerramento; o valor vem de `resumo.recebimento_label` (data + Recebido no SINIR / Aguardando SINIR).
 
+Etapa 2: dropdown **TipoResiduo** (`DropDown_cwst2tip`) é pesquisável (`isSearchable`). Rótulos e ids vêm de `tipoResiduoNomes` / `tipoResiduoIds`, preenchidos no carregamento da página.
+
 Pendências online: fotos multipart nos slots (`evidencia_1..3`), assinatura (pad → `data:image/png;base64,...`). Offline: etapas H–J (`client_uuid` já idempotente no `POST /coletas`).
 
 Fluxo nova coleta (espelha painel `/painel/coleta/nova`): FAB CollectionsList → **NewCollectionClientSelection** (`GET /clientes/coleta`) → tap cliente → `POST /coletas` → **CollectionWizard** com id real. Etapa 1 do wizard: transportadora/veículo/coletor + data/hora vindos da API (não placeholder).

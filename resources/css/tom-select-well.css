@@ -46,8 +46,12 @@ html[data-bs-theme="dark"] .ts-dropdown .dropdown-input::placeholder {
   overflow: visible;
 }
 
+.ts-dropdown {
+  z-index: 1080;
+}
+
 #addClienteModal .ts-dropdown {
-  z-index: 1060;
+  z-index: 1080;
 }
 
 #addClienteModal .ts-dropdown-content {

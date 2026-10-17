@@ -141,11 +141,11 @@ class ColetaNova extends Page
         ]);
 
         $scripts = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css">'
-            . '<link rel="stylesheet" href="'.URL.'/resources/css/tom-select-well.css?v=20260916">'
+            . '<link rel="stylesheet" href="'.URL.'/resources/css/tom-select-well.css?v=20261017">'
             . self::crudScripts('/painel/coleta/nova/'.$coletaId, false)
             . '<script>window.COLETA_WIZARD = { rascunhoConferido: '.($rascunhoConferido ? 'true' : 'false').' };</script>'
             . '<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>'
-            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20261006"></script>';
+            . '<script src="'.URL.'/resources/js/coleta-wizard.js?v=20261017"></script>';
 
         return self::getPage('Coleta #'.$coletaId, $content, 'coleta_nova', $scripts);
     }

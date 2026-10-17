@@ -107,6 +107,7 @@
       placeholder: 'Digite para buscar resíduo…',
       allowEmptyOption: true,
       sortField: { field: 'text', direction: 'asc' },
+      dropdownParent: 'body',
       plugins: ['dropdown_input'],
       render: {
         no_results: function () {
@@ -436,9 +437,7 @@
     initAssinaturaCanvas();
     $('#transportadora_id').on('change', reloadColetores);
     document.querySelector('[data-bs-target="#tab-residuos"]')?.addEventListener('shown.bs.tab', function () {
-      if (tipoResiduoTomSelect) {
-        tipoResiduoTomSelect.focus();
-      }
+      initTomSelectResiduos();
     });
   });
 })();
