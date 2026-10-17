@@ -350,6 +350,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-15 | Portal gerador: botão MTR oficial (`/gerador/coletas/{id}/mtr-oficial`) baixa o PDF do SINIR sem substituir o CDF já salvo |
 | 2026-10-16 | Certificados (`/painel/cdf`, mesmo acesso de coletas): um CDF SINIR por gerador e período; MTR oficial e CDF no portal só após Liberar (`mtr_oficial_liberado_em`, `cdf_liberado_em`). A data de encerramento do lançamento não marca mais a coleta como recebida — isso fica no recebimento SINIR |
+| 2026-10-17 | API do app de coletas: `recebimento_label` passa a ser encerramento + situação SINIR. O rascunho não usa mais `situacao_recebimento` como recebimento |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |

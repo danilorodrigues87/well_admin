@@ -266,8 +266,10 @@ Aplica **etapa 1** e/ou **etapa 4** conforme o que vier no body (não exige os d
 | `destinador_id` | sim (se salvar etapa 4) | FK ativa |
 | `tratamento` | não | Catálogo `/catalogos/tratamentos` |
 | `observacao_destinador` | não | Snapshot |
-| `situacao_recebimento` | não | `recebido` ou `pendente` |
-| `data_recebimento` | para finalizar | `Y-m-d` |
+| `situacao_recebimento` | não | O app não envia. No rascunho o painel ignora este campo. O recebimento de verdade é `sinir_recebido_em`, gravado só quando o painel confirma no SINIR |
+| `data_recebimento` | para finalizar | `Y-m-d`. Data de encerramento do relatório; não significa que o SINIR já recebeu |
+
+No detalhe, `resumo.encerramento_label` é a data (`dd/mm/aaaa` ou `—`) e `resumo.sinir_recebimento_label` é `Recebido no SINIR` ou `Aguardando SINIR`. `resumo.recebimento_label` junta os dois. O app do coletor não emite MTR, não recebe no SINIR e não libera CDF.
 
 ### POST relatório (rascunho etapa 3)
 

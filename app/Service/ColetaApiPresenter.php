@@ -189,9 +189,12 @@ class ColetaApiPresenter
             'cancelada' => 'Cancelada',
             default => ucfirst($c->status),
         };
-        $recebimentoLabel = $c->situacao_recebimento === 'recebido'
-            ? 'Recebido'.($c->data_recebimento ? ' em '.self::dateBr($c->data_recebimento) : '')
-            : 'Pendente';
+        $encerramentoLabel = self::dateBr($c->data_recebimento);
+        if ($encerramentoLabel === '') {
+            $encerramentoLabel = '—';
+        }
+        $sinirRecebimentoLabel = !empty($c->sinir_recebido_em) ? 'Recebido no SINIR' : 'Aguardando SINIR';
+        $recebimentoLabel = $encerramentoLabel.' · '.$sinirRecebimentoLabel;
         $veiculoLabel = trim(implode(' — ', array_filter([
             trim((string)($s?->veiculo_descricao ?? '')),
             trim((string)($s?->veiculo_placa ?? '')),
@@ -217,8 +220,9 @@ class ColetaApiPresenter
                 'hora' => $c->hora,
                 'relatorio' => $c->relatorio,
                 'tratamento' => $c->tratamento,
-                'situacao_recebimento' => $c->situacao_recebimento,
+                'situacao_recebimento' => !empty($c->sinir_recebido_em) ? 'recebido' : 'pendente',
                 'data_recebimento' => $c->data_recebimento,
+                'sinir_recebido_em' => $c->sinir_recebido_em,
                 'tem_assinatura_cliente' => $c->assinatura_cliente_path !== null && $c->assinatura_cliente_path !== '',
                 'sinir_status' => $c->sinir_status,
                 'sinir_man_numero' => $c->sinir_man_numero,
@@ -261,6 +265,8 @@ class ColetaApiPresenter
                 'veiculo_label' => $veiculoLabel !== '' ? $veiculoLabel : 'Não informado',
                 'motorista_label' => trim((string)($s?->motorista_nome ?? '')) ?: 'Não informado',
                 'destinador_label' => trim((string)($s?->destinador_nome ?? '')) ?: 'Não informado',
+                'encerramento_label' => $encerramentoLabel,
+                'sinir_recebimento_label' => $sinirRecebimentoLabel,
                 'recebimento_label' => $recebimentoLabel,
                 'tratamento_label' => trim((string)($c->tratamento ?? '')) ?: 'Não informado',
                 'relatorio_label' => trim((string)($c->relatorio ?? '')) ?: 'Sem observações.',
