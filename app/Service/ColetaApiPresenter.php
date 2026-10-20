@@ -218,7 +218,7 @@ class ColetaApiPresenter
                 'doc_referencia' => $c->doc_referencia,
                 'data_coleta' => $c->data_coleta,
                 'hora' => $c->hora,
-                'relatorio' => $c->relatorio,
+                'relatorio' => trim((string)($c->relatorio ?? '')),
                 'tratamento' => $c->tratamento,
                 'situacao_recebimento' => !empty($c->sinir_recebido_em) ? 'recebido' : 'pendente',
                 'data_recebimento' => $c->data_recebimento,

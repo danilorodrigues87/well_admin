@@ -58,19 +58,26 @@ Guia de edição pelo MCP, armadilhas e API oficial: [FLUTTERFLOW_MCP_GUIA.md](F
 | **WellAdmin Coleta Relatorio** | POST | `[baseUrl]/coletas/[coletaId]/relatorio` |
 | **WellAdmin Coleta Assinatura** | POST | `[baseUrl]/coletas/[coletaId]/assinatura` |
 
-### CollectionWizard (online C–F, 2026-10-08)
+### ColetaEditor (2026-10-17)
 
-Página `Scaffold_4rp06q2q` — 4 etapas com `currentStep` + footer Voltar/Continuar. Entrada: **RouteOfTheDay → Coletar** (`POST /coletas` com `data_coleta`/`client_uuid` → navega com `coletaId`).
+Página `Scaffold_coled01`. Cinco blocos de texto (Cliente, Transportador, Coleta, Relatório e fotos, Destinador), cada um com botão Editar.
 
-Scripts oficiais (`updateProjectByYaml`): `storage/ff_wizard_etapa_c|d|e|f/push_etapa_*.py`.
+O botão do cliente abre o componente `SeletorCliente` (`Container_ceclimd`): lista de `GET /clientes/coleta` (escopo pendentes). O campo busca nome, cidade ou CNPJ, como no painel, e refaz a consulta em `escopo=todos`. O toque faz `POST /coletas`, fecha o modal e a tela busca `GET /coletas/{id}`. O bloco mostra `resumo.cliente` e `snapshot.gerador_endereco`. Sem coleta criada, os outros botões avisam para selecionar o cliente e não abrem. Se a tela já entra com `coletaId` (Coletar na rota), o mesmo detalhe preenche o bloco ao abrir.
 
-Etapa 4 (2026-10-17): sem switch “Recebido no destinador”. Salvar e concluir enviam `situacao_recebimento` vazio. A data de encerramento abre o seletor e grava `dataRecebimento`. O detalhe mostra o rótulo Encerramento; o valor vem de `resumo.recebimento_label` (data + Recebido no SINIR / Aguardando SINIR).
+O botão do transportador abre `SeletorTransporte` (`Container_cetr01`): data, hora e listas tocáveis de transportadora, veículo e coletor. Salva com PATCH só desses campos. Ao fechar, o bloco mostra transportadora, veículo, motorista e data/hora.
 
-Etapa 2: dropdown **TipoResiduo** (`DropDown_cwst2tip`) é pesquisável (`isSearchable`). Rótulos e ids vêm de `tipoResiduoNomes` / `tipoResiduoIds`, preenchidos no carregamento da página.
+O botão da coleta abre `SeletorColeta` (`Container_cecol1`): busca e lista de tipos, quantidade, botões Kg, Litros e Unid, e a lista do que já foi lançado (toque remove). Ao fechar, o bloco mostra só os resíduos.
 
-Pendências online: fotos multipart nos slots (`evidencia_1..3`), assinatura (pad → `data:image/png;base64,...`). Offline: etapas H–J (`client_uuid` já idempotente no `POST /coletas`).
+O botão **Assinar** abre a página `AssinaturaColeta` (`Scaffold_ceasg1`) em tela cheia. A tela deita na horizontal para o cliente assinar, como numa maquininha. **Limpar** apaga o traço. **Salvar** envia `data:image/png;base64,...` em `POST /coletas/{id}/assinatura` e volta para a coleta. O bloco mostra `Assinatura salva` ou `Sem assinatura`.
 
-Fluxo nova coleta (espelha painel `/painel/coleta/nova`): FAB CollectionsList → **NewCollectionClientSelection** (`GET /clientes/coleta`) → tap cliente → `POST /coletas` → **CollectionWizard** com id real. Etapa 1 do wizard: transportadora/veículo/coletor + data/hora vindos da API (não placeholder).
+O botão de relatório abre `SeletorRelatorio` (`Container_cerel1`). Antes de abrir, a tela lê `GET /coletas/{id}` e devolve o texto no campo e marca Foto 1, 2 e 3 na cor primária quando a foto já está gravada. A imagem em si não aparece. Cada botão escolhe câmera ou galeria (só foto). **Salvar** e **Fechar** enviam o texto e as fotos novas em `POST /coletas/{id}/relatorio` (multipart). Foto que não foi trocada permanece. Ao fechar, o bloco mostra o texto e, se houver, quantas fotos estão anexadas.
+
+Entradas:
+
+- **RouteOfTheDay → Coletar** continua com `POST /coletas` e abre a editor com `coletaId`.
+- **CollectionsList FAB** e o atalho de nova coleta no **Dashboard** abrem a editor vazia (`coletaId` 0).
+
+Nada mais navega para o wizard antigo. A página CollectionWizard, a página NewCollectionClientSelection e o componente SeletorResiduo não estão mais na lista de arquivos do projeto. O detalhe (`Scaffold_bfclgcqo`) continua só leitura.
 
 **Login** — JSON Paths de resposta: `authToken`, `userName`, `userId`, `isAdmin`, `funcaoNome`, `userModulesCsv`, `operadoraId`, `operadoraNome`.
 

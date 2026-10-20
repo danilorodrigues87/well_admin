@@ -277,7 +277,7 @@ No detalhe, `resumo.encerramento_label` é a data (`dd/mm/aaaa` ou `—`) e `res
 
 - Campo `relatorio` (texto)
 - Arquivos opcionais: `evidencia_1`, `evidencia_2`, `evidencia_3`
-- Exige motorista + ≥1 item (mesma regra do wizard web)
+- Exige motorista. Não exige resíduo: há coleta só com relatório ou foto
 - Exige relatório **ou** ao menos uma foto (nova ou já existente)
 - **Não** muda status (permanece `rascunho`)
 - Resposta: `itens`, `evidencias`, `fotos_recebidas`, `motorista`, `rascunho_conferido`, `coleta` (detalhe)

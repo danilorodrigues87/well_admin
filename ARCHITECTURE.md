@@ -350,6 +350,12 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-15 | Portal gerador: botão MTR oficial (`/gerador/coletas/{id}/mtr-oficial`) baixa o PDF do SINIR sem substituir o CDF já salvo |
 | 2026-10-16 | Certificados (`/painel/cdf`, mesmo acesso de coletas): um CDF SINIR por gerador e período; MTR oficial e CDF no portal só após Liberar (`mtr_oficial_liberado_em`, `cdf_liberado_em`). A data de encerramento do lançamento não marca mais a coleta como recebida — isso fica no recebimento SINIR |
+| 2026-10-20 | Relatório do rascunho grava texto e fotos sem exigir resíduo. Coleta sem observação não devolve mais `null` no campo |
+| 2026-10-20 | App de coletas: ao reabrir o relatório, o texto volta no campo e o botão da foto já gravada muda de cor, sem mostrar a imagem. Texto vazio não apaga o relatório já salvo |
+| 2026-10-20 | App de coletas: modal `SeletorRelatorio` grava texto e até 3 fotos em `POST /coletas/{id}/relatorio` (multipart). A coleta continua rascunho |
+| 2026-10-20 | App de coletas: assinatura sai do modal de resíduos e abre em tela cheia (`AssinaturaColeta`), deitada, e grava o desenho em `POST /coletas/{id}/assinatura` |
+| 2026-10-19 | PATCH transporte só grava destinador quando há destinador, data, tratamento ou observação. Campo vazio não abre mais a etapa do destinador |
+| 2026-10-17 | App de coletas: a entrada de nova coleta e o Coletar da rota abrem `ColetaEditor`. O wizard antigo saiu da navegação |
 | 2026-10-17 | API do app de coletas: `recebimento_label` passa a ser encerramento + situação SINIR. O rascunho não usa mais `situacao_recebimento` como recebimento |
 | 2026-10-14 | Relatório coleta (impressão + PDF): seção **EVIDÊNCIAS** com fotos (`ColetaRelatorioPdfService` + `EvidenceStorageService::dataUriForEmbed`); impressão gerador usa `evidencia_img_url` → `/gerador/coletas/{id}/evidencias/{ordem}` (não `/storage/` admin) |
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |

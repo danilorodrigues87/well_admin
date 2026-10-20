@@ -22,8 +22,9 @@
 | 3 | Dashboard | (FF Design — ID muda ao recriar) | Conforme design | KPIs via `GET /dashboard/resumo` — [FLUTTERFLOW_DASHBOARD_BASICO.md](FLUTTERFLOW_DASHBOARD_BASICO.md) |
 | 4 | CollectionsList | Scaffold_dwij8cyv | Bottom nav inline + FAB | Lista coletas — [FLUTTERFLOW_COLLECTIONS_LIST.md](FLUTTERFLOW_COLLECTIONS_LIST.md) |
 | 5 | CollectionDetail | Scaffold_bfclgcqo | Inline | Detalhe operacional da coleta |
-| 6 | NewCollectionClientSelection | Scaffold_y00hrwko | Não | Escolher cliente |
-| 7 | **CollectionWizard** | Scaffold_4rp06q2q | Não (footer Voltar/Continuar) | Wizard 4 etapas (online C–F, 2026-10-08) |
+| 6 | NewCollectionClientSelection | Scaffold_nccs01ab | Não | Fora do fluxo. Apagar no FlutterFlow depois do Test Mode |
+| 7 | **ColetaEditor** | Scaffold_coled01 | Não | Tela da coleta em cinco blocos. Substitui o wizard |
+| 7b | CollectionWizard | Scaffold_4rp06q2q | Não | Fora do fluxo. Apagar no FlutterFlow depois do Test Mode |
 | 8 | CollectionWizardStep12 / Finalize | (legado design) | — | Substituídos por CollectionWizard |
 | 9 | RouteOfTheDay | Scaffold_74bj9gpe | Bottom nav inline | Rota do dia + mapa |
 | 10 | FleetMap | Scaffold_t85tsu07 | BottomNav5 | Mapa frota (gestor) |
@@ -44,13 +45,13 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 | **SplashPage** | — | App State `authToken` | — | Navigate Login / Dashboard |
 | **LoginPage** | (login exige ≥1 módulo app) | `POST /auth/login` | WellAdmin Login | Gravar token, userId, userName; **faltam** isAdmin, funcaoNome, userModulesCsv, operadora |
 | **Dashboard** | `dashboard` | `GET /dashboard/resumo` | Dashboard Resumo | MVP: 4 KPIs em `kpis.*`; depois `cards[]`, gráficos, `atalhos[]`, `atividades[]` (doc básico) |
-| **Dashboard** (chip Nova Coleta) | `coleta_nova` | — | — | → NewCollectionClientSelection |
+| **Dashboard** (chip Nova Coleta) | `coleta_nova` | — | — | → ColetaEditor vazia |
 | **Dashboard** (chip Minhas Coletas) | `coletas` | — | — | → CollectionsList |
 | **Dashboard** (chip Agendamentos) | `agendamentos` | `GET /agendamentos` | Agendamentos | **Falta página** AgendamentosList |
 | **Dashboard** (chip Ver Rota) | `rota_dia` | — | — | → RouteOfTheDay |
 | **Dashboard** (ActivityItem) | `dashboard` / `coletas` | `GET /dashboard/resumo` → `atividades[]` | Dashboard Resumo | ListView `ref_id` → CollectionDetail |
 | **CollectionsList** | `coletas` | `GET /coletas` | Coletas Listar | Filtros status, busca, paginação |
-| **CollectionsList** (FAB) | `coleta_nova` | — | — | → NewCollectionClientSelection |
+| **CollectionsList** (FAB) | `coleta_nova` | — | — | → ColetaEditor vazia |
 | **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | CardCom4 passa `coletaId`; `On Init` preenche `resumo` e `residuos` (ListView). Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
 | **CardCom4 Gerar PDF** | `coletas` | `GET /coletas/{id}/pdf` | Coleta PDF | Dompdf no servidor; botão nativo + API Call `wcpdf1` (completar Download File no FF) |
 | **CardCom4 Cancelar** | `coleta_nova` | `POST /coletas/{id}/cancelar` | Coleta Cancelar | Botão nativo; cancela relatório e MTR SINIR se houver; refresh da lista |
@@ -65,7 +66,7 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 | **CollectionWizard** | `coleta_nova` | `POST .../relatorio` | Coleta Relatorio | Texto; fotos multipart **pendente** |
 | **CollectionWizard** | `coleta_nova` | `POST .../finalizar` | Finalizar | Após PATCH destinador → CollectionDetail |
 | **CollectionWizard** | `coleta_nova` | `POST .../cancelar` | Cancelar | Volta à rota |
-| **RouteOfTheDay** (Coletar) | `coleta_nova` | `POST /coletas` | Coleta Criar | `data_coleta`+`client_uuid` → **CollectionWizard** |
+| **RouteOfTheDay** (Coletar) | `coleta_nova` | `POST /coletas` | Coleta Criar | `data_coleta`+`client_uuid` → **ColetaEditor** |
 | **RouteOfTheDay** | `rota_dia` | `GET /rota-do-dia/paradas` | Rota Paradas | Query `data`, `coletor_id`, `rota_id` |
 | **RouteOfTheDay** | `rota_dia` | `POST .../otimizar`, `salvar-ordem` | Rota Otimizar / Salvar Ordem | Google Map + polyline / Static Map |
 | **RouteOfTheDay** | `rota_dia` | Switch GPS | `POST /frota/posicao` | Frota Posicao |

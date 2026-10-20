@@ -308,8 +308,8 @@ class ColetaService
 
         $hasDestinador = (int)($dados['destinador_id'] ?? 0) > 0
             || trim((string)($dados['data_recebimento'] ?? '')) !== ''
-            || array_key_exists('tratamento', $dados)
-            || array_key_exists('observacao_destinador', $dados);
+            || trim((string)($dados['tratamento'] ?? '')) !== ''
+            || trim((string)($dados['observacao_destinador'] ?? '')) !== '';
 
         if (!$hasTransporte && !$hasDestinador) {
             throw new \InvalidArgumentException('Informe dados de transporte ou destinador.');
@@ -384,9 +384,14 @@ class ColetaService
     public static function salvarRascunhoFinal(int $coletaId, string $relatorio, array $filesByKey = []): array
     {
         self::assertRascunho($coletaId);
-        self::assertRequisitosBasicos($coletaId);
+        self::assertRequisitosBasicos($coletaId, false);
 
-        EntityColeta::update($coletaId, ['relatorio' => trim($relatorio)]);
+        $texto = trim($relatorio);
+        $atual = EntityColeta::getById($coletaId);
+        if ($texto === '' && $atual && trim((string) ($atual->relatorio ?? '')) !== '') {
+            $texto = trim((string) $atual->relatorio);
+        }
+        EntityColeta::update($coletaId, ['relatorio' => $texto]);
 
         $fotosRecebidas = 0;
         foreach ($filesByKey as $key => $file) {
@@ -673,9 +678,9 @@ class ColetaService
         }
     }
 
-    private static function assertRequisitosBasicos(int $coletaId): void
+    private static function assertRequisitosBasicos(int $coletaId, bool $exigeItens = true): void
     {
-        if (EntityColetaItem::countByColeta($coletaId) === 0) {
+        if ($exigeItens && EntityColetaItem::countByColeta($coletaId) === 0) {
             throw new \InvalidArgumentException('Adicione ao menos um resíduo antes de continuar.');
         }
 
