@@ -203,6 +203,7 @@ Body trocar senha:
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
 | GET | `/coletas/{id}/assinatura` | `coletas` | Imagem da assinatura do cliente. Exige o token. 404 se não houver arquivo |
 | GET | `/coletas/{id}/pdf` | `coletas` | PDF do relatório (Dompdf, mesmo layout do painel) |
+| GET | `/coletas/{id}/comprovante` | `coletas` | PDF estreito de 80 mm (cliente, data, resíduos, número do relatório e a marca). Mesma regra de acesso do PDF |
 
 Query `busca` em listagem: filtra por nome/cidade do cliente.
 
@@ -239,6 +240,10 @@ impede o cancelamento local. Resposta `data.message`, `data.sinir_cancelado` e
 **Dompdf** a partir do mesmo template HTML do painel
 (`/painel/coletas/mtr/{id}`). Requer módulo `coletas` e
 `ColetaMtrHelper::podeImprimirRelatorio` (não cancelada). No app, o card da lista e o botão Compartilhar do detalhe usam a mesma ação: baixam esse PDF com o token e abrem o compartilhamento do celular.
+
+### Comprovante 80 mm
+
+`GET /coletas/{id}/comprovante` devolve `application/pdf` com largura de 80 mm: marca (`CompanyConfig::name()`), número do relatório, cliente, data em `dd/mm/aaaa`, resíduos e quantidades. Mesmo acesso do PDF do relatório. No app, o botão Imprimir do detalhe baixa esse arquivo com o token e abre o compartilhamento do celular, de onde sai a impressão.
 
 ### Finalizar — requisitos
 

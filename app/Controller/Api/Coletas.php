@@ -458,6 +458,25 @@ class Coletas extends BaseApi
         }
     }
 
+    public static function comprovante($request, int $id): \App\Http\Response
+    {
+        try {
+            $detalhe = ColetaService::detalhar($id);
+            if ($err = self::assertColetaAccess($detalhe['coleta'])) {
+                return $err;
+            }
+            if (!ColetaMtrHelper::podeImprimirRelatorio($detalhe['coleta'])) {
+                return ApiHelper::fail('forbidden', 'Comprovante indisponível para esta coleta.', 403);
+            }
+
+            return \App\Service\ColetaRelatorioPdfService::comprovanteResponse($detalhe);
+        } catch (\InvalidArgumentException $e) {
+            return ApiHelper::fail('not_found', $e->getMessage(), 404);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiColetas::comprovante');
+        }
+    }
+
     private static function diaConsulta($valor, string $padrao): string
     {
         $texto = trim((string) $valor);

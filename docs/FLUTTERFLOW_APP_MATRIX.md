@@ -54,6 +54,7 @@ Legenda API: **OK** = call já existe no FF · **API** = endpoint existe no PHP,
 | **CollectionsList** (FAB) | `coleta_nova` | — | — | → ColetaEditor vazia |
 | **CollectionDetail** | `coletas` | `GET /coletas/{id}` | Coleta Detalhe | CardCom4 passa `coletaId`; `On Init` preenche `resumo` e `residuos` (ListView). Evidências: `GET .../evidencias/{ordem}` **sem call FF** |
 | **CardCom4 Compartilhar** | `coletas` | `GET /coletas/{id}/pdf` | Coleta PDF | Mesma ação do botão Compartilhar do detalhe: baixa o PDF com o token e abre o compartilhamento do celular |
+| **CollectionDetail Imprimir** | `coletas` | `GET /coletas/{id}/comprovante` | ação `compartilharComprovanteColeta` | PDF de 80 mm. O botão abre o compartilhamento do celular |
 | **CardCom4 Cancelar** | `coleta_nova` | `POST /coletas/{id}/cancelar` | Coleta Cancelar | Botão nativo; cancela relatório e MTR SINIR se houver; refresh da lista |
 | **CardCom4 Gerar MTR** | `coletas` | — | — | **Adiado** (próxima etapa) |
 | **CollectionDetail** (continuar) | `coleta_nova` | — | — | → Wizard se rascunho |

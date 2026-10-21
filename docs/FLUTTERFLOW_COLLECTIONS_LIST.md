@@ -103,6 +103,7 @@ Caminho típico no seletor de variável: **Widget State / Generator** → item d
    do card usa Expanded para não estourar o badge de quantidade.
    **Imprimir / PDF / MTR / Cancelar:**
    - **Compartilhar** (`Container_6ms03coe`): ação `compartilharPdfColeta`. Baixa `GET /coletas/{id}/pdf` com o token e abre o compartilhamento do celular. A mesma ação está no botão Compartilhar de `CollectionDetail`.
+   - **Imprimir** fica na tela de detalhe (`Container_cdimp01`): ação `compartilharComprovanteColeta`. Baixa `GET /coletas/{id}/comprovante` (PDF de 80 mm) com o token e abre o mesmo compartilhamento.
    - **Cancelar** (`Container_363uld0z`): API Call **WellAdmin Coleta Cancelar**
      (`POST /coletas/{id}/cancelar`). Cancela rascunho ou finalizada; se houver
      MTR no SINIR, cancela o manifesto antes. Sucesso → snackbar + volta à

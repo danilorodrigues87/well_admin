@@ -222,6 +222,13 @@ $obRouter->get('/api/v1/coletas/{id}/pdf', [
     },
 ]);
 
+$obRouter->get('/api/v1/coletas/{id}/comprovante', [
+    'middlewares' => $mod('coletas'),
+    function ($request, int $id) {
+        return Coletas::comprovante($request, $id);
+    },
+]);
+
 $obRouter->get('/api/v1/rota-do-dia/paradas', [
     'middlewares' => $mod('rota_dia'),
     function ($request) {

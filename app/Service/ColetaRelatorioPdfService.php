@@ -218,4 +218,97 @@ class ColetaRelatorioPdfService
 
         return $response;
     }
+
+    /**
+     * Comprovante estreito (80 mm) para o compartilhamento/impressão do celular.
+     *
+     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array, evidencias?: array} $detalhe
+     */
+    public static function comprovanteResponse(array $detalhe): \App\Http\Response
+    {
+        $bytes = self::renderComprovantePdfBytes($detalhe);
+        $filename = self::comprovanteFilename($detalhe['coleta']);
+        $response = new \App\Http\Response(200, $bytes, 'application/pdf');
+        $response->addHeader('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $response->addHeader('Content-Length', (string)strlen($bytes));
+        $response->addHeader('Cache-Control', 'private, no-store');
+
+        return $response;
+    }
+
+    public static function comprovanteFilename(EntityColeta $c): string
+    {
+        $num = ColetaMtrHelper::numeroRelatorioExibicao($c) ?? $c->id;
+
+        return 'comprovante-'.$num.'.pdf';
+    }
+
+    /**
+     * @param array{coleta: EntityColeta, snapshot: mixed, itens: array} $detalhe
+     */
+    public static function renderComprovantePdfBytes(array $detalhe): string
+    {
+        $c = $detalhe['coleta'];
+        $s = $detalhe['snapshot'];
+        $marca = \App\Common\CompanyConfig::name((int)($c->operadora_id ?? 0));
+        $cliente = (string)($s?->gerador_nome_fantasia ?? $c->cliente_nome ?? '');
+        $numero = ColetaMtrHelper::numeroRelatorioExibicao($c) ?? (string)$c->id;
+        $data = $c->data_coleta ? date('d/m/Y', strtotime((string)$c->data_coleta)) : '—';
+        $hora = $c->hora ? substr((string)$c->hora, 0, 5) : '';
+        $quando = trim($data.' '.$hora);
+
+        $linhas = '';
+        $alturaMm = 78 + (int)ceil(max(1, mb_strlen($cliente)) / 24) * 5;
+        foreach ($detalhe['itens'] as $i) {
+            $qtd = number_format((float)$i->quantidade, 3, ',', '.').' '.strtoupper((string)$i->unidade);
+            $nome = (string)$i->nome;
+            $linhas .= '<tr><td>'.CrudHelper::e($nome).'</td><td class="qtd">'.CrudHelper::e($qtd).'</td></tr>';
+            $alturaMm += 8 + 4 * max(0, (int)ceil(mb_strlen($nome) / 22) - 1);
+        }
+        if ($linhas === '') {
+            $linhas = '<tr><td colspan="2">Sem resíduos</td></tr>';
+            $alturaMm += 8;
+        }
+        $alturaMm = max(120, $alturaMm);
+
+        $html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
+            .'@page{margin:8px;}'
+            .'body{font-family:DejaVu Sans,sans-serif;font-size:10px;color:#111;margin:0;}'
+            .'h1{font-size:13px;text-align:center;margin:0 0 2px;}'
+            .'.marca{text-align:center;font-size:9px;margin:0 0 6px;}'
+            .'.linha{border-top:1px dashed #333;margin:6px 0;}'
+            .'.rotulo{font-size:8px;color:#444;margin:0;}'
+            .'.valor{font-size:11px;font-weight:bold;margin:0 0 4px;}'
+            .'table{width:100%;border-collapse:collapse;}'
+            .'td{padding:2px 0;vertical-align:top;}'
+            .'.qtd{text-align:right;white-space:nowrap;padding-left:6px;}'
+            .'.rodape{text-align:center;font-size:8px;margin:8px 0 0;}'
+            .'</style></head><body>'
+            .'<h1>COMPROVANTE</h1>'
+            .'<p class="marca">'.CrudHelper::e($marca).'</p>'
+            .'<div class="linha"></div>'
+            .'<p class="rotulo">Relatório</p><p class="valor">'.CrudHelper::e($numero).'</p>'
+            .'<p class="rotulo">Cliente</p><p class="valor">'.CrudHelper::e($cliente !== '' ? $cliente : '—').'</p>'
+            .'<p class="rotulo">Data</p><p class="valor">'.CrudHelper::e($quando).'</p>'
+            .'<div class="linha"></div>'
+            .'<p class="rotulo">Resíduos</p>'
+            .'<table>'.$linhas.'</table>'
+            .'<div class="linha"></div>'
+            .'<p class="rodape">'.CrudHelper::e($marca).'</p>'
+            .'</body></html>';
+
+        $larguraPt = 80 * 72 / 25.4;
+        $alturaPt = $alturaMm * 72 / 25.4;
+        $options = new Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->setDefaultFont('DejaVu Sans');
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper([0, 0, $larguraPt, $alturaPt]);
+        $dompdf->render();
+
+        return $dompdf->output();
+    }
 }
