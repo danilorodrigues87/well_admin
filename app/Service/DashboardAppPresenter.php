@@ -200,16 +200,23 @@ class DashboardAppPresenter
         }
 
         $out = [];
-        foreach (EntityColeta::list($where, $params, '5') as $c) {
-            $dataHora = trim((string)($c->data_coleta ?? ''));
-            if ($dataHora !== '' && trim((string)($c->hora ?? '')) !== '') {
-                $dataHora .= ' '.trim((string)$c->hora);
+        foreach (EntityColeta::list($where, $params, '10') as $c) {
+            $data = trim((string)($c->data_coleta ?? ''));
+            $hora = trim((string)($c->hora ?? ''));
+            $dataHora = null;
+            if ($data !== '') {
+                $ts = strtotime($data);
+                $dataHora = $ts !== false ? date('d/m/Y', $ts) : $data;
+                if ($hora !== '') {
+                    $ht = strtotime($hora);
+                    $dataHora .= ' '.($ht !== false ? date('H:i', $ht) : substr($hora, 0, 5));
+                }
             }
             $out[] = [
                 'tipo' => 'coleta',
                 'titulo' => trim($c->cliente_nome) !== '' ? $c->cliente_nome : 'Coleta #'.$c->id,
                 'subtitulo' => 'Coleta finalizada',
-                'data_hora' => $dataHora !== '' ? $dataHora : null,
+                'data_hora' => $dataHora,
                 'ref_id' => $c->id,
             ];
         }

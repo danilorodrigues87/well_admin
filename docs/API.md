@@ -95,7 +95,7 @@ Resposta (`data`):
       "tipo": "coleta",
       "titulo": "Cliente Exemplo",
       "subtitulo": "Coleta finalizada",
-      "data_hora": "2026-09-29 14:30:00",
+      "data_hora": "29/09/2026 14:30",
       "ref_id": 99
     }
   ]
@@ -106,6 +106,7 @@ Resposta (`data`):
 - **`cards` / `atalhos`:** filtrados pelos módulos do usuário (`modulos` no JWT recarregado no auth).
 - **`graficos.coletas_por_status`:** omitido se o usuário não tem módulo `coletas`.
 - Coletor (função Coletor): KPIs, gráficos e atividades filtrados por `coletor_id`; admin/gestor vê totais da operadora.
+- **`atividades`:** até 10 coletas finalizadas mais recentes. `data_hora` vem em `dd/mm/aaaa` e, quando há hora, `dd/mm/aaaa HH:mm`.
 
 ### Agendamentos
 
