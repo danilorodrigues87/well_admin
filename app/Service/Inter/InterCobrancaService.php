@@ -2,7 +2,6 @@
 
 namespace App\Service\Inter;
 
-use App\Common\DebugTrace;
 use App\Common\InterConfig;
 use App\Model\Entity\InterCobranca as EntityInterCobranca;
 use App\Service\Banco\BancoGatewayInterface;
@@ -34,19 +33,6 @@ class InterCobrancaService implements BancoGatewayInterface
     public function emitirCobranca(array $payload): array
     {
         $token = $this->requireToken();
-        // #region agent log
-        DebugTrace::log('A', 'InterCobrancaService.php:emitir', 'pre-cobranca config', [
-            'token_ok' => $token['ok'],
-            'token_status' => $token['raw_status'] ?? 0,
-            'inter_env' => InterConfig::env(),
-            'base_url' => InterConfig::baseUrl(),
-            'conta' => DebugTrace::maskConta(InterConfig::contaCorrente()),
-            'client_id' => DebugTrace::maskId(InterConfig::clientId()),
-            'cert_readable' => is_readable(InterConfig::certPath()),
-            'key_readable' => is_readable(InterConfig::keyPath()),
-            'valor_nominal' => $payload['valorNominal'] ?? null,
-        ]);
-        // #endregion
         if (!$token['ok']) {
             return [
                 'ok' => false,
@@ -63,13 +49,6 @@ class InterCobrancaService implements BancoGatewayInterface
             $payload,
             $token['token']
         );
-        // #region agent log
-        DebugTrace::log('A', 'InterCobrancaService.php:emitir', 'cobranca response', [
-            'ok' => $response['ok'],
-            'status' => $response['status'],
-            'error' => $response['error'],
-        ]);
-        // #endregion
 
         $body = $response['body'];
         $codigo = is_array($body) ? (string)($body['codigoSolicitacao'] ?? '') : '';

@@ -147,26 +147,6 @@ class Coletas extends BaseApi
                 $filesByKey[$key] = $_FILES[$key];
             }
         }
-        // #region agent log
-        $fileErrors = [];
-        foreach ($_FILES as $fileKey => $fileInfo) {
-            $fileErrors[(string) $fileKey] = is_array($fileInfo) ? (int) ($fileInfo['error'] ?? -1) : -1;
-        }
-        @file_put_contents(dirname(__DIR__, 3).'/debug-644d61.log', json_encode([
-            'sessionId' => '644d61',
-            'hypothesisId' => 'B',
-            'location' => 'Api/Coletas.php:salvarRelatorio',
-            'message' => 'multipart da api',
-            'data' => [
-                'coletaId' => $id,
-                'postKeys' => array_keys($body),
-                'relatorioLen' => strlen($relatorio),
-                'fileKeys' => array_keys($filesByKey),
-                'fileErrors' => $fileErrors,
-            ],
-            'timestamp' => (int) round(microtime(true) * 1000),
-        ], JSON_UNESCAPED_UNICODE)."\n", FILE_APPEND);
-        // #endregion
 
         try {
             $resumo = ColetaService::salvarRascunhoFinal($id, $relatorio, $filesByKey);

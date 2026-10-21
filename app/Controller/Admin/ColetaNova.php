@@ -421,21 +421,6 @@ class ColetaNova extends Page
         $post = $request->getPostVars();
         $relatorio = trim((string)($post['relatorio'] ?? ''));
         $filesByKey = self::collectEvidenciaFiles();
-        // #region agent log
-        @file_put_contents(dirname(__DIR__, 3).'/debug-644d61.log', json_encode([
-            'sessionId' => '644d61',
-            'hypothesisId' => 'W',
-            'location' => 'Admin/ColetaNova.php:acaoSalvarRascunhoFinal',
-            'message' => 'multipart do painel',
-            'data' => [
-                'coletaId' => $coletaId,
-                'postKeys' => array_keys($post),
-                'relatorioLen' => strlen($relatorio),
-                'fileKeys' => array_keys($filesByKey),
-            ],
-            'timestamp' => (int) round(microtime(true) * 1000),
-        ], JSON_UNESCAPED_UNICODE)."\n", FILE_APPEND);
-        // #endregion
 
         $resumo = ColetaService::salvarRascunhoFinal($coletaId, $relatorio, $filesByKey);
         $itens = EntityColetaItem::getByColetaId($coletaId);

@@ -2,7 +2,6 @@
 
 namespace App\Service\Inter;
 
-use App\Common\DebugTrace;
 use App\Common\InterConfig;
 
 class InterAuthService
@@ -37,12 +36,6 @@ class InterAuthService
         if (!$forceRefresh) {
             $cached = $this->loadCachedToken();
             if ($cached !== null) {
-                // #region agent log
-                DebugTrace::log('D', 'InterAuthService.php:cached', 'token from cache', [
-                    'expires_in' => max(0, $cached['expires_at'] - time()),
-                    'conta' => DebugTrace::maskConta(InterConfig::contaCorrente()),
-                ]);
-                // #endregion
                 return [
                     'ok' => true,
                     'token' => $cached['token'],
@@ -54,14 +47,6 @@ class InterAuthService
         }
 
         $response = $this->gateway->requestToken();
-        // #region agent log
-        DebugTrace::log('D', 'InterAuthService.php:requestToken', 'oauth result', [
-            'ok' => $response['ok'],
-            'status' => $response['status'],
-            'error' => $response['error'],
-            'force_refresh' => $forceRefresh,
-        ]);
-        // #endregion
         if (!$response['ok']) {
             return [
                 'ok' => false,

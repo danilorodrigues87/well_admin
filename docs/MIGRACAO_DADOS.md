@@ -172,6 +172,7 @@ Flags: `--dry-run`, `--limit=N`, `--purge-local`, `--operadora-id=N`.
 | `repair_coletas_data_recebimento.php` | `data_recebimento ← data_coleta` onde NULL |
 | `etl_download_evidencias.php` | Cloudinary → WebP local |
 | `purge_coletas_mtr_teste.php` | Remove faixa de MTR teste; reajusta `coleta_sequencia` |
+| `purge_coletas_canceladas_cliente.php` | Remove coletas `cancelada` de um cliente, com resíduos, fotos, assinatura e pasta em `storage/coletas/{id}` |
 
 ---
 
