@@ -350,6 +350,7 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-15 | Portal gerador: botão MTR oficial (`/gerador/coletas/{id}/mtr-oficial`) baixa o PDF do SINIR sem substituir o CDF já salvo |
 | 2026-10-16 | Certificados (`/painel/cdf`, mesmo acesso de coletas): um CDF SINIR por gerador e período; MTR oficial e CDF no portal só após Liberar (`mtr_oficial_liberado_em`, `cdf_liberado_em`). A data de encerramento do lançamento não marca mais a coleta como recebida — isso fica no recebimento SINIR |
+| 2026-10-21 | Lista de coletas do app: status, período, recebimento e MTR ficam atrás do botão Filtros. A data escolhida entra na requisição; o dia vale mesmo se vier com hora |
 | 2026-10-21 | Lista de coletas do app: filtro do mês atual, recebimento e MTR iguais ao painel. A data do card sai em `dd/mm/aaaa HH:mm` |
 | 2026-10-21 | Dashboard do app: atividades recentes trazem as 10 últimas coletas finalizadas, com data em `dd/mm/aaaa HH:mm` |
 | 2026-10-21 | App de coletas: bloco Destinador grava destinador, tratamento, observação e data de encerramento. Concluir coleta finaliza o rascunho sem emitir MTR |

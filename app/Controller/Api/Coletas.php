@@ -23,13 +23,10 @@ class Coletas extends BaseApi
         $status = trim((string)($query['status'] ?? ''));
         $busca = trim((string)($query['busca'] ?? ''));
         $recebimento = trim((string)($query['situacao_recebimento'] ?? ''));
-        $dataInicio = trim((string)($query['data_inicio'] ?? ''));
-        $dataFim = trim((string)($query['data_fim'] ?? ''));
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataInicio)) {
-            $dataInicio = date('Y-m-01');
-        }
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataFim)) {
-            $dataFim = date('Y-m-t');
+        $dataInicio = self::diaConsulta($query['data_inicio'] ?? '', date('Y-m-01'));
+        $dataFim = self::diaConsulta($query['data_fim'] ?? '', date('Y-m-t'));
+        if ($dataFim < $dataInicio) {
+            [$dataInicio, $dataFim] = [$dataFim, $dataInicio];
         }
 
         $where = '1=1';
@@ -434,5 +431,15 @@ class Coletas extends BaseApi
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiColetas::pdf');
         }
+    }
+
+    private static function diaConsulta($valor, string $padrao): string
+    {
+        $texto = trim((string) $valor);
+        if (preg_match('/^(\d{4}-\d{2}-\d{2})/', $texto, $encontrado) === 1) {
+            return $encontrado[1];
+        }
+
+        return $padrao;
     }
 }
