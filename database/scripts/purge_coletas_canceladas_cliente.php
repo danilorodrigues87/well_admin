@@ -40,7 +40,7 @@ if ($clienteId <= 0) {
 $db = new Database();
 
 $cliente = $db->execute(
-    'SELECT id, nome FROM clientes WHERE id = ? AND operadora_id = ? LIMIT 1',
+    'SELECT id, nome_fantasia FROM clientes WHERE id = ? AND operadora_id = ? LIMIT 1',
     [$clienteId, $operadoraId]
 )->fetch(PDO::FETCH_ASSOC);
 
@@ -60,7 +60,7 @@ $rows = $db->execute(
 )->fetchAll(PDO::FETCH_ASSOC);
 
 $prefix = $apply ? '' : '[lista] ';
-echo "{$prefix}Cliente {$cliente['id']} — {$cliente['nome']}\n";
+echo "{$prefix}Cliente {$cliente['id']} — {$cliente['nome_fantasia']}\n";
 echo "{$prefix}Coletas canceladas: ".count($rows)."\n";
 
 if ($rows === []) {
