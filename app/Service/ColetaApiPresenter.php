@@ -237,6 +237,9 @@ class ColetaApiPresenter
                 'data_recebimento' => $c->data_recebimento,
                 'sinir_recebido_em' => $c->sinir_recebido_em,
                 'tem_assinatura_cliente' => $c->assinatura_cliente_path !== null && $c->assinatura_cliente_path !== '',
+                'assinatura_url' => ($c->assinatura_cliente_path !== null && trim((string)$c->assinatura_cliente_path) !== '')
+                    ? URL.'/api/v1/coletas/'.$c->id.'/assinatura'
+                    : null,
                 'sinir_status' => $c->sinir_status,
                 'sinir_man_numero' => $c->sinir_man_numero,
             ],

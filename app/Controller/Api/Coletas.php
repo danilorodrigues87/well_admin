@@ -414,6 +414,31 @@ class Coletas extends BaseApi
         return new \App\Http\Response(200, file_get_contents($path), $mime);
     }
 
+    public static function assinatura($request, int $id): \App\Http\Response
+    {
+        $coleta = EntityColeta::getById($id);
+        if (!$coleta) {
+            return ApiHelper::fail('not_found', 'Coleta não encontrada.', 404);
+        }
+        if ($err = self::assertColetaAccess($coleta)) {
+            return $err;
+        }
+
+        $relativo = trim((string)($coleta->assinatura_cliente_path ?? ''));
+        if ($relativo === '') {
+            return ApiHelper::fail('not_found', 'Assinatura não encontrada.', 404);
+        }
+
+        $path = \App\Common\StoragePath::join($relativo);
+        if (!is_file($path)) {
+            return ApiHelper::fail('not_found', 'Arquivo não encontrado.', 404);
+        }
+
+        $mime = mime_content_type($path) ?: 'image/png';
+
+        return new \App\Http\Response(200, file_get_contents($path), $mime);
+    }
+
     public static function pdf($request, int $id): \App\Http\Response
     {
         try {

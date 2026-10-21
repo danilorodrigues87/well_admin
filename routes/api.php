@@ -208,6 +208,13 @@ $obRouter->get('/api/v1/coletas/{id}/evidencias/{ordem}', [
     },
 ]);
 
+$obRouter->get('/api/v1/coletas/{id}/assinatura', [
+    'middlewares' => $mod('coletas'),
+    function ($request, int $id) {
+        return Coletas::assinatura($request, $id);
+    },
+]);
+
 $obRouter->get('/api/v1/coletas/{id}/pdf', [
     'middlewares' => $mod('coletas'),
     function ($request, int $id) {

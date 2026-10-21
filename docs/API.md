@@ -201,6 +201,7 @@ Body trocar senha:
 | POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar relatório (rascunho ou finalizada). Se houver MTR no SINIR (`sinir_status=enviado`), cancela o manifesto antes. Body JSON opcional: `{ "justificativa": "..." }` (obrigatória na prática quando há MTR; default no servidor se vazia). |
 | POST | `/coletas/{id}/mtr` | `coleta_nova` | Gerar MTR no SINIR, a mesma checagem do painel (`podeGerarMtr` + pré-check). Só coleta finalizada, sem MTR já emitido. Resposta `data.message` e `data.numero_mtr`. |
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
+| GET | `/coletas/{id}/assinatura` | `coletas` | Imagem da assinatura do cliente. Exige o token. 404 se não houver arquivo |
 | GET | `/coletas/{id}/pdf` | `coletas` | PDF do relatório (Dompdf, mesmo layout do painel) |
 
 Query `busca` em listagem: filtra por nome/cidade do cliente.
@@ -220,7 +221,8 @@ Query `busca` em listagem: filtra por nome/cidade do cliente.
 - `resumo.transportador_label`, `veiculo_label`, `motorista_label`,
   `destinador_label`, `recebimento_label` e `tratamento_label`;
 - `resumo.relatorio_label`, `itens_count`, `evidencias_count`,
-  `pode_imprimir`, `pode_gerar_mtr` e `pode_cancelar`.
+  `pode_imprimir`, `pode_gerar_mtr` e `pode_cancelar`;
+- `coleta.assinatura_url`: rota autenticada da assinatura, ou `null` quando não há arquivo. `resumo.data_hora_label` e `resumo.recebimento_label` já saem em `dd/mm/aaaa`.
 
 O peso total soma somente itens cuja unidade seja `kg`.
 
@@ -287,6 +289,10 @@ No detalhe, `resumo.encerramento_label` é a data (`dd/mm/aaaa` ou `—`) e `res
 ### POST assinatura
 
 `POST /coletas/{id}/assinatura` — JSON `{ "assinatura": "data:image/png;base64,..." }` (aceita também `assinatura_data_url`).
+
+### GET assinatura
+
+`GET /coletas/{id}/assinatura` devolve os bytes da imagem, com o mesmo acesso de `GET /coletas/{id}/evidencias/{ordem}`. O app precisa enviar o token; um `Image` de rede sem o Bearer não abre o arquivo.
 
 ## API Gerador (portal cliente)
 
