@@ -194,6 +194,13 @@ $obRouter->post('/api/v1/coletas/{id}/cancelar', [
     },
 ]);
 
+$obRouter->post('/api/v1/coletas/{id}/mtr', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return Coletas::gerarMtr($request, $id);
+    },
+]);
+
 $obRouter->get('/api/v1/coletas/{id}/evidencias/{ordem}', [
     'middlewares' => $mod('coletas'),
     function ($request, int $id, int $ordem) {

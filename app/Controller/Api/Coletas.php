@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Common\Helpers\ApiHelper;
+use App\Common\Helpers\ColetaMtrHelper;
 use App\Common\OperadoraScope;
 use App\Http\ApiContext;
 use App\Model\Entity\Coleta as EntityColeta;
@@ -10,6 +11,7 @@ use App\Model\Entity\ColetaEvidencia as EntityColetaEvidencia;
 use App\Model\Entity\ColetaItem as EntityColetaItem;
 use App\Service\ColetaApiPresenter;
 use App\Service\ColetaService;
+use App\Service\Sinir\ColetaSinirPrecheckService;
 
 class Coletas extends BaseApi
 {
@@ -310,6 +312,50 @@ class Coletas extends BaseApi
             return self::handleInvalidArgument($e);
         } catch (\Throwable $e) {
             return self::handleThrowable($e, 'ApiColetas::cancelar');
+        }
+    }
+
+    public static function gerarMtr($request, int $id): \App\Http\Response
+    {
+        $coleta = EntityColeta::getById($id);
+        if (!$coleta) {
+            return ApiHelper::fail('not_found', 'Coleta não encontrada.', 404);
+        }
+        if ($err = self::assertColetaAccess($coleta)) {
+            return $err;
+        }
+        if (!ColetaMtrHelper::podeGerarMtr($coleta)) {
+            return ApiHelper::fail('validation_error', 'Esta coleta não pode gerar MTR agora.', 422);
+        }
+
+        $precheck = (new ColetaSinirPrecheckService())->forColeta($id);
+        if (!$precheck['ok']) {
+            $erros = $precheck['errors'] ?? [];
+            $mensagem = $erros !== []
+                ? implode(' ', $erros)
+                : 'Não foi possível gerar o MTR.';
+
+            return ApiHelper::fail('validation_error', $mensagem, 422);
+        }
+
+        try {
+            $result = ColetaService::gerarMtrSinir($id, true);
+            if (!empty($result['skipped']) || !empty($result['ok'])) {
+                return ApiHelper::ok([
+                    'message' => (string) ($result['message'] ?? 'MTR gerado.'),
+                    'numero_mtr' => $result['numero_mtr'] ?? null,
+                ]);
+            }
+
+            return ApiHelper::fail(
+                'sinir_error',
+                (string) ($result['message'] ?? 'Falha ao enviar ao SINIR.'),
+                422
+            );
+        } catch (\InvalidArgumentException $e) {
+            return self::handleInvalidArgument($e);
+        } catch (\Throwable $e) {
+            return self::handleThrowable($e, 'ApiColetas::gerarMtr');
         }
     }
 

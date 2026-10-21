@@ -198,6 +198,7 @@ Body trocar senha:
 | POST | `/coletas/{id}/assinatura` | `coleta_nova` | Assinatura do cliente (JSON `assinatura` = data-URL PNG/JPEG) |
 | POST | `/coletas/{id}/finalizar` | `coleta_nova` | Finalizar (multipart, fotos opcionais). **Requer `data_recebimento` preenchida** (PATCH transporte antes). |
 | POST | `/coletas/{id}/cancelar` | `coleta_nova` | Cancelar relatório (rascunho ou finalizada). Se houver MTR no SINIR (`sinir_status=enviado`), cancela o manifesto antes. Body JSON opcional: `{ "justificativa": "..." }` (obrigatória na prática quando há MTR; default no servidor se vazia). |
+| POST | `/coletas/{id}/mtr` | `coleta_nova` | Gerar MTR no SINIR, a mesma checagem do painel (`podeGerarMtr` + pré-check). Só coleta finalizada, sem MTR já emitido. Resposta `data.message` e `data.numero_mtr`. |
 | GET | `/coletas/{id}/evidencias/{ordem}` | `coletas` | Imagem da evidência |
 | GET | `/coletas/{id}/pdf` | `coletas` | PDF do relatório (Dompdf, mesmo layout do painel) |
 
@@ -269,7 +270,7 @@ Aplica **etapa 1** e/ou **etapa 4** conforme o que vier no body (não exige os d
 | `situacao_recebimento` | não | O app não envia. No rascunho o painel ignora este campo. O recebimento de verdade é `sinir_recebido_em`, gravado só quando o painel confirma no SINIR |
 | `data_recebimento` | para finalizar | `Y-m-d`. Data de encerramento do relatório; não significa que o SINIR já recebeu |
 
-No detalhe, `resumo.encerramento_label` é a data (`dd/mm/aaaa` ou `—`) e `resumo.sinir_recebimento_label` é `Recebido no SINIR` ou `Aguardando SINIR`. `resumo.recebimento_label` junta os dois. O app do coletor não emite MTR, não recebe no SINIR e não libera CDF.
+No detalhe, `resumo.encerramento_label` é a data (`dd/mm/aaaa` ou `—`) e `resumo.sinir_recebimento_label` é `Recebido no SINIR` ou `Aguardando SINIR`. `resumo.recebimento_label` junta os dois. O app do coletor emite MTR só pelo botão da lista (`POST /coletas/{id}/mtr`), na coleta já finalizada. Não recebe no SINIR e não libera CDF.
 
 ### POST relatório (rascunho etapa 3)
 
