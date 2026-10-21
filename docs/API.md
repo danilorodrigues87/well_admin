@@ -238,8 +238,7 @@ impede o cancelamento local. Resposta `data.message`, `data.sinir_cancelado` e
 `GET /coletas/{id}/pdf` devolve `application/pdf` (attachment) gerado com
 **Dompdf** a partir do mesmo template HTML do painel
 (`/painel/coletas/mtr/{id}`). Requer módulo `coletas` e
-`ColetaMtrHelper::podeImprimirRelatorio` (não cancelada). No app, use a API Call
-**WellAdmin Coleta PDF** + ação **Download File** (ou Custom Action com JWT).
+`ColetaMtrHelper::podeImprimirRelatorio` (não cancelada). No app, o card da lista e o botão Compartilhar do detalhe usam a mesma ação: baixam esse PDF com o token e abrem o compartilhamento do celular.
 
 ### Finalizar — requisitos
 

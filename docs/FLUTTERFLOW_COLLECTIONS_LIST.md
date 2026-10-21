@@ -102,11 +102,7 @@ Caminho típico no seletor de variável: **Widget State / Generator** → item d
    com todos os resíduos; nomes longos são truncados (`nome_label`) e o texto
    do card usa Expanded para não estourar o badge de quantidade.
    **Imprimir / PDF / MTR / Cancelar:**
-   - **Gerar PDF** (`Container_6ms03coe`): API Call **WellAdmin Coleta PDF**
-     (`GET /coletas/{id}/pdf`). No editor FF, configure a resposta como **File** e
-     acrescente a ação **Download File** após a call (o MCP grava a call; o
-     download binário costuma precisar desse passo no UI). Deploy PHP com Dompdf
-     obrigatório.
+   - **Compartilhar** (`Container_6ms03coe`): ação `compartilharPdfColeta`. Baixa `GET /coletas/{id}/pdf` com o token e abre o compartilhamento do celular. A mesma ação está no botão Compartilhar de `CollectionDetail`.
    - **Cancelar** (`Container_363uld0z`): API Call **WellAdmin Coleta Cancelar**
      (`POST /coletas/{id}/cancelar`). Cancela rascunho ou finalizada; se houver
      MTR no SINIR, cancela o manifesto antes. Sucesso → snackbar + volta à
