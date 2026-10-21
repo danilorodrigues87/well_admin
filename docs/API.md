@@ -189,7 +189,7 @@ Body trocar senha:
 
 | Método | Endpoint | Módulo | Ação |
 |--------|----------|--------|------|
-| GET | `/coletas?busca=&status=&page=&per_page=` | `coletas` | Listar (coletor vê só as suas) |
+| GET | `/coletas?busca=&status=&page=&per_page=&data_inicio=&data_fim=&situacao_recebimento=&filtro_mtr=` | `coletas` | Listar (coletor vê só as suas). Sem data válida, o intervalo é o mês atual. Sem status, oculta canceladas. `situacao_recebimento`: `pendente` ou `recebido`. `filtro_mtr`: `com_mtr`, `sem_mtr` ou `mtr_pendente`. Cada item traz `data_hora_label` em `dd/mm/aaaa HH:mm` |
 | POST | `/coletas` | `coleta_nova` | Iniciar rascunho `{ "cliente_id": 1, "data_coleta": "2026-10-05", "client_uuid": "uuid-v4" }` (`data_coleta` opcional; `client_uuid` opcional — idempotência offline/retry; servidor gera se omitido) |
 | GET | `/coletas/{id}` | `coletas` | Detalhe completo (wizard) |
 | PATCH | `/coletas/{id}/transporte` | `coleta_nova` | Salvar etapa 1 (transporte) e/ou etapa 4 (destinador) |

@@ -22,6 +22,15 @@ class Coletas extends BaseApi
         $perPage = min(50, max(1, (int)($query['per_page'] ?? 15)));
         $status = trim((string)($query['status'] ?? ''));
         $busca = trim((string)($query['busca'] ?? ''));
+        $recebimento = trim((string)($query['situacao_recebimento'] ?? ''));
+        $dataInicio = trim((string)($query['data_inicio'] ?? ''));
+        $dataFim = trim((string)($query['data_fim'] ?? ''));
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataInicio)) {
+            $dataInicio = date('Y-m-01');
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataFim)) {
+            $dataFim = date('Y-m-t');
+        }
 
         $where = '1=1';
         $params = [];
@@ -30,9 +39,26 @@ class Coletas extends BaseApi
             $where .= ' AND c.coletor_id = ?';
             $params[] = ApiContext::userId();
         }
+        $where .= ' AND c.data_coleta >= ? AND c.data_coleta <= ?';
+        $params[] = $dataInicio;
+        $params[] = $dataFim;
         if (in_array($status, ['rascunho', 'finalizada', 'cancelada'], true)) {
             $where .= ' AND c.status = ?';
             $params[] = $status;
+        } else {
+            $where .= " AND c.status != 'cancelada'";
+        }
+        if (in_array($recebimento, ['pendente', 'recebido'], true)) {
+            $where .= ' AND c.situacao_recebimento = ?';
+            $params[] = $recebimento;
+        }
+        $filtroMtr = trim((string)($query['filtro_mtr'] ?? ''));
+        if ($filtroMtr === 'com_mtr') {
+            $where .= " AND (c.sinir_status = 'enviado' OR (c.legacy_manifesto IS NOT NULL AND c.numero_mtr IS NOT NULL))";
+        } elseif ($filtroMtr === 'sem_mtr') {
+            $where .= " AND c.status = 'finalizada' AND (c.sinir_status IS NULL OR c.sinir_status NOT IN ('enviado'))";
+        } elseif ($filtroMtr === 'mtr_pendente') {
+            $where .= " AND c.status = 'finalizada' AND cl.exige_mtr = 1 AND (c.sinir_status IS NULL OR c.sinir_status IN ('pendente','erro'))";
         }
         if ($busca !== '') {
             $operadoraId = OperadoraScope::getOperadoraId();

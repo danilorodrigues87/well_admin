@@ -166,7 +166,20 @@ class ColetaApiPresenter
             'status' => $c->status,
             'data_coleta' => $c->data_coleta,
             'hora' => $c->hora,
+            'data_hora_label' => self::dataHoraLista($c->data_coleta, $c->hora),
         ];
+    }
+
+    private static function dataHoraLista(?string $data, ?string $hora): string
+    {
+        $label = self::dateBr($data);
+        $hora = trim((string)$hora);
+        if ($label !== '' && $hora !== '') {
+            $ht = strtotime($hora);
+            $label .= ' '.($ht !== false ? date('H:i', $ht) : substr($hora, 0, 5));
+        }
+
+        return $label;
     }
 
     /** @param array{coleta:EntityColeta,snapshot:?EntityColetaSnapshot,itens:EntityColetaItem[],evidencias:EntityColetaEvidencia[]} $detalhe */
