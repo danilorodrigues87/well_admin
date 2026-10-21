@@ -418,23 +418,39 @@ class Coletas extends BaseApi
     {
         $coleta = EntityColeta::getById($id);
         if (!$coleta) {
+            // #region agent log
+            self::debugAssinatura('coleta_ausente', $id, '', false);
+            // #endregion
             return ApiHelper::fail('not_found', 'Coleta não encontrada.', 404);
         }
         if ($err = self::assertColetaAccess($coleta)) {
+            // #region agent log
+            self::debugAssinatura('sem_acesso', $id, '', false);
+            // #endregion
             return $err;
         }
 
         $relativo = trim((string)($coleta->assinatura_cliente_path ?? ''));
         if ($relativo === '') {
+            // #region agent log
+            self::debugAssinatura('path_vazio', $id, '', false);
+            // #endregion
             return ApiHelper::fail('not_found', 'Assinatura não encontrada.', 404);
         }
 
         $path = \App\Common\StoragePath::join($relativo);
-        if (!is_file($path)) {
+        $existe = is_file($path);
+        if (!$existe) {
+            // #region agent log
+            self::debugAssinatura('arquivo_ausente', $id, $relativo, false);
+            // #endregion
             return ApiHelper::fail('not_found', 'Arquivo não encontrado.', 404);
         }
 
         $mime = mime_content_type($path) ?: 'image/png';
+        // #region agent log
+        self::debugAssinatura('ok', $id, $relativo, true);
+        // #endregion
 
         return new \App\Http\Response(200, file_get_contents($path), $mime);
     }
@@ -457,6 +473,26 @@ class Coletas extends BaseApi
             return self::handleThrowable($e, 'ApiColetas::pdf');
         }
     }
+
+    // #region agent log
+    private static function debugAssinatura(string $ramo, int $id, string $relativo, bool $existe): void
+    {
+        $linha = json_encode([
+            'sessionId' => '644d61',
+            'hypothesisId' => 'B',
+            'location' => 'Coletas.php:assinatura',
+            'message' => 'leitura da assinatura',
+            'data' => [
+                'ramo' => $ramo,
+                'coletaId' => $id,
+                'pathVazio' => $relativo === '',
+                'arquivoExiste' => $existe,
+            ],
+            'timestamp' => (int) round(microtime(true) * 1000),
+        ], JSON_UNESCAPED_UNICODE);
+        @file_put_contents(dirname(__DIR__, 3).'/debug-644d61.log', $linha."\n", FILE_APPEND);
+    }
+    // #endregion
 
     private static function diaConsulta($valor, string $padrao): string
     {

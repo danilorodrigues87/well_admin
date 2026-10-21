@@ -350,6 +350,8 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-15 | Portal gerador: botão MTR oficial (`/gerador/coletas/{id}/mtr-oficial`) baixa o PDF do SINIR sem substituir o CDF já salvo |
 | 2026-10-16 | Certificados (`/painel/cdf`, mesmo acesso de coletas): um CDF SINIR por gerador e período; MTR oficial e CDF no portal só após Liberar (`mtr_oficial_liberado_em`, `cdf_liberado_em`). A data de encerramento do lançamento não marca mais a coleta como recebida — isso fica no recebimento SINIR |
+| 2026-10-21 | Detalhe da coleta no app: toque na foto ou na assinatura abre a imagem em tela cheia |
+| 2026-10-21 | Detalhe da coleta no app: fotos e assinatura passam a ser desenhadas na própria tela, com o token, sem depender do componente Image |
 | 2026-10-21 | Detalhe da coleta no app: indicador enquanto carrega, fotos e assinatura baixadas com o token. Novo `GET /coletas/{id}/assinatura` |
 | 2026-10-21 | Lista de coletas do app: o botão Filtrar volta para baixo do painel, na largura da tela |
 | 2026-10-21 | Lista de coletas do app: a data escolhida entra na busca daquele toque, sem precisar de outro filtro |
