@@ -38,11 +38,15 @@ Correções em **dados já existentes** (sem mudar schema): preferir `database/s
 | `residuo_classes` | Classes/categorias NBR (normalizado, ID) |
 | `residuo_grupos` | Grupos por classe (código A/B/E…, FK classe_id) |
 | `tipos_residuos` | Catálogo de resíduos (FK classe_id + grupo_id) |
-| `veiculos` | Frota |
+| `veiculos` | Frota. Situação, km e combustível em `056_veiculos_frota.sql` |
 | `rotas` | Rotas de coleta |
 | `clientes` | Clientes (endereço inline; geolocalização em `018_clientes_geolocalizacao.sql`) |
 | `rota_atribuicoes` | Cliente ↔ rota (`coletor_id` legado, sempre NULL — coletor em `coletas.coletor_id`) |
 | `rota_dia_ordem` | Ordem das paradas do dia por coletor (`019_rota_dia_ordem.sql`) |
+| `veiculo_usos` | Quem assumiu o veículo, km inicial/final e encerramento (`056`) |
+| `veiculo_km` | Leituras de quilometragem (`056`) |
+| `veiculo_abastecimentos` | Abastecimentos (`056`) |
+| `veiculo_manutencoes` | Manutenções abertas, concluídas ou canceladas (`056`) |
 
 ## Migrations adicionais
 

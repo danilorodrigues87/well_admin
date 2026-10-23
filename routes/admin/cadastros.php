@@ -29,6 +29,20 @@ $extraActions = [
     ],
 ];
 
+$obRouter->get('/painel/veiculos/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:veiculos'],
+    function ($request, int $id) {
+        return new Response(200, Admin\Veiculos::ficha($request, $id));
+    },
+]);
+
+$obRouter->post('/painel/veiculos/{id}', [
+    'middlewares' => ['required-admin-login', 'required-module:veiculos'],
+    function ($request, int $id) {
+        return new Response(200, Admin\Veiculos::fichaAcao($request, $id), 'application/json');
+    },
+]);
+
 $obRouter->get('/painel/rotas/atribuicoes/{id}', [
     'middlewares' => ['required-admin-login', 'required-module:rotas'],
     function ($request, int $id) {

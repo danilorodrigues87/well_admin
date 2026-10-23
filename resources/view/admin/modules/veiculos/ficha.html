@@ -1,0 +1,143 @@
+<h1 class="mt-2">{{titulo}}</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{URL}}/painel/veiculos">Veículos</a></li>
+    <li class="breadcrumb-item active">{{placa}}</li>
+</ol>
+<div class="row g-3 mb-3">
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Situação</div><div class="mt-1">{{situacao_badge}}</div></div></div></div>
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Quilometragem</div><div class="fs-5">{{km_atual}} km</div></div></div></div>
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Combustível</div><div>{{combustivel}}</div><div class="text-muted small mt-2">Na frota: {{na_frota}}</div></div></div></div>
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Em uso</div><div>{{em_uso}}</div></div></div></div>
+</div>
+<div class="card mb-4 {{mostrar_fechar}}">
+    <div class="card-body">
+        <div class="mb-2"><strong>Manutenção aberta.</strong> {{manutencao_resumo}}</div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                    {{csrf_field}}
+                    <input type="hidden" name="acao" value="concluir_manutencao"/>
+                    <input type="hidden" name="manutencao_id" value="{{manutencao_id}}"/>
+                    <div class="mb-2"><label>Custo</label><input class="form-control" name="custo" inputmode="decimal" placeholder="Opcional"/></div>
+                    <div class="mb-2"><label>Observação</label><input class="form-control" name="observacao"/></div>
+                    <button class="btn btn-success btn-sm" type="submit">Concluir manutenção</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                    {{csrf_field}}
+                    <input type="hidden" name="acao" value="cancelar_manutencao"/>
+                    <input type="hidden" name="manutencao_id" value="{{manutencao_id}}"/>
+                    <div class="mb-2"><label>Motivo do cancelamento</label><input class="form-control" name="observacao"/></div>
+                    <button class="btn btn-outline-secondary btn-sm" type="submit">Cancelar manutenção</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-lg-6 {{mostrar_iniciar}}">
+        <div class="card h-100"><div class="card-header">Iniciar uso</div><div class="card-body">
+            <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                {{csrf_field}}
+                <input type="hidden" name="acao" value="iniciar_uso"/>
+                <div class="mb-2"><label>Coletor</label><select class="form-select" name="coletor_id" required>{{coletores_options}}</select></div>
+                <div class="mb-2"><label>Km inicial</label><input class="form-control" type="number" min="0" name="km" value="{{km_input}}" required/></div>
+                <button class="btn btn-primary btn-sm" type="submit">Assumir veículo</button>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-6 {{mostrar_encerrar}}">
+        <div class="card h-100"><div class="card-header">Encerrar uso</div><div class="card-body">
+            <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                {{csrf_field}}
+                <input type="hidden" name="acao" value="encerrar_uso"/>
+                <div class="mb-2"><label>Km final</label><input class="form-control" type="number" min="0" name="km" value="{{km_input}}" required/></div>
+                <button class="btn btn-primary btn-sm" type="submit">Liberar veículo</button>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-header">Quilometragem</div><div class="card-body">
+            <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                {{csrf_field}}
+                <input type="hidden" name="acao" value="registrar_km"/>
+                <div class="mb-2"><label>Km</label><input class="form-control" type="number" min="0" name="km" value="{{km_input}}" required/></div>
+                <div class="mb-2"><label>Observação</label><input class="form-control" name="observacao" placeholder="Obrigatória se o km for menor que o atual"/></div>
+                <button class="btn btn-outline-primary btn-sm" type="submit">Registrar</button>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-header">Abastecimento</div><div class="card-body">
+            <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                {{csrf_field}}
+                <input type="hidden" name="acao" value="abastecer"/>
+                <div class="row g-2">
+                    <div class="col-md-6 mb-2"><label>Data</label><input class="form-control" type="datetime-local" name="abastecido_em" value="{{abastecido_padrao}}" required/></div>
+                    <div class="col-md-6 mb-2"><label>Litros</label><input class="form-control" name="litros" inputmode="decimal" required/></div>
+                    <div class="col-md-6 mb-2"><label>Valor</label><input class="form-control" name="valor" inputmode="decimal" placeholder="Opcional"/></div>
+                    <div class="col-md-6 mb-2"><label>Km</label><input class="form-control" type="number" min="0" name="km" value="{{km_input}}" required/></div>
+                    <div class="col-12 mb-2"><label>Posto</label><input class="form-control" name="posto"/></div>
+                    <div class="col-12 mb-2"><label>Observação</label><input class="form-control" name="observacao"/></div>
+                </div>
+                <button class="btn btn-outline-primary btn-sm" type="submit">Registrar abastecimento</button>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-6 {{mostrar_abrir}}">
+        <div class="card h-100"><div class="card-header">Manutenção</div><div class="card-body">
+            <form action="{{URL}}/painel/veiculos/{{id}}" method="post" onsubmit="return enviarFicha(this)">
+                {{csrf_field}}
+                <input type="hidden" name="acao" value="abrir_manutencao"/>
+                <div class="mb-2"><label>Tipo</label><select class="form-select" name="tipo" required><option value="preventiva">Preventiva</option><option value="corretiva">Corretiva</option></select></div>
+                <div class="mb-2"><label>Descrição</label><textarea class="form-control" name="descricao" rows="2" required></textarea></div>
+                <button class="btn btn-warning btn-sm" type="submit">Abrir manutenção</button>
+            </form>
+        </div></div>
+    </div>
+</div>
+<ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-usos" type="button">Usos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-km" type="button">Quilometragem</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-abastece" type="button">Abastecimentos</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-manut" type="button">Manutenções</button></li>
+</ul>
+<div class="tab-content border border-top-0 p-3 mb-4 bg-white">
+    <div class="tab-pane fade show active" id="tab-usos">
+        <table class="table table-sm"><thead><tr><th>Coletor</th><th>Início</th><th>Fim</th><th>Km início</th><th>Km fim</th><th>Encerrou</th></tr></thead><tbody>{{usos_html}}</tbody></table>
+    </div>
+    <div class="tab-pane fade" id="tab-km">
+        <table class="table table-sm"><thead><tr><th>Quando</th><th>Km</th><th>Quem</th><th>Observação</th></tr></thead><tbody>{{kms_html}}</tbody></table>
+    </div>
+    <div class="tab-pane fade" id="tab-abastece">
+        <table class="table table-sm"><thead><tr><th>Quando</th><th>Litros</th><th>Valor</th><th>Km</th><th>Posto</th><th>Quem</th></tr></thead><tbody>{{abastecimentos_html}}</tbody></table>
+    </div>
+    <div class="tab-pane fade" id="tab-manut">
+        <table class="table table-sm"><thead><tr><th>Aberta em</th><th>Tipo</th><th>Status</th><th>Descrição</th><th>Custo</th><th>Quem</th></tr></thead><tbody>{{manutencoes_html}}</tbody></table>
+    </div>
+</div>
+<script>
+function enviarFicha(form) {
+    if (!form.reportValidity()) {
+        return false;
+    }
+    var data = $(form).serializeArray();
+    $.ajax({
+        url: form.action,
+        method: 'POST',
+        data: data,
+        dataType: 'json'
+    }).done(function (resp) {
+        if (!resp || resp.success === false) {
+            Swal.fire({ title: 'Erro', text: (resp && resp.message) ? resp.message : 'Não foi possível salvar.', icon: 'error' });
+            return;
+        }
+        window.location.reload();
+    }).fail(function () {
+        Swal.fire({ title: 'Erro', text: 'Não foi possível salvar.', icon: 'error' });
+    });
+    return false;
+}
+</script>

@@ -5,9 +5,10 @@
     <div class="card-body">
         <div id="barra-filtros-lista" class="row mb-3 crud-filters-row g-2">
             <div class="col-md-4"><input type="text" id="crud-busca" name="busca" class="form-control" placeholder="Buscar placa, marca..." /></div>
-            <div class="col-md-2"><select name="ativo" class="form-select crud-filter"><option value="">Ativos</option><option value="1">Somente ativos</option><option value="0">Somente inativos</option></select></div>
+            <div class="col-md-2"><select name="situacao" class="form-select crud-filter"><option value="">Situação</option><option value="disponivel">Disponível</option><option value="em_uso">Em uso</option><option value="manutencao">Manutenção</option></select></div>
+            <div class="col-md-2"><select name="ativo" class="form-select crud-filter"><option value="">Na frota</option><option value="1">Somente ativos</option><option value="0">Somente inativos</option></select></div>
         </div>
-        <table class="table table-striped"><thead><tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Ano</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
+        <table class="table table-striped"><thead><tr><th>Placa</th><th>Veículo</th><th>Situação</th><th>Km</th><th>Em uso</th><th>Ações</th></tr></thead><tbody id="crud-tbody"></tbody></table>
         <div id="crud-pagination"></div>
     </div>
 </div>
@@ -19,7 +20,8 @@
         <div class="mb-2"><label>Modelo</label><input class="form-control" name="modelo" id="crud-modelo" required/></div>
         <div class="mb-2"><label>Ano</label><input class="form-control" name="ano" id="crud-ano"/></div>
         <div class="mb-2"><label>Cor</label><input class="form-control" name="cor" id="crud-cor"/></div>
-        <div class="mb-2"><label>Status</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
+        <div class="mb-2"><label>Combustível</label><select class="form-select" name="combustivel" id="crud-combustivel"><option value="diesel">Diesel</option><option value="gasolina">Gasolina</option><option value="etanol">Etanol</option><option value="flex">Flex</option><option value="gnv">GNV</option></select></div>
+        <div class="mb-2"><label>Na frota</label><select class="form-select" name="ativo" id="crud-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select></div>
     </form></div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="salvarRegistro()">Salvar</button></div>
 </div></div></div>
