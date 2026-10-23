@@ -350,6 +350,8 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-15 | Portal gerador: botão MTR oficial (`/gerador/coletas/{id}/mtr-oficial`) baixa o PDF do SINIR sem substituir o CDF já salvo |
 | 2026-10-16 | Certificados (`/painel/cdf`, mesmo acesso de coletas): um CDF SINIR por gerador e período; MTR oficial e CDF no portal só após Liberar (`mtr_oficial_liberado_em`, `cdf_liberado_em`). A data de encerramento do lançamento não marca mais a coleta como recebida — isso fica no recebimento SINIR |
+| 2026-10-23 | App de coletas: tela Veículos (lista) e VeiculoDetalhe (assumir, km, abastecer, encerrar). Atalho no quarto item do início. A API continua no módulo `coleta_nova` |
+| 2026-10-23 | API do app de veículos (`coleta_nova`): `GET /veiculos`, detalhe e `POST /veiculos/{id}/usar`, `/km`, `/abastecimentos`, `/encerrar`. O coletor só registra no veículo que ele mesmo assumiu. O catálogo do wizard passa a incluir situação e km |
 | 2026-10-23 | Veículos no painel: situação (disponível, em uso, manutenção), km, abastecimento e manutenção na ficha. Histórico em `veiculo_usos`, `veiculo_km`, `veiculo_abastecimentos` e `veiculo_manutencoes` (`056`) |
 | 2026-10-23 | App de coletas: `formataData`, `parseRotaIdsFromApi` e `paradaItemsToLatLngs` foram ajustadas para o analisador do FlutterFlow |
 | 2026-10-21 | App de coletas: botão Imprimir do detalhe baixa o comprovante de 80 mm (`GET /coletas/{id}/comprovante`) e abre o compartilhamento do celular |

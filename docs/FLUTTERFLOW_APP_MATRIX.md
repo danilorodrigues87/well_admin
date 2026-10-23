@@ -32,7 +32,7 @@
 | 12 | PerfilPage | Scaffold_perfil1 | Não | **Stub antigo** — substituir por UserProfileSettings |
 | 13 | ProjectDocumentation | Scaffold_anbtcnvs | Não | Só design — não navegar em produção |
 
-**Nota:** Não há página dedicada **Veículos**, **Agendamentos**, **Termos**, **Privacidade** ou **Sobre o app** — veículos entram no wizard (catálogo); agendamentos só como chip no Dashboard; legal provavelmente dentro de UserProfileSettings (SettingsItem).
+**Nota:** **Veículos** é a página `Veiculos` (`Scaffold_82s4thhy`) e a ficha é `VeiculoDetalhe` (`Scaffold_vhdet0a1`). O catálogo do wizard continua em `GET /catalogos/veiculos`. Não há página dedicada de **Agendamentos**, **Termos**, **Privacidade** ou **Sobre o app** — agendamentos só como chip no Dashboard; legal provavelmente dentro de UserProfileSettings (SettingsItem).
 
 ---
 
@@ -124,8 +124,8 @@ Organização no editor = pasta; vínculo técnico = `folders.widgetClassKeyToFo
 
 | Esperado | Status no FF |
 |----------|----------------|
-| Bottom nav: Início, Coletas, Rotas, Veículos | Parcial: Dashboard, CollectionsList, RouteOfTheDay, FleetMap têm nav; **sem aba Veículos** |
-| Veículos (listagem) | **Ausente** — usar catálogo no wizard ou criar `VehiclesListPage` + `GET /catalogos/veiculos` |
+| Bottom nav: Início, Coletas, Rotas, Veículos | O início abre Veículos no quarto item. A própria tela Veículos tem Início, Coletas, Rotas e Veículos. Coletas e Rotas ainda não têm essa quarta aba |
+| Veículos (listagem) | `Veiculos` lista a frota (`GET /veiculos`). O toque abre `VeiculoDetalhe` (`GET /veiculos/{id}`) com assumir, km, abastecer e encerrar (módulo `coleta_nova`) |
 | Agendamentos (tela) | **Ausente** — só chip no Dashboard |
 | Perfil no dropdown | UserProfileSettings OK; unificar com avatar do header |
 | Termos / Privacidade / Sobre | Provável em SettingsItem — confirmar links WebView |
@@ -175,7 +175,7 @@ Multitenant **já funciona** na API via JWT `operadora_id` + `OperadoraScope` �
 7. **FleetMap** ← Frota Posicoes (gestor).
 8. **UserProfileSettings** ← Perfil; remover **PerfilPage** stub.
 9. Criar **AgendamentosPage** (opcional MVP: WebView ou list simples).
-10. Criar **VehiclesListPage** ou remover aba Veículos do design.
+10. **Veículos** já ligado: lista `Veiculos` e ficha `VeiculoDetalhe`. Publicar o PHP da API e baixar o projeto no FlutterFlow antes de testar no aparelho.
 
 ---
 

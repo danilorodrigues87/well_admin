@@ -31,6 +31,12 @@ Guia de edição pelo MCP, armadilhas e API oficial: [FLUTTERFLOW_MCP_GUIA.md](F
 | **WellAdmin Auth Me** | GET | `[baseUrl]/auth/me` |
 | **WellAdmin Clientes Coleta** | GET | `[baseUrl]/clientes/coleta?...` |
 | **WellAdmin Catalogo Veiculos** | GET | `[baseUrl]/catalogos/veiculos` |
+| **WellAdmin Veiculos** | GET | `[baseUrl]/veiculos` |
+| **WellAdmin Veiculo Detalhe** | GET | `[baseUrl]/veiculos/[veiculoId]` |
+| **WellAdmin Veiculo Usar** | POST | `[baseUrl]/veiculos/[veiculoId]/usar` |
+| **WellAdmin Veiculo Km** | POST | `[baseUrl]/veiculos/[veiculoId]/km` |
+| **WellAdmin Veiculo Abastecer** | POST | `[baseUrl]/veiculos/[veiculoId]/abastecimentos` |
+| **WellAdmin Veiculo Encerrar** | POST | `[baseUrl]/veiculos/[veiculoId]/encerrar` |
 | **WellAdmin Catalogo Tipos Residuos** | GET | `[baseUrl]/catalogos/tipos-residuos` |
 | **WellAdmin Catalogo Tratamentos** | GET | `[baseUrl]/catalogos/tratamentos` |
 | **WellAdmin Coletas Listar** | GET | `[baseUrl]/coletas?...` |
@@ -298,7 +304,7 @@ buga. Padrão estável nesta tela:
 
 7. **GPS contínuo** — Timer + **WellAdmin Frota Posicao** se `shareGpsEnabled`.
 
-8. **Aba Veículos** — sem página FleetMap ainda.
+8. **Aba Veículos** — o quarto item do início abre `Veiculos`. A ficha `VeiculoDetalhe` assume, registra km, abastece e encerra. O mapa da frota continua em FleetMap, só para quem tem `frota_mapa`.
 
 ### Marcar parada coletada / pulada
 

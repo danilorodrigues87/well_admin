@@ -178,12 +178,18 @@ Body trocar senha:
 
 | Endpoint | Módulo | Conteúdo |
 |----------|--------|----------|
-| `GET /catalogos/veiculos` | `coleta_nova` | Veículos ativos |
+| `GET /catalogos/veiculos` | `coleta_nova` | Veículos ativos. Inclui `situacao`, `situacao_label`, `km_atual`, `combustivel` e `combustivel_label`. Não esconde veículo em uso |
 | `GET /catalogos/tipos-residuos` | `coleta_nova` | Tipos de resíduo ativos |
 | `GET /catalogos/tratamentos` | `coleta_nova` | Lista de tratamentos |
 | `GET /catalogos/transportadoras` | `coleta_nova` | Transportadoras ativas (`id`, `nome`, `cnpj`, `is_padrao`, `label`) |
 | `GET /catalogos/destinadores` | `coleta_nova` | Destinadores ativos (`id`, `nome`, `cnpj`, `endereco`, `is_padrao`, `label`) |
 | `GET /catalogos/coletores` | `rota_dia` | Coletores ativos (`id`, `nome`, `email`) — também usado no wizard |
+| `GET /veiculos` | `coleta_nova` | Frota ativa para o app. `meu_veiculo_id` e `items[]` com `bloqueado`, `meu_uso`, `pode_assumir`, `pode_registrar`, `km_label`, `situacao_label` |
+| `GET /veiculos/{id}` | `coleta_nova` | Detalhe com as últimas quilometragens, abastecimentos e manutenção aberta |
+| `POST /veiculos/{id}/usar` | `coleta_nova` | Coletor assume um veículo disponível. Body: `{ "km": 15010 }` |
+| `POST /veiculos/{id}/km` | `coleta_nova` | Leitura de km do veículo que o coletor está usando. Body: `{ "km": 15040, "observacao": "" }`. Queda de km é recusada |
+| `POST /veiculos/{id}/abastecimentos` | `coleta_nova` | Abastecimento do uso aberto. Body: `km`, `litros`, `valor`, `posto`, `observacao`. `abastecido_em` é opcional (`Y-m-d H:i:s`); se faltar, vale agora |
+| `POST /veiculos/{id}/encerrar` | `coleta_nova` | Encerra o uso com km final. Body: `{ "km": 15100 }`. Só o coletor que assumiu consegue registrar ou encerrar |
 
 ### Coletas
 

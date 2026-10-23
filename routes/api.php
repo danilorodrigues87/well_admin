@@ -9,6 +9,7 @@ use App\Controller\Api\Coletas;
 use App\Controller\Api\Dashboard;
 use App\Controller\Api\Perfil;
 use App\Controller\Api\Frota;
+use App\Controller\Api\Veiculos as ApiVeiculos;
 use App\Controller\Api\RotaDoDia;
 use App\Controller\Api\Gerador as ApiGerador;
 use App\Controller\Api\Webhooks\InterCobranca as InterCobrancaWebhook;
@@ -93,6 +94,48 @@ $obRouter->get('/api/v1/catalogos/veiculos', [
     'middlewares' => $mod('coleta_nova'),
     function ($request) {
         return Catalogos::veiculos($request);
+    },
+]);
+
+$obRouter->get('/api/v1/veiculos', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request) {
+        return ApiVeiculos::index($request);
+    },
+]);
+
+$obRouter->get('/api/v1/veiculos/{id}', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return ApiVeiculos::show($request, $id);
+    },
+]);
+
+$obRouter->post('/api/v1/veiculos/{id}/usar', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return ApiVeiculos::usar($request, $id);
+    },
+]);
+
+$obRouter->post('/api/v1/veiculos/{id}/km', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return ApiVeiculos::km($request, $id);
+    },
+]);
+
+$obRouter->post('/api/v1/veiculos/{id}/abastecimentos', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return ApiVeiculos::abastecer($request, $id);
+    },
+]);
+
+$obRouter->post('/api/v1/veiculos/{id}/encerrar', [
+    'middlewares' => $mod('coleta_nova'),
+    function ($request, int $id) {
+        return ApiVeiculos::encerrar($request, $id);
     },
 ]);
 

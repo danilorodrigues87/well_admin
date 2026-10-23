@@ -91,7 +91,37 @@ class ColetaApiPresenter
             'modelo' => $v->modelo,
             'placa' => $v->placa,
             'label' => trim($v->marca.' '.$v->modelo.' — '.$v->placa),
+            'situacao' => $v->situacao,
+            'situacao_label' => VeiculoFrotaService::situacaoLabel($v->situacao),
+            'km_atual' => $v->km_atual,
+            'combustivel' => $v->combustivel,
+            'combustivel_label' => VeiculoFrotaService::combustivelLabel($v->combustivel),
         ];
+    }
+
+    public static function veiculoFrota(EntityVeiculo $v, int $usuarioId): array
+    {
+        $meu = $v->situacao === 'em_uso' && (int)$v->em_uso_usuario_id === $usuarioId;
+        $item = self::veiculo($v);
+        $item['km_label'] = number_format($v->km_atual, 0, ',', '.').' km';
+        $item['bloqueado'] = !$meu && in_array($v->situacao, ['em_uso', 'manutencao'], true);
+        $item['meu_uso'] = $meu;
+        $item['pode_assumir'] = $v->ativo === 1 && $v->situacao === 'disponivel';
+        $item['pode_registrar'] = $meu;
+        $item['em_uso_nome'] = $v->em_uso_nome;
+        $item['em_uso_desde_label'] = self::dataHoraCurta($v->em_uso_desde);
+
+        return $item;
+    }
+
+    public static function dataHoraCurta(?string $dt): string
+    {
+        if ($dt === null || trim($dt) === '') {
+            return '';
+        }
+        $t = strtotime($dt);
+
+        return $t ? date('d/m/Y H:i', $t) : '';
     }
 
     public static function tipoResiduo(EntityTipoResiduo $t): array
