@@ -132,10 +132,10 @@ class RelatorioService
     }
 
     /**
-     * Coletas finalizadas de um cliente, agrupadas por mês e tipo de resíduo.
+     * Kg finalizados por empresa. Cliente 0 e tipo 0 significam todos.
      *
      * @param array{modo?:string,competencia?:string,competencia_ini?:string,competencia_fim?:string,ano?:string,tipo_residuo_id?:int} $filtros
-     * @return array{ok:bool,message:string,rows:array<int,array<string,mixed>>,total_kg:float,total_coletas:int,inicio:string,fim:string}
+     * @return array{ok:bool,message:string,rows:array<int,array<string,mixed>>,total_kg:float,inicio:string,fim:string}
      */
     public static function coletasPorCliente(int $clienteId, array $filtros): array
     {
@@ -144,15 +144,9 @@ class RelatorioService
             'message' => '',
             'rows' => [],
             'total_kg' => 0.0,
-            'total_coletas' => 0,
             'inicio' => '',
             'fim' => '',
         ];
-        if ($clienteId <= 0) {
-            $vazio['message'] = 'Escolha o cliente.';
-
-            return $vazio;
-        }
 
         $periodo = self::periodoCliente($filtros);
         if (!$periodo['ok']) {
@@ -163,9 +157,13 @@ class RelatorioService
 
         $operadoraId = OperadoraScope::getOperadoraId();
         $tipoId = (int)($filtros['tipo_residuo_id'] ?? 0);
-        $where = "c.operadora_id = ? AND c.cliente_id = ? AND c.status = 'finalizada'
+        $where = "c.operadora_id = ? AND c.status = 'finalizada'
                AND c.data_coleta BETWEEN ? AND ? AND ci.unidade = 'kg'";
-        $params = [$operadoraId, $clienteId, $periodo['inicio'], $periodo['fim']];
+        $params = [$operadoraId, $periodo['inicio'], $periodo['fim']];
+        if ($clienteId > 0) {
+            $where .= ' AND c.cliente_id = ?';
+            $params[] = $clienteId;
+        }
         if ($tipoId > 0) {
             $where .= ' AND ci.tipo_residuo_id = ?';
             $params[] = $tipoId;
@@ -173,33 +171,16 @@ class RelatorioService
 
         $db = new Database();
         $rows = $db->execute(
-            'SELECT DATE_FORMAT(c.data_coleta, \'%Y-%m\') AS competencia,
-                    COALESCE(tr.nome, ci.nome) AS tipo_nome,
-                    COALESCE(NULLIF(rc.nome, \'\'), NULLIF(ci.classe_nome, \'\'), \'\') AS classe_nome,
-                    COALESCE(NULLIF(rg.codigo, \'\'), NULLIF(ci.grupo_codigo, \'\'), \'\') AS grupo_codigo,
-                    COUNT(DISTINCT c.id) AS coletas,
+            'SELECT cl.id AS cliente_id, cl.nome_fantasia AS empresa,
                     COALESCE(SUM(ci.quantidade), 0) AS kg
              FROM coletas c
              INNER JOIN coleta_itens ci ON ci.coleta_id = c.id
-             LEFT JOIN tipos_residuos tr ON tr.id = ci.tipo_residuo_id
-             LEFT JOIN residuo_classes rc ON rc.id = tr.classe_id
-             LEFT JOIN residuo_grupos rg ON rg.id = tr.grupo_id
+             INNER JOIN clientes cl ON cl.id = c.cliente_id AND cl.operadora_id = c.operadora_id
              WHERE '.$where.'
-             GROUP BY DATE_FORMAT(c.data_coleta, \'%Y-%m\'),
-                      COALESCE(tr.nome, ci.nome),
-                      COALESCE(NULLIF(rc.nome, \'\'), NULLIF(ci.classe_nome, \'\'), \'\'),
-                      COALESCE(NULLIF(rg.codigo, \'\'), NULLIF(ci.grupo_codigo, \'\'), \'\')
-             ORDER BY competencia ASC, tipo_nome ASC',
+             GROUP BY cl.id, cl.nome_fantasia
+             ORDER BY kg DESC, cl.nome_fantasia ASC',
             $params
         )->fetchAll(PDO::FETCH_ASSOC);
-
-        $totalColetas = (int)$db->execute(
-            'SELECT COUNT(DISTINCT c.id) AS qtd
-             FROM coletas c
-             INNER JOIN coleta_itens ci ON ci.coleta_id = c.id
-             WHERE '.$where,
-            $params
-        )->fetch(PDO::FETCH_ASSOC)['qtd'];
 
         $totalKg = 0.0;
         foreach ($rows as $row) {
@@ -211,7 +192,6 @@ class RelatorioService
             'message' => '',
             'rows' => $rows,
             'total_kg' => $totalKg,
-            'total_coletas' => $totalColetas,
             'inicio' => $periodo['inicio'],
             'fim' => $periodo['fim'],
         ];
@@ -272,7 +252,7 @@ class RelatorioService
         ];
     }
 
-    public static function csvColetasPorCliente(int $clienteId, array $filtros, string $clienteNome): string
+    public static function csvColetasPorCliente(int $clienteId, array $filtros): string
     {
         $result = self::coletasPorCliente($clienteId, $filtros);
         $out = fopen('php://temp', 'r+');
@@ -280,19 +260,14 @@ class RelatorioService
             return '';
         }
 
-        fputcsv($out, ['Cliente', 'Mês', 'Resíduo', 'Classificação', 'Coletas', 'Kg', 'Toneladas'], ';');
+        fputcsv($out, ['Empresa', 'Quantidade (kg)'], ';');
         foreach ($result['rows'] as $row) {
-            $kg = (float)($row['kg'] ?? 0);
             fputcsv($out, [
-                $clienteNome,
-                self::mesExibicao((string)$row['competencia']),
-                $row['tipo_nome'] ?? '',
-                self::classificacaoExibicao((string)($row['classe_nome'] ?? ''), (string)($row['grupo_codigo'] ?? '')),
-                $row['coletas'] ?? 0,
-                number_format($kg, 3, ',', ''),
-                number_format($kg / 1000, 3, ',', ''),
+                $row['empresa'] ?? '',
+                number_format((float)($row['kg'] ?? 0), 3, ',', ''),
             ], ';');
         }
+        fputcsv($out, ['Total', number_format($result['total_kg'], 3, ',', '')], ';');
         rewind($out);
         $csv = stream_get_contents($out);
         fclose($out);
@@ -300,22 +275,12 @@ class RelatorioService
         return $csv !== false ? $csv : '';
     }
 
-    public static function classificacaoExibicao(string $classe, string $grupo): string
+    public static function kgExibicao(float $kg): string
     {
-        $classe = trim($classe);
-        $grupo = trim($grupo);
-        $curta = $classe;
-        if (preg_match('/^Classe\s+(.+)$/u', $classe, $m)) {
-            $curta = trim($m[1]);
-        }
-        if ($grupo !== '' && $curta !== '' && !preg_match('/(?:^|\s)'.preg_quote($grupo, '/').'(?:$|\s)/u', $curta)) {
-            $curta = str_contains($curta, '—') ? $curta.' ('.$grupo.')' : $curta.' '.$grupo;
-        }
-        if ($curta === '' && $grupo !== '') {
-            $curta = $grupo;
-        }
+        $inteiro = abs($kg - round($kg)) < 0.0005;
+        $texto = number_format($kg, $inteiro ? 0 : 3, ',', '.');
 
-        return $curta !== '' ? $curta : '—';
+        return $texto.' kg';
     }
 
     public static function mesExibicao(string $competencia): string

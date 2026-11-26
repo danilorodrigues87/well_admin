@@ -131,17 +131,30 @@ $obRouter->get('/painel/coletas/cdf/{id}', [
     },
 ]);
 
-$obRouter->get('/painel/coletas/relatorio-cliente', [
+$obRouter->get('/painel/coletas/residuos', [
     'middlewares' => ['required-admin-login', 'required-module:coletas'],
     function ($request) {
         return new Response(200, RelatorioCliente::index($request));
     },
 ]);
 
-$obRouter->post('/painel/coletas/relatorio-cliente/export', [
+$obRouter->post('/painel/coletas/residuos/export', [
     'middlewares' => ['required-admin-login', 'required-module:coletas'],
     function ($request) {
         RelatorioCliente::exportCsv($request);
+    },
+]);
+
+$obRouter->get('/painel/coletas/relatorio-cliente', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request) {
+        $qs = $request->getQueryParams();
+        $destino = URL.'/painel/coletas/residuos';
+        if ($qs !== []) {
+            $destino .= '?'.http_build_query($qs);
+        }
+        header('Location: '.$destino, true, 302);
+        exit;
     },
 ]);
 

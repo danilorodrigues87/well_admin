@@ -160,7 +160,7 @@ app/Common/SinirConfig.php          — operadoras.sinir_* + fallback .env (flag
   CdfLoteService.php                — /painel/cdf: período, liberar e reter MTR oficial e CDF no portal
   ColetaCdfService.php              — storage PDF portal gerador
   DmrService.php                    — agregação DMR por competência (`/painel/dmr`)
-  RelatorioService.php              — coletas do financeiro e Coletas por cliente (`/painel/coletas/relatorio-cliente`)
+  RelatorioService.php              — coletas do financeiro e Resíduos gerados (`/painel/coletas/residuos`)
   SinirCatalogService.php           — listas SINIR + sugestão mapeamento tipos_residuos
   SinirService.php                  — badge, smoke test, reenvio
 app/Model/Entity/SinirEnvio.php     — histórico de tentativas
@@ -413,3 +413,4 @@ Ordem, quando retomar: cadastro legal do estabelecimento e do funcionário, livr
 | 2026-11-26 | Operação: Coletas por cliente (`/painel/coletas/relatorio-cliente`). Finalizadas de um cliente, por mês e tipo de resíduo, período de um mês, vários meses ou um ano. CSV. A DMR não muda |
 | 2026-11-26 | Menu: Coletas / MTR, Certificados e Coletas por cliente destacam só o item da tela aberta. O acesso continua no módulo coletas |
 | 2026-11-26 | Coletas por cliente: resumo do período e detalhe mensal com classificação do resíduo, kg e toneladas |
+| 2026-11-26 | A página virou Resíduos gerados (`/painel/coletas/residuos`). Padrão: todos os clientes, todos os resíduos e o mês atual. A tabela lista cada empresa e o total em kg |

@@ -13,64 +13,42 @@ class RelatorioCliente extends Page
     public static function index($request): string
     {
         $query = $request->getQueryParams();
-        $clienteId = (int)($query['cliente_id'] ?? 0);
-        $tipoId = (int)($query['tipo_residuo_id'] ?? 0);
-        $modo = (string)($query['modo'] ?? 'mes');
         $filtros = self::filtros($query);
-        $buscar = $clienteId > 0;
+        $clienteId = (int)($query['cliente_id'] ?? 0);
+        $tipoId = (int)$filtros['tipo_residuo_id'];
+        $modo = (string)$filtros['modo'];
 
         $aviso = '';
         $linhas = '';
-        $linhasResumo = '';
-        $resumo = '';
-        $tituloTon = ($filtros['modo'] ?? '') === 'ano'
-            ? 'Quantidade '.(int)($filtros['ano'] ?? 0).' (t)'
-            : 'Toneladas';
-        if ($buscar) {
-            $cliente = EntityCliente::getById($clienteId);
-            if (!$cliente) {
-                $aviso = 'Cliente não encontrado.';
+        $totalLinha = '';
+        $tituloResultado = '';
+        $cliente = $clienteId > 0 ? EntityCliente::getById($clienteId) : null;
+        $tipo = $tipoId > 0 ? EntityTipoResiduo::getById($tipoId) : null;
+        if ($clienteId > 0 && !$cliente) {
+            $aviso = 'Cliente não encontrado.';
+        } elseif ($tipoId > 0 && !$tipo) {
+            $aviso = 'Tipo de resíduo não encontrado.';
+        } else {
+            $result = RelatorioService::coletasPorCliente($clienteId, $filtros);
+            if (!$result['ok']) {
+                $aviso = $result['message'];
             } else {
-                $result = RelatorioService::coletasPorCliente($clienteId, $filtros);
-                if (!$result['ok']) {
-                    $aviso = $result['message'];
+                $nomeResiduo = $tipo ? $tipo->nome : 'Resíduos';
+                $tituloResultado = mb_strtoupper($nomeResiduo, 'UTF-8')
+                    .' GERADO POR EMPRESA — '.self::rotuloPeriodo($filtros, $result);
+                foreach ($result['rows'] as $row) {
+                    $linhas .= '<tr>
+                        <td>'.CrudHelper::e((string)$row['empresa']).'</td>
+                        <td class="text-end">'.CrudHelper::e(RelatorioService::kgExibicao((float)$row['kg'])).'</td>
+                    </tr>';
+                }
+                if ($linhas === '') {
+                    $linhas = '<tr><td colspan="2" class="text-center text-muted">Nenhuma coleta finalizada no período.</td></tr>';
                 } else {
-                    $resumo = $cliente->nome_fantasia
-                        .' · '.date('d/m/Y', strtotime($result['inicio']))
-                        .' a '.date('d/m/Y', strtotime($result['fim']))
-                        .' · '.number_format($result['total_kg'], 3, ',', '.')
-                        .' kg · '.number_format($result['total_kg'] / 1000, 3, ',', '.')
-                        .' t · '.$result['total_coletas'].' coleta(s)';
-                    $agrupado = [];
-                    foreach ($result['rows'] as $row) {
-                        $chave = (string)$row['tipo_nome'].'|'.(string)($row['classe_nome'] ?? '').'|'.(string)($row['grupo_codigo'] ?? '');
-                        if (!isset($agrupado[$chave])) {
-                            $agrupado[$chave] = $row;
-                            $agrupado[$chave]['kg'] = 0.0;
-                            $agrupado[$chave]['coletas'] = 0;
-                        }
-                        $agrupado[$chave]['kg'] += (float)$row['kg'];
-                        $agrupado[$chave]['coletas'] += (int)$row['coletas'];
-                    }
-                    foreach ($agrupado as $row) {
-                        $linhasResumo .= self::linhaResiduo($row, false);
-                    }
-                    if ($linhasResumo !== '') {
-                        $linhasResumo .= '<tr class="fw-bold">
-                            <td colspan="2">Total</td>
-                            <td class="text-end">'.(int)$result['total_coletas'].'</td>
-                            <td class="text-end">'.number_format($result['total_kg'], 3, ',', '.').'</td>
-                            <td class="text-end">'.number_format($result['total_kg'] / 1000, 3, ',', '.').'</td>
-                        </tr>';
-                    }
-                    foreach ($result['rows'] as $row) {
-                        $linhas .= self::linhaResiduo($row, true);
-                    }
-                    if ($linhas === '') {
-                        $mensagem = 'Nenhuma coleta finalizada no período.';
-                        $linhasResumo = '<tr><td colspan="5" class="text-center text-muted">'.CrudHelper::e($mensagem).'</td></tr>';
-                        $linhas = '<tr><td colspan="6" class="text-center text-muted">'.CrudHelper::e($mensagem).'</td></tr>';
-                    }
+                    $totalLinha = '<tr>
+                        <td class="fw-bold">TOTAL GERAL</td>
+                        <td class="text-end fw-bold text-success fs-5">'.CrudHelper::e(RelatorioService::kgExibicao($result['total_kg'])).'</td>
+                    </tr>';
                 }
             }
         }
@@ -85,15 +63,14 @@ class RelatorioCliente extends Page
             'competencia_fim' => CrudHelper::e((string)($query['competencia_fim'] ?? date('Y-m'))),
             'ano' => CrudHelper::e((string)($query['ano'] ?? date('Y'))),
             'aviso' => $aviso !== '' ? '<div class="alert alert-warning">'.CrudHelper::e($aviso).'</div>' : '',
-            'resumo' => $resumo !== '' ? '<p class="mb-2"><strong>'.CrudHelper::e($resumo).'</strong></p>' : '',
-            'titulo_ton' => CrudHelper::e($tituloTon),
-            'linhas_resumo' => $linhasResumo,
+            'titulo_resultado' => CrudHelper::e($tituloResultado),
             'linhas' => $linhas,
+            'total_linha' => $totalLinha,
             'mostrar_tabela' => $linhas !== '' ? '' : 'd-none',
-            'mostrar_csv' => $buscar && $aviso === '' && $linhas !== '' ? '' : 'd-none',
+            'mostrar_csv' => $aviso === '' && $totalLinha !== '' ? '' : 'd-none',
         ]);
 
-        return self::getPage('Coletas por cliente', $content, 'relatorio_cliente');
+        return self::getPage('Resíduos gerados', $content, 'residuos_gerados');
     }
 
     public static function exportCsv($request): never
@@ -106,60 +83,75 @@ class RelatorioCliente extends Page
         }
 
         $clienteId = (int)($post['cliente_id'] ?? 0);
-        $cliente = $clienteId > 0 ? EntityCliente::getById($clienteId) : null;
         $filtros = self::filtros($post);
-        $result = RelatorioService::coletasPorCliente($clienteId, $filtros);
-        if (!$cliente || !$result['ok']) {
+        $cliente = $clienteId > 0 ? EntityCliente::getById($clienteId) : null;
+        $tipoId = (int)$filtros['tipo_residuo_id'];
+        $tipo = $tipoId > 0 ? EntityTipoResiduo::getById($tipoId) : null;
+        if ($clienteId > 0 && !$cliente) {
             http_response_code(400);
-            echo !$cliente ? 'Cliente não encontrado.' : $result['message'];
+            echo 'Cliente não encontrado.';
             exit;
         }
-        $csv = RelatorioService::csvColetasPorCliente($clienteId, $filtros, $cliente->nome_fantasia);
+        if ($tipoId > 0 && !$tipo) {
+            http_response_code(400);
+            echo 'Tipo de resíduo não encontrado.';
+            exit;
+        }
+        $result = RelatorioService::coletasPorCliente($clienteId, $filtros);
+        if (!$result['ok']) {
+            http_response_code(400);
+            echo $result['message'];
+            exit;
+        }
+        $csv = RelatorioService::csvColetasPorCliente($clienteId, $filtros);
 
         header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="coletas-cliente-'.date('Y-m-d_His').'.csv"');
+        header('Content-Disposition: attachment; filename="residuos-gerados-'.date('Y-m-d_His').'.csv"');
         echo "\xEF\xBB\xBF".$csv;
         exit;
     }
 
-    /** @param array<string, mixed> $row */
-    private static function linhaResiduo(array $row, bool $comMes): string
+    /** @param array<string, mixed> $filtros @param array{inicio:string,fim:string} $result */
+    private static function rotuloPeriodo(array $filtros, array $result): string
     {
-        $kg = (float)$row['kg'];
-        $classe = RelatorioService::classificacaoExibicao(
-            (string)($row['classe_nome'] ?? ''),
-            (string)($row['grupo_codigo'] ?? '')
-        );
-        $mes = $comMes
-            ? '<td>'.RelatorioService::mesExibicao((string)$row['competencia']).'</td>'
-            : '';
+        $modo = (string)($filtros['modo'] ?? 'mes');
+        if ($modo === 'ano') {
+            return (string)(int)$filtros['ano'];
+        }
+        $inicio = RelatorioService::mesExibicao(substr((string)$result['inicio'], 0, 7));
+        if ($modo === 'mes') {
+            return $inicio;
+        }
 
-        return '<tr>'
-            .$mes
-            .'<td>'.CrudHelper::e((string)$row['tipo_nome']).'</td>'
-            .'<td>'.CrudHelper::e($classe).'</td>'
-            .'<td class="text-end">'.(int)$row['coletas'].'</td>'
-            .'<td class="text-end">'.number_format($kg, 3, ',', '.').'</td>'
-            .'<td class="text-end">'.number_format($kg / 1000, 3, ',', '.').'</td>'
-            .'</tr>';
+        return $inicio.' a '.RelatorioService::mesExibicao(substr((string)$result['fim'], 0, 7));
     }
 
     /** @param array<string, mixed> $input */
     private static function filtros(array $input): array
     {
+        $modo = (string)($input['modo'] ?? 'mes');
+        if (!in_array($modo, ['mes', 'intervalo', 'ano'], true)) {
+            $modo = 'mes';
+        }
+        $mesAtual = date('Y-m');
+        $competencia = trim((string)($input['competencia'] ?? ''));
+        $inicio = trim((string)($input['competencia_ini'] ?? ''));
+        $fim = trim((string)($input['competencia_fim'] ?? ''));
+        $ano = trim((string)($input['ano'] ?? ''));
+
         return [
-            'modo' => (string)($input['modo'] ?? 'mes'),
-            'competencia' => (string)($input['competencia'] ?? ''),
-            'competencia_ini' => (string)($input['competencia_ini'] ?? ''),
-            'competencia_fim' => (string)($input['competencia_fim'] ?? ''),
-            'ano' => (string)($input['ano'] ?? ''),
+            'modo' => $modo,
+            'competencia' => $competencia !== '' ? $competencia : $mesAtual,
+            'competencia_ini' => $inicio !== '' ? $inicio : $mesAtual,
+            'competencia_fim' => $fim !== '' ? $fim : $mesAtual,
+            'ano' => $ano !== '' ? $ano : date('Y'),
             'tipo_residuo_id' => (int)($input['tipo_residuo_id'] ?? 0),
         ];
     }
 
     private static function opcoesClientes(int $selecionado): string
     {
-        $html = '<option value="">Selecione</option>';
+        $html = '<option value="0"'.($selecionado === 0 ? ' selected' : '').'>Todos</option>';
         foreach (EntityCliente::list("c.status = 'ativo'", [], '500') as $cliente) {
             $sel = $cliente->id === $selecionado ? ' selected' : '';
             $html .= '<option value="'.$cliente->id.'"'.$sel.'>'.CrudHelper::e($cliente->nome_fantasia).'</option>';
@@ -170,7 +162,7 @@ class RelatorioCliente extends Page
 
     private static function opcoesTipos(int $selecionado): string
     {
-        $html = '<option value="0">Todos</option>';
+        $html = '<option value="0"'.($selecionado === 0 ? ' selected' : '').'>Todos</option>';
         foreach (EntityTipoResiduo::list('t.ativo = 1', [], '500') as $tipo) {
             $sel = $tipo->id === $selecionado ? ' selected' : '';
             $html .= '<option value="'.$tipo->id.'"'.$sel.'>'.CrudHelper::e($tipo->nome).'</option>';
