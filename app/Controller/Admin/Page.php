@@ -120,14 +120,16 @@ class Page
                 if (!in_array($slug, $permittedSlugs, true)) {
                     continue;
                 }
-                if ($slug === $currentSlug) {
+                $menuKey = (string)($item['menu'] ?? $slug);
+                $isCurrent = $menuKey === $currentSlug;
+                if ($isCurrent) {
                     $hasActive = true;
                 }
 
                 $subLinks .= View::render('admin/menu/sub_link', [
                     'label' => $item['label'],
                     'link' => URL.$item['link'],
-                    'active' => $slug === $currentSlug ? 'active' : '',
+                    'active' => $isCurrent ? 'active' : '',
                 ]);
             }
 

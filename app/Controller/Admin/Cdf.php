@@ -41,7 +41,7 @@ class Cdf extends Page
             'data_fim' => CrudHelper::e($fim),
         ]);
 
-        return self::getPage('Certificados', $content, 'coletas', self::crudScripts('/painel/cdf'));
+        return self::getPage('Certificados', $content, 'cdf', self::crudScripts('/painel/cdf'));
     }
 
     public static function list($request): string

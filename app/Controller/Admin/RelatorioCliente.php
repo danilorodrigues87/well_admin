@@ -67,7 +67,7 @@ class RelatorioCliente extends Page
             'mostrar_csv' => $buscar && $aviso === '' && $linhas !== '' ? '' : 'd-none',
         ]);
 
-        return self::getPage('Coletas por cliente', $content, 'coletas');
+        return self::getPage('Coletas por cliente', $content, 'relatorio_cliente');
     }
 
     public static function exportCsv($request): never
