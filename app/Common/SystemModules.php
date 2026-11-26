@@ -54,6 +54,7 @@ class SystemModules
                 ['slug' => 'coleta_nova', 'label' => 'Lançar Coleta', 'link' => '/painel/coleta/nova'],
                 ['slug' => 'agendamentos', 'label' => 'Agendamentos', 'link' => '/painel/agendamentos'],
                 ['slug' => 'dmr', 'label' => 'DMR Geradores', 'link' => '/painel/dmr'],
+                ['slug' => 'coletas', 'label' => 'Coletas por cliente', 'link' => '/painel/coletas/relatorio-cliente'],
                 ['slug' => 'rota_dia', 'label' => 'Rota do dia', 'link' => '/painel/rota-do-dia'],
                 ['slug' => 'frota_mapa', 'label' => 'Mapa da frota', 'link' => '/painel/frota/mapa'],
             ],

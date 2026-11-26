@@ -160,6 +160,7 @@ app/Common/SinirConfig.php          — operadoras.sinir_* + fallback .env (flag
   CdfLoteService.php                — /painel/cdf: período, liberar e reter MTR oficial e CDF no portal
   ColetaCdfService.php              — storage PDF portal gerador
   DmrService.php                    — agregação DMR por competência (`/painel/dmr`)
+  RelatorioService.php              — coletas do financeiro e Coletas por cliente (`/painel/coletas/relatorio-cliente`)
   SinirCatalogService.php           — listas SINIR + sugestão mapeamento tipos_residuos
   SinirService.php                  — badge, smoke test, reenvio
 app/Model/Entity/SinirEnvio.php     — histórico de tentativas
@@ -218,7 +219,32 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 
 ---
 
-## 9. Changelog
+## 9. Aprimoramentos futuros
+
+Itens decididos e **adiados**. Não implementar até o usuário pedir de novo.
+
+### Ponto eletrônico REP-P (adiado em 2026-11-26)
+
+Controle de jornada dos funcionários, com valor na fiscalização, no modelo **REP-P** da Portaria MTP nº 671/2021. Fica no admin PHP (`well_admin`, `operadora_id`). Não entra no portal do gerador nem no fluxo de coletas até a etapa do celular.
+
+O código sozinho não torna o ponto válido. Antes do uso real são necessários o registro do programa no INPI (art. 91), certificado e-CNPJ ICP-Brasil da empresa desenvolvedora e o Atestado Técnico e Termo de Responsabilidade (art. 89). Até lá, comprovante e arquivos devem indicar que não servem para fiscalização.
+
+Regras já fechadas para quando for feito:
+
+- Relógio oficial é o do servidor (NTP). A hora do celular é só auxiliar.
+- Marcação original não se altera e não se apaga. Ajuste, falta e banco de horas ficam no tratamento.
+- Não bloquear horário nem exigir autorização para hora extra (art. 74). GPS pode anotar, não pode impedir a batida.
+- NSR único por CNPJ do estabelecimento, começando em 1.
+- Comprovante PDF (art. 79, assinatura PAdES) na hora da batida, com as últimas 48 horas disponíveis ao empregado.
+- AFD com CRC-16/KERMIT e assinatura `.p7s` (CAdES). Espelho mensal (art. 84) e AEJ. Guarda mínima de 5 anos.
+- Identificação por nome e CPF. Sem biometria nesta versão.
+- O app de coletas só envia a batida numa etapa final. O livro fica no servidor.
+
+Ordem, quando retomar: cadastro legal do estabelecimento e do funcionário, livro imutável, batida na web, comprovante, AFD, tratamento e espelho, AEJ, coletor no app, e só então INPI, certificado e atestado.
+
+---
+
+## 10. Changelog
 
 | Data | Alteração |
 |------|-----------|
@@ -350,6 +376,10 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR CDF já emitido: `consultaListaCdf` e `cdfNumero` do manifesto vinculam o certificado existente em vez de emitir outro |
 | 2026-10-15 | Portal gerador: botão MTR oficial (`/gerador/coletas/{id}/mtr-oficial`) baixa o PDF do SINIR sem substituir o CDF já salvo |
 | 2026-10-16 | Certificados (`/painel/cdf`, mesmo acesso de coletas): um CDF SINIR por gerador e período; MTR oficial e CDF no portal só após Liberar (`mtr_oficial_liberado_em`, `cdf_liberado_em`). A data de encerramento do lançamento não marca mais a coleta como recebida — isso fica no recebimento SINIR |
+| 2026-10-24 | App de coletas: na Rota do Dia o rodapé copiado do início permanece. Filtros, mapa e paradas ficam no bloco expandido do meio, como nas outras telas |
+| 2026-10-23 | App de coletas: a lista de veículos não lê o cartão do veículo em uso antes da resposta da API, evitando a tela vermelha no primeiro quadro |
+| 2026-10-23 | App de coletas: o menu lateral abre em Início, Coletas, Rotas e Frota. O item da tela atual fica marcado e, se tocado de novo, só fecha a gaveta |
+| 2026-10-23 | App de coletas: menu lateral virou o componente MenuLateral. O ícone do painel abre a gaveta; Início, Coletas, Rota do Dia, Frota e Sair estão ligados. Agendamentos, Clientes, Configurações e Meu Perfil ficam para quando as telas existirem |
 | 2026-10-23 | App de coletas: tela Veículos (lista) e VeiculoDetalhe (assumir, km, abastecer, encerrar). Atalho no quarto item do início. A API continua no módulo `coleta_nova` |
 | 2026-10-23 | API do app de veículos (`coleta_nova`): `GET /veiculos`, detalhe e `POST /veiculos/{id}/usar`, `/km`, `/abastecimentos`, `/encerrar`. O coletor só registra no veículo que ele mesmo assumiu. O catálogo do wizard passa a incluir situação e km |
 | 2026-10-23 | Veículos no painel: situação (disponível, em uso, manutenção), km, abastecimento e manutenção na ficha. Histórico em `veiculo_usos`, `veiculo_km`, `veiculo_abastecimentos` e `veiculo_manutencoes` (`056`) |
@@ -379,3 +409,5 @@ Não copiar código legado procedural — reimplementar via MVC + Services.
 | 2026-10-15 | SINIR nacional: não tratar `manifestoCodigo` 0 / texto `ERRO:` como sucesso; evita fatal `uk_coletas_numero_mtr` ao gravar `numero_mtr=0` |
 | 2026-10-15 | SINIR payload MMA: `greCodigo` + ONU (`marNumeroONU`, `marClasseRisco`, `marNomeEmbarque`) em itens `(*)`/RSS — padrão gre 4 e textos `NAO SE APLICA` |
 | 2026-10-15 | MTR nacional (12 dígitos): gravar em `sinir_man_numero` apenas; não preencher `numero_mtr` int — evita overflow MySQL |
+| 2026-11-26 | Ponto eletrônico REP-P adiado. Decisão e etapas em §9; não há tela, tabela nem API até nova pedido |
+| 2026-11-26 | Operação: Coletas por cliente (`/painel/coletas/relatorio-cliente`). Finalizadas de um cliente, por mês e tipo de resíduo, período de um mês, vários meses ou um ano. CSV. A DMR não muda |

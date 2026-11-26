@@ -4,6 +4,7 @@ use App\Controller\Admin\Agendamentos;
 use App\Controller\Admin\Cdf;
 use App\Controller\Admin\ColetaNova;
 use App\Controller\Admin\Coletas;
+use App\Controller\Admin\RelatorioCliente;
 use App\Controller\Admin\FrotaMapa;
 use App\Controller\Admin\RotaDoDia;
 use App\Http\Response;
@@ -127,6 +128,20 @@ $obRouter->get('/painel/coletas/cdf/{id}', [
     function ($request, int $id) {
         $out = Coletas::cdfDownload($request, $id);
         return $out instanceof Response ? $out : new Response(200, $out);
+    },
+]);
+
+$obRouter->get('/painel/coletas/relatorio-cliente', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request) {
+        return new Response(200, RelatorioCliente::index($request));
+    },
+]);
+
+$obRouter->post('/painel/coletas/relatorio-cliente/export', [
+    'middlewares' => ['required-admin-login', 'required-module:coletas'],
+    function ($request) {
+        RelatorioCliente::exportCsv($request);
     },
 ]);
 

@@ -1,0 +1,112 @@
+<h1 class="mt-2">Coletas por cliente</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item"><a href="{{URL}}/painel">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{{URL}}/painel/coletas">Coletas</a></li>
+    <li class="breadcrumb-item active">Por cliente</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-chart-bar me-1"></i> Coletas finalizadas</span>
+        <form method="post" action="{{URL}}/painel/coletas/relatorio-cliente/export" class="{{mostrar_csv}}">
+            {{csrf_field}}
+            <input type="hidden" name="cliente_id" value=""/>
+            <input type="hidden" name="tipo_residuo_id" value=""/>
+            <input type="hidden" name="modo" value=""/>
+            <input type="hidden" name="competencia" value=""/>
+            <input type="hidden" name="competencia_ini" value=""/>
+            <input type="hidden" name="competencia_fim" value=""/>
+            <input type="hidden" name="ano" value=""/>
+            <button type="submit" class="btn btn-outline-success btn-sm" id="btn-csv"><i class="fas fa-file-csv me-1"></i> Exportar CSV</button>
+        </form>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small">Totais das coletas finalizadas de um cliente, por mês e tipo de resíduo, só itens em kg. A declaração DMR continua na tela DMR Geradores.</p>
+        {{aviso}}
+        <form method="get" action="{{URL}}/painel/coletas/relatorio-cliente" id="form-relatorio">
+            <div class="row g-2 align-items-end mb-3">
+                <div class="col-md-4">
+                    <label class="form-label small mb-0">Cliente</label>
+                    <select name="cliente_id" class="form-select" required>{{clientes_options}}</select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small mb-0">Período</label>
+                    <select name="modo" class="form-select" id="modo-periodo">
+                        <option value="mes">Um mês</option>
+                        <option value="intervalo">Vários meses</option>
+                        <option value="ano">Ano</option>
+                    </select>
+                </div>
+                <div class="col-md-2" id="campo-mes">
+                    <label class="form-label small mb-0">Mês</label>
+                    <input type="month" name="competencia" class="form-control" value="{{competencia}}"/>
+                </div>
+                <div class="col-md-2 d-none" id="campo-ini">
+                    <label class="form-label small mb-0">De</label>
+                    <input type="month" name="competencia_ini" class="form-control" value="{{competencia_ini}}"/>
+                </div>
+                <div class="col-md-2 d-none" id="campo-fim">
+                    <label class="form-label small mb-0">Até</label>
+                    <input type="month" name="competencia_fim" class="form-control" value="{{competencia_fim}}"/>
+                </div>
+                <div class="col-md-2 d-none" id="campo-ano">
+                    <label class="form-label small mb-0">Ano</label>
+                    <input type="number" name="ano" class="form-control" min="2000" max="2100" value="{{ano}}"/>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small mb-0">Tipo de resíduo</label>
+                    <select name="tipo_residuo_id" class="form-select">{{tipos_options}}</select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Gerar</button>
+                </div>
+            </div>
+        </form>
+        {{resumo}}
+        <div class="table-responsive {{mostrar_tabela}}">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>Mês</th>
+                        <th>Tipo de resíduo</th>
+                        <th class="text-end">Coletas</th>
+                        <th class="text-end">Kg</th>
+                    </tr>
+                </thead>
+                <tbody>{{linhas}}</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+(function () {
+    var modo = document.getElementById('modo-periodo');
+    var campos = {
+        mes: document.getElementById('campo-mes'),
+        intervaloIni: document.getElementById('campo-ini'),
+        intervaloFim: document.getElementById('campo-fim'),
+        ano: document.getElementById('campo-ano')
+    };
+    function aplicar() {
+        var valor = modo.value;
+        campos.mes.classList.toggle('d-none', valor !== 'mes');
+        campos.intervaloIni.classList.toggle('d-none', valor !== 'intervalo');
+        campos.intervaloFim.classList.toggle('d-none', valor !== 'intervalo');
+        campos.ano.classList.toggle('d-none', valor !== 'ano');
+    }
+    modo.value = '{{modo}}';
+    modo.addEventListener('change', aplicar);
+    aplicar();
+
+    var csv = document.getElementById('btn-csv');
+    if (!csv) return;
+    csv.form.addEventListener('submit', function () {
+        var origem = document.getElementById('form-relatorio');
+        csv.form.querySelectorAll('input[type="hidden"]').forEach(function (campo) {
+            if (!campo.name || campo.name === 'csrf_token' || campo.name === '_csrf') return;
+            var fonte = origem.querySelector('[name="' + campo.name + '"]');
+            if (fonte) campo.value = fonte.value;
+        });
+    });
+})();
+</script>
