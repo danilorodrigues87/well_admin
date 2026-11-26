@@ -175,13 +175,20 @@ class RelatorioService
         $rows = $db->execute(
             'SELECT DATE_FORMAT(c.data_coleta, \'%Y-%m\') AS competencia,
                     COALESCE(tr.nome, ci.nome) AS tipo_nome,
+                    COALESCE(NULLIF(rc.nome, \'\'), NULLIF(ci.classe_nome, \'\'), \'\') AS classe_nome,
+                    COALESCE(NULLIF(rg.codigo, \'\'), NULLIF(ci.grupo_codigo, \'\'), \'\') AS grupo_codigo,
                     COUNT(DISTINCT c.id) AS coletas,
                     COALESCE(SUM(ci.quantidade), 0) AS kg
              FROM coletas c
              INNER JOIN coleta_itens ci ON ci.coleta_id = c.id
              LEFT JOIN tipos_residuos tr ON tr.id = ci.tipo_residuo_id
+             LEFT JOIN residuo_classes rc ON rc.id = tr.classe_id
+             LEFT JOIN residuo_grupos rg ON rg.id = tr.grupo_id
              WHERE '.$where.'
-             GROUP BY DATE_FORMAT(c.data_coleta, \'%Y-%m\'), COALESCE(tr.nome, ci.nome)
+             GROUP BY DATE_FORMAT(c.data_coleta, \'%Y-%m\'),
+                      COALESCE(tr.nome, ci.nome),
+                      COALESCE(NULLIF(rc.nome, \'\'), NULLIF(ci.classe_nome, \'\'), \'\'),
+                      COALESCE(NULLIF(rg.codigo, \'\'), NULLIF(ci.grupo_codigo, \'\'), \'\')
              ORDER BY competencia ASC, tipo_nome ASC',
             $params
         )->fetchAll(PDO::FETCH_ASSOC);
@@ -273,14 +280,17 @@ class RelatorioService
             return '';
         }
 
-        fputcsv($out, ['Cliente', 'Mês', 'Tipo de resíduo', 'Coletas', 'Kg'], ';');
+        fputcsv($out, ['Cliente', 'Mês', 'Resíduo', 'Classificação', 'Coletas', 'Kg', 'Toneladas'], ';');
         foreach ($result['rows'] as $row) {
+            $kg = (float)($row['kg'] ?? 0);
             fputcsv($out, [
                 $clienteNome,
                 self::mesExibicao((string)$row['competencia']),
                 $row['tipo_nome'] ?? '',
+                self::classificacaoExibicao((string)($row['classe_nome'] ?? ''), (string)($row['grupo_codigo'] ?? '')),
                 $row['coletas'] ?? 0,
-                number_format((float)($row['kg'] ?? 0), 3, ',', ''),
+                number_format($kg, 3, ',', ''),
+                number_format($kg / 1000, 3, ',', ''),
             ], ';');
         }
         rewind($out);
@@ -288,6 +298,24 @@ class RelatorioService
         fclose($out);
 
         return $csv !== false ? $csv : '';
+    }
+
+    public static function classificacaoExibicao(string $classe, string $grupo): string
+    {
+        $classe = trim($classe);
+        $grupo = trim($grupo);
+        $curta = $classe;
+        if (preg_match('/^Classe\s+(.+)$/u', $classe, $m)) {
+            $curta = trim($m[1]);
+        }
+        if ($grupo !== '' && $curta !== '' && !preg_match('/(?:^|\s)'.preg_quote($grupo, '/').'(?:$|\s)/u', $curta)) {
+            $curta = str_contains($curta, '—') ? $curta.' ('.$grupo.')' : $curta.' '.$grupo;
+        }
+        if ($curta === '' && $grupo !== '') {
+            $curta = $grupo;
+        }
+
+        return $curta !== '' ? $curta : '—';
     }
 
     public static function mesExibicao(string $competencia): string

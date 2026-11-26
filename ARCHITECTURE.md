@@ -412,3 +412,4 @@ Ordem, quando retomar: cadastro legal do estabelecimento e do funcionário, livr
 | 2026-11-26 | Ponto eletrônico REP-P adiado. Decisão e etapas em §9; não há tela, tabela nem API até nova pedido |
 | 2026-11-26 | Operação: Coletas por cliente (`/painel/coletas/relatorio-cliente`). Finalizadas de um cliente, por mês e tipo de resíduo, período de um mês, vários meses ou um ano. CSV. A DMR não muda |
 | 2026-11-26 | Menu: Coletas / MTR, Certificados e Coletas por cliente destacam só o item da tela aberta. O acesso continua no módulo coletas |
+| 2026-11-26 | Coletas por cliente: resumo do período e detalhe mensal com classificação do resíduo, kg e toneladas |
